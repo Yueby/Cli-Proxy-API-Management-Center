@@ -19,6 +19,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useVisualConfig } from '@/hooks/useVisualConfig';
 import { useNotificationStore, useAuthStore, useThemeStore, useConfigStore } from '@/stores';
 import { configFileApi } from '@/services/api/configFile';
+import { PageHeader } from '@/components/common/PageHeader';
 import styles from './ConfigPage.module.scss';
 
 type ConfigEditorTab = 'visual' | 'source';
@@ -500,10 +501,6 @@ export function ConfigPage() {
     </div>
   );
 
-  const pageEyebrow =
-    activeTab === 'visual'
-      ? t('config_management.tabs.visual', { defaultValue: '可视化编辑' })
-      : t('config_management.tabs.source', { defaultValue: '源文件编辑' });
   const pageDescription =
     activeTab === 'visual'
       ? t('config_management.visual.notice')
@@ -511,34 +508,31 @@ export function ConfigPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.pageHeader}>
-        <div className={styles.pageHeaderCopy}>
-          <span className={styles.pageEyebrow}>{pageEyebrow}</span>
-          <h1 className={styles.pageTitle}>{t('config_management.title')}</h1>
-          <p className={styles.description}>{pageDescription}</p>
-        </div>
+      <PageHeader
+        title={t('config_management.title')}
+        description={pageDescription}
+      />
 
-        <div className={styles.pageMeta}>
-          <div className={`${styles.statusBadge} ${getStatusClass()}`}>{getStatusText()}</div>
-          <div className={styles.tabBar}>
-            <button
-              type="button"
-              className={`${styles.tabItem} ${activeTab === 'visual' ? styles.tabActive : ''}`}
-              onClick={() => handleTabChange('visual')}
-              disabled={saving || loading}
-            >
-              {t('config_management.tabs.visual', { defaultValue: '可视化编辑' })}
-            </button>
-            <button
-              type="button"
-              className={`${styles.tabItem} ${activeTab === 'source' ? styles.tabActive : ''}`}
-              onClick={() => handleTabChange('source')}
-              disabled={saving || loading}
-            >
-              {t('config_management.tabs.source', { defaultValue: '源代码编辑' })}
-            </button>
-          </div>
+      <div className={styles.headerControls}>
+        <div className={styles.tabBar}>
+          <button
+            type="button"
+            className={`${styles.tabItem} ${activeTab === 'visual' ? styles.tabActive : ''}`}
+            onClick={() => handleTabChange('visual')}
+            disabled={saving || loading}
+          >
+            {t('config_management.tabs.visual', { defaultValue: '可视化编辑' })}
+          </button>
+          <button
+            type="button"
+            className={`${styles.tabItem} ${activeTab === 'source' ? styles.tabActive : ''}`}
+            onClick={() => handleTabChange('source')}
+            disabled={saving || loading}
+          >
+            {t('config_management.tabs.source', { defaultValue: '源代码编辑' })}
+          </button>
         </div>
+        <div className={`${styles.statusBadge} ${getStatusClass()}`}>{getStatusText()}</div>
       </div>
 
       <div className={styles.workspaceShell}>

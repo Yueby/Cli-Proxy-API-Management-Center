@@ -87,6 +87,11 @@ export function CodexSection({
           onDelete={(_, index) => onDelete(index)}
           actionsDisabled={actionsDisabled}
           getRowDisabled={(item) => hasDisableAllModelsRule(item.excludedModels)}
+          listClassName={styles.providerGrid}
+          rowClassName={styles.providerCard}
+          rowDisabledClassName={styles.providerCardDisabled}
+          metaClassName={styles.providerCardMeta}
+          actionsClassName={styles.providerCardActions}
           renderExtraActions={(item, index) => (
             <ToggleSwitch
               label={t('ai_providers.config_toggle_label')}
@@ -103,7 +108,6 @@ export function CodexSection({
               item.baseUrl
             );
             const headerEntries = Object.entries(item.headers || {});
-            const configDisabled = hasDisableAllModelsRule(item.excludedModels);
             const excludedModels = item.excludedModels ?? [];
             const statusData =
               statusBarCache.get(getProviderConfigKey(item, index)) ||
@@ -153,11 +157,6 @@ export function CodexSection({
                         <strong>{key}:</strong> {value}
                       </span>
                     ))}
-                  </div>
-                )}
-                {configDisabled && (
-                  <div className="status-badge warning" style={{ marginTop: 8, marginBottom: 0 }}>
-                    {t('ai_providers.config_disabled_badge')}
                   </div>
                 )}
                 {item.models?.length ? (

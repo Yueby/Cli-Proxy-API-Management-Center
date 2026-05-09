@@ -11,7 +11,9 @@ import {
   IconCheck,
   IconChevronDown,
   IconChevronUp,
+  IconPencil,
   IconSlidersHorizontal,
+  IconTrash2,
   IconX,
 } from '@/components/ui/icons';
 import iconOpenaiLight from '@/assets/icons/openai-light.svg';
@@ -535,10 +537,9 @@ export function OpenAISection({
     return (
       <div
         key={`openai-provider-${originalIndex}`}
-        className={styles.openaiProviderCard}
-        style={actionsDisabled ? { opacity: 0.6 } : undefined}
+        className={`${styles.providerCard} ${providerDisabled ? styles.providerCardDisabled : ''}`}
       >
-        <div className={styles.openaiProviderMeta}>
+        <div className={styles.providerCardMeta}>
           <div className={styles.openaiProviderTitle}>{provider.name}</div>
           {provider.priority !== undefined && (
             <div className={styles.fieldRow}>
@@ -556,11 +557,6 @@ export function OpenAISection({
             <span className={styles.fieldLabel}>{t('common.base_url')}:</span>
             <span className={styles.fieldValue}>{provider.baseUrl}</span>
           </div>
-          {providerDisabled && (
-            <div className="status-badge warning" style={{ marginTop: 8, marginBottom: 0 }}>
-              {t('ai_providers.config_disabled_badge')}
-            </div>
-          )}
           {headerEntries.length > 0 && (
             <div className={styles.headerBadgeList}>
               {headerEntries.map(([key, value]) => (
@@ -643,22 +639,27 @@ export function OpenAISection({
           </div>
           <ProviderStatusBar statusData={statusData} />
         </div>
-        <div className={styles.openaiProviderActions}>
+        <div className={styles.providerCardActions}>
           <Button
-            variant="secondary"
+            variant="ghost"
             size="sm"
             onClick={() => onEdit(originalIndex)}
             disabled={actionsDisabled}
+            title={t('common.edit')}
+            aria-label={t('common.edit')}
           >
-            {t('common.edit')}
+            <IconPencil size={15} />
           </Button>
           <Button
-            variant="danger"
+            variant="ghost"
             size="sm"
             onClick={() => onDelete(originalIndex)}
             disabled={actionsDisabled}
+            title={t('common.delete')}
+            aria-label={t('common.delete')}
+            className="btn-danger-ghost"
           >
-            {t('common.delete')}
+            <IconTrash2 size={15} />
           </Button>
           <ToggleSwitch
             label={t('ai_providers.config_toggle_label')}

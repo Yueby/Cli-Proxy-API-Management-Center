@@ -322,9 +322,9 @@
 
 .pageSizeSelect {
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 70%, transparent);
-  border-radius: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--border-color);
+  border-radius: $radius-full;
   background-color: var(--bg-secondary);
   color: var(--text-primary);
   font-size: 14px;
@@ -335,7 +335,7 @@
   &:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 12%, transparent);
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.18);
   }
 }
 

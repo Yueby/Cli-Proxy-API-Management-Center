@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { IconPencil, IconTrash2 } from '@/components/ui/icons';
 
 interface ProviderListProps<T> {
   items: T[];
@@ -18,6 +19,7 @@ interface ProviderListProps<T> {
   renderExtraActions?: (item: T, index: number) => ReactNode;
   listClassName?: string;
   rowClassName?: string;
+  rowDisabledClassName?: string;
   metaClassName?: string;
   actionsClassName?: string;
 }
@@ -31,12 +33,12 @@ export function ProviderList<T>({
   onDelete,
   emptyTitle,
   emptyDescription,
-  deleteLabel,
   actionsDisabled = false,
   getRowDisabled,
   renderExtraActions,
   listClassName,
   rowClassName,
+  rowDisabledClassName,
   metaClassName,
   actionsClassName,
 }: ProviderListProps<T>) {
@@ -54,32 +56,41 @@ export function ProviderList<T>({
     <div className={listClassName ?? 'item-list'}>
       {items.map((item, index) => {
         const rowDisabled = getRowDisabled ? getRowDisabled(item, index) : false;
+        const rowClass = [
+          rowClassName ?? 'item-row',
+          rowDisabled ? (rowDisabledClassName ?? '') : '',
+        ].filter(Boolean).join(' ');
+
         return (
           <div
             key={keyField(item, index)}
-            className={rowClassName ?? 'item-row'}
-            style={rowDisabled ? { opacity: 0.6 } : undefined}
+            className={rowClass}
           >
-            <div className={metaClassName ?? 'item-meta'}>{renderContent(item, index)}</div>
             <div className={actionsClassName ?? 'item-actions'}>
               <Button
-                variant="secondary"
+                variant="ghost"
                 size="sm"
                 onClick={() => onEdit(item, index)}
                 disabled={actionsDisabled}
+                title={t('common.edit')}
+                aria-label={t('common.edit')}
               >
-                {t('common.edit')}
+                <IconPencil size={15} />
               </Button>
               <Button
-                variant="danger"
+                variant="ghost"
                 size="sm"
                 onClick={() => onDelete(item, index)}
                 disabled={actionsDisabled}
+                title={t('common.delete')}
+                aria-label={t('common.delete')}
+                className="btn-danger-ghost"
               >
-                {deleteLabel || t('common.delete')}
+                <IconTrash2 size={15} />
               </Button>
               {renderExtraActions ? renderExtraActions(item, index) : null}
             </div>
+            <div className={metaClassName ?? 'item-meta'}>{renderContent(item, index)}</div>
           </div>
         );
       })}

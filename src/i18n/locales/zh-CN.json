@@ -193,6 +193,7 @@
   },
   "ai_providers": {
     "title": "AI 提供商配置",
+    "description": "管理 Gemini、Codex、Claude、Vertex 及 OpenAI 兼容提供方的 API 密钥与配置。",
     "gemini_title": "Gemini API 密钥",
     "gemini_add_button": "添加密钥",
     "gemini_empty_title": "暂无Gemini密钥",
@@ -944,6 +945,7 @@
   },
   "logs": {
     "title": "日志查看",
+    "description": "实时查看和搜索请求日志。",
     "refresh_button": "刷新日志",
     "clear_button": "清空日志",
     "download_button": "下载日志",
@@ -1227,8 +1229,12 @@
     "search_no_results": "无匹配结果",
     "search_no_results_desc": "没有匹配「{{query}}」的凭证，请尝试其他关键字。"
   },
+  "oauth": {
+    "description": "为支持的提供方启动 OAuth 或设备授权流程。"
+  },
   "system_info": {
     "title": "管理中心信息",
+    "description": "系统信息、版本详情和可用模型。",
     "about_title": "CLI Proxy API Management Center",
     "connection_status_title": "连接状态",
     "api_status_label": "API 状态:",

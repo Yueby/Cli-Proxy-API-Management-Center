@@ -37,6 +37,7 @@ import {
 import { parseLogLine } from './hooks/logParsing';
 import { useLogFilters } from './hooks/useLogFilters';
 import { isNearBottom, useLogScroller } from './hooks/useLogScroller';
+import { PageHeader } from '@/components/common/PageHeader';
 import styles from './LogsPage.module.scss';
 
 interface ErrorLogItem {
@@ -452,7 +453,10 @@ export function LogsPage() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.pageTitle}>{t('logs.title')}</h1>
+      <PageHeader
+        title={t('logs.title')}
+        description={t('logs.description')}
+      />
 
       <div className={styles.tabBar}>
         <button

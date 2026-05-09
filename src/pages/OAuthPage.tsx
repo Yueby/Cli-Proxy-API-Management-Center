@@ -8,6 +8,7 @@ import { useNotificationStore, useThemeStore } from '@/stores';
 import { oauthApi, type OAuthProvider } from '@/services/api/oauth';
 import { vertexApi, type VertexImportResponse } from '@/services/api/vertex';
 import { copyToClipboard } from '@/utils/clipboard';
+import { PageHeader } from '@/components/common/PageHeader';
 import styles from './OAuthPage.module.scss';
 import iconCodex from '@/assets/icons/codex.svg';
 import iconClaude from '@/assets/icons/claude.svg';
@@ -357,7 +358,10 @@ export function OAuthPage() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.pageTitle}>{t('nav.oauth', { defaultValue: 'OAuth' })}</h1>
+      <PageHeader
+        title={t('nav.oauth', { defaultValue: 'OAuth' })}
+        description={t('oauth.description')}
+      />
 
       <div className={styles.content}>
         {PROVIDERS.map((provider) => {

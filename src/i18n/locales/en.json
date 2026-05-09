@@ -193,6 +193,7 @@
   },
   "ai_providers": {
     "title": "AI Providers Configuration",
+    "description": "Manage API keys and configurations for Gemini, Codex, Claude, Vertex, and OpenAI-compatible providers.",
     "gemini_title": "Gemini API Keys",
     "gemini_add_button": "Add Key",
     "gemini_empty_title": "No Gemini Keys",
@@ -944,6 +945,7 @@
   },
   "logs": {
     "title": "Logs Viewer",
+    "description": "View and search request logs in real time.",
     "refresh_button": "Refresh Logs",
     "clear_button": "Clear Logs",
     "download_button": "Download Logs",
@@ -1227,8 +1229,12 @@
     "search_no_results": "No results",
     "search_no_results_desc": "No credentials match \"{{query}}\". Try a different keyword."
   },
+  "oauth": {
+    "description": "Start OAuth or device flows for supported providers."
+  },
   "system_info": {
     "title": "Management Center Info",
+    "description": "System information, version details, and available models.",
     "about_title": "CLI Proxy API Management Center",
     "connection_status_title": "Connection Status",
     "api_status_label": "API Status:",

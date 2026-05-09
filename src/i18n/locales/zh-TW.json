@@ -193,6 +193,7 @@
   },
   "ai_providers": {
     "title": "AI 供應商設定",
+    "description": "管理 Gemini、Codex、Claude、Vertex 及 OpenAI 相容提供方的 API 金鑰與設定。",
     "gemini_title": "Gemini API 金鑰",
     "gemini_add_button": "新增金鑰",
     "gemini_empty_title": "暫無 Gemini 金鑰",
@@ -970,6 +971,7 @@
   },
   "logs": {
     "title": "記錄檢視",
+    "description": "即時檢視和搜尋請求日誌。",
     "refresh_button": "重新整理記錄",
     "clear_button": "清空記錄",
     "download_button": "下載記錄",
@@ -1253,8 +1255,12 @@
     "search_no_results": "無匹配結果",
     "search_no_results_desc": "沒有匹配「{{query}}」的憑證，請嘗試其他關鍵字。"
   },
+  "oauth": {
+    "description": "為支援的提供方啟動 OAuth 或裝置授權流程。"
+  },
   "system_info": {
     "title": "管理中心資訊",
+    "description": "系統資訊、版本詳情和可用模型。",
     "about_title": "CLI Proxy API Management Center",
     "connection_status_title": "連線狀態",
     "api_status_label": "API 狀態:",

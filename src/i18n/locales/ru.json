@@ -193,6 +193,7 @@
   },
   "ai_providers": {
     "title": "Конфигурация AI-провайдеров",
+    "description": "Управление API-ключами и настройками для Gemini, Codex, Claude, Vertex и OpenAI-совместимых провайдеров.",
     "gemini_title": "API-ключи Gemini",
     "gemini_add_button": "Добавить ключ",
     "gemini_empty_title": "Ключи Gemini отсутствуют",
@@ -941,6 +942,7 @@
   },
   "logs": {
     "title": "Просмотр журналов",
+    "description": "Просмотр и поиск журналов запросов в реальном времени.",
     "refresh_button": "Обновить журналы",
     "clear_button": "Очистить журналы",
     "download_button": "Скачать журналы",
@@ -1224,8 +1226,12 @@
     "search_no_results": "Нет результатов",
     "search_no_results_desc": "Нет учётных данных, соответствующих «{{query}}». Попробуйте другой запрос."
   },
+  "oauth": {
+    "description": "Запуск OAuth или потоков авторизации устройств для поддерживаемых провайдеров."
+  },
   "system_info": {
     "title": "Информация о центре управления",
+    "description": "Системная информация, версии и доступные модели.",
     "about_title": "CLI Proxy API Management Center",
     "connection_status_title": "Статус подключения",
     "api_status_label": "Статус API:",

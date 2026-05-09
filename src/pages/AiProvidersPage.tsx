@@ -16,6 +16,7 @@ import {
   withoutDisableAllModelsRule,
 } from '@/components/providers/utils';
 import { usePageTransitionLayer } from '@/components/common/PageTransitionLayer';
+import { PageHeader } from '@/components/common/PageHeader';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { ampcodeApi, providersApi } from '@/services/api';
 import { useAuthStore, useConfigStore, useNotificationStore, useThemeStore } from '@/stores';
@@ -407,7 +408,10 @@ export function AiProvidersPage() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.pageTitle}>{t('ai_providers.title')}</h1>
+      <PageHeader
+        title={t('ai_providers.title')}
+        description={t('ai_providers.description')}
+      />
       <div className={styles.content}>
         {error && <div className="error-box">{error}</div>}
 
