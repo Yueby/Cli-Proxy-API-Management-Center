@@ -1248,7 +1248,10 @@
     "refresh_files": "重新整理驗證檔案",
     "refresh_files_and_quota": "重新整理驗證檔案&配額",
     "refresh_all_credentials": "重新整理全部憑證",
-    "card_idle_hint": "請使用頂部「重新整理全部憑證」按鈕取得最新配額。"
+    "card_idle_hint": "請使用頂部「重新整理全部憑證」按鈕取得最新配額。",
+    "search_placeholder": "搜尋憑證...",
+    "search_no_results": "無匹配結果",
+    "search_no_results_desc": "沒有匹配「{{query}}」的憑證，請嘗試其他關鍵字。"
   },
   "system_info": {
     "title": "管理中心資訊",

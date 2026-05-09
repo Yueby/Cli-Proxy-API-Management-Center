@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { triggerHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { useNotificationStore, useQuotaStore, useThemeStore } from '@/stores';
@@ -16,7 +17,7 @@ import type { QuotaStatusState } from './QuotaCard';
 import { useQuotaLoader } from './useQuotaLoader';
 import type { QuotaConfig } from './quotaConfigs';
 import { useGridColumns } from './useGridColumns';
-import { IconRefreshCw } from '@/components/ui/icons';
+import { IconRefreshCw, IconSearch, IconX } from '@/components/ui/icons';
 import styles from '@/pages/QuotaPage.module.scss';
 
 type QuotaUpdater<T> = T | ((prev: T) => T);
@@ -115,11 +116,23 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
   const [columns, gridRef] = useGridColumns(380); // Min card width 380px matches SCSS
   const [viewMode, setViewMode] = useState<ViewMode>('paged');
   const [showTooManyWarning, setShowTooManyWarning] = useState(false);
+  const [search, setSearch] = useState('');
 
-  const filteredFiles = useMemo(() => files.filter((file) => config.filterFn(file)), [
+  const typeFilteredFiles = useMemo(() => files.filter((file) => config.filterFn(file)), [
     files,
     config
   ]);
+
+  const filteredFiles = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return typeFilteredFiles;
+    return typeFilteredFiles.filter((file) =>
+      [file.name, file.type, file.provider].some(
+        (value) => value && value.toLowerCase().includes(term)
+      )
+    );
+  }, [typeFilteredFiles, search]);
+
   const showAllAllowed = filteredFiles.length <= MAX_SHOW_ALL_THRESHOLD;
   const effectiveViewMode: ViewMode = viewMode === 'all' && !showAllAllowed ? 'paged' : viewMode;
 
@@ -188,13 +201,13 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
 
   useEffect(() => {
     if (loading) return;
-    if (filteredFiles.length === 0) {
+    if (typeFilteredFiles.length === 0) {
       setQuota({});
       return;
     }
     setQuota((prev) => {
       const nextState: Record<string, TState> = {};
-      filteredFiles.forEach((file) => {
+      typeFilteredFiles.forEach((file) => {
         const cached = prev[file.name];
         if (cached) {
           nextState[file.name] = cached;
@@ -202,7 +215,7 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
       });
       return nextState;
     });
-  }, [filteredFiles, loading, setQuota]);
+  }, [typeFilteredFiles, loading, setQuota]);
 
   const refreshQuotaForFile = useCallback(
     async (file: AuthFileItem) => {
@@ -240,9 +253,11 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
   const titleNode = (
     <div className={styles.titleWrapper}>
       <span>{t(`${config.i18nPrefix}.title`)}</span>
-      {filteredFiles.length > 0 && (
+      {typeFilteredFiles.length > 0 && (
         <span className={styles.countBadge}>
-          {filteredFiles.length}
+          {filteredFiles.length !== typeFilteredFiles.length
+            ? `${filteredFiles.length}/${typeFilteredFiles.length}`
+            : typeFilteredFiles.length}
         </span>
       )}
     </div>
@@ -255,6 +270,31 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
       title={titleNode}
       extra={
         <div className={styles.headerActions}>
+          {typeFilteredFiles.length > 0 && (
+            <div className={styles.searchWrapper}>
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={t('quota_management.search_placeholder')}
+                className={styles.searchInput}
+                rightElement={
+                  search ? (
+                    <button
+                      type="button"
+                      className={styles.searchClear}
+                      onClick={() => setSearch('')}
+                      title="Clear"
+                      aria-label="Clear"
+                    >
+                      <IconX size={14} />
+                    </button>
+                  ) : (
+                    <IconSearch size={14} className={styles.searchIcon} />
+                  )
+                }
+              />
+            </div>
+          )}
           <div className={styles.viewModeToggle}>
             <Button
               variant="secondary"
@@ -299,10 +339,15 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
         </div>
       }
     >
-      {filteredFiles.length === 0 ? (
+      {typeFilteredFiles.length === 0 ? (
         <EmptyState
           title={t(`${config.i18nPrefix}.empty_title`)}
           description={t(`${config.i18nPrefix}.empty_desc`)}
+        />
+      ) : filteredFiles.length === 0 ? (
+        <EmptyState
+          title={t('quota_management.search_no_results')}
+          description={t('quota_management.search_no_results_desc', { query: search.trim() })}
         />
       ) : (
         <>
