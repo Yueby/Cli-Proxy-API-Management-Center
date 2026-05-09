@@ -17,7 +17,7 @@ import type { QuotaStatusState } from './QuotaCard';
 import { useQuotaLoader } from './useQuotaLoader';
 import type { QuotaConfig } from './quotaConfigs';
 import { useGridColumns } from './useGridColumns';
-import { IconRefreshCw, IconSearch, IconX } from '@/components/ui/icons';
+import { IconRefreshCw, IconSearch, IconX, IconChevronLeft, IconChevronRight } from '@/components/ui/icons';
 import styles from '@/pages/QuotaPage.module.scss';
 
 type QuotaUpdater<T> = T | ((prev: T) => T);
@@ -375,8 +375,10 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
                 size="sm"
                 onClick={goToPrev}
                 disabled={currentPage <= 1}
+                title={t('auth_files.pagination_prev')}
+                aria-label={t('auth_files.pagination_prev')}
               >
-                {t('auth_files.pagination_prev')}
+                <IconChevronLeft size={16} />
               </Button>
               <div className={styles.pageInfo}>
                 {t('auth_files.pagination_info', {
@@ -390,8 +392,10 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
                 size="sm"
                 onClick={goToNext}
                 disabled={currentPage >= totalPages}
+                title={t('auth_files.pagination_next')}
+                aria-label={t('auth_files.pagination_next')}
               >
-                {t('auth_files.pagination_next')}
+                <IconChevronRight size={16} />
               </Button>
             </div>
           )}

@@ -8,6 +8,7 @@ import { useNotificationStore, useThemeStore } from '@/stores';
 import { oauthApi, type OAuthProvider } from '@/services/api/oauth';
 import { vertexApi, type VertexImportResponse } from '@/services/api/vertex';
 import { copyToClipboard } from '@/utils/clipboard';
+import { IconCopy, IconExternalLink } from '@/components/ui/icons';
 import { PageHeader } from '@/components/common/PageHeader';
 import styles from './OAuthPage.module.scss';
 import iconCodex from '@/assets/icons/codex.svg';
@@ -422,15 +423,17 @@ export function OAuthPage() {
                       <div className={styles.authUrlLabel}>{t(provider.urlLabelKey)}</div>
                       <div className={styles.authUrlValue}>{state.url}</div>
                       <div className={styles.authUrlActions}>
-                        <Button variant="secondary" size="sm" onClick={() => copyLink(state.url!)}>
-                          {t(getAuthKey(provider.id, 'copy_link'))}
+                        <Button variant="secondary" size="sm" onClick={() => copyLink(state.url!)} title={t(getAuthKey(provider.id, 'copy_link'))} aria-label={t(getAuthKey(provider.id, 'copy_link'))}>
+                          <IconCopy size={16} />
                         </Button>
                         <Button
                           variant="secondary"
                           size="sm"
                           onClick={() => window.open(state.url, '_blank', 'noopener,noreferrer')}
+                          title={t(getAuthKey(provider.id, 'open_link'))}
+                          aria-label={t(getAuthKey(provider.id, 'open_link'))}
                         >
-                          {t(getAuthKey(provider.id, 'open_link'))}
+                          <IconExternalLink size={16} />
                         </Button>
                       </div>
                     </div>

@@ -652,12 +652,10 @@ export function LogsPage() {
                   size="sm"
                   onClick={() => loadLogs(false)}
                   disabled={disableControls || loading}
-                  className={styles.actionButton}
+                  title={t('logs.refresh_button')}
+                  aria-label={t('logs.refresh_button')}
                 >
-                  <span className={styles.buttonContent}>
-                    <IconRefreshCw size={16} />
-                    {t('logs.refresh_button')}
-                  </span>
+                  <IconRefreshCw size={16} />
                 </Button>
                 <ToggleSwitch
                   checked={autoRefresh}
@@ -675,24 +673,20 @@ export function LogsPage() {
                   size="sm"
                   onClick={downloadLogs}
                   disabled={logState.buffer.length === 0}
-                  className={styles.actionButton}
+                  title={t('logs.download_button')}
+                  aria-label={t('logs.download_button')}
                 >
-                  <span className={styles.buttonContent}>
-                    <IconDownload size={16} />
-                    {t('logs.download_button')}
-                  </span>
+                  <IconDownload size={16} />
                 </Button>
                 <Button
                   variant="danger"
                   size="sm"
                   onClick={clearLogs}
                   disabled={disableControls}
-                  className={styles.actionButton}
+                  title={t('logs.clear_button')}
+                  aria-label={t('logs.clear_button')}
                 >
-                  <span className={styles.buttonContent}>
-                    <IconTrash2 size={16} />
-                    {t('logs.clear_button')}
-                  </span>
+                  <IconTrash2 size={16} />
                 </Button>
               </div>
             </div>
@@ -847,8 +841,10 @@ export function LogsPage() {
                 onClick={loadErrorLogs}
                 loading={loadingErrors}
                 disabled={disableControls}
+                title={t('common.refresh')}
+                aria-label={t('common.refresh')}
               >
-                {t('common.refresh')}
+                <IconRefreshCw size={16} />
               </Button>
             }
           >

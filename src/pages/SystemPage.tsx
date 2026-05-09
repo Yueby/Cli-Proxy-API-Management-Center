@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
-import { IconGithub, IconBookOpen, IconExternalLink, IconCode } from '@/components/ui/icons';
+import { IconGithub, IconBookOpen, IconExternalLink, IconCode, IconRefreshCw, IconCheck } from '@/components/ui/icons';
 import {
   useAuthStore,
   useConfigStore,
@@ -464,8 +464,10 @@ export function SystemPage() {
               size="sm"
               onClick={() => fetchModels({ forceRefresh: true })}
               loading={modelsLoading}
+              title={t('common.refresh')}
+              aria-label={t('common.refresh')}
             >
-              {t('common.refresh')}
+              <IconRefreshCw size={16} />
             </Button>
           }
         >
@@ -536,7 +538,7 @@ export function SystemPage() {
               loading={requestLogSaving}
               disabled={!canEditRequestLog || !requestLogDirty}
             >
-              {t('common.save')}
+              <IconCheck size={16} />
             </Button>
           </>
         }

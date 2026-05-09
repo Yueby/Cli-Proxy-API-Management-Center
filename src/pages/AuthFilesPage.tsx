@@ -20,7 +20,8 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { IconFilterAll } from '@/components/ui/icons';
+import { IconFilterAll, IconRefreshCw, IconUpload,
+  IconTrash2, IconChevronLeft, IconChevronRight} from '@/components/ui/icons';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import { copyToClipboard } from '@/utils/clipboard';
@@ -666,16 +667,18 @@ export function AuthFilesPage() {
         title={titleNode}
         extra={
           <div className={styles.headerActions}>
-            <Button variant="secondary" size="sm" onClick={handleHeaderRefresh} disabled={loading}>
-              {t('common.refresh')}
+            <Button variant="secondary" size="sm" onClick={handleHeaderRefresh} disabled={loading} title={t('common.refresh')} aria-label={t('common.refresh')}>
+              <IconRefreshCw size={16} />
             </Button>
             <Button
               size="sm"
               onClick={handleUploadClick}
               disabled={disableControls || uploading}
               loading={uploading}
+              title={t('auth_files.upload_button')}
+              aria-label={t('auth_files.upload_button')}
             >
-              {t('auth_files.upload_button')}
+              <IconUpload size={16} />
             </Button>
             <Button
               variant="danger"
@@ -845,8 +848,10 @@ export function AuthFilesPage() {
                   size="sm"
                   onClick={() => setPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage <= 1}
+                  title={t('auth_files.pagination_prev')}
+                  aria-label={t('auth_files.pagination_prev')}
                 >
-                  {t('auth_files.pagination_prev')}
+                  <IconChevronLeft size={16} />
                 </Button>
                 <div className={styles.pageInfo}>
                   {t('auth_files.pagination_info', {
@@ -860,8 +865,10 @@ export function AuthFilesPage() {
                   size="sm"
                   onClick={() => setPage(Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage >= totalPages}
+                  title={t('auth_files.pagination_next')}
+                  aria-label={t('auth_files.pagination_next')}
                 >
-                  {t('auth_files.pagination_next')}
+                  <IconChevronRight size={16} />
                 </Button>
               </div>
             )}
@@ -984,7 +991,7 @@ export function AuthFilesPage() {
                     onClick={() => batchDelete(selectedNames)}
                     disabled={disableControls || selectedNames.length === 0}
                   >
-                    {t('common.delete')}
+                    <IconTrash2 size={16} />
                   </Button>
                 </div>
               </div>

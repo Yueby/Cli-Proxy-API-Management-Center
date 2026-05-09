@@ -23,6 +23,8 @@ import type { ProviderFormState } from '@/components/providers';
 import type { ModelInfo } from '@/utils/models';
 import layoutStyles from './AiProvidersEditLayout.module.scss';
 import styles from './AiProvidersPage.module.scss';
+import { IconChevronLeft, IconCheck } from '@/components/ui/icons';
+
 
 type LocationState = { fromAiProviders?: boolean } | null;
 
@@ -522,7 +524,7 @@ export function AiProvidersCodexEditPage() {
             onClick={handleBack}
             className={layoutStyles.floatingBackButton}
           >
-            {t('common.back')}
+            <IconChevronLeft size={16} />
           </Button>
           <Button
             size="sm"
@@ -531,7 +533,7 @@ export function AiProvidersCodexEditPage() {
             disabled={!canSave}
             className={layoutStyles.floatingSaveButton}
           >
-            {t('common.save')}
+            <IconCheck size={16} />
           </Button>
         </div>
       }

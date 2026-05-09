@@ -22,6 +22,8 @@ import { excludedModelsToText, parseExcludedModels } from '@/components/provider
 import type { GeminiFormState } from '@/components/providers';
 import layoutStyles from './AiProvidersEditLayout.module.scss';
 import styles from './AiProvidersPage.module.scss';
+import { IconChevronLeft, IconCheck } from '@/components/ui/icons';
+
 
 type LocationState = { fromAiProviders?: boolean } | null;
 
@@ -517,7 +519,7 @@ export function AiProvidersGeminiEditPage() {
             onClick={handleBack}
             className={layoutStyles.floatingBackButton}
           >
-            {t('common.back')}
+            <IconChevronLeft size={16} />
           </Button>
           <Button
             size="sm"
@@ -526,7 +528,7 @@ export function AiProvidersGeminiEditPage() {
             disabled={!canSave}
             className={layoutStyles.floatingSaveButton}
           >
-            {t('common.save')}
+            <IconCheck size={16} />
           </Button>
         </div>
       }

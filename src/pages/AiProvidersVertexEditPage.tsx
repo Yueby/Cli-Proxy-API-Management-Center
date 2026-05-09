@@ -18,6 +18,8 @@ import { buildHeaderObject, headersToEntries, normalizeHeaderEntries } from '@/u
 import { areKeyValueEntriesEqual, areModelEntriesEqual, areStringArraysEqual } from '@/utils/compare';
 import type { VertexFormState } from '@/components/providers';
 import layoutStyles from './AiProvidersEditLayout.module.scss';
+import { IconChevronLeft, IconCheck } from '@/components/ui/icons';
+
 
 type LocationState = { fromAiProviders?: boolean } | null;
 
@@ -314,7 +316,7 @@ export function AiProvidersVertexEditPage() {
             onClick={handleBack}
             className={layoutStyles.floatingBackButton}
           >
-            {t('common.back')}
+            <IconChevronLeft size={16} />
           </Button>
           <Button
             size="sm"
@@ -323,7 +325,7 @@ export function AiProvidersVertexEditPage() {
             disabled={!canSave}
             className={layoutStyles.floatingSaveButton}
           >
-            {t('common.save')}
+            <IconCheck size={16} />
           </Button>
         </div>
       }

@@ -21,6 +21,8 @@ import {
 } from '@/components/providers/utils';
 import type { AmpcodeFormState } from '@/components/providers';
 import layoutStyles from './AiProvidersEditLayout.module.scss';
+import { IconTrash2 } from '@/components/ui/icons';
+
 
 type LocationState = { fromAiProviders?: boolean } | null;
 
@@ -461,7 +463,7 @@ export function AiProvidersAmpcodeEditPage() {
                     }}
                     disabled={loading || saving || disableControls || entries.length <= 1}
                   >
-                    {t('common.delete')}
+                    <IconTrash2 size={14} />
                   </Button>
                 </div>
                 <input

@@ -13,6 +13,8 @@ import { buildHeaderObject } from '@/utils/headers';
 import type { ClaudeEditOutletContext } from './AiProvidersClaudeEditLayout';
 import styles from './AiProvidersPage.module.scss';
 import layoutStyles from './AiProvidersEditLayout.module.scss';
+import { IconChevronLeft } from '@/components/ui/icons';
+
 
 const getErrorMessage = (err: unknown) => {
   if (err instanceof Error) return err.message;
@@ -210,7 +212,7 @@ export function AiProvidersClaudeModelsPage() {
             onClick={handleBack}
             className={layoutStyles.floatingBackButton}
           >
-            {t('common.back')}
+            <IconChevronLeft size={16} />
           </Button>
           <Button
             size="sm"

@@ -18,6 +18,8 @@ import type { OpenAIEditOutletContext } from './AiProvidersOpenAIEditLayout';
 import type { KeyTestStatus } from '@/stores/useOpenAIEditDraftStore';
 import styles from './AiProvidersPage.module.scss';
 import layoutStyles from './AiProvidersEditLayout.module.scss';
+import { IconChevronLeft, IconCheck, IconTrash2 } from '@/components/ui/icons';
+
 
 const OPENAI_TEST_TIMEOUT_MS = 30_000;
 
@@ -482,7 +484,7 @@ export function AiProvidersOpenAIEditPage() {
                     onClick={() => removeEntry(index)}
                     disabled={saving || disableControls || isTestingKeys || list.length <= 1}
                   >
-                    {t('common.delete')}
+                    <IconTrash2 size={14} />
                   </Button>
                 </div>
               </div>
@@ -511,7 +513,7 @@ export function AiProvidersOpenAIEditPage() {
             onClick={handleBack}
             className={layoutStyles.floatingBackButton}
           >
-            {t('common.back')}
+            <IconChevronLeft size={16} />
           </Button>
           <Button
             size="sm"
@@ -520,7 +522,7 @@ export function AiProvidersOpenAIEditPage() {
             disabled={!canSave}
             className={layoutStyles.floatingSaveButton}
           >
-            {t('common.save')}
+            <IconCheck size={16} />
           </Button>
         </div>
       }

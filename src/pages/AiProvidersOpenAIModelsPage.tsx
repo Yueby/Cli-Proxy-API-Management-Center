@@ -14,6 +14,8 @@ import { buildOpenAIModelsEndpoint } from '@/components/providers/utils';
 import type { OpenAIEditOutletContext } from './AiProvidersOpenAIEditLayout';
 import styles from './AiProvidersPage.module.scss';
 import layoutStyles from './AiProvidersEditLayout.module.scss';
+import { IconChevronLeft } from '@/components/ui/icons';
+
 
 const getErrorMessage = (err: unknown) => {
   if (err instanceof Error) return err.message;
@@ -191,7 +193,7 @@ export function AiProvidersOpenAIModelsPage() {
             onClick={handleBack}
             className={layoutStyles.floatingBackButton}
           >
-            {t('common.back')}
+            <IconChevronLeft size={16} />
           </Button>
           <Button
             size="sm"

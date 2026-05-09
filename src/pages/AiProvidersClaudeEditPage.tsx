@@ -17,6 +17,8 @@ import { buildClaudeMessagesEndpoint, parseTextList } from '@/components/provide
 import type { ClaudeEditOutletContext } from './AiProvidersClaudeEditLayout';
 import styles from './AiProvidersPage.module.scss';
 import layoutStyles from './AiProvidersEditLayout.module.scss';
+import { IconChevronLeft, IconCheck } from '@/components/ui/icons';
+
 
 const CLAUDE_TEST_TIMEOUT_MS = 30_000;
 const DEFAULT_ANTHROPIC_VERSION = '2023-06-01';
@@ -282,7 +284,7 @@ export function AiProvidersClaudeEditPage() {
             onClick={handleBack}
             className={layoutStyles.floatingBackButton}
           >
-            {t('common.back')}
+            <IconChevronLeft size={16} />
           </Button>
           <Button
             size="sm"
@@ -291,7 +293,7 @@ export function AiProvidersClaudeEditPage() {
             disabled={!canSave}
             className={layoutStyles.floatingSaveButton}
           >
-            {t('common.save')}
+            <IconCheck size={16} />
           </Button>
         </div>
       }

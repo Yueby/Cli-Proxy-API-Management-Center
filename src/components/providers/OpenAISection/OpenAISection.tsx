@@ -12,6 +12,7 @@ import {
   IconChevronDown,
   IconChevronUp,
   IconPencil,
+  IconPlus,
   IconSlidersHorizontal,
   IconTrash2,
   IconX,
@@ -507,9 +508,11 @@ export function OpenAISection({
           size="sm"
           onClick={onAdd}
           disabled={actionsDisabled}
+          title={t('ai_providers.openai_add_button')}
+          aria-label={t('ai_providers.openai_add_button')}
           className={styles.openaiAddButton}
         >
-          {t('ai_providers.openai_add_button')}
+          <IconPlus size={16} />
         </Button>
       </div>
     );

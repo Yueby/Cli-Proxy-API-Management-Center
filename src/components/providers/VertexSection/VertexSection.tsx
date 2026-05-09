@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
+import { IconPlus } from '@/components/ui/icons';
 import iconVertex from '@/assets/icons/vertex.svg';
 import type { ProviderKeyConfig } from '@/types';
 import { maskApiKey } from '@/utils/format';
@@ -72,8 +73,8 @@ export function VertexSection({
           </span>
         }
         extra={
-          <Button size="sm" onClick={onAdd} disabled={actionsDisabled}>
-            {t('ai_providers.vertex_add_button')}
+          <Button size="sm" onClick={onAdd} disabled={actionsDisabled} title={t('ai_providers.vertex_add_button')} aria-label={t('ai_providers.vertex_add_button')}>
+            <IconPlus size={16} />
           </Button>
         }
       >
