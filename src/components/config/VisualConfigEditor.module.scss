@@ -262,15 +262,15 @@
   flex: 0 0 auto;
   padding: 10px 14px;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 84%, transparent);
-  background: color-mix(in srgb, var(--bg-primary) 88%, transparent);
-  box-shadow: 0 18px 36px -30px rgba(0, 0, 0, 0.28);
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  box-shadow: var(--shadow);
   white-space: nowrap;
 }
 
 .mobileSectionNavButtonActive {
-  border-color: color-mix(in srgb, var(--primary-color) 24%, var(--border-color));
-  background: color-mix(in srgb, var(--bg-primary) 96%, transparent);
+  border-color: var(--primary-color);
+  background: var(--bg-primary);
 }
 
 .mobileSectionNavIndex {
@@ -281,7 +281,7 @@
   height: 28px;
   padding: 0 8px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--bg-secondary) 88%, transparent);
+  background: var(--bg-secondary);
   color: var(--text-secondary);
   font-size: 11px;
   font-weight: 700;
@@ -329,16 +329,10 @@
 .sidebarRail {
   max-height: calc(100vh - var(--header-height, 64px) - 36px);
   overflow-y: auto;
-  overflow-x: hidden;
-  padding: 12px;
-  border-radius: 26px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 84%, transparent);
-  background: color-mix(in srgb, var(--bg-primary) 76%, transparent);
-  --glass-blur: 14px;
-  backdrop-filter: var(--glass-backdrop-filter);
-  -webkit-backdrop-filter: var(--glass-backdrop-filter);
-  box-shadow: 0 24px 56px -34px rgba(0, 0, 0, 0.42);
-  -ms-overflow-style: none;
+  padding: -sm;
+  border-radius: -lg;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
   scrollbar-width: none;
 
   &::-webkit-scrollbar {
@@ -364,13 +358,11 @@
 .floatingSidebarRail {
   max-height: inherit;
   overflow-y: auto;
-  overflow-x: hidden;
-  padding: 12px;
-  border-radius: 26px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 84%, transparent);
-  background: color-mix(in srgb, var(--bg-primary) 96%, transparent);
-  box-shadow: 0 24px 56px -34px rgba(0, 0, 0, 0.42);
-  -ms-overflow-style: none;
+  padding: -sm;
+  border-radius: -lg;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-lg);
   scrollbar-width: none;
 
   &::-webkit-scrollbar {
@@ -402,7 +394,7 @@
   gap: 14px;
   width: 100%;
   padding: 14px;
-  border-radius: 20px;
+  border-radius: -lg;
   border: 1px solid transparent;
   background: transparent;
   color: inherit;
@@ -414,8 +406,8 @@
 
   &:hover {
     transform: translateX(2px);
-    background: color-mix(in srgb, var(--bg-secondary) 86%, transparent);
-    border-color: color-mix(in srgb, var(--border-color) 88%, transparent);
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
   }
 
   @media (max-width: 1024px) {
@@ -429,9 +421,9 @@
 }
 
 .navButtonActive {
-  background: color-mix(in srgb, var(--bg-primary) 92%, transparent);
-  border-color: color-mix(in srgb, var(--primary-color) 24%, var(--border-color));
-  box-shadow: 0 18px 36px -30px rgba(0, 0, 0, 0.32);
+  background: var(--bg-primary);
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow);
 }
 
 .navIndex {
@@ -441,8 +433,8 @@
   min-width: 34px;
   height: 34px;
   border-radius: 12px;
-  background: color-mix(in srgb, var(--bg-secondary) 88%, transparent);
-  border: 1px solid color-mix(in srgb, var(--border-color) 84%, transparent);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   color: var(--text-secondary);
   font-size: 11px;
   font-weight: 700;
@@ -513,10 +505,6 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  padding: clamp(20px, 3vw, 30px);
-  border-radius: 32px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 84%, transparent);
-  background: color-mix(in srgb, var(--bg-primary) 76%, transparent);
 }
 
 .sectionGrid {
@@ -537,7 +525,7 @@
 
 .divider {
   height: 1px;
-  background: color-mix(in srgb, var(--border-color) 84%, transparent);
+  background: var(--border-color);
 }
 
 .toggleRow {
@@ -545,10 +533,10 @@
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 16px;
   align-items: center;
-  padding: 16px 18px;
-  border-radius: 18px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 82%, transparent);
-  background: color-mix(in srgb, var(--bg-primary) 84%, transparent);
+  padding: -md;
+  border-radius: -lg;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
 
   @include mobile {
     grid-template-columns: minmax(0, 1fr);
@@ -609,8 +597,8 @@
   min-height: 26px;
   padding: 0 10px;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 82%, transparent);
-  background: color-mix(in srgb, var(--bg-primary) 92%, transparent);
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
   color: var(--text-secondary);
   font-size: 11px;
   font-weight: 700;
@@ -622,9 +610,9 @@
   flex-direction: column;
   gap: 14px;
   padding: 18px 20px;
-  border-radius: 24px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 82%, transparent);
-  background: color-mix(in srgb, var(--bg-primary) 84%, transparent);
+  border-radius: -lg;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
 }
 
 .subsectionHeader {
@@ -682,9 +670,9 @@
   flex-direction: column;
   gap: 12px;
   padding: 14px;
-  border-radius: 20px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 84%, transparent);
-  background: color-mix(in srgb, var(--bg-primary) 88%, transparent);
+  border-radius: -lg;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
 }
 
 .ruleCardHeader {
@@ -716,12 +704,12 @@
 }
 
 .emptyState {
-  border: 1px dashed color-mix(in srgb, var(--border-color) 84%, transparent);
-  border-radius: 18px;
+  border: 1px dashed var(--border-color);
+  border-radius: -lg;
   padding: 18px 16px;
   color: var(--text-secondary);
   text-align: center;
-  background: color-mix(in srgb, var(--bg-secondary) 88%, transparent);
+  background: var(--bg-secondary);
 }
 
 .stringList {
@@ -812,7 +800,7 @@
   .overview {
     gap: 14px;
     padding: 18px;
-    border-radius: 24px;
+    border-radius: -lg;
   }
 
   .overviewFocusLink {
@@ -820,13 +808,13 @@
   }
 
   .sections {
-    border-radius: 26px;
+    border-radius: -lg;
     padding: 16px;
   }
 
   .subsection {
     padding: 16px;
-    border-radius: 20px;
+    border-radius: -lg;
   }
 
   .toggleRow {
