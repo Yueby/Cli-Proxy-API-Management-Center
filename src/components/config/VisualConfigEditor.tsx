@@ -326,13 +326,6 @@ export function VisualConfigEditor({
     [countErrors, hasPayloadValidationErrors, t]
   );
 
-  const hasValidationIssues =
-    sections.some((section) => section.errorCount > 0) || hasPayloadValidationErrors;
-  const focusSections = useMemo(
-    () => sections.filter((section) => ['server', 'network', 'payload'].includes(section.id)),
-    [sections]
-  );
-
   useEffect(() => {
     if (!isCurrentLayer) return undefined;
     if (typeof IntersectionObserver === 'undefined') return undefined;
@@ -483,7 +476,7 @@ export function VisualConfigEditor({
 
   const navContent = (
     <div className={styles.navList}>
-      {sections.map((section, index) => {
+      {sections.map((section) => {
         const Icon = section.icon;
 
         return (
@@ -495,23 +488,15 @@ export function VisualConfigEditor({
             }`}
             onClick={() => handleSectionJump(section.id)}
           >
-            <span className={styles.navIndex}>{String(index + 1).padStart(2, '0')}</span>
-            <span className={styles.navMain}>
-              <span className={styles.navHeadingRow}>
-                <span className={styles.navLabelWrap}>
-                  <span className={styles.navIcon}>
-                    <Icon size={14} />
-                  </span>
-                  <span className={styles.navLabel}>{section.title}</span>
-                </span>
-                {section.errorCount > 0 ? (
-                  <span className={styles.navBadge} aria-hidden="true">
-                    {section.errorCount}
-                  </span>
-                ) : null}
-              </span>
-              <span className={styles.navDescription}>{section.description}</span>
+            <span className={styles.navIcon}>
+              <Icon size={14} />
             </span>
+            <span className={styles.navLabel}>{section.title}</span>
+            {section.errorCount > 0 ? (
+              <span className={styles.navBadge} aria-hidden="true">
+                {section.errorCount}
+              </span>
+            ) : null}
           </button>
         );
       })}
@@ -520,60 +505,14 @@ export function VisualConfigEditor({
 
   return (
     <div className={styles.visualEditor}>
-      <div className={styles.overview}>
-        <div className={styles.overviewHeader}>
-          <div className={styles.overviewMeta}>
-            <span className={styles.overviewPill}>
-              {t('config_management.visual.quick_jump', { defaultValue: '快速跳转' })}
-            </span>
-            {hasValidationIssues ? (
-              <span className={`${styles.overviewPill} ${styles.overviewPillWarning}`}>
-                {t('config_management.visual.validation.validation_blocked')}
-              </span>
-            ) : null}
-          </div>
-        </div>
-
-        <div className={styles.overviewFocusList}>
-          {focusSections.map((section) => {
-            const Icon = section.icon;
-
-            return (
-              <button
-                key={section.id}
-                type="button"
-                className={`${styles.overviewFocusLink} ${
-                  activeSectionId === section.id ? styles.overviewFocusLinkActive : ''
-                }`}
-                onClick={() => handleSectionJump(section.id)}
-              >
-                <span className={styles.focusIcon}>
-                  <Icon size={16} />
-                </span>
-                <span className={styles.focusCopy}>
-                  <span className={styles.focusTitle}>{section.title}</span>
-                  <span className={styles.focusDescription}>{section.description}</span>
-                </span>
-                {section.errorCount > 0 ? (
-                  <span className={styles.navBadge} aria-hidden="true">
-                    {section.errorCount}
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       <div ref={workspaceRef} className={styles.workspace}>
         {isMobile ? (
           <div className={styles.mobileSectionNav}>
             <div
               ref={mobileNavScrollerRef}
               className={styles.mobileSectionNavScroller}
-              aria-label={t('config_management.visual.quick_jump', { defaultValue: '快速跳转' })}
             >
-              {sections.map((section, index) => (
+              {sections.map((section) => (
                 <button
                   key={section.id}
                   ref={(node) => {
@@ -585,9 +524,6 @@ export function VisualConfigEditor({
                   }`}
                   onClick={() => handleSectionJump(section.id)}
                 >
-                  <span className={styles.mobileSectionNavIndex}>
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
                   <span className={styles.mobileSectionNavLabel}>{section.title}</span>
                   {section.errorCount > 0 ? (
                     <span className={styles.mobileSectionNavBadge} aria-hidden="true">
