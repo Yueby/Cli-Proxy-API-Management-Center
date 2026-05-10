@@ -20,8 +20,8 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { IconFilterAll, IconRefreshCw, IconUpload,
-  IconTrash2, IconChevronLeft, IconChevronRight} from '@/components/ui/icons';
+import { IconFilterAll, IconRefreshCw, IconTrash2, IconUpload } from '@/components/ui/icons';
+import { Pagination } from '@/components/ui/Pagination';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import { copyToClipboard } from '@/utils/clipboard';
@@ -842,35 +842,14 @@ export function AuthFilesPage() {
             )}
 
             {!loading && sorted.length > pageSize && (
-              <div className={styles.pagination}>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage <= 1}
-                  title={t('auth_files.pagination_prev')}
-                  aria-label={t('auth_files.pagination_prev')}
-                >
-                  <IconChevronLeft size={16} />
-                </Button>
-                <div className={styles.pageInfo}>
-                  {t('auth_files.pagination_info', {
-                    current: currentPage,
-                    total: totalPages,
-                    count: sorted.length,
-                  })}
-                </div>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage >= totalPages}
-                  title={t('auth_files.pagination_next')}
-                  aria-label={t('auth_files.pagination_next')}
-                >
-                  <IconChevronRight size={16} />
-                </Button>
-              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={sorted.length}
+                onPrev={() => setPage(Math.max(1, currentPage - 1))}
+                onNext={() => setPage(Math.min(totalPages, currentPage + 1))}
+                className={styles.pagination}
+              />
             )}
           </div>
         </div>

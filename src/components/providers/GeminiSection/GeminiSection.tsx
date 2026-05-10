@@ -11,6 +11,7 @@ import { statusBarDataFromRecentRequests } from '@/utils/recentRequests';
 import styles from '@/pages/AiProvidersPage.module.scss';
 import { ProviderList } from '../ProviderList';
 import { ProviderStatusBar } from '../ProviderStatusBar';
+import { FieldRow, HeaderBadgeList, ModelTagList, ExcludedModelsList, StatsPills } from '../ProviderCardParts';
 import {
   getProviderConfigKey,
   getProviderRecentBuckets,
@@ -108,7 +109,6 @@ export function GeminiSection({
               item.apiKey,
               item.baseUrl
             );
-            const headerEntries = Object.entries(item.headers || {});
             const excludedModels = item.excludedModels ?? [];
             const statusData =
               statusBarCache.get(getProviderConfigKey(item, index)) ||
@@ -119,80 +119,15 @@ export function GeminiSection({
                 <div className="item-title">
                   {t('ai_providers.gemini_item_title')} #{index + 1}
                 </div>
-                <div className={styles.fieldRow}>
-                  <span className={styles.fieldLabel}>{t('common.api_key')}:</span>
-                  <span className={styles.fieldValue}>{maskApiKey(item.apiKey)}</span>
-                </div>
-                {item.priority !== undefined && (
-                  <div className={styles.fieldRow}>
-                    <span className={styles.fieldLabel}>{t('common.priority')}:</span>
-                    <span className={styles.fieldValue}>{item.priority}</span>
-                  </div>
-                )}
-                {item.prefix && (
-                  <div className={styles.fieldRow}>
-                    <span className={styles.fieldLabel}>{t('common.prefix')}:</span>
-                    <span className={styles.fieldValue}>{item.prefix}</span>
-                  </div>
-                )}
-                {item.baseUrl && (
-                  <div className={styles.fieldRow}>
-                    <span className={styles.fieldLabel}>{t('common.base_url')}:</span>
-                    <span className={styles.fieldValue}>{item.baseUrl}</span>
-                  </div>
-                )}
-                {item.proxyUrl && (
-                  <div className={styles.fieldRow}>
-                    <span className={styles.fieldLabel}>{t('common.proxy_url')}:</span>
-                    <span className={styles.fieldValue}>{item.proxyUrl}</span>
-                  </div>
-                )}
-                {headerEntries.length > 0 && (
-                  <div className={styles.headerBadgeList}>
-                    {headerEntries.map(([key, value]) => (
-                      <span key={key} className={styles.headerBadge}>
-                        <strong>{key}:</strong> {value}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                {item.models?.length ? (
-                  <div className={styles.modelTagList}>
-                    <span className={styles.modelCountLabel}>
-                      {t('ai_providers.gemini_models_count')}: {item.models.length}
-                    </span>
-                    {item.models.map((model) => (
-                      <span key={model.name} className={styles.modelTag}>
-                        <span className={styles.modelName}>{model.name}</span>
-                        {model.alias && model.alias !== model.name && (
-                          <span className={styles.modelAlias}>{model.alias}</span>
-                        )}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-                {excludedModels.length ? (
-                  <div className={styles.excludedModelsSection}>
-                    <div className={styles.excludedModelsLabel}>
-                      {t('ai_providers.excluded_models_count', { count: excludedModels.length })}
-                    </div>
-                    <div className={styles.modelTagList}>
-                      {excludedModels.map((model) => (
-                        <span key={model} className={`${styles.modelTag} ${styles.excludedModelTag}`}>
-                          <span className={styles.modelName}>{model}</span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-                <div className={styles.cardStats}>
-                  <span className={`${styles.statPill} ${styles.statSuccess}`}>
-                    {t('stats.success')}: {stats.success}
-                  </span>
-                  <span className={`${styles.statPill} ${styles.statFailure}`}>
-                    {t('stats.failure')}: {stats.failure}
-                  </span>
-                </div>
+                <FieldRow label={t('common.api_key')} value={maskApiKey(item.apiKey)} />
+                <FieldRow label={t('common.priority')} value={item.priority} />
+                <FieldRow label={t('common.prefix')} value={item.prefix} />
+                <FieldRow label={t('common.base_url')} value={item.baseUrl} />
+                <FieldRow label={t('common.proxy_url')} value={item.proxyUrl} />
+                <HeaderBadgeList headers={item.headers} />
+                <ModelTagList models={item.models} countLabel={t('ai_providers.gemini_models_count')} />
+                <ExcludedModelsList models={excludedModels} />
+                <StatsPills success={stats.success} failure={stats.failure} />
                 <ProviderStatusBar statusData={statusData} />
               </Fragment>
             );

@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { Pagination } from '@/components/ui/Pagination';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { triggerHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { useNotificationStore, useQuotaStore, useThemeStore } from '@/stores';
@@ -18,7 +19,7 @@ import type { QuotaStatusState } from './QuotaCard';
 import { useQuotaLoader } from './useQuotaLoader';
 import type { QuotaConfig } from './quotaConfigs';
 import { useGridColumns } from './useGridColumns';
-import { IconRefreshCw, IconSearch, IconX, IconChevronLeft, IconChevronRight } from '@/components/ui/icons';
+import { IconRefreshCw, IconSearch, IconX } from '@/components/ui/icons';
 import styles from '@/pages/QuotaPage.module.scss';
 
 type QuotaUpdater<T> = T | ((prev: T) => T);
@@ -356,35 +357,13 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
             ))}
           </div>
           {filteredFiles.length > pageSize && effectiveViewMode === 'paged' && (
-            <div className={styles.pagination}>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={goToPrev}
-                disabled={currentPage <= 1}
-                title={t('auth_files.pagination_prev')}
-                aria-label={t('auth_files.pagination_prev')}
-              >
-                <IconChevronLeft size={16} />
-              </Button>
-              <div className={styles.pageInfo}>
-                {t('auth_files.pagination_info', {
-                  current: currentPage,
-                  total: totalPages,
-                  count: filteredFiles.length
-                })}
-              </div>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={goToNext}
-                disabled={currentPage >= totalPages}
-                title={t('auth_files.pagination_next')}
-                aria-label={t('auth_files.pagination_next')}
-              >
-                <IconChevronRight size={16} />
-              </Button>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredFiles.length}
+              onPrev={goToPrev}
+              onNext={goToNext}
+            />
           )}
         </>
       )}
