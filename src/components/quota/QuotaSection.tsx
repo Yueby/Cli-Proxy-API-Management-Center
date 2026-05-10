@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { triggerHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { useNotificationStore, useQuotaStore, useThemeStore } from '@/stores';
@@ -295,34 +296,20 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
               />
             </div>
           )}
-          <div className={styles.viewModeToggle}>
-            <Button
-              variant="secondary"
-              size="sm"
-              className={`${styles.viewModeButton} ${
-                effectiveViewMode === 'paged' ? styles.viewModeButtonActive : ''
-              }`}
-              onClick={() => setViewMode('paged')}
-            >
-              {t('auth_files.view_mode_paged')}
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              className={`${styles.viewModeButton} ${
-                effectiveViewMode === 'all' ? styles.viewModeButtonActive : ''
-              }`}
-              onClick={() => {
-                if (filteredFiles.length > MAX_SHOW_ALL_THRESHOLD) {
-                  setShowTooManyWarning(true);
-                } else {
-                  setViewMode('all');
-                }
-              }}
-            >
-              {t('auth_files.view_mode_all')}
-            </Button>
-          </div>
+          <SegmentedControl
+            options={[
+              { value: 'paged', label: t('auth_files.view_mode_paged') },
+              { value: 'all', label: t('auth_files.view_mode_all') },
+            ]}
+            value={effectiveViewMode}
+            onChange={(mode) => {
+              if (mode === 'all' && filteredFiles.length > MAX_SHOW_ALL_THRESHOLD) {
+                setShowTooManyWarning(true);
+              } else {
+                setViewMode(mode as ViewMode);
+              }
+            }}
+          />
           <Button
             variant="secondary"
             size="sm"

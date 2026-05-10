@@ -38,6 +38,7 @@ import { parseLogLine } from './hooks/logParsing';
 import { useLogFilters } from './hooks/useLogFilters';
 import { isNearBottom, useLogScroller } from './hooks/useLogScroller';
 import { PageHeader } from '@/components/common/PageHeader';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import styles from './LogsPage.module.scss';
 
 interface ErrorLogItem {
@@ -458,22 +459,14 @@ export function LogsPage() {
         description={t('logs.description')}
       />
 
-      <div className={styles.tabBar}>
-        <button
-          type="button"
-          className={`${styles.tabItem} ${activeTab === 'logs' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('logs')}
-        >
-          {t('logs.log_content')}
-        </button>
-        <button
-          type="button"
-          className={`${styles.tabItem} ${activeTab === 'errors' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('errors')}
-        >
-          {t('logs.error_logs_modal_title')}
-        </button>
-      </div>
+      <SegmentedControl
+        options={[
+          { value: 'logs', label: t('logs.log_content') },
+          { value: 'errors', label: t('logs.error_logs_modal_title') },
+        ]}
+        value={activeTab}
+        onChange={(tab) => setActiveTab(tab as TabType)}
+      />
 
       <div className={styles.content}>
         {activeTab === 'logs' && (

@@ -6,6 +6,7 @@ import { parse as parseYaml, parseDocument } from 'yaml';
 import { usePageTransitionLayer } from '@/components/common/PageTransitionLayer';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import {
   IconCheck,
   IconChevronDown,
@@ -514,24 +515,15 @@ export function ConfigPage() {
       />
 
       <div className={styles.headerControls}>
-        <div className={styles.tabBar}>
-          <button
-            type="button"
-            className={`${styles.tabItem} ${activeTab === 'visual' ? styles.tabActive : ''}`}
-            onClick={() => handleTabChange('visual')}
-            disabled={saving || loading}
-          >
-            {t('config_management.tabs.visual', { defaultValue: '可视化编辑' })}
-          </button>
-          <button
-            type="button"
-            className={`${styles.tabItem} ${activeTab === 'source' ? styles.tabActive : ''}`}
-            onClick={() => handleTabChange('source')}
-            disabled={saving || loading}
-          >
-            {t('config_management.tabs.source', { defaultValue: '源代码编辑' })}
-          </button>
-        </div>
+        <SegmentedControl
+          options={[
+            { value: 'visual', label: t('config_management.tabs.visual', { defaultValue: '可视化编辑' }) },
+            { value: 'source', label: t('config_management.tabs.source', { defaultValue: '源代码编辑' }) },
+          ]}
+          value={activeTab}
+          onChange={(tab) => handleTabChange(tab as ConfigEditorTab)}
+          disabled={saving || loading}
+        />
         <div className={`${styles.statusBadge} ${getStatusClass()}`}>{getStatusText()}</div>
       </div>
 

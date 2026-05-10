@@ -1,0 +1,57 @@
+@use '../../styles/variables' as *;
+
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: 3px;
+  border-radius: $radius-full;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.rootFullWidth {
+  width: 100%;
+}
+
+.segment {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 14px;
+  border-radius: $radius-full;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+
+  &:hover:not(:disabled) {
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.segmentActive {
+  color: var(--primary-contrast, #fff);
+  background: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+
+  &:hover:not(:disabled) {
+    color: var(--primary-contrast, #fff);
+    background: var(--primary-hover);
+  }
+}
+
+.rootFullWidth .segment {
+  flex: 1;
+}
