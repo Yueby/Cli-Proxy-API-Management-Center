@@ -240,7 +240,7 @@
 
 .filterControls {
   display: grid;
-  grid-template-columns: minmax(240px, 1.4fr) repeat(2, minmax(120px, 0.72fr)) minmax(220px, auto);
+  grid-template-columns: minmax(240px, 1.4fr) repeat(2, minmax(120px, 0.72fr));
   gap: $spacing-md;
   align-items: flex-end;
 
@@ -281,17 +281,18 @@
 
 .filterToggleItem {
   min-width: 0;
-
-  @include tablet {
-    grid-column: 1 / -1;
-  }
+  grid-column: 1 / -1;
 }
 
 .filterToggleGroup {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-sm;
   min-height: 40px;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
 }
 
 .filterToggleCard {
@@ -459,26 +460,12 @@
   }
 }
 
-// 卡片渐变背景 — subtle tint only
-.antigravityCard {
-  background-image: linear-gradient(180deg, rgba(224, 247, 250, 0.06), transparent);
-}
-
-.claudeCard {
-  background-image: linear-gradient(180deg, rgba(251, 236, 228, 0.08), transparent);
-}
-
-.codexCard {
-  background-image: linear-gradient(180deg, rgba(234, 231, 255, 0.08), transparent);
-}
-
-.geminiCliCard {
-  background-image: linear-gradient(180deg, rgba(224, 232, 255, 0.08), transparent);
-}
-
-.kimiCard {
-  background-image: linear-gradient(180deg, rgba(220, 232, 255, 0.08), transparent);
-}
+// 卡片品牌色类保留为空 no-op — 品牌色已由 typeBadge / providerAvatar 表达
+.antigravityCard {}
+.claudeCard {}
+.codexCard {}
+.geminiCliCard {}
+.kimiCard {}
 
 .quotaSection {
   display: flex;
@@ -658,25 +645,20 @@
 .fileCard {
   position: relative;
   overflow: hidden;
-  background-color: color-mix(in srgb, var(--bg-primary) 85%, transparent);
-  --glass-blur: 8px;
-  backdrop-filter: var(--glass-backdrop-filter);
-  -webkit-backdrop-filter: var(--glass-backdrop-filter);
-  border: 1px solid color-mix(in srgb, var(--border-color) 70%, transparent);
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 16px;
   display: flex;
   flex-direction: column;
   min-height: 100%;
   transition:
-    transform $transition-fast,
-    box-shadow $transition-fast,
-    border-color $transition-fast;
+    border-color $transition-fast,
+    box-shadow $transition-fast;
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.15);
-    border-color: color-mix(in srgb, var(--primary-color) 28%, var(--border-color));
+    border-color: color-mix(in srgb, var(--border-color) 45%, var(--text-primary));
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
   }
 }
 
@@ -707,7 +689,6 @@
   }
 
   &:hover {
-    transform: none;
     box-shadow: none;
     border-color: var(--border-color);
   }
@@ -771,7 +752,40 @@
   }
 
   .quotaSection {
-    display: none;
+    gap: 4px;
+    padding-top: 6px;
+    margin-top: 2px;
+  }
+
+  .quotaRow {
+    gap: 2px;
+  }
+
+  .quotaRowHeader {
+    gap: 4px;
+  }
+
+  .quotaModel {
+    font-size: 11px;
+  }
+
+  .quotaMeta {
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .quotaBar {
+    height: 5px;
+  }
+
+  .quotaError {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+
+  .codexPlan {
+    font-size: 11px;
+    gap: 4px;
   }
 
   .cardActions {

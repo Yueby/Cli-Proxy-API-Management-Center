@@ -2,37 +2,33 @@
 @use '../../styles/variables' as *;
 
 .section {
-  display: grid;
-  grid-template-columns: minmax(0, 200px) minmax(0, 1fr);
-  gap: $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
   padding: $spacing-lg 0;
-  border-top: 1px solid var(--border-color);
-  scroll-margin-top: 80px;
+  scroll-margin-top: 70px;
+
+  & + & {
+    border-top: 1px solid var(--border-color);
+  }
 
   &:first-child {
-    border-top: none;
     padding-top: 0;
   }
 
+  &:last-child {
+    padding-bottom: 0;
+  }
+
   @include mobile {
-    grid-template-columns: minmax(0, 1fr);
-    gap: $spacing-md;
     padding: $spacing-md 0;
-    scroll-margin-top: 60px;
   }
 }
 
 .header {
-  position: sticky;
-  top: 72px;
-  align-self: start;
   display: flex;
   flex-direction: column;
-  gap: $spacing-sm;
-
-  @include mobile {
-    position: static;
-  }
+  gap: 2px;
 }
 
 .titleRow {
@@ -41,38 +37,12 @@
   gap: $spacing-sm;
 }
 
-.indexBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: $radius-md;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  color: var(--text-tertiary);
-  font-size: 11px;
-  font-weight: 700;
-}
-
 .iconBadge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: $radius-md;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   flex: 0 0 auto;
-}
-
-.headingGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
 }
 
 .title {
@@ -88,10 +58,6 @@
   color: var(--text-tertiary);
   font-size: 13px;
   line-height: 1.5;
-
-  @include mobile {
-    max-width: none;
-  }
 }
 
 .content {

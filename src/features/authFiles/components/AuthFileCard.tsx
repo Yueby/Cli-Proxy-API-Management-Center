@@ -96,8 +96,9 @@ export function AuthFileCard(props: AuthFileCardProps) {
 
   const quotaType =
     quotaFilterType && resolveQuotaType(file) === quotaFilterType ? quotaFilterType : null;
+  const cachedQuotaType = resolveQuotaType(file);
 
-  const showQuotaLayout = Boolean(quotaType) && !isRuntimeOnly && !compact;
+  const showCachedQuota = Boolean(cachedQuotaType) && !isRuntimeOnly;
 
   const providerCardClass =
     quotaType === 'antigravity'
@@ -247,12 +248,8 @@ export function AuthFileCard(props: AuthFileCardProps) {
               <ProviderStatusBar statusData={statusData} styles={styles} />
             </div>
 
-            {showQuotaLayout && quotaType && (
-              <AuthFileQuotaSection
-                file={file}
-                quotaType={quotaType}
-                disableControls={disableControls}
-              />
+            {showCachedQuota && cachedQuotaType && (
+              <AuthFileQuotaSection file={file} quotaType={cachedQuotaType} />
             )}
           </div>
 

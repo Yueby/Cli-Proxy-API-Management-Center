@@ -2,7 +2,7 @@
  * Generic quota section component.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -14,11 +14,15 @@ import { triggerHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { useNotificationStore, useQuotaStore, useThemeStore } from '@/stores';
 import type { AuthFileItem, ResolvedTheme } from '@/types';
 import { getStatusFromError } from '@/utils/quota';
+import {
+  MIN_CARD_PAGE_SIZE,
+  MAX_CARD_PAGE_SIZE,
+  clampCardPageSize,
+} from '@/features/authFiles/constants';
 import { QuotaCard } from './QuotaCard';
 import type { QuotaStatusState } from './QuotaCard';
 import { useQuotaLoader } from './useQuotaLoader';
 import type { QuotaConfig } from './quotaConfigs';
-import { useGridColumns } from './useGridColumns';
 import { IconRefreshCw, IconSearch, IconX } from '@/components/ui/icons';
 import styles from '@/pages/QuotaPage.module.scss';
 
@@ -28,7 +32,6 @@ type QuotaSetter<T> = (updater: QuotaUpdater<T>) => void;
 
 type ViewMode = 'paged' | 'all';
 
-const MAX_ITEMS_PER_PAGE = 25;
 const MAX_SHOW_ALL_THRESHOLD = 30;
 
 interface QuotaPaginationState<T> {
@@ -39,6 +42,7 @@ interface QuotaPaginationState<T> {
   setPageSize: (size: number) => void;
   goToPrev: () => void;
   goToNext: () => void;
+  goToPage: (page: number) => void;
   loading: boolean;
   loadingScope: 'page' | 'all' | null;
   setLoading: (loading: boolean, scope?: 'page' | 'all' | null) => void;
@@ -75,6 +79,10 @@ const useQuotaPagination = <T,>(items: T[], defaultPageSize = 6): QuotaPaginatio
     setPage((prev) => Math.min(totalPages, prev + 1));
   }, [totalPages]);
 
+  const goToPage = useCallback((target: number) => {
+    setPage(Math.max(1, Math.min(totalPages, target)));
+  }, [totalPages]);
+
   const setLoading = useCallback((isLoading: boolean, scope?: 'page' | 'all' | null) => {
     setLoadingState(isLoading);
     setLoadingScope(isLoading ? (scope ?? null) : null);
@@ -88,6 +96,7 @@ const useQuotaPagination = <T,>(items: T[], defaultPageSize = 6): QuotaPaginatio
     setPageSize,
     goToPrev,
     goToNext,
+    goToPage,
     loading,
     loadingScope,
     setLoading
@@ -115,10 +124,11 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
   >;
 
   /* Removed useRef */
-  const [columns, gridRef] = useGridColumns(380); // Min card width 380px matches SCSS
   const [viewMode, setViewMode] = useState<ViewMode>('paged');
   const [showTooManyWarning, setShowTooManyWarning] = useState(false);
   const [search, setSearch] = useState('');
+  const [userPageSize, setUserPageSize] = useState<number>(9);
+  const [pageSizeInput, setPageSizeInput] = useState<string>('9');
 
   const typeFilteredFiles = useMemo(() => files.filter((file) => config.filterFn(file)), [
     files,
@@ -146,6 +156,7 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
     setPageSize,
     goToPrev,
     goToNext,
+    goToPage,
     loading: sectionLoading,
     setLoading
   } = useQuotaPagination(filteredFiles);
@@ -166,15 +177,55 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
     };
   }, [showAllAllowed, viewMode]);
 
-  // Update page size based on view mode and columns
+  // Update page size based on view mode
   useEffect(() => {
     if (effectiveViewMode === 'all') {
       setPageSize(Math.max(1, filteredFiles.length));
     } else {
-      // Paged mode: 3 rows * columns, capped to avoid oversized pages.
-      setPageSize(Math.min(columns * 3, MAX_ITEMS_PER_PAGE));
+      setPageSize(userPageSize);
     }
-  }, [effectiveViewMode, columns, filteredFiles.length, setPageSize]);
+  }, [effectiveViewMode, userPageSize, filteredFiles.length, setPageSize]);
+
+  useEffect(() => {
+    setPageSizeInput(String(userPageSize));
+  }, [userPageSize]);
+
+  const commitPageSizeInput = useCallback(
+    (rawValue: string) => {
+      const trimmed = rawValue.trim();
+      if (!trimmed) {
+        setPageSizeInput(String(userPageSize));
+        return;
+      }
+
+      const value = Number(trimmed);
+      if (!Number.isFinite(value)) {
+        setPageSizeInput(String(userPageSize));
+        return;
+      }
+
+      const next = clampCardPageSize(value);
+      setUserPageSize(next);
+      setPageSizeInput(String(next));
+    },
+    [userPageSize]
+  );
+
+  const handlePageSizeChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    const rawValue = event.currentTarget.value;
+    setPageSizeInput(rawValue);
+
+    const trimmed = rawValue.trim();
+    if (!trimmed) return;
+
+    const parsed = Number(trimmed);
+    if (!Number.isFinite(parsed)) return;
+
+    const rounded = Math.round(parsed);
+    if (rounded < MIN_CARD_PAGE_SIZE || rounded > MAX_CARD_PAGE_SIZE) return;
+
+    setUserPageSize(rounded);
+  }, []);
 
   const { quota, loadQuota } = useQuotaLoader(config);
 
@@ -200,24 +251,6 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
     if (targets.length === 0) return;
     loadQuota(targets, scope, setLoading);
   }, [loading, effectiveViewMode, filteredFiles, pageItems, loadQuota, setLoading]);
-
-  useEffect(() => {
-    if (loading) return;
-    if (typeFilteredFiles.length === 0) {
-      setQuota({});
-      return;
-    }
-    setQuota((prev) => {
-      const nextState: Record<string, TState> = {};
-      typeFilteredFiles.forEach((file) => {
-        const cached = prev[file.name];
-        if (cached) {
-          nextState[file.name] = cached;
-        }
-      });
-      return nextState;
-    });
-  }, [typeFilteredFiles, loading, setQuota]);
 
   const refreshQuotaForFile = useCallback(
     async (file: AuthFileItem) => {
@@ -297,6 +330,25 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
               />
             </div>
           )}
+          {effectiveViewMode === 'paged' && typeFilteredFiles.length > 0 && (
+            <input
+              className={styles.pageSizeSelect}
+              type="number"
+              min={MIN_CARD_PAGE_SIZE}
+              max={MAX_CARD_PAGE_SIZE}
+              step={1}
+              value={pageSizeInput}
+              onChange={handlePageSizeChange}
+              onBlur={(e) => commitPageSizeInput(e.currentTarget.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.currentTarget.blur();
+                }
+              }}
+              title={t('auth_files.page_size_label')}
+              aria-label={t('auth_files.page_size_label')}
+            />
+          )}
           <SegmentedControl
             options={[
               { value: 'paged', label: t('auth_files.view_mode_paged') },
@@ -339,7 +391,7 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
         />
       ) : (
         <>
-          <div ref={gridRef} className={config.gridClassName}>
+          <div className={config.gridClassName}>
             {pageItems.map((item) => (
               <QuotaCard
                 key={item.name}
@@ -363,6 +415,7 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
               totalItems={filteredFiles.length}
               onPrev={goToPrev}
               onNext={goToNext}
+              onPageChange={goToPage}
             />
           )}
         </>

@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import { Modal } from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { AuthFileModelItem } from '@/features/authFiles/constants';
 import { isModelExcluded } from '@/features/authFiles/constants';
@@ -27,11 +26,6 @@ export function AuthFileModelsModal(props: AuthFileModelsModalProps) {
       open={open}
       onClose={onClose}
       title={t('auth_files.models_title', { defaultValue: '支持的模型' }) + ` - ${fileName}`}
-      footer={
-        <Button variant="secondary" onClick={onClose}>
-          {t('common.close')}
-        </Button>
-      }
     >
       {loading ? (
         <div className={styles.hint}>

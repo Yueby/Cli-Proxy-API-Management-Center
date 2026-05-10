@@ -848,6 +848,7 @@ export function AuthFilesPage() {
                 totalItems={sorted.length}
                 onPrev={() => setPage(Math.max(1, currentPage - 1))}
                 onNext={() => setPage(Math.min(totalPages, currentPage + 1))}
+                onPageChange={(p) => setPage(p)}
                 className={styles.pagination}
               />
             )}

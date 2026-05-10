@@ -131,11 +131,6 @@ export function SettingsAliasModal({
       onClose={onClose}
       title={t('oauth_model_alias.diagram_settings_title', { alias: alias ?? '' })}
       width={720}
-      footer={
-        <Button variant="secondary" onClick={onClose}>
-          {t('common.close')}
-        </Button>
-      }
     >
       {alias ? (
         (() => {
@@ -214,11 +209,6 @@ export function SettingsSourceModal({
       onClose={onClose}
       title={t('oauth_model_alias.diagram_settings_source_title')}
       width={720}
-      footer={
-        <Button variant="secondary" onClick={onClose}>
-          {t('common.close')}
-        </Button>
-      }
     >
       {source ? (
         source.aliases.length === 0 ? (
