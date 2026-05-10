@@ -1,3 +1,5 @@
+@use '../styles/variables' as *;
+
 .content {
   width: 100%;
   max-width: 960px;
@@ -52,7 +54,7 @@
 
 .ampcodeUpstreamMappingCard {
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: $radius-lg;
   background: var(--bg-secondary);
   padding: 12px;
   display: flex;

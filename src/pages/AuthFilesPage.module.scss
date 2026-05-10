@@ -60,7 +60,7 @@
   height: 24px;
   min-width: 24px;
   padding: 0 8px;
-  border-radius: 999px;
+  border-radius: $radius-full;
   font-size: 13px;
   font-weight: 600;
   color: var(--count-badge-text);
@@ -91,7 +91,7 @@
   flex-direction: column;
   gap: 10px;
   padding: 12px 14px;
-  border-radius: 10px;
+  border-radius: $radius-lg;
   border: 1px solid color-mix(in srgb, var(--border-color) 60%, transparent);
   background: color-mix(in srgb, var(--bg-secondary) 60%, transparent);
 
@@ -139,7 +139,7 @@
   align-items: center;
   gap: 8px;
   padding: 7px 12px 7px 8px;
-  border-radius: 10px;
+  border-radius: $radius-lg;
   font-size: 13px;
   font-weight: 600;
   line-height: 1.2;
@@ -184,7 +184,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: $radius-md;
   border: 1px solid color-mix(in srgb, var(--border-color) 50%, transparent);
   background: color-mix(in srgb, var(--bg-tertiary) 60%, transparent);
 }
@@ -215,7 +215,7 @@
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
-  border-radius: 6px;
+  border-radius: $radius-md;
   background: color-mix(in srgb, var(--filter-color) 12%, transparent);
   color: var(--text-tertiary);
   font-size: 11px;
@@ -233,7 +233,7 @@
 
 .filterControlsPanel {
   padding: 14px;
-  border-radius: 10px;
+  border-radius: $radius-lg;
   border: 1px solid color-mix(in srgb, var(--border-color) 60%, transparent);
   background: color-mix(in srgb, var(--bg-secondary) 50%, transparent);
 }
@@ -300,7 +300,7 @@
   align-items: center;
   min-height: 40px;
   padding: 0 2px;
-  border-radius: 8px;
+  border-radius: $radius-md;
   border: 1px solid color-mix(in srgb, var(--border-color) 60%, transparent);
   background: color-mix(in srgb, var(--bg-secondary) 50%, transparent);
 }
@@ -513,7 +513,7 @@
 .quotaBar {
   height: 8px;
   background-color: var(--bg-tertiary);
-  border-radius: 999px;
+  border-radius: $radius-full;
   overflow: hidden;
 }
 
@@ -628,7 +628,7 @@
   font-weight: 700;
   font-size: 12px;
   padding: 2px 8px;
-  border-radius: 6px;
+  border-radius: $radius-md;
   background: rgba(217, 165, 22, 0.15);
   border: 1px solid rgba(217, 165, 22, 0.3);
   color: #e0aa14;
@@ -647,7 +647,7 @@
   overflow: hidden;
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: $radius-lg;
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -696,7 +696,7 @@
 
 .fileCardCompact {
   padding: 12px;
-  border-radius: 10px;
+  border-radius: $radius-lg;
 
   .fileCardMain {
     gap: 8px;
@@ -713,7 +713,7 @@
   .providerAvatar {
     width: 34px;
     height: 34px;
-    border-radius: 8px;
+    border-radius: $radius-md;
   }
 
   .providerAvatarImage {
@@ -747,7 +747,7 @@
 
   .healthStatusMessage {
     padding: 6px 8px;
-    border-radius: 8px;
+    border-radius: $radius-md;
     font-size: 11px;
   }
 
@@ -806,14 +806,14 @@
   .cardUtilityActions {
     gap: 2px;
     padding: 2px;
-    border-radius: 6px;
+    border-radius: $radius-md;
   }
 
   .iconButton:global(.btn.btn-sm) {
     width: 28px;
     height: 28px;
     min-width: 28px;
-    border-radius: 6px;
+    border-radius: $radius-md;
   }
 
   .statusToggle {
@@ -858,7 +858,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: $radius-lg;
   border: 1px solid color-mix(in srgb, var(--border-color) 60%, transparent);
 }
 
@@ -893,7 +893,7 @@
   display: inline-flex;
   align-items: center;
   padding: 3px 8px;
-  border-radius: 6px;
+  border-radius: $radius-md;
   font-size: 11px;
   font-weight: 600;
   line-height: 1;
@@ -906,7 +906,7 @@
   display: inline-flex;
   align-items: center;
   padding: 3px 8px;
-  border-radius: 6px;
+  border-radius: $radius-md;
   font-size: 10px;
   font-weight: 700;
   line-height: 1;
@@ -1045,7 +1045,7 @@
   color: var(--warning-text);
   background-color: color-mix(in srgb, var(--warning-bg) 60%, transparent);
   border: 1px solid color-mix(in srgb, var(--warning-border) 60%, transparent);
-  border-radius: 8px;
+  border-radius: $radius-md;
   padding: 8px 10px;
   word-break: break-word;
 }
@@ -1095,7 +1095,7 @@
   gap: 5px;
   min-width: 0;
   padding: 4px 10px;
-  border-radius: 999px;
+  border-radius: $radius-full;
   border: none;
 }
 
@@ -1202,7 +1202,7 @@
 .statusBlock {
   width: 100%;
   height: 6px;
-  border-radius: 999px;
+  border-radius: $radius-full;
   transition:
     transform 0.15s ease,
     opacity 0.15s ease;
@@ -1225,7 +1225,7 @@
   transform: translateX(-50%);
   background: var(--bg-quinary, var(--bg-primary, #fff));
   border: 1px solid var(--border-secondary, #e5e7eb);
-  border-radius: 10px;
+  border-radius: $radius-lg;
   padding: 8px 10px;
   font-size: 11px;
   line-height: 1.5;
@@ -1313,7 +1313,7 @@
   font-weight: 700;
   white-space: nowrap;
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: $radius-full;
   background: var(--bg-tertiary);
   flex-shrink: 0;
 }
@@ -1464,7 +1464,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: $radius-md;
   background: color-mix(in srgb, var(--primary-color) 16%, transparent);
 }
 
@@ -1477,7 +1477,7 @@
   align-items: center;
   gap: 3px;
   padding: 2px;
-  border-radius: 8px;
+  border-radius: $radius-md;
   background: color-mix(in srgb, var(--bg-tertiary) 50%, transparent);
 }
 
@@ -1501,7 +1501,7 @@
   min-width: 32px;
   padding: 0;
   box-sizing: border-box;
-  border-radius: 8px;
+  border-radius: $radius-md;
   gap: 0;
 }
 
@@ -1920,7 +1920,7 @@
   color: var(--text-tertiary);
   background-color: var(--bg-tertiary);
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: $radius-lg;
   flex-shrink: 0;
   margin-left: auto;
 }
@@ -1945,7 +1945,7 @@
   color: var(--danger-color);
   background-color: rgba($error-color, 0.1);
   padding: 2px 6px;
-  border-radius: 8px;
+  border-radius: $radius-md;
   border: 1px solid var(--danger-color);
   flex-shrink: 0;
 }
