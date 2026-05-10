@@ -7,7 +7,7 @@
   gap: $spacing-xl;
 
   :global(.form-group) {
-    gap: 8px;
+    gap: 6px;
     margin-bottom: 0;
   }
 
@@ -18,23 +18,6 @@
     letter-spacing: 0.04em;
   }
 
-  :global(.input) {
-    min-height: 48px;
-    border-radius: 16px;
-    background: color-mix(in srgb, var(--bg-primary) 92%, transparent);
-    border-color: color-mix(in srgb, var(--border-color) 84%, transparent);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  }
-
-  :global(.input:focus) {
-    background: var(--bg-primary);
-    border-color: var(--primary-color);
-  }
-
-  :global(textarea.input) {
-    min-height: 120px;
-  }
-
   :global(.hint) {
     color: var(--text-secondary);
     font-size: 12px;
@@ -42,19 +25,17 @@
   }
 
   :global(.error-box) {
-    border-radius: 14px;
+    border-radius: $radius-md;
   }
 
   :global(.item-list) {
-    gap: 12px;
-    margin-top: 10px;
+    gap: $spacing-sm;
+    margin-top: $spacing-sm;
   }
 
   :global(.item-row) {
-    border-radius: 18px;
-    padding: 14px 16px;
-    background: color-mix(in srgb, var(--bg-primary) 78%, transparent);
-    border-color: color-mix(in srgb, var(--border-color) 86%, transparent);
+    border-radius: $radius-lg;
+    padding: $spacing-md;
   }
 
   :global(.item-row .item-meta) {
@@ -63,12 +44,6 @@
 
   :global(.item-row .item-actions) {
     flex-wrap: wrap;
-  }
-
-  :global(.pill) {
-    background: color-mix(in srgb, var(--bg-secondary) 84%, transparent);
-    border: 1px solid color-mix(in srgb, var(--border-color) 84%, transparent);
-    color: var(--text-secondary);
   }
 }
 
@@ -128,70 +103,39 @@
 }
 
 .overview {
-  position: relative;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  border-radius: 30px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 78%, transparent);
-  background:
-    radial-gradient(
-      circle at top right,
-      color-mix(in srgb, var(--primary-color) 12%, transparent),
-      transparent 36%
-    ),
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--bg-primary) 94%, transparent),
-      color-mix(in srgb, var(--bg-secondary) 96%, transparent)
-    );
-  padding: clamp(22px, 3vw, 30px);
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0 auto auto 0;
-    width: min(220px, 44vw);
-    height: min(220px, 44vw);
-    background: radial-gradient(
-      circle,
-      color-mix(in srgb, var(--primary-color) 16%, transparent),
-      transparent 72%
-    );
-    opacity: 0.6;
-    pointer-events: none;
-  }
+  gap: $spacing-md;
+  padding: $spacing-lg;
+  border-radius: $radius-lg;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
 }
 
 .overviewHeader {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  min-width: 0;
+  gap: $spacing-sm;
 }
 
 .overviewMeta {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: $spacing-sm;
 }
 
 .overviewPill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 34px;
-  padding: 0 14px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 84%, transparent);
-  background: color-mix(in srgb, var(--bg-primary) 82%, transparent);
+  height: 28px;
+  padding: 0 12px;
+  border-radius: $radius-full;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
   color: var(--text-secondary);
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-weight: 600;
 }
 
 .overviewPillWarning {
@@ -201,10 +145,9 @@
 }
 
 .overviewFocusList {
-  position: relative;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: $spacing-sm;
 
   @media (max-width: 1200px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -218,61 +161,57 @@
 .overviewFocusLink {
   @include button-reset;
   display: flex;
-  align-items: flex-start;
-  gap: 14px;
+  align-items: center;
+  gap: $spacing-sm;
   width: 100%;
-  padding: 14px 16px;
-  border-radius: 20px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 70%, transparent);
-  background: color-mix(in srgb, var(--bg-primary) 74%, transparent);
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-md;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
   text-align: left;
-  transition:
-    transform 0.18s ease,
-    border-color 0.18s ease,
-    background-color 0.18s ease;
+  transition: border-color $transition-fast, background-color $transition-fast;
 
   &:hover {
-    transform: translateY(-1px);
-    border-color: color-mix(in srgb, var(--primary-color) 26%, var(--border-color));
-    background: color-mix(in srgb, var(--bg-primary) 92%, transparent);
+    border-color: var(--border-hover);
+    background: var(--bg-tertiary);
   }
 }
 
 .overviewFocusLinkActive {
-  border-color: color-mix(in srgb, var(--primary-color) 28%, var(--border-color));
-  background: color-mix(in srgb, var(--bg-primary) 92%, transparent);
+  border-color: var(--primary-color);
+  background: var(--bg-tertiary);
 }
 
 .focusIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--primary-color) 10%, var(--bg-secondary));
-  color: var(--primary-hover);
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-md;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
   flex: 0 0 auto;
 }
 
 .focusCopy {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   min-width: 0;
 }
 
 .focusTitle {
   color: var(--text-primary);
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .focusDescription {
-  color: var(--text-secondary);
-  font-size: 13px;
-  line-height: 1.55;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .workspace {
