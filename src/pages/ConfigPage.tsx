@@ -5,6 +5,7 @@ import type { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { parse as parseYaml, parseDocument } from 'yaml';
 import { usePageTransitionLayer } from '@/components/common/PageTransitionLayer';
 import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import {
@@ -514,20 +515,22 @@ export function ConfigPage() {
         description={pageDescription}
       />
 
-      <div className={styles.headerControls}>
-        <SegmentedControl
-          options={[
-            { value: 'visual', label: t('config_management.tabs.visual', { defaultValue: '可视化编辑' }) },
-            { value: 'source', label: t('config_management.tabs.source', { defaultValue: '源代码编辑' }) },
-          ]}
-          value={activeTab}
-          onChange={(tab) => handleTabChange(tab as ConfigEditorTab)}
-          disabled={saving || loading}
-        />
-        <div className={`${styles.statusBadge} ${getStatusClass()}`}>{getStatusText()}</div>
-      </div>
-
-      <div className={styles.workspaceShell}>
+      <Card
+        title={
+          <SegmentedControl
+            options={[
+              { value: 'visual', label: t('config_management.tabs.visual', { defaultValue: '可视化编辑' }) },
+              { value: 'source', label: t('config_management.tabs.source', { defaultValue: '源代码编辑' }) },
+            ]}
+            value={activeTab}
+            onChange={(tab) => handleTabChange(tab as ConfigEditorTab)}
+            disabled={saving || loading}
+          />
+        }
+        extra={
+          <div className={`${styles.statusBadge} ${getStatusClass()}`}>{getStatusText()}</div>
+        }
+      >
         <div className={styles.content}>
           {error && <div className="error-box">{error}</div>}
           {!error && visualParseError && (
@@ -623,7 +626,7 @@ export function ConfigPage() {
             </div>
           )}
         </div>
-      </div>
+      </Card>
 
       {shouldRenderFloatingActions && typeof document !== 'undefined'
         ? createPortal(floatingActions, document.body)
