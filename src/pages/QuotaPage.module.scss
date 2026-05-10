@@ -81,9 +81,9 @@
 }
 
 .pageSizeSelect {
-  padding: 0 14px;
+  padding: 0 12px;
   border: 1px solid var(--border-color);
-  border-radius: $radius-full;
+  border-radius: $radius-md;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   font-size: 14px;
@@ -98,9 +98,9 @@
 }
 
 .statsInfo {
-  padding: 0 14px;
+  padding: 0 12px;
   background-color: var(--bg-secondary);
-  border-radius: $radius-full;
+  border-radius: $radius-md;
   font-size: 13px;
   color: var(--text-secondary);
   white-space: nowrap;

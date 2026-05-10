@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { IconPencil } from '@/components/ui/icons';
 import iconAmp from '@/assets/icons/amp.svg';
 import type { AmpcodeConfig } from '@/types';
 import { maskApiKey } from '@/utils/format';
@@ -38,8 +39,10 @@ export function AmpcodeSection({
             size="sm"
             onClick={onEdit}
             disabled={disableControls || loading || isSwitching}
+            title={t('common.edit')}
+            aria-label={t('common.edit')}
           >
-            {t('common.edit')}
+            <IconPencil size={16} />
           </Button>
         }
       >

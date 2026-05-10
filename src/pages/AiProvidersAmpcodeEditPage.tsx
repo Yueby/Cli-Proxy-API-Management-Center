@@ -21,7 +21,7 @@ import {
 } from '@/components/providers/utils';
 import type { AmpcodeFormState } from '@/components/providers';
 import layoutStyles from './AiProvidersEditLayout.module.scss';
-import { IconTrash2 } from '@/components/ui/icons';
+import { IconTrash2, IconChevronLeft, IconCheck } from '@/components/ui/icons';
 
 
 type LocationState = { fromAiProviders?: boolean } | null;
@@ -362,7 +362,7 @@ export function AiProvidersAmpcodeEditPage() {
             onClick={handleBack}
             className={layoutStyles.floatingBackButton}
           >
-            {t('common.back')}
+            <IconChevronLeft size={16} />
           </Button>
           <Button
             size="sm"
@@ -371,7 +371,7 @@ export function AiProvidersAmpcodeEditPage() {
             disabled={!canSave}
             className={layoutStyles.floatingSaveButton}
           >
-            {t('common.save')}
+            <IconCheck size={16} />
           </Button>
         </div>
       }
