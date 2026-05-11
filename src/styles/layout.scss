@@ -296,7 +296,9 @@
   overflow-y: auto;
 
   &.content-logs {
-    overflow: hidden;
+    @media (max-width: $breakpoint-mobile) {
+      overflow-y: auto;
+    }
   }
 }
 
@@ -308,12 +310,16 @@
   padding: var(--content-padding);
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
+  gap: $spacing-md;
 
   &.main-content-logs {
     flex: 1 1 auto;
     min-height: 0;
-    overflow: hidden;
+
+    @media (max-width: $breakpoint-mobile) {
+      min-height: auto;
+      flex: 1 0 auto;
+    }
   }
 }
 
@@ -372,7 +378,7 @@
     height: 44px;
     padding: 0 $spacing-md;
     font-size: 15px;
-    border-radius: $radius-lg;
+    border-radius: $radius-md;
   }
 
   .mobile-menu-btn {

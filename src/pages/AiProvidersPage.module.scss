@@ -1,10 +1,13 @@
 @use '../styles/variables' as *;
 @use '../styles/mixins' as *;
 
-$openai-toolbar-control-height: 34px;
+$openai-toolbar-control-height: 30px;
 
 .container {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
 }
 
 .cardTitle {
@@ -21,7 +24,7 @@ $openai-toolbar-control-height: 34px;
 .content {
   display: flex;
   flex-direction: column;
-  gap: $spacing-xl;
+  gap: $spacing-md;
   padding-bottom: calc(
     var(--provider-nav-height, 60px) + 12px + env(safe-area-inset-bottom) + #{$spacing-md}
   );
@@ -49,8 +52,8 @@ $openai-toolbar-control-height: 34px;
 
 .openaiProviderList {
   display: grid;
-  gap: $spacing-md;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 350px), 1fr));
+  gap: $spacing-sm;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
 
   @include mobile {
     grid-template-columns: 1fr;
@@ -60,8 +63,8 @@ $openai-toolbar-control-height: 34px;
 // Unified provider grid layout - shared by all provider sections
 .providerGrid {
   display: grid;
-  gap: $spacing-md;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 350px), 1fr));
+  gap: $spacing-sm;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
 
   @include mobile {
     grid-template-columns: 1fr;
@@ -71,44 +74,42 @@ $openai-toolbar-control-height: 34px;
 .providerCard {
   position: relative;
   border: 1px solid var(--border-color);
-  border-radius: $radius-lg;
-  padding: $spacing-md $spacing-lg;
+  border-radius: $radius-md;
+  padding: $spacing-sm $spacing-md;
   background: var(--bg-primary);
-  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: $spacing-sm;
+  gap: $spacing-xs;
   min-height: 0;
   min-width: 0;
-  transition: border-color $transition-fast, box-shadow $transition-fast;
+  transition: border-color $transition-fast;
 
   &:hover {
-    border-color: color-mix(in srgb, var(--primary-color) 28%, var(--border-color));
-    box-shadow: $shadow-md;
+    border-color: color-mix(in srgb, var(--primary-color) 22%, var(--border-color));
   }
 }
 
 .providerCardMeta {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   flex: 1;
   min-width: 0;
 }
 
 .providerCardActions {
   position: absolute;
-  top: $spacing-sm;
-  right: $spacing-sm;
+  top: 6px;
+  right: 6px;
   display: flex;
   align-items: center;
   gap: 2px;
 
   :global(.btn) {
-    width: 30px;
-    height: 30px;
-    min-width: 30px;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
     padding: 0;
     border-radius: $radius-md;
     color: var(--text-tertiary);
@@ -429,7 +430,7 @@ $openai-toolbar-control-height: 34px;
   gap: $spacing-sm;
   width: 100%;
   padding: 8px;
-  border-radius: -md;
+  border-radius: $radius-md;
   cursor: pointer;
   transition: background 0.15s ease;
 
@@ -901,7 +902,7 @@ $openai-toolbar-control-height: 34px;
   transform: translateX(-50%);
   background: var(--bg-primary, #fff);
   border: 1px solid var(--border-secondary, #e5e7eb);
-  border-radius: -md;
+  border-radius: $radius-md;
   padding: 6px 10px;
   font-size: 11px;
   line-height: 1.5;

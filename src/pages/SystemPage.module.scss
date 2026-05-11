@@ -1,11 +1,16 @@
+@use '../styles/variables' as *;
+
 .container {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
 }
 
 .content {
   display: flex;
   flex-direction: column;
-  gap: $spacing-xl;
+  gap: $spacing-md;
 }
 
 .aboutCard {

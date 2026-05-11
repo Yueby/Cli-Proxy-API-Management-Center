@@ -4,13 +4,13 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
+  gap: $spacing-md;
 }
 
 .pageHeader {
   display: flex;
   flex-direction: column;
-  gap: $spacing-sm;
+  gap: $spacing-xs;
 }
 
 .pageTitle {
@@ -88,7 +88,7 @@
   color: var(--text-primary);
   font-size: 13px;
   cursor: text;
-  height: 34px;
+  height: 30px;
   width: 72px;
   box-sizing: border-box;
 
@@ -109,7 +109,7 @@
   font-size: 13px;
   color: var(--text-secondary);
   white-space: nowrap;
-  height: 34px;
+  height: 30px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -211,7 +211,7 @@
 }
 
 .searchInput:global(.input) {
-  height: 34px;
+  height: 30px;
   width: 180px;
   padding-right: 32px;
   font-size: 13px;

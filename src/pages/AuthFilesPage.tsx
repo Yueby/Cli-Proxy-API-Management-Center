@@ -20,7 +20,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { IconFilterAll, IconRefreshCw, IconTrash2, IconUpload } from '@/components/ui/icons';
+import { IconDownload, IconFilterAll, IconRefreshCw, IconTrash2, IconUpload } from '@/components/ui/icons';
 import { Pagination } from '@/components/ui/Pagination';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
@@ -947,8 +947,10 @@ export function AuthFilesPage() {
                     size="sm"
                     onClick={() => void batchDownload(selectedNames)}
                     disabled={disableControls || selectedNames.length === 0}
+                    title={t('auth_files.batch_download')}
+                    aria-label={t('auth_files.batch_download')}
                   >
-                    {t('auth_files.batch_download')}
+                    <IconDownload size={16} />
                   </Button>
                   <Button
                     size="sm"

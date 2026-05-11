@@ -3,7 +3,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
+  gap: $spacing-md;
   min-height: 0;
 }
 
@@ -79,7 +79,7 @@
 .content {
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
+  gap: $spacing-md;
 }
 
 .contentWithFloatingAction {
@@ -112,6 +112,10 @@
   -webkit-backdrop-filter: var(--glass-backdrop-filter);
   border: 1px solid var(--glass-border);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+
+  :global(.btn) {
+    border-radius: $radius-full;
+  }
 }
 
 :global([data-theme='dark']) {

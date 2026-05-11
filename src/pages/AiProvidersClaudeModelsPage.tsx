@@ -13,7 +13,7 @@ import { buildHeaderObject } from '@/utils/headers';
 import type { ClaudeEditOutletContext } from './AiProvidersClaudeEditLayout';
 import styles from './AiProvidersPage.module.scss';
 import layoutStyles from './AiProvidersEditLayout.module.scss';
-import { IconChevronLeft } from '@/components/ui/icons';
+import { IconCheck, IconChevronLeft } from '@/components/ui/icons';
 
 
 const getErrorMessage = (err: unknown) => {
@@ -219,8 +219,10 @@ export function AiProvidersClaudeModelsPage() {
             onClick={handleApply}
             disabled={!canApply}
             className={layoutStyles.floatingSaveButton}
+            title={t('ai_providers.claude_models_fetch_apply')}
+            aria-label={t('ai_providers.claude_models_fetch_apply')}
           >
-            {t('ai_providers.claude_models_fetch_apply')}
+            <IconCheck size={16} />
           </Button>
         </div>
       }

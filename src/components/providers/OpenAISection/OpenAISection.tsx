@@ -325,6 +325,13 @@ export function OpenAISection({
         break;
     }
 
+    // Always push disabled providers to the end
+    sorted.sort((a, b) => {
+      const aDisabled = a.config.disabled === true ? 1 : 0;
+      const bDisabled = b.config.disabled === true ? 1 : 0;
+      return aDisabled - bDisabled;
+    });
+
     return sorted;
   }, [configs, sortOption, sortDirection, usageByProvider, selectedModels]);
 

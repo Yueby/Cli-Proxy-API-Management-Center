@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ModelMappingDiagram, type ModelMappingDiagramRef } from '@/components/modelAlias';
-import { IconChevronUp } from '@/components/ui/icons';
+import { IconChevronUp, IconPencil, IconPlus, IconTrash2 } from '@/components/ui/icons';
 import type { OAuthModelAliasEntry } from '@/types';
 import type { AuthFileModelItem } from '@/features/authFiles/constants';
 import styles from '@/pages/AuthFilesPage.module.scss';
@@ -68,8 +68,10 @@ export function OAuthModelAliasCard(props: OAuthModelAliasCardProps) {
             size="sm"
             onClick={onAdd}
             disabled={disableControls || modelAliasError === 'unsupported'}
+            title={t('oauth_model_alias.add')}
+            aria-label={t('oauth_model_alias.add')}
           >
-            {t('oauth_model_alias.add')}
+            <IconPlus size={16} />
           </Button>
         </div>
       }
@@ -127,11 +129,11 @@ export function OAuthModelAliasCard(props: OAuthModelAliasCardProps) {
                 </div>
               </div>
               <div className={styles.excludedActions}>
-                <Button variant="secondary" size="sm" onClick={() => onEditProvider(provider)}>
-                  {t('common.edit')}
+                <Button variant="secondary" size="sm" onClick={() => onEditProvider(provider)} title={t('common.edit')} aria-label={t('common.edit')}>
+                  <IconPencil size={15} />
                 </Button>
-                <Button variant="danger" size="sm" onClick={() => onDeleteProvider(provider)}>
-                  {t('oauth_model_alias.delete')}
+                <Button variant="danger" size="sm" onClick={() => onDeleteProvider(provider)} title={t('oauth_model_alias.delete')} aria-label={t('oauth_model_alias.delete')}>
+                  <IconTrash2 size={15} />
                 </Button>
               </div>
             </div>

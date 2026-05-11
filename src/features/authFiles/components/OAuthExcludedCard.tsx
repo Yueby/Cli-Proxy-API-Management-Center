@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { IconPencil, IconPlus, IconTrash2 } from '@/components/ui/icons';
 import styles from '@/pages/AuthFilesPage.module.scss';
 
 type UnsupportedError = 'unsupported' | null;
@@ -23,8 +24,8 @@ export function OAuthExcludedCard(props: OAuthExcludedCardProps) {
     <Card
       title={t('oauth_excluded.title')}
       extra={
-        <Button size="sm" onClick={onAdd} disabled={disableControls || excludedError === 'unsupported'}>
-          {t('oauth_excluded.add')}
+        <Button size="sm" onClick={onAdd} disabled={disableControls || excludedError === 'unsupported'} title={t('oauth_excluded.add')} aria-label={t('oauth_excluded.add')}>
+          <IconPlus size={16} />
         </Button>
       }
     >
@@ -48,11 +49,11 @@ export function OAuthExcludedCard(props: OAuthExcludedCardProps) {
                 </div>
               </div>
               <div className={styles.excludedActions}>
-                <Button variant="secondary" size="sm" onClick={() => onEdit(provider)}>
-                  {t('common.edit')}
+                <Button variant="secondary" size="sm" onClick={() => onEdit(provider)} title={t('common.edit')} aria-label={t('common.edit')}>
+                  <IconPencil size={15} />
                 </Button>
-                <Button variant="danger" size="sm" onClick={() => onDelete(provider)}>
-                  {t('oauth_excluded.delete')}
+                <Button variant="danger" size="sm" onClick={() => onDelete(provider)} title={t('oauth_excluded.delete')} aria-label={t('oauth_excluded.delete')}>
+                  <IconTrash2 size={15} />
                 </Button>
               </div>
             </div>

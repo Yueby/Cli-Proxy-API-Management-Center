@@ -4,16 +4,11 @@ import { createPortal } from 'react-dom';
 import type { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { parse as parseYaml, parseDocument } from 'yaml';
 import { usePageTransitionLayer } from '@/components/common/PageTransitionLayer';
-import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import {
   IconCheck,
-  IconChevronDown,
-  IconChevronUp,
   IconRefreshCw,
-  IconSearch,
 } from '@/components/ui/icons';
 import { VisualConfigEditor } from '@/components/config/VisualConfigEditor';
 import { DiffModal } from '@/components/config/DiffModal';
@@ -75,12 +70,6 @@ export function ConfigPage() {
   const [mergedYaml, setMergedYaml] = useState('');
 
   // Search state
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<{ current: number; total: number }>({
-    current: 0,
-    total: 0,
-  });
-  const [lastSearchedQuery, setLastSearchedQuery] = useState('');
   const editorRef = useRef<ReactCodeMirrorRef | null>(null);
   const floatingActionsRef = useRef<HTMLDivElement>(null);
 
@@ -277,111 +266,6 @@ export function ConfigPage() {
     ]
   );
 
-  // Search functionality
-  const performSearch = useCallback((query: string, direction: 'next' | 'prev' = 'next') => {
-    if (!query || !editorRef.current?.view) return;
-
-    const view = editorRef.current.view;
-    const doc = view.state.doc.toString();
-    const matches: number[] = [];
-    const lowerQuery = query.toLowerCase();
-    const lowerDoc = doc.toLowerCase();
-
-    let pos = 0;
-    while (pos < lowerDoc.length) {
-      const index = lowerDoc.indexOf(lowerQuery, pos);
-      if (index === -1) break;
-      matches.push(index);
-      pos = index + 1;
-    }
-
-    if (matches.length === 0) {
-      setSearchResults({ current: 0, total: 0 });
-      return;
-    }
-
-    // Find current match based on cursor position
-    const selection = view.state.selection.main;
-    const cursorPos = direction === 'prev' ? selection.from : selection.to;
-    let currentIndex = 0;
-
-    if (direction === 'next') {
-      // Find next match after cursor
-      for (let i = 0; i < matches.length; i++) {
-        if (matches[i] > cursorPos) {
-          currentIndex = i;
-          break;
-        }
-        // If no match after cursor, wrap to first
-        if (i === matches.length - 1) {
-          currentIndex = 0;
-        }
-      }
-    } else {
-      // Find previous match before cursor
-      for (let i = matches.length - 1; i >= 0; i--) {
-        if (matches[i] < cursorPos) {
-          currentIndex = i;
-          break;
-        }
-        // If no match before cursor, wrap to last
-        if (i === 0) {
-          currentIndex = matches.length - 1;
-        }
-      }
-    }
-
-    const matchPos = matches[currentIndex];
-    setSearchResults({ current: currentIndex + 1, total: matches.length });
-
-    // Scroll to and select the match
-    view.dispatch({
-      selection: { anchor: matchPos, head: matchPos + query.length },
-      scrollIntoView: true,
-    });
-    view.focus();
-  }, []);
-
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchQuery(value);
-    // Do not auto-search on each keystroke. Clear previous results when query changes.
-    if (!value) {
-      setSearchResults({ current: 0, total: 0 });
-      setLastSearchedQuery('');
-    } else {
-      setSearchResults({ current: 0, total: 0 });
-    }
-  }, []);
-
-  const executeSearch = useCallback(
-    (direction: 'next' | 'prev' = 'next') => {
-      if (!searchQuery) return;
-      setLastSearchedQuery(searchQuery);
-      performSearch(searchQuery, direction);
-    },
-    [searchQuery, performSearch]
-  );
-
-  const handleSearchKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        executeSearch(e.shiftKey ? 'prev' : 'next');
-      }
-    },
-    [executeSearch]
-  );
-
-  const handlePrevMatch = useCallback(() => {
-    if (!lastSearchedQuery) return;
-    performSearch(lastSearchedQuery, 'prev');
-  }, [lastSearchedQuery, performSearch]);
-
-  const handleNextMatch = useCallback(() => {
-    if (!lastSearchedQuery) return;
-    performSearch(lastSearchedQuery, 'next');
-  }, [lastSearchedQuery, performSearch]);
-
   // Keep bottom floating actions from covering page content by syncing its height to a CSS variable.
   useLayoutEffect(() => {
     if (typeof window === 'undefined' || !shouldRenderFloatingActions) return;
@@ -549,68 +433,6 @@ export function ConfigPage() {
             />
           ) : (
             <div className={styles.sourceWorkspace}>
-              <div className={styles.sourceToolbar}>
-                <div className={styles.searchInputWrapper}>
-                  <Input
-                    value={searchQuery}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                    onKeyDown={handleSearchKeyDown}
-                    placeholder={t('config_management.search_placeholder', {
-                      defaultValue: '搜索配置内容...',
-                    })}
-                    disabled={disableControls || loading}
-                    className={styles.searchInput}
-                    rightElement={
-                      <div className={styles.searchRight}>
-                        {searchQuery && lastSearchedQuery === searchQuery && (
-                          <span className={styles.searchCount}>
-                            {searchResults.total > 0
-                              ? `${searchResults.current} / ${searchResults.total}`
-                              : t('config_management.search_no_results', {
-                                  defaultValue: '无结果',
-                                })}
-                          </span>
-                        )}
-                        <button
-                          type="button"
-                          className={styles.searchButton}
-                          onClick={() => executeSearch('next')}
-                          disabled={!searchQuery || disableControls || loading}
-                          title={t('config_management.search_button', { defaultValue: '搜索' })}
-                        >
-                          <IconSearch size={16} />
-                        </button>
-                      </div>
-                    }
-                  />
-                </div>
-
-                <div className={styles.searchActions}>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={handlePrevMatch}
-                    disabled={
-                      !searchQuery || lastSearchedQuery !== searchQuery || searchResults.total === 0
-                    }
-                    title={t('config_management.search_prev', { defaultValue: '上一个' })}
-                  >
-                    <IconChevronUp size={16} />
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={handleNextMatch}
-                    disabled={
-                      !searchQuery || lastSearchedQuery !== searchQuery || searchResults.total === 0
-                    }
-                    title={t('config_management.search_next', { defaultValue: '下一个' })}
-                  >
-                    <IconChevronDown size={16} />
-                  </Button>
-                </div>
-              </div>
-
               <div className={styles.editorWrapper}>
                 <Suspense fallback={null}>
                   <LazyConfigSourceEditor

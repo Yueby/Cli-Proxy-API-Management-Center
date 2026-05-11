@@ -6,7 +6,7 @@
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
+  gap: $spacing-md;
   padding-bottom: calc(
     var(--config-action-bar-height, 0px) + 16px + env(safe-area-inset-bottom) + #{$spacing-md}
   );
@@ -29,7 +29,7 @@
 .content {
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
+  gap: $spacing-md;
   min-height: 0;
 }
 
@@ -147,7 +147,7 @@
   flex: 0 0 auto;
   height: clamp(420px, 64vh, 980px);
   border: 1px solid var(--border-color);
-  border-radius: $radius-lg;
+  border-radius: $radius-md;
   overflow: hidden;
   background: var(--bg-primary);
 

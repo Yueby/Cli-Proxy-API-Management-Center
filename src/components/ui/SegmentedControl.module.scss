@@ -20,7 +20,7 @@
   justify-content: center;
   height: 28px;
   padding: 0 12px;
-  border-radius: $radius-sm;
+  border-radius: calc(#{$radius-md} - 3px);
   border: none;
   background: transparent;
   color: var(--text-secondary);

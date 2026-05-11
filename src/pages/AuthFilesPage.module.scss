@@ -4,7 +4,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
+  gap: $spacing-md;
   padding-bottom: calc(
     var(--auth-files-action-bar-height, 0px) + 16px + env(safe-area-inset-bottom)
   );
@@ -13,7 +13,7 @@
 .pageHeader {
   display: flex;
   flex-direction: column;
-  gap: $spacing-sm;
+  gap: $spacing-xs;
 }
 
 .pageTitle {
@@ -330,7 +330,7 @@
   color: var(--text-primary);
   font-size: 14px;
   cursor: text;
-  height: 40px;
+  height: 36px;
   box-sizing: border-box;
 
   &:focus {

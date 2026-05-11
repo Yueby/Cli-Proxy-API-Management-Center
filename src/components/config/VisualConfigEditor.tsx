@@ -196,6 +196,37 @@ export function VisualConfigEditor({
   const mobileNavButtonRefs = useRef<Partial<Record<VisualSectionId, HTMLButtonElement | null>>>(
     {}
   );
+  const [showMobileNav, setShowMobileNav] = useState(false);
+
+  // Show mobile nav only after scrolling past the page title
+  useEffect(() => {
+    if (!isMobile || !isCurrentLayer) return;
+    const workspace = workspaceRef.current;
+    if (!workspace) return;
+
+    // Find the scrollable ancestor
+    let scrollParent: HTMLElement | null = workspace.parentElement;
+    while (scrollParent) {
+      const style = getComputedStyle(scrollParent);
+      if (style.overflowY === 'auto' || style.overflowY === 'scroll') break;
+      scrollParent = scrollParent.parentElement;
+    }
+    if (!scrollParent) return;
+
+    const handleScroll = () => {
+      const rect = workspace.getBoundingClientRect();
+      const containerRect = scrollParent!.getBoundingClientRect();
+      // Show nav when workspace top scrolls above the container top (title is out of view)
+      setShowMobileNav(rect.top < containerRect.top);
+    };
+
+    scrollParent.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => {
+      scrollParent!.removeEventListener('scroll', handleScroll);
+    };
+  }, [isMobile, isCurrentLayer]);
 
   const isKeepaliveDisabled =
     values.streaming.keepaliveSeconds === '' || values.streaming.keepaliveSeconds === '0';
@@ -326,18 +357,53 @@ export function VisualConfigEditor({
     if (!isCurrentLayer) return undefined;
     if (typeof IntersectionObserver === 'undefined') return undefined;
 
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    const visibleSections = new Set<VisualSectionId>();
+
+    // Find the scrollable ancestor to use as observer root
+    const workspace = workspaceRef.current;
+    let scrollRoot: Element | null = null;
+    if (workspace) {
+      let parent: HTMLElement | null = workspace.parentElement;
+      while (parent) {
+        const style = getComputedStyle(parent);
+        if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
+          scrollRoot = parent;
+          break;
+        }
+        parent = parent.parentElement;
+      }
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
-        const visibleEntries = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((left, right) => right.intersectionRatio - left.intersectionRatio);
+        if (isJumpingRef.current) return;
 
-        if (visibleEntries.length === 0) return;
-        setActiveSectionId(visibleEntries[0].target.id as VisualSectionId);
+        for (const entry of entries) {
+          const id = entry.target.id as VisualSectionId;
+          if (entry.isIntersecting) {
+            visibleSections.add(id);
+          } else {
+            visibleSections.delete(id);
+          }
+        }
+
+        if (visibleSections.size === 0) return;
+
+        // Pick the first visible section in DOM order
+        const orderedIds = sections.map((s) => s.id);
+        const nextId = orderedIds.find((id) => visibleSections.has(id));
+        if (!nextId) return;
+
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          setActiveSectionId(nextId);
+        }, 60);
       },
       {
-        rootMargin: '-18% 0px -58% 0px',
-        threshold: [0.12, 0.3, 0.55],
+        root: scrollRoot,
+        rootMargin: '-10% 0px -60% 0px',
+        threshold: [0, 0.2],
       }
     );
 
@@ -346,7 +412,10 @@ export function VisualConfigEditor({
       if (element) observer.observe(element);
     }
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (debounceTimer) clearTimeout(debounceTimer);
+    };
   }, [isCurrentLayer, sections]);
 
   useEffect(() => {
@@ -370,11 +439,17 @@ export function VisualConfigEditor({
     });
   }, [activeSectionId, isCurrentLayer, isMobile]);
 
-  const [sidebarLeft, setSidebarLeft] = useState<number>(0);
+  const [sidebarLeft, setSidebarLeft] = useState<number | null>(null);
+  const isJumpingRef = useRef(false);
 
   const handleSectionJump = useCallback((sectionId: VisualSectionId) => {
     setActiveSectionId(sectionId);
+    isJumpingRef.current = true;
     sectionRefs.current[sectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Re-enable observer after scroll animation completes
+    setTimeout(() => {
+      isJumpingRef.current = false;
+    }, 600);
   }, []);
 
   // Track sidebar anchor position so the fixed sidebar rail aligns with the grid column.
@@ -394,10 +469,12 @@ export function VisualConfigEditor({
       typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updatePosition) : null;
     resizeObserver?.observe(anchor);
     window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, { passive: true });
 
     return () => {
       resizeObserver?.disconnect();
       window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition);
     };
   }, [isMobile]);
 
@@ -430,38 +507,42 @@ export function VisualConfigEditor({
     </div>
   );
 
+  const mobileNavContent = (
+    <div className={styles.mobileSectionNavFixed}>
+      <div
+        ref={mobileNavScrollerRef}
+        className={styles.mobileSectionNavScroller}
+      >
+        {sections.map((section) => (
+          <button
+            key={section.id}
+            ref={(node) => {
+              mobileNavButtonRefs.current[section.id] = node;
+            }}
+            type="button"
+            className={`${styles.mobileSectionNavButton} ${
+              activeSectionId === section.id ? styles.mobileSectionNavButtonActive : ''
+            }`}
+            onClick={() => handleSectionJump(section.id)}
+          >
+            <span className={styles.mobileSectionNavLabel}>{section.title}</span>
+            {section.errorCount > 0 ? (
+              <span className={styles.mobileSectionNavBadge} aria-hidden="true">
+                {section.errorCount}
+              </span>
+            ) : null}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <div className={styles.visualEditor}>
       <div ref={workspaceRef} className={styles.workspace}>
-        {isMobile ? (
-          <div className={styles.mobileSectionNav}>
-            <div
-              ref={mobileNavScrollerRef}
-              className={styles.mobileSectionNavScroller}
-            >
-              {sections.map((section) => (
-                <button
-                  key={section.id}
-                  ref={(node) => {
-                    mobileNavButtonRefs.current[section.id] = node;
-                  }}
-                  type="button"
-                  className={`${styles.mobileSectionNavButton} ${
-                    activeSectionId === section.id ? styles.mobileSectionNavButtonActive : ''
-                  }`}
-                  onClick={() => handleSectionJump(section.id)}
-                >
-                  <span className={styles.mobileSectionNavLabel}>{section.title}</span>
-                  {section.errorCount > 0 ? (
-                    <span className={styles.mobileSectionNavBadge} aria-hidden="true">
-                      {section.errorCount}
-                    </span>
-                  ) : null}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : null}
+        {isMobile && isCurrentLayer && showMobileNav && typeof document !== 'undefined'
+          ? createPortal(mobileNavContent, document.body)
+          : null}
 
         <aside ref={sidebarAnchorRef} className={styles.sidebar} aria-hidden="true">
           <div className={styles.sidebarPlaceholder} />
@@ -988,7 +1069,7 @@ export function VisualConfigEditor({
         </div>
       </div>
 
-      {!isMobile && isCurrentLayer && typeof document !== 'undefined'
+      {!isMobile && isCurrentLayer && typeof document !== 'undefined' && sidebarLeft !== null
         ? createPortal(
             <div className={styles.sidebarRail} style={{ left: `${sidebarLeft}px` }}>
               {navContent}

@@ -54,7 +54,15 @@ export function ProviderList<T>({
 
   return (
     <div className={listClassName ?? 'item-list'}>
-      {items.map((item, index) => {
+      {items
+        .map((item, index) => ({ item, index }))
+        .sort((a, b) => {
+          if (!getRowDisabled) return 0;
+          const aDisabled = getRowDisabled(a.item, a.index) ? 1 : 0;
+          const bDisabled = getRowDisabled(b.item, b.index) ? 1 : 0;
+          return aDisabled - bDisabled;
+        })
+        .map(({ item, index }) => {
         const rowDisabled = getRowDisabled ? getRowDisabled(item, index) : false;
         const rowClass = [
           rowClassName ?? 'item-row',
