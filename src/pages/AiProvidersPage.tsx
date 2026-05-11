@@ -406,6 +406,48 @@ export function AiProvidersPage() {
     });
   };
 
+  const importConfigs = useCallback(
+    async <T,>(
+      accept: string,
+      saveFn: (merged: T[]) => Promise<unknown>,
+      currentConfigs: T[],
+      setConfigs: (configs: T[]) => void,
+      cacheKey: Parameters<typeof updateConfigValue>[0],
+      providerLabel: string
+    ) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = accept;
+      input.onchange = async () => {
+        const file = input.files?.[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const parsed = JSON.parse(text);
+          const items: T[] = Array.isArray(parsed) ? parsed : [parsed];
+          if (items.length === 0) {
+            showNotification(t('notification.import_empty', { defaultValue: 'File is empty' }), 'warning');
+            return;
+          }
+          const merged = [...currentConfigs, ...items];
+          await saveFn(merged);
+          setConfigs(merged);
+          updateConfigValue(cacheKey, merged);
+          clearCache(cacheKey);
+          showNotification(
+            t('notification.import_success', { defaultValue: 'Imported {{count}} configs to {{provider}}', count: items.length, provider: providerLabel }),
+            'success'
+          );
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          showNotification(`${t('notification.import_failed', { defaultValue: 'Import failed' })}: ${message}`, 'error');
+        }
+      };
+      input.click();
+    },
+    [clearCache, showNotification, t, updateConfigValue]
+  );
+
   return (
     <div className={styles.container}>
       <PageHeader
@@ -426,6 +468,7 @@ export function AiProvidersPage() {
             onEdit={(index) => openEditor(`/ai-providers/gemini/${index}`)}
             onDelete={deleteGemini}
             onToggle={(index, enabled) => void setConfigEnabled('gemini', index, enabled)}
+            onImport={() => void importConfigs('.json', providersApi.saveGeminiKeys, geminiKeys, setGeminiKeys, 'gemini-api-key', 'Gemini')}
           />
         </div>
 
@@ -440,6 +483,7 @@ export function AiProvidersPage() {
             onEdit={(index) => openEditor(`/ai-providers/codex/${index}`)}
             onDelete={(index) => void deleteProviderEntry('codex', index)}
             onToggle={(index, enabled) => void setConfigEnabled('codex', index, enabled)}
+            onImport={() => void importConfigs('.json', providersApi.saveCodexConfigs, codexConfigs, setCodexConfigs, 'codex-api-key', 'Codex')}
           />
         </div>
 
@@ -454,6 +498,7 @@ export function AiProvidersPage() {
             onEdit={(index) => openEditor(`/ai-providers/claude/${index}`)}
             onDelete={(index) => void deleteProviderEntry('claude', index)}
             onToggle={(index, enabled) => void setConfigEnabled('claude', index, enabled)}
+            onImport={() => void importConfigs('.json', providersApi.saveClaudeConfigs, claudeConfigs, setClaudeConfigs, 'claude-api-key', 'Claude')}
           />
         </div>
 
@@ -468,6 +513,7 @@ export function AiProvidersPage() {
             onEdit={(index) => openEditor(`/ai-providers/vertex/${index}`)}
             onDelete={deleteVertex}
             onToggle={(index, enabled) => void setConfigEnabled('vertex', index, enabled)}
+            onImport={() => void importConfigs('.json', providersApi.saveVertexConfigs, vertexConfigs, setVertexConfigs, 'vertex-api-key', 'Vertex')}
           />
         </div>
 
@@ -493,6 +539,7 @@ export function AiProvidersPage() {
             onEdit={(index) => openEditor(`/ai-providers/openai/${index}`)}
             onDelete={deleteOpenai}
             onToggle={(index, enabled) => void setOpenAIProviderEnabled(index, enabled)}
+            onImport={() => void importConfigs('.json', providersApi.saveOpenAIProviders, openaiProviders, setOpenaiProviders, 'openai-compatibility', 'OpenAI')}
           />
         </div>
       </div>

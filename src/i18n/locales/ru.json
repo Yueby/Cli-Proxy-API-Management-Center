@@ -194,6 +194,8 @@
   "ai_providers": {
     "title": "Конфигурация AI-провайдеров",
     "description": "Управление API-ключами и настройками для Gemini, Codex, Claude, Vertex и OpenAI-совместимых провайдеров.",
+    "export_configs": "Экспорт",
+    "import_configs": "Импорт",
     "gemini_title": "API-ключи Gemini",
     "gemini_add_button": "Добавить ключ",
     "gemini_empty_title": "Ключи Gemini отсутствуют",

@@ -144,7 +144,8 @@ textarea {
   border: 1px solid var(--border-color);
   border-radius: $radius-lg;
   box-shadow: var(--shadow);
-  padding: $spacing-lg;
+  padding: 0;
+  overflow: hidden;
 }
 
 .card-header {
@@ -153,7 +154,11 @@ textarea {
   justify-content: space-between;
   gap: $spacing-sm;
   flex-wrap: wrap;
-  margin-bottom: $spacing-md;
+  padding: $spacing-md $spacing-lg;
+  position: sticky;
+  top: -1px;
+  z-index: 2;
+  background: var(--bg-primary);
 
   > * {
     min-width: 0;
@@ -166,6 +171,10 @@ textarea {
     font-weight: 700;
     color: var(--text-primary);
   }
+}
+
+.card-body {
+  padding: 0 $spacing-lg $spacing-lg;
 }
 
 .status-badge {

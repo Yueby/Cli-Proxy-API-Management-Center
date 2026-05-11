@@ -194,6 +194,8 @@
   "ai_providers": {
     "title": "AI 提供商配置",
     "description": "管理 Gemini、Codex、Claude、Vertex 及 OpenAI 兼容提供方的 API 密钥与配置。",
+    "export_configs": "导出配置",
+    "import_configs": "导入配置",
     "gemini_title": "Gemini API 密钥",
     "gemini_add_button": "添加密钥",
     "gemini_empty_title": "暂无Gemini密钥",

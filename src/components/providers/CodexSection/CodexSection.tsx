@@ -1,14 +1,12 @@
 import { Fragment, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
-import { IconPlus } from '@/components/ui/icons';
 import iconCodex from '@/assets/icons/codex.svg';
 import type { ProviderKeyConfig } from '@/types';
 import { maskApiKey } from '@/utils/format';
 import { statusBarDataFromRecentRequests } from '@/utils/recentRequests';
 import styles from '@/pages/AiProvidersPage.module.scss';
+import { ProviderCard } from '../ProviderCard';
 import { ProviderList } from '../ProviderList';
 import { ProviderStatusBar } from '../ProviderStatusBar';
 import { FieldRow, HeaderBadgeList, ModelTagList, ExcludedModelsList, StatsPills } from '../ProviderCardParts';
@@ -30,6 +28,7 @@ interface CodexSectionProps {
   onEdit: (index: number) => void;
   onDelete: (index: number) => void;
   onToggle: (index: number, enabled: boolean) => void;
+  onImport?: () => void;
 }
 
 export function CodexSection({
@@ -42,6 +41,7 @@ export function CodexSection({
   onEdit,
   onDelete,
   onToggle,
+  onImport,
 }: CodexSectionProps) {
   const { t } = useTranslation();
   const actionsDisabled = disableControls || loading || isSwitching;
@@ -66,18 +66,15 @@ export function CodexSection({
 
   return (
     <>
-      <Card
-        title={
-          <span className={styles.cardTitle}>
-            <img src={iconCodex} alt="" className={styles.cardTitleIcon} />
-            {t('ai_providers.codex_title')}
-          </span>
-        }
-        extra={
-          <Button size="sm" onClick={onAdd} disabled={actionsDisabled} title={t('ai_providers.codex_add_button')} aria-label={t('ai_providers.codex_add_button')}>
-            <IconPlus size={16} />
-          </Button>
-        }
+      <ProviderCard
+        icon={iconCodex}
+        title={t('ai_providers.codex_title')}
+        configs={configs}
+        exportFilename="codex-configs"
+        disabled={actionsDisabled}
+        onAdd={onAdd}
+        onImport={onImport}
+        addLabel={t('ai_providers.codex_add_button')}
       >
         <ProviderList<ProviderKeyConfig>
           items={configs}
@@ -132,7 +129,7 @@ export function CodexSection({
             );
           }}
         />
-      </Card>
+      </ProviderCard>
     </>
   );
 }

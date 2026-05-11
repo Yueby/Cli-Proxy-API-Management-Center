@@ -1,14 +1,12 @@
 import { Fragment, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
-import { IconPlus } from '@/components/ui/icons';
 import iconClaude from '@/assets/icons/claude.svg';
 import type { ProviderKeyConfig } from '@/types';
 import { maskApiKey } from '@/utils/format';
 import { statusBarDataFromRecentRequests } from '@/utils/recentRequests';
 import styles from '@/pages/AiProvidersPage.module.scss';
+import { ProviderCard } from '../ProviderCard';
 import { ProviderList } from '../ProviderList';
 import { ProviderStatusBar } from '../ProviderStatusBar';
 import { FieldRow, HeaderBadgeList, ModelTagList, ExcludedModelsList, StatsPills } from '../ProviderCardParts';
@@ -30,6 +28,7 @@ interface ClaudeSectionProps {
   onEdit: (index: number) => void;
   onDelete: (index: number) => void;
   onToggle: (index: number, enabled: boolean) => void;
+  onImport?: () => void;
 }
 
 export function ClaudeSection({
@@ -42,6 +41,7 @@ export function ClaudeSection({
   onEdit,
   onDelete,
   onToggle,
+  onImport,
 }: ClaudeSectionProps) {
   const { t } = useTranslation();
   const actionsDisabled = disableControls || loading || isSwitching;
@@ -66,18 +66,15 @@ export function ClaudeSection({
 
   return (
     <>
-      <Card
-        title={
-          <span className={styles.cardTitle}>
-            <img src={iconClaude} alt="" className={styles.cardTitleIcon} />
-            {t('ai_providers.claude_title')}
-          </span>
-        }
-        extra={
-          <Button size="sm" onClick={onAdd} disabled={actionsDisabled} title={t('ai_providers.claude_add_button')} aria-label={t('ai_providers.claude_add_button')}>
-            <IconPlus size={16} />
-          </Button>
-        }
+      <ProviderCard
+        icon={iconClaude}
+        title={t('ai_providers.claude_title')}
+        configs={configs}
+        exportFilename="claude-configs"
+        disabled={actionsDisabled}
+        onAdd={onAdd}
+        onImport={onImport}
+        addLabel={t('ai_providers.claude_add_button')}
       >
         <ProviderList<ProviderKeyConfig>
           items={configs}
@@ -143,7 +140,7 @@ export function ClaudeSection({
             );
           }}
         />
-      </Card>
+      </ProviderCard>
     </>
   );
 }

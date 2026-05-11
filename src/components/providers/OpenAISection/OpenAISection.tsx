@@ -11,16 +11,19 @@ import {
   IconCheck,
   IconChevronDown,
   IconChevronUp,
+  IconDownload,
   IconPencil,
   IconPlus,
   IconSlidersHorizontal,
   IconTrash2,
+  IconUpload,
   IconX,
 } from '@/components/ui/icons';
 import iconOpenaiLight from '@/assets/icons/openai-light.svg';
 import iconOpenaiDark from '@/assets/icons/openai-dark.svg';
 import type { OpenAIProviderConfig } from '@/types';
 import { maskApiKey } from '@/utils/format';
+import { downloadBlob } from '@/utils/download';
 import { statusBarDataFromRecentRequests } from '@/utils/recentRequests';
 import styles from '@/pages/AiProvidersPage.module.scss';
 import { ProviderStatusBar } from '../ProviderStatusBar';
@@ -57,6 +60,7 @@ interface OpenAISectionProps {
   onEdit: (index: number) => void;
   onDelete: (index: number) => void;
   onToggle: (index: number, enabled: boolean) => void;
+  onImport?: () => void;
 }
 
 interface IndexedOpenAIProvider {
@@ -83,6 +87,7 @@ export function OpenAISection({
   onEdit,
   onDelete,
   onToggle,
+  onImport,
 }: OpenAISectionProps) {
   const { t } = useTranslation();
   const pageTransitionLayer = usePageTransitionLayer();
@@ -511,6 +516,33 @@ export function OpenAISection({
           )}
         </div>
         {renderSortControls()}
+        {configs.length > 0 && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              const blob = new Blob([JSON.stringify(configs, null, 2)], { type: 'application/json' });
+              downloadBlob({ filename: 'openai-configs.json', blob });
+            }}
+            disabled={actionsDisabled}
+            title={t('ai_providers.export_configs')}
+            aria-label={t('ai_providers.export_configs')}
+          >
+            <IconUpload size={16} />
+          </Button>
+        )}
+        {onImport && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={onImport}
+            disabled={actionsDisabled}
+            title={t('ai_providers.import_configs')}
+            aria-label={t('ai_providers.import_configs')}
+          >
+            <IconDownload size={16} />
+          </Button>
+        )}
         <Button
           size="sm"
           onClick={onAdd}
