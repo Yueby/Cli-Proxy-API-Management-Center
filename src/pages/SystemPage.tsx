@@ -28,6 +28,8 @@ import iconGlm from '@/assets/icons/glm.svg';
 import iconGrok from '@/assets/icons/grok.svg';
 import iconDeepseek from '@/assets/icons/deepseek.svg';
 import iconMinimax from '@/assets/icons/minimax.svg';
+import iconMimoLight from '@/assets/icons/mimo-light.svg';
+import iconMimoDark from '@/assets/icons/mimo-dark.svg';
 import { PageHeader } from '@/components/common/PageHeader';
 import styles from './SystemPage.module.scss';
 
@@ -41,6 +43,7 @@ const MODEL_CATEGORY_ICONS: Record<string, string | { light: string; dark: strin
   grok: iconGrok,
   deepseek: iconDeepseek,
   minimax: iconMinimax,
+  mimo: { light: iconMimoLight, dark: iconMimoDark },
 };
 
 const parseVersionSegments = (version?: string | null) => {
@@ -488,7 +491,7 @@ export function SystemPage() {
                   <div key={group.id} className="item-row">
                     <div className="item-meta">
                       <div className={styles.groupTitle}>
-                        {iconSrc && <img src={iconSrc} alt="" className={styles.groupIcon} />}
+                        {iconSrc && <img src={iconSrc} alt="" className={`${styles.groupIcon} ${group.id === 'mimo' ? styles.groupIconMimo : ''}`} />}
                         <span className="item-title">{group.label}</span>
                       </div>
                       <div className="item-subtitle">
