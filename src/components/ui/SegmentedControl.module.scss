@@ -21,7 +21,7 @@
   height: 28px;
   padding: 0 12px;
   border-radius: calc(#{$radius-md} - 3px);
-  border: none;
+  border: 2px solid transparent;
   background: transparent;
   color: var(--text-secondary);
   font-size: 13px;
@@ -44,10 +44,16 @@
 .segmentActive {
   color: var(--primary-contrast, #fff);
   background: var(--primary-color);
+  border-color: var(--primary-color);
 
   &:hover:not(:disabled) {
     color: var(--primary-contrast, #fff);
     background: var(--primary-hover);
+  }
+
+  &:focus-visible {
+    border-color: var(--primary-contrast, #fff);
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.38);
   }
 }
 

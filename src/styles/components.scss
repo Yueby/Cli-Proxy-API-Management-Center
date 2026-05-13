@@ -28,6 +28,11 @@
       background-color: var(--primary-hover);
       border-color: var(--primary-hover);
     }
+
+    &:focus-visible {
+      border-color: var(--primary-contrast, #fff);
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.38);
+    }
   }
 
   &.btn-secondary {
@@ -37,7 +42,7 @@
 
     &:hover {
       background-color: var(--bg-hover, var(--bg-tertiary));
-      border-color: var(--border-hover);
+      border-color: var(--primary-color);
     }
   }
 
@@ -60,6 +65,11 @@
     &:hover {
       background-color: color.adjust($error-color, $lightness: -5%);
     }
+
+    &:focus-visible {
+      border-color: #fff;
+      box-shadow: 0 0 0 3px rgba($error-color, 0.38);
+    }
   }
 
   &.btn-full {
@@ -75,6 +85,12 @@
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.18);
   }
 }
 
@@ -100,7 +116,12 @@ textarea {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
   box-sizing: border-box;
-  transition: border-color $transition-fast, box-shadow $transition-fast;
+  transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+
+  &:hover:not(:focus):not(:disabled) {
+    border-color: var(--primary-color);
+    background-color: var(--bg-tertiary);
+  }
 
   &:focus {
     outline: none;
@@ -175,6 +196,10 @@ textarea {
 
 .card-body {
   padding: 0 $spacing-lg $spacing-lg;
+
+  &:first-child {
+    padding-top: $spacing-lg;
+  }
 }
 
 .status-badge {
@@ -292,11 +317,11 @@ textarea {
     height: 30px;
     padding: 0;
     background: transparent;
-    border: none;
+    border: 2px solid transparent;
     color: var(--text-secondary);
     border-radius: $radius-md;
     cursor: pointer;
-    transition: color 0.15s ease, background-color 0.15s ease;
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 
     svg {
       display: block;
@@ -542,7 +567,7 @@ textarea {
 .modal-body {
   padding: $spacing-lg;
   overflow: auto;
-  max-height: 65vh;
+  max-height: 80vh;
 }
 
 .modal-footer {

@@ -301,7 +301,7 @@ export function MainLayout() {
           <img src={INLINE_LOGO_JPEG} alt="" className="header-brand-logo" />
         </a>
 
-        <nav className={`header-nav ${mobileNavOpen ? 'nav-open' : ''}`}>
+        <nav className="header-nav header-nav-desktop">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
@@ -377,6 +377,27 @@ export function MainLayout() {
           </Button>
         </div>
       </header>
+
+      <nav className={`header-nav-mobile ${mobileNavOpen ? 'nav-open' : ''}`}>
+        {navItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            end={item.path === '/'}
+          >
+            <span className="nav-icon">{item.icon}</span>
+            <span className="nav-label">{item.label}</span>
+          </NavLink>
+        ))}
+      </nav>
+      {mobileNavOpen && (
+        <div
+          className="mobile-nav-backdrop"
+          onClick={() => setMobileNavOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
       <div className={`content${isLogsPage ? ' content-logs' : ''}`} ref={contentRef}>
         <main className={`main-content${isLogsPage ? ' main-content-logs' : ''}`}>

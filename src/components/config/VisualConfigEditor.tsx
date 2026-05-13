@@ -15,6 +15,8 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import {
+  IconChevronLeft,
+  IconChevronRight,
   IconCode,
   IconDiamond,
   IconKey,
@@ -26,7 +28,6 @@ import {
   type IconProps,
 } from '@/components/ui/icons';
 import { ConfigSection } from '@/components/config/ConfigSection';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
 import type {
   PayloadFilterRule,
   PayloadParamValidationErrorCode,
@@ -179,7 +180,6 @@ export function VisualConfigEditor({
   const { t } = useTranslation();
   const pageTransitionLayer = usePageTransitionLayer();
   const isCurrentLayer = pageTransitionLayer ? pageTransitionLayer.isCurrentLayer : true;
-  const isMobile = useMediaQuery('(max-width: 768px)');
   const routingStrategyLabelId = useId();
   const routingStrategyHintId = `${routingStrategyLabelId}-hint`;
   const keepaliveInputId = useId();
@@ -190,43 +190,9 @@ export function VisualConfigEditor({
   const nonstreamKeepaliveErrorId = `${nonstreamKeepaliveInputId}-error`;
   const [activeSectionId, setActiveSectionId] = useState<VisualSectionId>('server');
   const workspaceRef = useRef<HTMLDivElement | null>(null);
-  const sidebarAnchorRef = useRef<HTMLElement | null>(null);
   const sectionRefs = useRef<Partial<Record<VisualSectionId, HTMLElement | null>>>({});
-  const mobileNavScrollerRef = useRef<HTMLDivElement | null>(null);
-  const mobileNavButtonRefs = useRef<Partial<Record<VisualSectionId, HTMLButtonElement | null>>>(
-    {}
-  );
-  const [showMobileNav, setShowMobileNav] = useState(false);
-
-  // Show mobile nav only after scrolling past the page title
-  useEffect(() => {
-    if (!isMobile || !isCurrentLayer) return;
-    const workspace = workspaceRef.current;
-    if (!workspace) return;
-
-    // Find the scrollable ancestor
-    let scrollParent: HTMLElement | null = workspace.parentElement;
-    while (scrollParent) {
-      const style = getComputedStyle(scrollParent);
-      if (style.overflowY === 'auto' || style.overflowY === 'scroll') break;
-      scrollParent = scrollParent.parentElement;
-    }
-    if (!scrollParent) return;
-
-    const handleScroll = () => {
-      const rect = workspace.getBoundingClientRect();
-      const containerRect = scrollParent!.getBoundingClientRect();
-      // Show nav when workspace top scrolls above the container top (title is out of view)
-      setShowMobileNav(rect.top < containerRect.top);
-    };
-
-    scrollParent.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-
-    return () => {
-      scrollParent!.removeEventListener('scroll', handleScroll);
-    };
-  }, [isMobile, isCurrentLayer]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isJumpingRef = useRef(false);
 
   const isKeepaliveDisabled =
     values.streaming.keepaliveSeconds === '' || values.streaming.keepaliveSeconds === '0';
@@ -418,65 +384,38 @@ export function VisualConfigEditor({
     };
   }, [isCurrentLayer, sections]);
 
-  useEffect(() => {
-    if (!isCurrentLayer || !isMobile) return;
-    const scroller = mobileNavScrollerRef.current;
-    const button = mobileNavButtonRefs.current[activeSectionId];
-    if (!scroller || !button) return;
-
-    const scrollerRect = scroller.getBoundingClientRect();
-    const buttonRect = button.getBoundingClientRect();
-    const centeredLeft =
-      scroller.scrollLeft +
-      (buttonRect.left - scrollerRect.left) -
-      (scroller.clientWidth - buttonRect.width) / 2;
-    const maxScrollLeft = Math.max(scroller.scrollWidth - scroller.clientWidth, 0);
-    const targetLeft = Math.min(Math.max(centeredLeft, 0), maxScrollLeft);
-
-    scroller.scrollTo({
-      left: targetLeft,
-      behavior: 'smooth',
-    });
-  }, [activeSectionId, isCurrentLayer, isMobile]);
-
-  const [sidebarLeft, setSidebarLeft] = useState<number | null>(null);
-  const isJumpingRef = useRef(false);
-
   const handleSectionJump = useCallback((sectionId: VisualSectionId) => {
     setActiveSectionId(sectionId);
     isJumpingRef.current = true;
     sectionRefs.current[sectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Close sidebar after jump on desktop
+    setSidebarOpen(false);
     // Re-enable observer after scroll animation completes
     setTimeout(() => {
       isJumpingRef.current = false;
     }, 600);
   }, []);
 
-  // Track sidebar anchor position so the fixed sidebar rail aligns with the grid column.
+  // Close sidebar on outside click
   useEffect(() => {
-    if (isMobile) return;
-    const anchor = sidebarAnchorRef.current;
-    if (!anchor) return;
-
-    const updatePosition = () => {
-      const rect = anchor.getBoundingClientRect();
-      setSidebarLeft(rect.left);
+    if (!sidebarOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as Node;
+      const sidebarEl = document.querySelector(`.${styles.sidebarDrawer}`);
+      const toggleEl = document.querySelector(`.${styles.sidebarToggle}`);
+      if (sidebarEl?.contains(target) || toggleEl?.contains(target)) return;
+      setSidebarOpen(false);
     };
-
-    updatePosition();
-
-    const resizeObserver =
-      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updatePosition) : null;
-    resizeObserver?.observe(anchor);
-    window.addEventListener('resize', updatePosition);
-    window.addEventListener('scroll', updatePosition, { passive: true });
-
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSidebarOpen(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleEscape);
     return () => {
-      resizeObserver?.disconnect();
-      window.removeEventListener('resize', updatePosition);
-      window.removeEventListener('scroll', updatePosition);
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', handleEscape);
     };
-  }, [isMobile]);
+  }, [sidebarOpen]);
 
   const navContent = (
     <div className={styles.navList}>
@@ -507,47 +446,9 @@ export function VisualConfigEditor({
     </div>
   );
 
-  const mobileNavContent = (
-    <div className={styles.mobileSectionNavFixed}>
-      <div
-        ref={mobileNavScrollerRef}
-        className={styles.mobileSectionNavScroller}
-      >
-        {sections.map((section) => (
-          <button
-            key={section.id}
-            ref={(node) => {
-              mobileNavButtonRefs.current[section.id] = node;
-            }}
-            type="button"
-            className={`${styles.mobileSectionNavButton} ${
-              activeSectionId === section.id ? styles.mobileSectionNavButtonActive : ''
-            }`}
-            onClick={() => handleSectionJump(section.id)}
-          >
-            <span className={styles.mobileSectionNavLabel}>{section.title}</span>
-            {section.errorCount > 0 ? (
-              <span className={styles.mobileSectionNavBadge} aria-hidden="true">
-                {section.errorCount}
-              </span>
-            ) : null}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
   return (
     <div className={styles.visualEditor}>
       <div ref={workspaceRef} className={styles.workspace}>
-        {isMobile && isCurrentLayer && showMobileNav && typeof document !== 'undefined'
-          ? createPortal(mobileNavContent, document.body)
-          : null}
-
-        <aside ref={sidebarAnchorRef} className={styles.sidebar} aria-hidden="true">
-          <div className={styles.sidebarPlaceholder} />
-        </aside>
-
         <div className={styles.sections}>
           <ConfigSection
             id="server"
@@ -1069,11 +970,23 @@ export function VisualConfigEditor({
         </div>
       </div>
 
-      {!isMobile && isCurrentLayer && typeof document !== 'undefined' && sidebarLeft !== null
+      {isCurrentLayer && typeof document !== 'undefined'
         ? createPortal(
-            <div className={styles.sidebarRail} style={{ left: `${sidebarLeft}px` }}>
-              {navContent}
-            </div>,
+            <>
+              <button
+                type="button"
+                className={`${styles.sidebarToggle} ${sidebarOpen ? styles.sidebarToggleOpen : ''}`}
+                onClick={() => setSidebarOpen((prev) => !prev)}
+                aria-label={sidebarOpen ? 'Close navigation' : 'Open navigation'}
+                aria-expanded={sidebarOpen}
+              >
+                {sidebarOpen ? <IconChevronLeft size={14} /> : <IconChevronRight size={14} />}
+              </button>
+              <div className={`${styles.sidebarDrawer} ${sidebarOpen ? styles.sidebarDrawerOpen : ''}`}>
+                {navContent}
+              </div>
+              {sidebarOpen && <div className={styles.sidebarBackdrop} onClick={() => setSidebarOpen(false)} />}
+            </>,
             document.body
           )
         : null}

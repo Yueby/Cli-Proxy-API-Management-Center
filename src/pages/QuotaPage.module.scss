@@ -91,10 +91,17 @@
   height: 30px;
   width: 72px;
   box-sizing: border-box;
+  transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+
+  &:hover:not(:focus):not(:disabled) {
+    border-color: var(--primary-color);
+    background-color: var(--bg-tertiary);
+  }
 
   &:focus {
     outline: none;
     border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(139, 134, 128, 0.18);
   }
 
   @include mobile {
@@ -217,13 +224,18 @@
   font-size: 13px;
   background: var(--bg-secondary);
   border-color: var(--border-color);
+  transition: width $transition-fast, border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+
+  &:hover:not(:focus) {
+    border-color: var(--primary-color);
+    background-color: var(--bg-tertiary);
+  }
 
   &:focus {
     width: 220px;
     border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(139, 134, 128, 0.18);
   }
-
-  transition: width $transition-fast, border-color $transition-fast;
 
   @include mobile {
     width: 100%;
@@ -240,7 +252,7 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-  border: none;
+  border: 2px solid transparent;
   background: var(--bg-tertiary);
   border-radius: 50%;
   cursor: pointer;
@@ -379,7 +391,7 @@
 
 .quotaMessageAction {
   width: 100%;
-  border: none;
+  border: 2px solid transparent;
   background: none;
   cursor: pointer;
   text-decoration: underline;
