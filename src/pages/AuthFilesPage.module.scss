@@ -570,7 +570,7 @@
 
 .quotaMessageAction {
   width: 100%;
-  border: none;
+  border: 2px solid transparent;
   background: none;
   cursor: pointer;
   text-decoration: underline;
@@ -977,7 +977,7 @@
   gap: 5px;
   min-width: 0;
   padding: 0;
-  border: none;
+  border: 2px solid transparent;
   background: none;
 }
 
@@ -1096,7 +1096,7 @@
   min-width: 0;
   padding: 4px 10px;
   border-radius: $radius-full;
-  border: none;
+  border: 2px solid transparent;
 }
 
 .statLabel {
@@ -1399,6 +1399,7 @@
   &:focus {
     outline: none;
     border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.18);
   }
 }
 
@@ -1857,6 +1858,7 @@
   &:focus {
     outline: none;
     border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.18);
   }
 
   &::placeholder {

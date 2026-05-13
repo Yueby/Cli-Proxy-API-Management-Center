@@ -162,10 +162,6 @@ $openai-toolbar-control-height: 30px;
   > button {
     height: $openai-toolbar-control-height;
     padding: 0 12px;
-    border-color: var(--border-primary);
-    border-radius: $radius-md;
-    background: var(--bg-secondary);
-    box-shadow: none;
     font-size: 13px;
   }
 }
@@ -185,6 +181,11 @@ $openai-toolbar-control-height: 30px;
   &:hover {
     border-color: var(--primary-color);
     background: var(--bg-tertiary);
+  }
+
+  &:focus-visible {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.18);
   }
 
   > span {
@@ -253,7 +254,6 @@ $openai-toolbar-control-height: 30px;
   border: 1px solid var(--border-primary);
   border-radius: $radius-md;
   background: var(--bg-secondary);
-  overflow: hidden;
   transition:
     background-color $transition-fast,
     border-color $transition-fast,
@@ -262,6 +262,11 @@ $openai-toolbar-control-height: 30px;
   &:hover {
     border-color: var(--primary-color);
     background: var(--bg-tertiary);
+  }
+
+  &:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.18);
   }
 }
 
@@ -288,11 +293,18 @@ $openai-toolbar-control-height: 30px;
   min-width: 0;
   height: 100%;
   padding: 0 9px;
-  border: 0;
+  border: 2px solid transparent;
+  border-radius: $radius-md;
   background: transparent;
   color: var(--text-primary);
   cursor: pointer;
   text-align: left;
+
+  &:focus-visible {
+    outline: none;
+    border-color: transparent;
+    box-shadow: none;
+  }
 
   &:disabled {
     cursor: not-allowed;
@@ -348,7 +360,7 @@ $openai-toolbar-control-height: 30px;
   width: 30px;
   height: 100%;
   padding: 0;
-  border: 0;
+  border: 2px solid transparent;
   border-left: 1px solid var(--border-primary);
   background: transparent;
   color: var(--text-secondary);
@@ -356,11 +368,19 @@ $openai-toolbar-control-height: 30px;
   flex-shrink: 0;
   transition:
     background-color $transition-fast,
-    color $transition-fast;
+    color $transition-fast,
+    border-color $transition-fast,
+    box-shadow $transition-fast;
 
   &:hover {
     background: var(--bg-tertiary);
     color: var(--text-primary);
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: transparent;
+    box-shadow: none;
   }
 
   &:disabled {

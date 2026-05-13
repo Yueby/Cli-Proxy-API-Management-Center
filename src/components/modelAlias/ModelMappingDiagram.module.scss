@@ -142,12 +142,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: none;
+    border: 2px solid transparent;
     background: var(--bg-secondary);
     border-radius: $radius-sm;
     cursor: pointer;
     color: var(--text-secondary);
-    transition: background-color 0.15s, color 0.15s;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
 
     &:hover {
       background: var(--border-color);
@@ -346,7 +346,7 @@
 }
 
 .settingsDelete {
-  border: 0;
+  border: 2px solid transparent;
   background: transparent;
   color: var(--error-color);
   padding: 6px;

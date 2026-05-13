@@ -48,9 +48,11 @@ export function AuthFilesPrefixProxyEditorModal(props: AuthFilesPrefixProxyEdito
       }
       footer={
         <>
-          <Button variant="secondary" onClick={onClose} disabled={editor?.saving === true}>
-            {dirty ? t('common.cancel') : t('common.close')}
-          </Button>
+          {dirty && (
+            <Button variant="secondary" onClick={onClose} disabled={editor?.saving === true}>
+              {t('common.cancel')}
+            </Button>
+          )}
           <Button
             variant="secondary"
             onClick={() => {

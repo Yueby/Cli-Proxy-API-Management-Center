@@ -92,6 +92,7 @@ export function OpenAISection({
   const { t } = useTranslation();
   const pageTransitionLayer = usePageTransitionLayer();
   const isTransitionAnimating = pageTransitionLayer?.isAnimating ?? false;
+  const isCurrentLayer = pageTransitionLayer ? pageTransitionLayer.isCurrentLayer : true;
   const actionsDisabled = disableControls || loading || isSwitching;
   const toggleDisabled = disableControls || loading || isSwitching;
   const [sortOption, setSortOption] = useState<SortOption>('priority');
@@ -110,7 +111,7 @@ export function OpenAISection({
   const topDropdownRef = useRef<HTMLDivElement>(null);
   const floatingDropdownRef = useRef<HTMLDivElement>(null);
 
-  const shouldRenderFloatingToolbar = !isTransitionAnimating && floatingToolbarStyle.visible;
+  const shouldRenderFloatingToolbar = isCurrentLayer && !isTransitionAnimating && floatingToolbarStyle.visible;
 
   useEffect(() => {
     if (isTransitionAnimating) {

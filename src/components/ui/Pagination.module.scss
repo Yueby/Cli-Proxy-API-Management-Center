@@ -32,11 +32,12 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background $transition-fast, color $transition-fast, border-color $transition-fast;
+  transition: background $transition-fast, color $transition-fast, border-color $transition-fast, box-shadow $transition-fast;
 
   &:hover {
-    background: var(--bg-secondary);
+    background: var(--bg-tertiary);
     color: var(--text-primary);
+    border-color: var(--primary-color);
   }
 }
 
@@ -49,6 +50,11 @@
   &:hover {
     background: var(--primary-hover);
     color: var(--primary-contrast, #fff);
+  }
+
+  &:focus-visible {
+    border-color: var(--primary-contrast, #fff);
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.38);
   }
 }
 
@@ -80,10 +86,17 @@
   color: var(--text-primary);
   font-size: 13px;
   text-align: center;
+  transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+
+  &:hover:not(:focus) {
+    border-color: var(--primary-color);
+    background-color: var(--bg-tertiary);
+  }
 
   &:focus {
     outline: none;
     border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(139, 134, 128, 0.18);
   }
 
   /* Hide number spinners */
