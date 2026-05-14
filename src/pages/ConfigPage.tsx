@@ -1,10 +1,10 @@
-import { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { createPortal } from 'react-dom';
 import type { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { parse as parseYaml, parseDocument } from 'yaml';
 import { usePageTransitionLayer } from '@/components/common/PageTransitionLayer';
 import { Card } from '@/components/ui/Card';
+import { FloatingDock } from '@/components/ui/FloatingDock';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import {
   IconCheck,
@@ -71,7 +71,6 @@ export function ConfigPage() {
 
   // Search state
   const editorRef = useRef<ReactCodeMirrorRef | null>(null);
-  const floatingActionsRef = useRef<HTMLDivElement>(null);
 
   const disableControls = connectionStatus !== 'connected';
   const isDirty = dirty || visualDirty;
@@ -266,31 +265,6 @@ export function ConfigPage() {
     ]
   );
 
-  // Keep bottom floating actions from covering page content by syncing its height to a CSS variable.
-  useLayoutEffect(() => {
-    if (typeof window === 'undefined' || !shouldRenderFloatingActions) return;
-
-    const actionsEl = floatingActionsRef.current;
-    if (!actionsEl) return;
-
-    const updatePadding = () => {
-      const height = actionsEl.getBoundingClientRect().height;
-      document.documentElement.style.setProperty('--config-action-bar-height', `${height}px`);
-    };
-
-    updatePadding();
-    window.addEventListener('resize', updatePadding);
-
-    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updatePadding);
-    ro?.observe(actionsEl);
-
-    return () => {
-      ro?.disconnect();
-      window.removeEventListener('resize', updatePadding);
-      document.documentElement.style.removeProperty('--config-action-bar-height');
-    };
-  }, [shouldRenderFloatingActions]);
-
   // Status text
   const getStatusText = () => {
     if (disableControls) return t('config_management.status_disconnected');
@@ -345,46 +319,36 @@ export function ConfigPage() {
   }, [isDirty, loadConfig, showConfirmation, t]);
 
   const floatingActions = (
-    <div className={styles.floatingActionContainer} ref={floatingActionsRef}>
-      <div className={styles.floatingActionList}>
-        <div
-          className={`${styles.floatingStatus} ${
-            isMobile ? styles.floatingStatusCompact : ''
-          } ${getStatusClass()}`}
-        >
-          {getFloatingStatusText()}
-        </div>
-        <button
-          type="button"
-          className={styles.floatingActionButton}
-          onClick={handleReload}
-          disabled={loading || saving}
-          title={t('config_management.reload')}
-          aria-label={t('config_management.reload')}
-        >
-          <IconRefreshCw size={16} />
-        </button>
-        <button
-          type="button"
-          className={styles.floatingActionButton}
-          onClick={handleSave}
-          disabled={
-            disableControls ||
-            loading ||
-            saving ||
-            !isDirty ||
-            diffModalOpen ||
-            hasVisualModeError ||
-            hasVisualValidationErrors
-          }
-          title={t('config_management.save')}
-          aria-label={t('config_management.save')}
-        >
-          <IconCheck size={16} />
-          {isDirty && <span className={styles.dirtyDot} aria-hidden="true" />}
-        </button>
-      </div>
-    </div>
+    <FloatingDock visible={shouldRenderFloatingActions} heightVar="--config-action-bar-height">
+      <FloatingDock.Status className={`${isMobile ? styles.floatingStatusCompact : ''} ${getStatusClass()}`}>
+        {getFloatingStatusText()}
+      </FloatingDock.Status>
+      <FloatingDock.Button
+        onClick={handleReload}
+        disabled={loading || saving}
+        title={t('config_management.reload')}
+        aria-label={t('config_management.reload')}
+      >
+        <IconRefreshCw size={16} />
+      </FloatingDock.Button>
+      <FloatingDock.Button
+        onClick={handleSave}
+        disabled={
+          disableControls ||
+          loading ||
+          saving ||
+          !isDirty ||
+          diffModalOpen ||
+          hasVisualModeError ||
+          hasVisualValidationErrors
+        }
+        title={t('config_management.save')}
+        aria-label={t('config_management.save')}
+      >
+        <IconCheck size={16} />
+        {isDirty && <FloatingDock.DirtyDot />}
+      </FloatingDock.Button>
+    </FloatingDock>
   );
 
   const pageDescription =
@@ -450,9 +414,7 @@ export function ConfigPage() {
         </div>
       </Card>
 
-      {shouldRenderFloatingActions && typeof document !== 'undefined'
-        ? createPortal(floatingActions, document.body)
-        : null}
+      {floatingActions}
       <DiffModal
         open={diffModalOpen}
         original={serverYaml}

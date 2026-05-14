@@ -1,10 +1,12 @@
 /**
  * Shared presentational components for provider cards.
- * Eliminates repeated JSX across Gemini/Claude/Codex/Vertex/OpenAI sections.
+ * Uses unified ItemCard styles for consistent appearance.
  */
 
 import { useTranslation } from 'react-i18next';
-import styles from '@/pages/AiProvidersPage.module.scss';
+import { ItemCard } from '@/components/ui/ItemCard';
+
+const styles = ItemCard.styles;
 
 // ─── FieldRow ───────────────────────────────────────────
 
@@ -111,13 +113,15 @@ export function StatsPills({ success, failure }: StatsPillsProps) {
   const { t } = useTranslation();
   if (success === 0 && failure === 0) return null;
   return (
-    <div className={styles.cardStats}>
-      <span className={`${styles.statPill} ${styles.statSuccess}`}>
-        {t('stats.success')}: {success}
-      </span>
-      <span className={`${styles.statPill} ${styles.statFailure}`}>
-        {t('stats.failure')}: {failure}
-      </span>
+    <div className={styles.stats}>
+      <div className={`${styles.statPill} ${styles.statSuccess}`}>
+        <span className={styles.statLabel}>{t('stats.success')}</span>
+        <span className={styles.statValue}>{success}</span>
+      </div>
+      <div className={`${styles.statPill} ${styles.statFailure}`}>
+        <span className={styles.statLabel}>{t('stats.failure')}</span>
+        <span className={styles.statValue}>{failure}</span>
+      </div>
     </div>
   );
 }

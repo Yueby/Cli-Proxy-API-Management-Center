@@ -1,0 +1,153 @@
+@use '../../../styles/variables' as *;
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: $radius-full;
+  border: 1px solid var(--border-secondary);
+  background: var(--bg-quinary, #f8f9fa);
+  cursor: default;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: var(--primary-color);
+    background: var(--bg-tertiary);
+  }
+}
+
+.badgeIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  line-height: 1;
+}
+
+.badgeCount {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.tooltip {
+  position: fixed;
+  transform: translateX(-50%) translateY(-100%) translateY(-10px);
+  background: var(--bg-quinary, var(--bg-primary, #fff));
+  border: 1px solid var(--border-secondary, #e5e7eb);
+  border-radius: $radius-lg;
+  padding: 10px 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  z-index: 9999;
+  pointer-events: none;
+  min-width: 140px;
+  max-width: 280px;
+  animation: tooltipFadeIn 0.15s ease-out;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--bg-quinary, var(--bg-primary, #fff));
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--border-secondary, #e5e7eb);
+  }
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-100%) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-100%) translateY(-10px);
+  }
+}
+
+.tooltipList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tooltipItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.tooltipIndex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.tooltipKey {
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-weight: 600;
+  color: var(--text-primary);
+  word-break: break-all;
+  flex: 1;
+  min-width: 0;
+}
+
+.tooltipStats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tooltipSuccess {
+  color: var(--success-badge-text, #065f46);
+}
+
+.tooltipFailure {
+  color: var(--failure-badge-text, #991b1b);
+}
+
+:global([data-theme='dark']) {
+  .badge {
+    background: rgba($primary-color, 0.08);
+  }
+
+  .tooltip {
+    background: var(--bg-secondary, #1f2937);
+    border-color: var(--border-primary, #374151);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+
+    &::after {
+      border-top-color: var(--bg-secondary, #1f2937);
+    }
+
+    &::before {
+      border-top-color: var(--border-primary, #374151);
+    }
+  }
+}

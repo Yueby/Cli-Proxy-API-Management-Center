@@ -41,6 +41,7 @@ import {
   type ResolvedTheme,
 } from '@/features/authFiles/constants';
 import { AuthFileCard } from '@/features/authFiles/components/AuthFileCard';
+import { ItemCard } from '@/components/ui/ItemCard';
 import { AuthFileModelsModal } from '@/features/authFiles/components/AuthFileModelsModal';
 import { AuthFilesPrefixProxyEditorModal } from '@/features/authFiles/components/AuthFilesPrefixProxyEditorModal';
 import { OAuthExcludedCard } from '@/features/authFiles/components/OAuthExcludedCard';
@@ -815,9 +816,7 @@ export function AuthFilesPage() {
                 description={t('auth_files.search_empty_desc')}
               />
             ) : (
-              <div
-                className={`${styles.fileGrid} ${quotaFilterType ? styles.fileGridQuotaManaged : ''} ${compactMode ? styles.fileGridCompact : ''}`}
-              >
+              <ItemCard.Grid compact={compactMode} wide={!!quotaFilterType}>
                 {pageItems.map((file) => (
                   <AuthFileCard
                     key={file.name}
@@ -838,7 +837,7 @@ export function AuthFilesPage() {
                     onToggleSelect={toggleSelect}
                   />
                 ))}
-              </div>
+              </ItemCard.Grid>
             )}
 
             {!loading && sorted.length > pageSize && (

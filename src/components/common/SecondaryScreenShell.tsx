@@ -1,6 +1,6 @@
-import { forwardRef, useLayoutEffect, useRef, type ReactNode } from 'react';
-import { createPortal } from 'react-dom';
+import { forwardRef, useRef, type ReactNode } from 'react';
 import { Button } from '@/components/ui/Button';
+import { FloatingDock } from '@/components/ui/FloatingDock';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { IconChevronLeft } from '@/components/ui/icons';
 import { usePageTransitionLayer } from './PageTransitionLayer';
@@ -56,34 +56,6 @@ export const SecondaryScreenShell = forwardRef<HTMLDivElement, SecondaryScreenSh
     const shouldRenderFloatingAction = Boolean(floatingAction) && isCurrentLayer;
     const floatingActionRef = useRef<HTMLDivElement | null>(null);
 
-    useLayoutEffect(() => {
-      if (!shouldRenderFloatingAction) return;
-
-      const element = floatingActionRef.current;
-      if (!element) return;
-
-      const updateHeight = () => {
-        const height = element.getBoundingClientRect().height;
-        document.documentElement.style.setProperty(
-          '--secondary-shell-floating-action-height',
-          `${height}px`
-        );
-      };
-
-      updateHeight();
-      window.addEventListener('resize', updateHeight);
-
-      const resizeObserver =
-        typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updateHeight);
-      resizeObserver?.observe(element);
-
-      return () => {
-        resizeObserver?.disconnect();
-        window.removeEventListener('resize', updateHeight);
-        document.documentElement.style.removeProperty('--secondary-shell-floating-action-height');
-      };
-    }, [shouldRenderFloatingAction]);
-
     return (
       <>
         <div className={containerClassName} ref={ref}>
@@ -119,16 +91,13 @@ export const SecondaryScreenShell = forwardRef<HTMLDivElement, SecondaryScreenSh
             <div className={contentClasses}>{children}</div>
           )}
         </div>
-        {shouldRenderFloatingAction && typeof document !== 'undefined'
-          ? createPortal(
-              <div className={styles.floatingActionContainer}>
-                <div className={styles.floatingActionSurface} ref={floatingActionRef}>
-                  {floatingAction}
-                </div>
-              </div>,
-              document.body
-            )
-          : null}
+        <FloatingDock
+          ref={floatingActionRef}
+          visible={shouldRenderFloatingAction}
+          heightVar="--secondary-shell-floating-action-height"
+        >
+          {floatingAction}
+        </FloatingDock>
       </>
     );
   }

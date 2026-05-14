@@ -8,17 +8,19 @@ import { SelectionCheckbox } from '@/components/ui/SelectionCheckbox';
 import { Select } from '@/components/ui/Select';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import {
-  IconCheck,
   IconChevronDown,
   IconChevronUp,
   IconDownload,
+  IconKey,
   IconPencil,
   IconPlus,
+  IconSignal,
   IconSlidersHorizontal,
   IconTrash2,
   IconUpload,
   IconX,
 } from '@/components/ui/icons';
+import { ItemCard } from '@/components/ui/ItemCard';
 import iconOpenaiLight from '@/assets/icons/openai-light.svg';
 import iconOpenaiDark from '@/assets/icons/openai-dark.svg';
 import type { OpenAIProviderConfig } from '@/types';
@@ -26,7 +28,9 @@ import { maskApiKey } from '@/utils/format';
 import { downloadBlob } from '@/utils/download';
 import { statusBarDataFromRecentRequests } from '@/utils/recentRequests';
 import styles from '@/pages/AiProvidersPage.module.scss';
+import keyBadgeStyles from './KeyCountBadge.module.scss';
 import { ProviderStatusBar } from '../ProviderStatusBar';
+import { ModelCategoryBadges } from '../ModelCategoryBadges';
 import { usePageTransitionLayer } from '@/components/common/PageTransitionLayer';
 import {
   getOpenAIProviderRecentWindowStats,
@@ -68,13 +72,80 @@ interface IndexedOpenAIProvider {
   originalIndex: number;
 }
 
-const getApiKeyEntryRenderKey = (
-  entry: NonNullable<OpenAIProviderConfig['apiKeyEntries']>[number],
-  entryIndex: number
-) => {
-  const authIndex = entry.authIndex == null ? '' : String(entry.authIndex).trim();
-  return authIndex ? `auth-index-${authIndex}` : `api-key-entry-${entryIndex}`;
-};
+/** 密钥数量 badge，hover 弹出 masked key 列表（含统计） */
+function KeyCountBadge({ entries, providerName, baseUrl, usageByProvider }: {
+  entries: NonNullable<OpenAIProviderConfig['apiKeyEntries']>;
+  providerName: string;
+  baseUrl: string;
+  usageByProvider: ProviderRecentUsageMap;
+}) {
+  const [show, setShow] = useState(false);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const ref = useRef<HTMLDivElement>(null);
+
+  const open = () => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setPos({ top: rect.top, left: rect.left + rect.width / 2 });
+    }
+    setShow(true);
+  };
+
+  useEffect(() => {
+    if (!show) return;
+    const dismiss = () => setShow(false);
+    const handlePointerDown = (e: PointerEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setShow(false);
+      }
+    };
+    window.addEventListener('scroll', dismiss, true);
+    window.addEventListener('touchmove', dismiss, true);
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => {
+      window.removeEventListener('scroll', dismiss, true);
+      window.removeEventListener('touchmove', dismiss, true);
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [show]);
+
+  if (!entries || entries.length === 0) return null;
+
+  return (
+    <>
+      <div
+        ref={ref}
+        className={keyBadgeStyles.badge}
+        onPointerEnter={(e) => { if (e.pointerType === 'mouse') open(); }}
+        onPointerLeave={(e) => { if (e.pointerType === 'mouse') setShow(false); }}
+        onClick={() => setShow((v) => !v)}
+      >
+        <span className={keyBadgeStyles.badgeIcon}><IconKey size={13} /></span>
+        <span className={keyBadgeStyles.badgeCount}>{entries.length}</span>
+      </div>
+      {show && createPortal(
+        <div className={keyBadgeStyles.tooltip} style={{ top: pos.top, left: pos.left }}>
+          <div className={keyBadgeStyles.tooltipList}>
+            {entries.map((entry, i) => {
+              const entryStats = getProviderTotalStats(usageByProvider, providerName, entry.apiKey, baseUrl);
+              return (
+                <div key={i} className={keyBadgeStyles.tooltipItem}>
+                  <span className={keyBadgeStyles.tooltipIndex}>{i + 1}</span>
+                  <span className={keyBadgeStyles.tooltipKey}>{maskApiKey(entry.apiKey)}</span>
+                  <span className={keyBadgeStyles.tooltipStats}>
+                    <span className={keyBadgeStyles.tooltipSuccess}>✓{entryStats.success}</span>
+                    <span className={keyBadgeStyles.tooltipFailure}>✗{entryStats.failure}</span>
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
+  );
+}
 
 export function OpenAISection({
   configs,
@@ -578,140 +649,83 @@ export function OpenAISection({
     const providerDisabled = provider.disabled === true;
 
     return (
-      <div
+      <ItemCard
         key={`openai-provider-${originalIndex}`}
-        className={`${styles.providerCard} ${providerDisabled ? styles.providerCardDisabled : ''}`}
-      >
-        <div className={styles.providerCardMeta}>
-          <div className={styles.openaiProviderTitle}>{provider.name}</div>
-          {provider.priority !== undefined && (
-            <div className={styles.fieldRow}>
-              <span className={styles.fieldLabel}>{t('common.priority')}:</span>
-              <span className={styles.fieldValue}>{provider.priority}</span>
-            </div>
-          )}
-          {provider.prefix && (
-            <div className={styles.fieldRow}>
-              <span className={styles.fieldLabel}>{t('common.prefix')}:</span>
-              <span className={styles.fieldValue}>{provider.prefix}</span>
-            </div>
-          )}
-          <div className={styles.fieldRow}>
-            <span className={styles.fieldLabel}>{t('common.base_url')}:</span>
-            <span className={styles.fieldValue}>{provider.baseUrl}</span>
-          </div>
-          {headerEntries.length > 0 && (
-            <div className={styles.headerBadgeList}>
-              {headerEntries.map(([key, value]) => (
-                <span key={key} className={styles.headerBadge}>
-                  <strong>{key}:</strong> {value}
-                </span>
-              ))}
-            </div>
-          )}
-          {apiKeyEntries.length > 0 && (
-            <div className={styles.apiKeyEntriesSection}>
-              <div className={styles.apiKeyEntriesLabel}>
-                {t('ai_providers.openai_keys_count')}: {apiKeyEntries.length}
+        disabled={providerDisabled}
+        title={provider.name}
+        subtitle={provider.baseUrl}
+        headerExtra={
+          <>
+            <KeyCountBadge entries={apiKeyEntries} providerName={provider.name} baseUrl={provider.baseUrl} usageByProvider={usageByProvider} />
+            {provider.priority !== undefined && (
+              <span
+                className={ItemCard.styles.typeBadge}
+                style={{ backgroundColor: 'rgba(16, 185, 129, 0.10)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.25)' }}
+              >
+                <IconSignal size={12} /> P{provider.priority}
+              </span>
+            )}
+          </>
+        }
+        content={
+          <>
+            <ItemCard.FieldRow label={t('common.prefix')} value={provider.prefix} />
+            {headerEntries.length > 0 && (
+              <div className={ItemCard.styles.headerBadgeList}>
+                {headerEntries.map(([key, value]) => (
+                  <span key={key} className={ItemCard.styles.headerBadge}>
+                    <strong>{key}:</strong> {value}
+                  </span>
+                ))}
               </div>
-              <div className={styles.apiKeyEntryList}>
-                {apiKeyEntries.map((entry, entryIndex) => {
-                  const entryStats = getProviderTotalStats(
-                    usageByProvider,
-                    provider.name,
-                    entry.apiKey,
-                    provider.baseUrl
-                  );
-                  return (
-                    <div
-                      key={getApiKeyEntryRenderKey(entry, entryIndex)}
-                      className={styles.apiKeyEntryCard}
-                    >
-                      <span className={styles.apiKeyEntryIndex}>{entryIndex + 1}</span>
-                      <span className={styles.apiKeyEntryKey}>{maskApiKey(entry.apiKey)}</span>
-                      {entry.proxyUrl && (
-                        <span className={styles.apiKeyEntryProxy}>{entry.proxyUrl}</span>
-                      )}
-                      <div className={styles.apiKeyEntryStats}>
-                        <span
-                          className={`${styles.apiKeyEntryStat} ${styles.apiKeyEntryStatSuccess}`}
-                        >
-                          <IconCheck size={12} /> {entryStats.success}
-                        </span>
-                        <span
-                          className={`${styles.apiKeyEntryStat} ${styles.apiKeyEntryStatFailure}`}
-                        >
-                          <IconX size={12} /> {entryStats.failure}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-          <div className={styles.fieldRow} style={{ marginTop: '8px' }}>
-            <span className={styles.fieldLabel}>{t('ai_providers.openai_models_count')}:</span>
-            <span className={styles.fieldValue}>{provider.models?.length || 0}</span>
-          </div>
-          {provider.models?.length ? (
-            <div className={styles.modelTagList}>
-              {provider.models.map((model) => (
-                <span key={model.name} className={styles.modelTag}>
-                  <span className={styles.modelName}>{model.name}</span>
-                  {model.alias && model.alias !== model.name && (
-                    <span className={styles.modelAlias}>{model.alias}</span>
-                  )}
-                </span>
-              ))}
-            </div>
-          ) : null}
-          {provider.testModel && (
-            <div className={styles.fieldRow}>
-              <span className={styles.fieldLabel}>{t('ai_providers.openai_test_model')}:</span>
-              <span className={styles.fieldValue}>{provider.testModel}</span>
-            </div>
-          )}
-          <div className={styles.cardStats}>
-            <span className={`${styles.statPill} ${styles.statSuccess}`}>
-              {t('stats.success')}: {stats.success}
-            </span>
-            <span className={`${styles.statPill} ${styles.statFailure}`}>
-              {t('stats.failure')}: {stats.failure}
-            </span>
-          </div>
-          <ProviderStatusBar statusData={statusData} />
-        </div>
-        <div className={styles.providerCardActions}>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(originalIndex)}
-            disabled={actionsDisabled}
-            title={t('common.edit')}
-            aria-label={t('common.edit')}
-          >
-            <IconPencil size={15} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDelete(originalIndex)}
-            disabled={actionsDisabled}
-            title={t('common.delete')}
-            aria-label={t('common.delete')}
-            className="btn-danger-ghost"
-          >
-            <IconTrash2 size={15} />
-          </Button>
-          <ToggleSwitch
-            label={t('ai_providers.config_toggle_label')}
-            checked={!providerDisabled}
-            disabled={toggleDisabled}
-            onChange={(value) => void onToggle(originalIndex, value)}
-          />
-        </div>
-      </div>
+            )}
+            <ModelCategoryBadges models={provider.models} resolvedTheme={resolvedTheme} />
+            <ItemCard.FieldRow label={t('ai_providers.openai_test_model')} value={provider.testModel} />
+            <ItemCard.Stats>
+              <ItemCard.StatPill label={t('stats.success')} value={stats.success} variant="success" />
+              <ItemCard.StatPill label={t('stats.failure')} value={stats.failure} variant="failure" />
+            </ItemCard.Stats>
+            <ProviderStatusBar statusData={statusData} />
+          </>
+        }
+        actions={
+          <>
+            <ItemCard.ActionsMain>
+              <ItemCard.UtilityActions>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onEdit(originalIndex)}
+                  disabled={actionsDisabled}
+                  title={t('common.edit')}
+                  aria-label={t('common.edit')}
+                  className={ItemCard.styles.iconButton}
+                >
+                  <IconPencil size={15} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onDelete(originalIndex)}
+                  disabled={actionsDisabled}
+                  title={t('common.delete')}
+                  aria-label={t('common.delete')}
+                  className={`btn-danger-ghost ${ItemCard.styles.iconButton}`}
+                >
+                  <IconTrash2 size={15} />
+                </Button>
+              </ItemCard.UtilityActions>
+            </ItemCard.ActionsMain>
+            <ItemCard.ToggleArea label={t('ai_providers.config_toggle_label')}>
+              <ToggleSwitch
+                checked={!providerDisabled}
+                disabled={toggleDisabled}
+                onChange={(value) => void onToggle(originalIndex, value)}
+              />
+            </ItemCard.ToggleArea>
+          </>
+        }
+      />
     );
   };
 
@@ -752,7 +766,7 @@ export function OpenAISection({
               description={t('ai_providers.openai_empty_desc')}
             />
           ) : (
-            <div className={styles.openaiProviderList}>{sortedConfigs.map(renderProviderCard)}</div>
+            <ItemCard.Grid>{sortedConfigs.map(renderProviderCard)}</ItemCard.Grid>
           )}
         </Card>
       </div>

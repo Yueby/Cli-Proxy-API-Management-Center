@@ -1,18 +1,23 @@
 import { useTranslation } from 'react-i18next';
+import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { SelectionCheckbox } from '@/components/ui/SelectionCheckbox';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
+import { ItemCard } from '@/components/ui/ItemCard';
 import {
   IconDownload,
   IconInfo,
   IconModelCluster,
   IconSettings,
+  IconSignal,
   IconTrash2,
 } from '@/components/ui/icons';
 import { ProviderStatusBar } from '@/components/providers/ProviderStatusBar';
+import { useQuotaStore } from '@/stores';
 import type { AuthFileItem } from '@/types';
 import { resolveAuthProvider } from '@/utils/quota';
+import { resolveCodexPlanType } from '@/utils/quota/resolvers';
 import {
   normalizeRecentRequestAuthIndex,
   normalizeRecentRequestBuckets,
@@ -97,7 +102,6 @@ export function AuthFileCard(props: AuthFileCardProps) {
   const quotaType =
     quotaFilterType && resolveQuotaType(file) === quotaFilterType ? quotaFilterType : null;
   const cachedQuotaType = resolveQuotaType(file);
-
   const showCachedQuota = Boolean(cachedQuotaType) && !isRuntimeOnly;
 
   const providerCardClass =
@@ -124,6 +128,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
 
   const priorityValue = parsePriorityValue(file.priority ?? file['priority']);
   const noteValue = typeof file.note === 'string' ? file.note.trim() : '';
+
   const stateLabel = isRuntimeOnly
     ? t('auth_files.type_virtual') || '虚拟认证文件'
     : file.disabled
@@ -133,95 +138,148 @@ export function AuthFileCard(props: AuthFileCardProps) {
         : rawStatusMessage
           ? t('auth_files.health_status_healthy')
           : t('auth_files.status_toggle_label');
-  const stateBadgeClass = isRuntimeOnly
-    ? styles.stateBadgeVirtual
+
+  const stateBadgeVariant: 'active' | 'warning' | 'disabled' | 'custom' = isRuntimeOnly
+    ? 'custom'
     : file.disabled
-      ? styles.stateBadgeDisabled
+      ? 'disabled'
       : hasStatusWarning
-        ? styles.stateBadgeWarning
-        : styles.stateBadgeActive;
+        ? 'warning'
+        : 'active';
+
+  // Resolve plan/tier badge from file metadata + quota store
+  const codexPlan = resolveCodexPlanType(file);
+  const quotaStorePlan = useQuotaStore((state) => {
+    // Claude planType
+    const claudeQ = state.claudeQuota[file.name];
+    if (claudeQ && claudeQ.status === 'success' && claudeQ.planType) return claudeQ.planType;
+    // Gemini CLI tierLabel
+    const geminiQ = state.geminiCliQuota[file.name];
+    if (geminiQ && geminiQ.status === 'success' && geminiQ.tierLabel) return geminiQ.tierLabel;
+    // Codex planType (from API, may differ from file metadata)
+    const codexQ = state.codexQuota[file.name];
+    if (codexQ && codexQ.status === 'success' && codexQ.planType) return codexQ.planType;
+    return null;
+  });
+  const resolvedPlanLabel = codexPlan || quotaStorePlan || null;
+
+  // Gemini CLI premium tier detection
+  const geminiTierId = useQuotaStore((state) => {
+    const q = state.geminiCliQuota[file.name];
+    return q && q.status === 'success' ? q.tierId ?? null : null;
+  });
+
+  const getPlanBadgeStyle = (plan: string) => {
+    const normalized = plan.trim().toLowerCase();
+    const isPro = normalized === 'pro';
+    const isProLite = normalized === 'prolite' || normalized === 'pro-lite' || normalized === 'pro_lite';
+    const isPlus = normalized === 'plus' || normalized === 'chatgpt-plus' || normalized === 'chatgptplus';
+    const isTeam = normalized === 'team' || normalized === 'enterprise';
+    const isPremiumTier = geminiTierId === 'g1-ultra-tier';
+    if (isPro || isPremiumTier)
+      return { backgroundColor: 'rgba(139, 92, 246, 0.12)', color: '#8b5cf6', border: '1px solid rgba(139, 92, 246, 0.3)' };
+    if (isProLite)
+      return { backgroundColor: 'rgba(217, 165, 22, 0.15)', color: '#e0aa14', border: '1px solid rgba(217, 165, 22, 0.3)' };
+    if (isPlus)
+      return { backgroundColor: 'rgba(16, 163, 127, 0.12)', color: '#10a37f', border: '1px solid rgba(16, 163, 127, 0.3)' };
+    if (isTeam)
+      return { backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)' };
+    return { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' };
+  };
 
   return (
-    <div
-      className={`${styles.fileCard} ${compact ? styles.fileCardCompact : ''} ${providerCardClass} ${selected ? styles.fileCardSelected : ''} ${file.disabled ? styles.fileCardDisabled : ''}`}
-    >
-      <div className={styles.fileCardLayout}>
-        <div className={styles.fileCardMain}>
-          <div className={styles.cardHeader}>
-            {!isRuntimeOnly && (
-              <SelectionCheckbox
-                checked={selected}
-                onChange={() => onToggleSelect(file.name)}
-                className={styles.cardSelection}
-                aria-label={
-                  selected ? t('auth_files.batch_deselect') : t('auth_files.batch_select_all')
-                }
-                title={selected ? t('auth_files.batch_deselect') : t('auth_files.batch_select_all')}
-              />
-            )}
-            <div
-              className={styles.providerAvatar}
-              style={{
-                backgroundColor: typeColor.bg,
-                color: typeColor.text,
-                ...(typeColor.border ? { border: typeColor.border } : {}),
-              }}
+    <ItemCard
+      selected={selected}
+      disabled={file.disabled}
+      compact={compact}
+      className={providerCardClass}
+      avatar={{
+        icon: providerIcon || undefined,
+        fallback: typeLabel.slice(0, 1).toUpperCase(),
+        bgColor: typeColor.bg,
+        textColor: typeColor.text,
+        border: typeColor.border || undefined,
+      }}
+      title={file.name}
+      subtitle={
+        !compact && noteValue ? (
+          <>
+            <span className={styles.noteLabel}>{t('auth_files.note_display')}</span>
+            <span className={styles.noteValue}>{noteValue}</span>
+          </>
+        ) : undefined
+      }
+      badges={[
+        {
+          label: typeLabel,
+          variant: 'custom',
+          style: {
+            backgroundColor: typeColor.bg,
+            color: typeColor.text,
+            ...(typeColor.border ? { border: typeColor.border } : {}),
+          },
+        },
+        // 只在有警告或虚拟文件时显示状态 badge，启用/禁用由 toggle 表达
+        ...((isRuntimeOnly || hasStatusWarning) ? [{
+          label: stateLabel,
+          variant: stateBadgeVariant as 'active' | 'warning' | 'disabled' | 'custom',
+          className: isRuntimeOnly ? styles.stateBadgeVirtual : undefined,
+        }] : []),
+      ]}
+      headerExtra={(() => {
+        const badges: ReactNode[] = [];
+
+        // Plan/tier badge
+        if (resolvedPlanLabel) {
+          badges.push(
+            <span key="plan" className={ItemCard.styles.typeBadge} style={getPlanBadgeStyle(resolvedPlanLabel)}>
+              {resolvedPlanLabel}
+            </span>
+          );
+        }
+
+        // 优先级 badge
+        if (priorityValue !== undefined) {
+          badges.push(
+            <span
+              key="priority"
+              className={ItemCard.styles.typeBadge}
+              style={{ backgroundColor: 'rgba(16, 185, 129, 0.10)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.25)' }}
             >
-              {providerIcon ? (
-                <img src={providerIcon} alt="" className={styles.providerAvatarImage} />
-              ) : (
-                <span className={styles.providerAvatarFallback}>
-                  {typeLabel.slice(0, 1).toUpperCase()}
-                </span>
-              )}
-            </div>
-            <div className={styles.cardHeaderContent}>
-              <div className={styles.cardBadgeRow}>
-                <span
-                  className={styles.typeBadge}
-                  style={{
-                    backgroundColor: typeColor.bg,
-                    color: typeColor.text,
-                    ...(typeColor.border ? { border: typeColor.border } : {}),
-                  }}
-                >
-                  {typeLabel}
-                </span>
-                <span className={`${styles.stateBadge} ${stateBadgeClass}`}>{stateLabel}</span>
-              </div>
-              <span className={styles.fileName} title={file.name}>
-                {file.name}
-              </span>
-              {!compact && noteValue && (
-                <div className={styles.noteText} title={noteValue}>
-                  <span className={styles.noteLabel}>{t('auth_files.note_display')}</span>
-                  <span className={styles.noteValue}>{noteValue}</span>
-                </div>
-              )}
-            </div>
-          </div>
+              <IconSignal size={12} /> P{priorityValue}
+            </span>
+          );
+        }
 
-          <div className={`${styles.cardMeta} ${compact ? styles.cardMetaCompact : ''}`}>
-            <div className={styles.metaItem}>
-              <span className={styles.metaLabel}>{t('auth_files.file_size')}</span>
-              <span className={styles.metaValue}>
-                {file.size ? formatFileSize(file.size) : '-'}
-              </span>
-            </div>
-            <div className={styles.metaItem}>
-              <span className={styles.metaLabel}>{t('auth_files.file_modified')}</span>
-              <span className={styles.metaValue}>{formatModified(file)}</span>
-            </div>
-            {priorityValue !== undefined && (
-              <div className={`${styles.metaItem} ${styles.priorityBadge}`}>
-                <span className={styles.metaLabel}>{t('auth_files.priority_display')}</span>
-                <span className={`${styles.metaValue} ${styles.priorityValue}`}>
-                  {priorityValue}
-                </span>
-              </div>
-            )}
-          </div>
+        return badges.length > 0 ? <>{badges}</> : undefined;
+      })()}
+      selection={
+        !isRuntimeOnly ? (
+          <SelectionCheckbox
+            checked={selected}
+            onChange={() => onToggleSelect(file.name)}
+            aria-label={
+              selected ? t('auth_files.batch_deselect') : t('auth_files.batch_select_all')
+            }
+            title={selected ? t('auth_files.batch_deselect') : t('auth_files.batch_select_all')}
+          />
+        ) : undefined
+      }
+      content={
+        <>
+          {/* Meta */}
+          <ItemCard.Meta>
+            <ItemCard.MetaItem
+              label={t('auth_files.file_size')}
+              value={file.size ? formatFileSize(file.size) : '-'}
+            />
+            <ItemCard.MetaItem
+              label={t('auth_files.file_modified')}
+              value={formatModified(file)}
+            />
+          </ItemCard.Meta>
 
+          {/* Health warning */}
           {rawStatusMessage && hasStatusWarning && (
             <div className={styles.healthStatusMessage} title={rawStatusMessage}>
               <IconInfo className={styles.messageIcon} size={14} />
@@ -229,106 +287,90 @@ export function AuthFileCard(props: AuthFileCardProps) {
             </div>
           )}
 
-          <div className={`${styles.cardInsights} ${compact ? styles.cardInsightsCompact : ''}`}>
-            <div className={`${styles.cardStats} ${compact ? styles.cardStatsCompact : ''}`}>
-              <div className={`${styles.statPill} ${styles.statSuccess}`}>
-                <span className={styles.statLabel}>{t('stats.success')}</span>
-                <span className={styles.statValue}>{fileStats.success}</span>
-              </div>
-              <div className={`${styles.statPill} ${styles.statFailure}`}>
-                <span className={styles.statLabel}>{t('stats.failure')}</span>
-                <span className={styles.statValue}>{fileStats.failure}</span>
-              </div>
-            </div>
+          {/* Stats */}
+          <ItemCard.Stats>
+            <ItemCard.StatPill label={t('stats.success')} value={fileStats.success} variant="success" />
+            <ItemCard.StatPill label={t('stats.failure')} value={fileStats.failure} variant="failure" />
+          </ItemCard.Stats>
 
-            <div className={`${styles.statusPanel} ${compact ? styles.statusPanelCompact : ''}`}>
-              <div className={styles.statusPanelLabel}>
-                <span>{t('auth_files.health_status_label')}</span>
-              </div>
-              <ProviderStatusBar statusData={statusData} styles={styles} />
-            </div>
+          {/* Status bar */}
+          <ProviderStatusBar statusData={statusData} />
 
-            {showCachedQuota && cachedQuotaType && (
-              <AuthFileQuotaSection file={file} quotaType={cachedQuotaType} />
+          {/* Quota */}
+          {showCachedQuota && cachedQuotaType && (
+            <AuthFileQuotaSection file={file} quotaType={cachedQuotaType} />
+          )}
+        </>
+      }
+      actions={
+        <>
+          <ItemCard.ActionsMain>
+            {showModelsButton && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => onShowModels(file)}
+                className={styles.modelsActionButton}
+                title={t('auth_files.models_button', { defaultValue: '模型' })}
+                disabled={disableControls}
+              >
+                <>
+                  <IconModelCluster size={16} />
+                  <span>{t('auth_files.models_button', { defaultValue: '模型' })}</span>
+                </>
+              </Button>
             )}
-          </div>
-
-          <div className={styles.cardActions}>
-            <div className={styles.cardActionsMain}>
-              {showModelsButton && (
+            {!isRuntimeOnly && (
+              <ItemCard.UtilityActions>
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => onShowModels(file)}
-                  className={`${styles.primaryActionButton} ${styles.modelsActionButton}`}
-                  title={t('auth_files.models_button', { defaultValue: '模型' })}
+                  onClick={() => onDownload(file.name)}
+                  className={ItemCard.styles.iconButton}
+                  title={t('auth_files.download_button')}
                   disabled={disableControls}
                 >
-                  <>
-                    <span className={styles.modelsActionIconWrap}>
-                      <IconModelCluster className={styles.actionIcon} size={16} />
-                    </span>
-                    <span className={styles.actionButtonLabel}>
-                      {t('auth_files.models_button', { defaultValue: '模型' })}
-                    </span>
-                  </>
+                  <IconDownload size={16} />
                 </Button>
-              )}
-              {!isRuntimeOnly && (
-                <div className={styles.cardUtilityActions}>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => onDownload(file.name)}
-                    className={styles.iconButton}
-                    title={t('auth_files.download_button')}
-                    disabled={disableControls}
-                  >
-                    <IconDownload className={styles.actionIcon} size={16} />
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => onOpenPrefixProxyEditor(file)}
-                    className={styles.iconButton}
-                    title={t('auth_files.prefix_proxy_button')}
-                    disabled={disableControls}
-                  >
-                    <IconSettings className={styles.actionIcon} size={16} />
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => onDelete(file.name)}
-                    className={styles.iconButton}
-                    title={t('auth_files.delete_button')}
-                    disabled={disableControls || deleting === file.name}
-                  >
-                    {deleting === file.name ? (
-                      <LoadingSpinner size={14} />
-                    ) : (
-                      <IconTrash2 className={styles.actionIcon} size={16} />
-                    )}
-                  </Button>
-                </div>
-              )}
-            </div>
-            {!isRuntimeOnly && (
-              <div className={styles.statusToggle}>
-                <span className={styles.statusToggleLabel}>
-                  {t('auth_files.status_toggle_label')}
-                </span>
-                <ToggleSwitch
-                  ariaLabel={t('auth_files.status_toggle_label')}
-                  checked={!file.disabled}
-                  disabled={disableControls || statusUpdating[file.name] === true}
-                  onChange={(value) => onToggleStatus(file, value)}
-                />
-              </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => onOpenPrefixProxyEditor(file)}
+                  className={ItemCard.styles.iconButton}
+                  title={t('auth_files.prefix_proxy_button')}
+                  disabled={disableControls}
+                >
+                  <IconSettings size={16} />
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => onDelete(file.name)}
+                  className={ItemCard.styles.iconButton}
+                  title={t('auth_files.delete_button')}
+                  disabled={disableControls || deleting === file.name}
+                >
+                  {deleting === file.name ? (
+                    <LoadingSpinner size={14} />
+                  ) : (
+                    <IconTrash2 size={16} />
+                  )}
+                </Button>
+              </ItemCard.UtilityActions>
             )}
-          </div>
-        </div>
-      </div>
-    </div>
+          </ItemCard.ActionsMain>
+          {!isRuntimeOnly && (
+            <ItemCard.ToggleArea label={t('auth_files.status_toggle_label')}>
+              <ToggleSwitch
+                ariaLabel={t('auth_files.status_toggle_label')}
+                checked={!file.disabled}
+                disabled={disableControls || statusUpdating[file.name] === true}
+                onChange={(value) => onToggleStatus(file, value)}
+              />
+            </ItemCard.ToggleArea>
+          )}
+        </>
+      }
+    />
   );
 }

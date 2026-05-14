@@ -12,12 +12,20 @@
   gap: 8px;
 }
 
-.floatingBackButton {
-  min-width: 82px;
+.floatingBackButton:global(.btn) {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0;
+  border-radius: 9999px;
 }
 
-.floatingSaveButton {
-  min-width: 88px;
+.floatingSaveButton:global(.btn) {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0;
+  border-radius: 9999px;
 }
 
 .upstreamApiKeyRow {

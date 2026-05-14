@@ -5,8 +5,8 @@
 import { useTranslation } from 'react-i18next';
 import type { ReactElement, ReactNode } from 'react';
 import type { TFunction } from 'i18next';
-import type { AuthFileItem, ResolvedTheme, ThemeColors } from '@/types';
-import { TYPE_COLORS } from '@/utils/quota';
+import type { AuthFileItem, ResolvedTheme } from '@/types';
+import { resolveCodexPlanType } from '@/utils/quota/resolvers';
 import styles from '@/pages/QuotaPage.module.scss';
 
 type QuotaStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -72,21 +72,14 @@ interface QuotaCardProps<TState extends QuotaStatusState> {
 export function QuotaCard<TState extends QuotaStatusState>({
   item,
   quota,
-  resolvedTheme,
   i18nPrefix,
   cardIdleMessageKey,
   cardClassName,
-  defaultType,
   canRefresh = false,
   onRefresh,
   renderQuotaItems
 }: QuotaCardProps<TState>) {
   const { t } = useTranslation();
-
-  const displayType = item.type || item.provider || defaultType;
-  const typeColorSet = TYPE_COLORS[displayType] || TYPE_COLORS.unknown;
-  const typeColor: ThemeColors =
-    resolvedTheme === 'dark' && typeColorSet.dark ? typeColorSet.dark : typeColorSet.light;
 
   const quotaStatus = quota?.status ?? 'idle';
   const quotaErrorMessage = resolveQuotaErrorMessage(
@@ -96,27 +89,41 @@ export function QuotaCard<TState extends QuotaStatusState>({
   );
   const idleMessageKey = onRefresh ? `${i18nPrefix}.idle` : (cardIdleMessageKey ?? `${i18nPrefix}.idle`);
 
-  const getTypeLabel = (type: string): string => {
-    const key = `auth_files.filter_${type}`;
-    const translated = t(key);
-    if (translated !== key) return translated;
-    if (type.toLowerCase() === 'iflow') return 'iFlow';
-    return type.charAt(0).toUpperCase() + type.slice(1);
-  };
+  // Extract planType: prefer file metadata (always available), fallback to quota state
+  const planTypeFromFile = resolveCodexPlanType(item);
+  const planTypeFromQuota = quota && 'planType' in quota ? (quota as Record<string, unknown>).planType as string | null | undefined : undefined;
+  // Also extract tierLabel for Gemini CLI
+  const tierLabel = quota && 'tierLabel' in quota ? (quota as Record<string, unknown>).tierLabel as string | null | undefined : undefined;
+  const planType = planTypeFromFile || planTypeFromQuota || tierLabel || null;
+  const normalizedPlan = planType ? planType.trim().toLowerCase() : '';
+  const isPro = normalizedPlan === 'pro';
+  const isProLite = normalizedPlan === 'prolite' || normalizedPlan === 'pro-lite' || normalizedPlan === 'pro_lite';
+  const isPlus = normalizedPlan === 'plus' || normalizedPlan === 'chatgpt-plus' || normalizedPlan === 'chatgptplus';
+  const isTeam = normalizedPlan === 'team' || normalizedPlan === 'enterprise';
+  // Gemini CLI premium tiers
+  const tierId = quota && 'tierId' in quota ? (quota as Record<string, unknown>).tierId as string | null | undefined : undefined;
+  const isPremiumTier = tierId ? tierId === 'g1-ultra-tier' : false;
+  const planBadgeStyle = (isPro || isPremiumTier)
+    ? { backgroundColor: 'rgba(139, 92, 246, 0.12)', color: '#8b5cf6', border: '1px solid rgba(139, 92, 246, 0.3)' }
+    : isProLite
+      ? { backgroundColor: 'rgba(217, 165, 22, 0.15)', color: '#e0aa14', border: '1px solid rgba(217, 165, 22, 0.3)' }
+      : isPlus
+        ? { backgroundColor: 'rgba(16, 163, 127, 0.12)', color: '#10a37f', border: '1px solid rgba(16, 163, 127, 0.3)' }
+        : isTeam
+          ? { backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)' }
+          : { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' };
 
   return (
     <div className={`${styles.fileCard} ${cardClassName}`}>
       <div className={styles.cardHeader}>
-        <span
-          className={styles.typeBadge}
-          style={{
-            backgroundColor: typeColor.bg,
-            color: typeColor.text,
-            ...(typeColor.border ? { border: typeColor.border } : {})
-          }}
-        >
-          {getTypeLabel(displayType)}
-        </span>
+        {planType && (
+          <span
+            className={styles.typeBadge}
+            style={planBadgeStyle}
+          >
+            {planType}
+          </span>
+        )}
         <span className={styles.fileName}>{item.name}</span>
       </div>
 

@@ -332,6 +332,12 @@
   cursor: text;
   height: 36px;
   box-sizing: border-box;
+  transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+
+  &:hover:not(:focus):not(:disabled) {
+    border-color: var(--primary-color);
+    background-color: var(--bg-tertiary);
+  }
 
   &:focus {
     outline: none;
@@ -1395,6 +1401,12 @@
   resize: vertical;
   min-height: 120px;
   box-sizing: border-box;
+  transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+
+  &:hover:not(:focus):not(:disabled) {
+    border-color: var(--primary-color);
+    background-color: var(--bg-tertiary);
+  }
 
   &:focus {
     outline: none;
@@ -1854,6 +1866,12 @@
   font-size: 14px;
   font-family: monospace;
   resize: vertical;
+  transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+
+  &:hover:not(:focus):not(:disabled) {
+    border-color: var(--primary-color);
+    background-color: var(--bg-tertiary);
+  }
 
   &:focus {
     outline: none;

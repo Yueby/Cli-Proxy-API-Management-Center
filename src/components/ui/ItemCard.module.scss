@@ -1,0 +1,837 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+// ============================================
+// ItemCard - 统一卡片组件
+// 结构: Header → Content → Actions (竖排)
+// 基于 AuthFiles 卡片设计
+// ============================================
+
+.card {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: $radius-lg;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  transition:
+    border-color $transition-fast,
+    box-shadow $transition-fast;
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--border-color) 45%, var(--text-primary));
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+  }
+}
+
+.cardSelected {
+  border-color: color-mix(in srgb, var(--primary-color) 60%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 30%, transparent);
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--primary-color) 60%, transparent);
+  }
+}
+
+.cardDisabled {
+  background-color: color-mix(in srgb, var(--bg-primary) 78%, var(--bg-secondary));
+  border-color: color-mix(in srgb, var(--border-color) 62%, transparent);
+
+  .header,
+  .content {
+    opacity: 0.72;
+  }
+
+  .actions {
+    opacity: 1;
+  }
+
+  &:hover {
+    box-shadow: none;
+    border-color: var(--border-color);
+  }
+}
+
+.cardCompact {
+  padding: 12px;
+
+  .layout {
+    gap: 8px;
+  }
+
+  .header {
+    gap: 8px;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: $radius-md;
+  }
+
+  .avatarImage {
+    width: 16px;
+    height: 16px;
+  }
+
+  .avatarFallback {
+    font-size: 14px;
+  }
+
+  .headerContent {
+    gap: 3px;
+  }
+
+  .badgeRow {
+    gap: 4px;
+  }
+
+  .typeBadge,
+  .stateBadge {
+    padding: 3px 7px;
+    font-size: 10px;
+  }
+
+  .title {
+    font-size: 13px;
+    line-height: 1.3;
+    -webkit-line-clamp: 1;
+  }
+
+  .content {
+    gap: 6px;
+  }
+
+  .actions {
+    gap: 6px;
+    padding-top: 6px;
+  }
+
+  .actionsMain {
+    gap: 4px;
+  }
+
+  .utilityActions {
+    gap: 2px;
+    padding: 2px;
+    border-radius: $radius-md;
+  }
+
+  .iconButton:global(.btn.btn-sm) {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: $radius-md;
+  }
+
+  .toggleArea {
+    gap: 6px;
+  }
+
+  .toggleLabel {
+    font-size: 10px;
+  }
+}
+
+// ─── Layout ─────────────────────────────────
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+// ─── Header ─────────────────────────────────
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.selection {
+  flex-shrink: 0;
+  margin-top: 8px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-lg;
+  border: 1px solid color-mix(in srgb, var(--border-color) 60%, transparent);
+}
+
+.avatarImage {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.avatarFallback {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.headerExtra {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.typeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: $radius-md;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.stateBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: $radius-md;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.stateBadgeActive {
+  color: var(--success-badge-text, #065f46);
+  background: var(--success-badge-bg, #d1fae5);
+  border: 1px solid var(--success-badge-border, #6ee7b7);
+}
+
+.stateBadgeWarning {
+  color: var(--warning-text);
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+}
+
+.stateBadgeDisabled {
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--bg-tertiary) 86%, transparent);
+  border: 1px solid var(--border-color);
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-primary);
+  word-break: break-all;
+  line-height: 1.4;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+// ─── Content ────────────────────────────────
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 2px;
+}
+
+// 元数据行
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+}
+
+.metaItem {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+}
+
+.metaLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  line-height: 1.2;
+  white-space: nowrap;
+
+  &::after {
+    content: ':';
+  }
+}
+
+.metaValue {
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+// 字段行（用于 Provider 卡片的 key:value 展示）
+.fieldRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.fieldLabel {
+  color: var(--text-tertiary);
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.fieldValue {
+  color: var(--text-primary);
+  font-weight: 600;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  font-family: 'Monaco', 'Menlo', 'Consolas', 'Ubuntu Mono', monospace;
+}
+
+// 统计 pills
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.statPill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+  padding: 4px 10px;
+  border-radius: $radius-full;
+  border: 2px solid transparent;
+}
+
+.statLabel {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.statValue {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.statSuccess {
+  background: color-mix(in srgb, var(--success-badge-bg, #d1fae5) 50%, transparent);
+  color: var(--success-badge-text, #065f46);
+}
+
+.statFailure {
+  background: color-mix(in srgb, var(--failure-badge-bg) 50%, transparent);
+  color: var(--failure-badge-text);
+}
+
+// ─── Actions ────────────────────────────────
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--border-color) 50%, transparent);
+  flex-wrap: nowrap;
+}
+
+.actionsMain {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+  flex-wrap: nowrap;
+}
+
+.utilityActions {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px;
+  border-radius: $radius-md;
+  background: color-mix(in srgb, var(--bg-tertiary) 50%, transparent);
+}
+
+.iconButton:global(.btn.btn-sm) {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
+  box-sizing: border-box;
+  border-radius: $radius-md;
+  gap: 0;
+}
+
+.toggleArea {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.toggleLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+// ─── Grid Container ─────────────────────────
+
+.grid {
+  display: grid;
+  gap: $spacing-md;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gridCompact {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+}
+
+.gridWide {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+}
+
+// ─── Mobile ─────────────────────────────────
+
+@include mobile {
+  .toggleArea {
+    margin-left: auto;
+  }
+}
+
+
+// ─── Header Badges (custom headers) ────────
+
+.headerBadgeList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.headerBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+  background: var(--accent-tertiary, #f3f4f6);
+  border: 1px solid var(--border-primary);
+  border-radius: $radius-lg;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  strong {
+    font-weight: 600;
+    color: var(--text-primary);
+    flex-shrink: 0;
+  }
+}
+
+// ─── Model Tags ─────────────────────────────
+
+.modelTagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.modelCountLabel {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.modelTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+  background: var(--bg-quinary, #f8f9fa);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-secondary);
+  border-radius: $radius-lg;
+  padding: 4px 10px;
+  font-size: 12px;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--primary-color);
+  }
+}
+
+.modelName {
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.modelAlias {
+  color: var(--text-tertiary);
+  font-style: italic;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+
+  &::before {
+    content: '→ ';
+  }
+}
+
+// ─── Excluded Models ────────────────────────
+
+.excludedModelTag {
+  background: var(--warning-bg, #fef3c7);
+  border-color: var(--warning-border, #fbbf24);
+  color: var(--warning-text, #92400e);
+
+  .modelName {
+    color: var(--warning-text, #92400e);
+  }
+}
+
+.excludedModelsSection {
+  margin-top: 8px;
+}
+
+.excludedModelsLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--warning-text, #92400e);
+  margin-bottom: 4px;
+}
+
+// ─── Status Bar (shared) ────────────────────
+
+.statusBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  max-width: none;
+  flex-wrap: nowrap;
+}
+
+.statusBlocks {
+  display: flex;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.statusBlockWrapper {
+  flex: 1;
+  min-width: 5px;
+  position: relative;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.statusBlock {
+  width: 100%;
+  height: 6px;
+  border-radius: $radius-full;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
+
+  .statusBlockWrapper:hover &,
+  .statusBlockWrapper.statusBlockActive & {
+    transform: scaleY(1.6);
+    opacity: 0.9;
+  }
+}
+
+.statusBlockIdle {
+  background-color: var(--border-secondary, #e5e7eb);
+}
+
+.statusBlockActive {
+  // marker class for active tooltip state
+}
+
+.statusTooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-quinary, var(--bg-primary, #fff));
+  border: 1px solid var(--border-secondary, #e5e7eb);
+  border-radius: $radius-lg;
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  z-index: $z-dropdown;
+  pointer-events: none;
+  color: var(--text-primary);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--bg-quinary, var(--bg-primary, #fff));
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--border-secondary, #e5e7eb);
+  }
+}
+
+.statusTooltipLeft {
+  left: 0;
+  transform: translateX(0);
+
+  &::after,
+  &::before {
+    left: 8px;
+    transform: none;
+  }
+}
+
+.statusTooltipRight {
+  left: auto;
+  right: 0;
+  transform: translateX(0);
+
+  &::after,
+  &::before {
+    left: auto;
+    right: 8px;
+    transform: none;
+  }
+}
+
+.tooltipTime {
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.tooltipStats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tooltipSuccess {
+  color: var(--success-color, #22c55e);
+}
+
+.tooltipFailure {
+  color: var(--danger-color, #ef4444);
+}
+
+.tooltipRate {
+  color: var(--text-secondary);
+  margin-left: 2px;
+}
+
+.statusRate {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 6px 10px;
+  border-radius: $radius-full;
+  background: var(--bg-tertiary);
+  flex-shrink: 0;
+}
+
+.statusRateHigh {
+  color: var(--success-badge-text, #065f46);
+  background: var(--success-badge-bg, #d1fae5);
+}
+
+.statusRateMedium {
+  color: var(--warning-text, #92400e);
+  background: var(--warning-bg, #fef3c7);
+}
+
+.statusRateLow {
+  color: var(--failure-badge-text);
+  background: var(--failure-badge-bg);
+}
+
+// ─── Dark Theme ─────────────────────────────
+
+:global([data-theme='dark']) {
+  .headerBadge {
+    background: rgba($primary-color, 0.14);
+    border-color: rgba($primary-color, 0.35);
+    color: var(--text-secondary);
+
+    strong {
+      color: var(--text-secondary);
+    }
+  }
+
+  .modelTag {
+    background: rgba($primary-color, 0.1);
+    border-color: var(--border-secondary);
+  }
+
+  .excludedModelTag {
+    background: rgba($warning-color, 0.22);
+    border-color: rgba($warning-color, 0.55);
+    color: var(--warning-color);
+
+    .modelName {
+      color: var(--warning-color);
+    }
+  }
+
+  .excludedModelsLabel {
+    color: var(--warning-color);
+  }
+
+  .statusBlockIdle {
+    background-color: var(--border-primary, #374151);
+  }
+
+  .statusTooltip {
+    background: var(--bg-secondary, #1f2937);
+    border-color: var(--border-primary, #374151);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+    &::after {
+      border-top-color: var(--bg-secondary, #1f2937);
+    }
+
+    &::before {
+      border-top-color: var(--border-primary, #374151);
+    }
+  }
+
+  .statusRateHigh {
+    background: rgba(34, 197, 94, 0.2);
+    color: #86efac;
+  }
+
+  .statusRateMedium {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fde68a;
+  }
+
+  .statusRateLow {
+    background: rgba($error-color, 0.24);
+    color: #f1b0a6;
+  }
+}
+
+@include mobile {
+  .statusTooltip {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .statusBlocks {
+    min-width: 0;
+  }
+}
