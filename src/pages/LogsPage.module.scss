@@ -333,8 +333,6 @@
   border-radius: $radius-md;
   flex: 1 1 auto;
   min-height: 280px;
-  max-height: calc(100vh - 320px);
-  height: auto;
   overflow: auto;
   resize: vertical;
   position: relative;
@@ -342,16 +340,11 @@
   touch-action: pan-y;
   overscroll-behavior: contain;
 
-  @include tablet {
-    min-height: 240px;
-    max-height: calc(100vh - 300px);
-  }
-
   @include mobile {
     min-height: 360px;
-    height: 420px;
-    max-height: 480px;
     flex: 0 0 auto;
+    height: calc(100vh - 260px);
+    max-height: none;
   }
 }
 
@@ -627,7 +620,6 @@
   @media (min-width: 769px) {
     .logPanel {
       min-height: 160px;
-      max-height: calc(100vh - 300px);
     }
   }
 }
@@ -663,7 +655,6 @@
 
     .logPanel {
       min-height: 0;
-      max-height: calc(100vh - 280px);
     }
   }
 
@@ -712,7 +703,6 @@
 
     .logPanel {
       min-height: 0;
-      max-height: calc(100vh - 220px);
     }
   }
 
