@@ -1,7 +1,7 @@
 @use '../styles/variables' as *;
 @use '../styles/mixins' as *;
 
-$openai-toolbar-control-height: 30px;
+$openai-toolbar-control-height: 32px;
 
 .container {
   width: 100%;
@@ -1378,7 +1378,7 @@ $openai-toolbar-control-height: 30px;
   width: 100%;
   padding: 8px 10px;
   font-size: 14px;
-  min-height: 38px;
+  min-height: 32px;
   text-align: center;
 }
 

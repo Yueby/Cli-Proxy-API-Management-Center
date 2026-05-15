@@ -133,7 +133,7 @@ export function GeminiSection({
                   <ItemCard.ActionsMain>
                     <ItemCard.UtilityActions>
                       <Button
-                        variant="ghost"
+                        variant="secondary"
                         size="sm"
                         onClick={() => onEdit(index)}
                         disabled={actionsDisabled}
@@ -144,13 +144,13 @@ export function GeminiSection({
                         <IconPencil size={15} />
                       </Button>
                       <Button
-                        variant="ghost"
+                        variant="danger"
                         size="sm"
                         onClick={() => onDelete(index)}
                         disabled={actionsDisabled}
                         title={t('common.delete')}
                         aria-label={t('common.delete')}
-                        className={`btn-danger-ghost ${ItemCard.styles.iconButton}`}
+                        className={ItemCard.styles.iconButton}
                       >
                         <IconTrash2 size={15} />
                       </Button>

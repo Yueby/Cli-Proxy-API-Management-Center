@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Select';
-import { IconCopy, IconPencil, IconPlus, IconTrash2 } from '@/components/ui/icons';
+import { IconCopy, IconPencil, IconPlus, IconRefreshCw, IconTrash2, IconX } from '@/components/ui/icons';
 import { useNotificationStore } from '@/stores';
 import styles from './VisualConfigEditor.module.scss';
 import { copyToClipboard } from '@/utils/clipboard';
@@ -377,8 +377,10 @@ export const ApiKeysCardEditor = memo(function ApiKeysCardEditor({
               size="sm"
               onClick={handleGenerate}
               disabled={disabled}
+              title={t('config_management.visual.api_keys.generate')}
+              aria-label={t('config_management.visual.api_keys.generate')}
             >
-              {t('config_management.visual.api_keys.generate')}
+              <IconRefreshCw size={16} />
             </Button>
           </div>
           <div id={apiKeyHintId} className="hint">
@@ -443,7 +445,7 @@ const StringListEditor = memo(function StringListEditor({
             disabled={disabled}
           />
           <Button variant="ghost" size="sm" onClick={() => removeItem(index)} disabled={disabled} title={t('config_management.visual.common.delete')} aria-label={t('config_management.visual.common.delete')}>
-            <IconTrash2 size={14} />
+            <IconX size={14} />
           </Button>
         </div>
       ))}
@@ -635,7 +637,7 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
               {t('config_management.visual.payload_rules.rule')} {ruleIndex + 1}
             </div>
             <Button
-              variant="ghost"
+              variant="danger"
               size="sm"
               onClick={() => removeRule(ruleIndex)}
               disabled={disabled}
@@ -702,13 +704,13 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
                   </>
                 )}
                 <Button
-                  variant="ghost"
+                  variant="secondary"
                   size="sm"
                   className={styles.payloadRowActionButton}
                   onClick={() => removeModel(ruleIndex, modelIndex)}
                   disabled={disabled}
                  title={t('config_management.visual.common.delete')} aria-label={t('config_management.visual.common.delete')}>
-            <IconTrash2 size={14} />
+            <IconX size={14} />
           </Button>
               </div>
             ))}
@@ -762,13 +764,13 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
                     )}
                     {renderParamValueEditor(ruleIndex, paramIndex, param)}
                     <Button
-                      variant="ghost"
+                      variant="secondary"
                       size="sm"
                       className={styles.payloadRowActionButton}
                       onClick={() => removeParam(ruleIndex, paramIndex)}
                       disabled={disabled}
                      title={t('config_management.visual.common.delete')} aria-label={t('config_management.visual.common.delete')}>
-            <IconTrash2 size={14} />
+            <IconX size={14} />
           </Button>
                   </div>
                   {paramError && (
@@ -856,7 +858,7 @@ export const PayloadFilterRulesEditor = memo(function PayloadFilterRulesEditor({
               {t('config_management.visual.payload_rules.rule')} {ruleIndex + 1}
             </div>
             <Button
-              variant="ghost"
+              variant="danger"
               size="sm"
               onClick={() => removeRule(ruleIndex)}
               disabled={disabled}
@@ -890,13 +892,13 @@ export const PayloadFilterRulesEditor = memo(function PayloadFilterRulesEditor({
                   }
                 />
                 <Button
-                  variant="ghost"
+                  variant="secondary"
                   size="sm"
                   className={styles.payloadRowActionButton}
                   onClick={() => removeModel(ruleIndex, modelIndex)}
                   disabled={disabled}
                  title={t('config_management.visual.common.delete')} aria-label={t('config_management.visual.common.delete')}>
-            <IconTrash2 size={14} />
+            <IconX size={14} />
           </Button>
               </div>
             ))}

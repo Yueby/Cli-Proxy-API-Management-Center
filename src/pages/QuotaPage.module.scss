@@ -88,7 +88,7 @@
   color: var(--text-primary);
   font-size: 13px;
   cursor: text;
-  height: 30px;
+  height: 32px;
   width: 72px;
   box-sizing: border-box;
   transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
@@ -116,7 +116,7 @@
   font-size: 13px;
   color: var(--text-secondary);
   white-space: nowrap;
-  height: 30px;
+  height: 32px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -218,7 +218,7 @@
 }
 
 .searchInput:global(.input) {
-  height: 30px;
+  height: 32px;
   width: 180px;
   padding-right: 32px;
   font-size: 13px;

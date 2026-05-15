@@ -33,8 +33,8 @@ export function Button({
 
   return (
     <button className={classes} disabled={disabled || loading} {...rest}>
-      {loading && <span className="loading-spinner" aria-hidden="true" />}
-      {hasChildren && <span>{children}</span>}
+      {loading && <span className="loading-spinner loading-spinner-overlay" aria-hidden="true" />}
+      {hasChildren && <span style={loading ? { opacity: 0 } : undefined}>{children}</span>}
     </button>
   );
 }
