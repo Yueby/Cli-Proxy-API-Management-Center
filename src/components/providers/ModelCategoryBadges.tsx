@@ -12,6 +12,7 @@ import iconClaude from '@/assets/icons/claude.svg';
 import iconGemini from '@/assets/icons/gemini.svg';
 import iconDeepseek from '@/assets/icons/deepseek.svg';
 import iconGrok from '@/assets/icons/grok.svg';
+import iconGrokDark from '@/assets/icons/grok-dark.svg';
 import iconQwen from '@/assets/icons/qwen.svg';
 import iconGlm from '@/assets/icons/glm.svg';
 import iconMinimax from '@/assets/icons/minimax.svg';
@@ -26,7 +27,7 @@ const CATEGORY_ICONS: Record<string, { light: string; dark?: string }> = {
   claude: { light: iconClaude },
   gemini: { light: iconGemini },
   deepseek: { light: iconDeepseek },
-  grok: { light: iconGrok },
+  grok: { light: iconGrok, dark: iconGrokDark },
   qwen: { light: iconQwen },
   glm: { light: iconGlm },
   minimax: { light: iconMinimax },

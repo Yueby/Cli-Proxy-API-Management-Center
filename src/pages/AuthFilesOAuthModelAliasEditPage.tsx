@@ -13,6 +13,7 @@ import { useAuthStore, useNotificationStore } from '@/stores';
 import { authFilesApi } from '@/services/api';
 import type { AuthFileItem, OAuthModelAliasEntry } from '@/types';
 import { generateId } from '@/utils/helpers';
+import { normalizeProviderKey } from '@/features/authFiles/constants';
 import styles from './AuthFilesOAuthModelAliasEditPage.module.scss';
 
 type AuthFileModelItem = { id: string; display_name?: string; type?: string; owned_by?: string };
@@ -34,8 +35,6 @@ const OAUTH_PROVIDER_PRESETS = [
 ];
 
 const OAUTH_PROVIDER_EXCLUDES = new Set(['all', 'unknown', 'empty']);
-
-const normalizeProviderKey = (value: string) => value.trim().toLowerCase();
 
 const buildEmptyMappingEntry = (): OAuthModelMappingFormEntry => ({
   id: generateId(),
@@ -99,13 +98,17 @@ export function AuthFilesOAuthModelAliasEditPage() {
       }
     });
 
-    const normalizedExtras = Array.from(extraProviders)
-      .map((value) => value.trim())
-      .filter((value) => value && !OAUTH_PROVIDER_EXCLUDES.has(value.toLowerCase()));
+    const normalizedExtras = Array.from(
+      new Set(
+        Array.from(extraProviders)
+          .map((value) => normalizeProviderKey(value))
+          .filter((value) => value && !OAUTH_PROVIDER_EXCLUDES.has(value))
+      )
+    );
 
-    const baseSet = new Set(OAUTH_PROVIDER_PRESETS.map((value) => value.toLowerCase()));
+    const baseSet = new Set(OAUTH_PROVIDER_PRESETS.map((value) => normalizeProviderKey(value)));
     const extraList = normalizedExtras
-      .filter((value) => !baseSet.has(value.toLowerCase()))
+      .filter((value) => !baseSet.has(value))
       .sort((a, b) => a.localeCompare(b));
 
     return [...OAUTH_PROVIDER_PRESETS, ...extraList];
@@ -303,7 +306,7 @@ export function AuthFilesOAuthModelAliasEditPage() {
   }, []);
 
   const handleSave = useCallback(async () => {
-    const channel = provider.trim();
+    const channel = normalizeProviderKey(provider);
     if (!channel) {
       showNotification(t('oauth_model_alias.provider_required'), 'error');
       return;
@@ -397,7 +400,7 @@ export function AuthFilesOAuthModelAliasEditPage() {
               {providerOptions.length > 0 && (
                 <div className={styles.tagList}>
                   {providerOptions.map((option) => {
-                    const isActive = normalizeProviderKey(provider) === option.toLowerCase();
+                    const isActive = normalizeProviderKey(provider) === normalizeProviderKey(option);
                     return (
                       <button
                         key={option}

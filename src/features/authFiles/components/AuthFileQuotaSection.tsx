@@ -10,11 +10,10 @@ import {
 import { useQuotaStore } from '@/stores';
 import type { AuthFileItem } from '@/types';
 import type { QuotaProviderType } from '@/features/authFiles/constants';
-import { resolveQuotaErrorMessage } from '@/features/authFiles/constants';
 import { QuotaProgressBar } from '@/features/authFiles/components/QuotaProgressBar';
 import styles from '@/pages/AuthFilesPage.module.scss';
 
-type QuotaState = { status?: string; error?: string; errorStatus?: number } | undefined;
+type QuotaState = { status?: string } | undefined;
 
 const getQuotaConfig = (type: QuotaProviderType) => {
   if (type === 'antigravity') return ANTIGRAVITY_CONFIG;
@@ -46,24 +45,9 @@ export function AuthFileQuotaSection(props: AuthFileQuotaSectionProps) {
     return state.geminiCliQuota[file.name] as QuotaState;
   });
 
-  if (!quota || (quota.status !== 'success' && quota.status !== 'error')) return null;
+  if (!quota || quota.status !== 'success') return null;
 
   const config = getQuotaConfig(quotaType);
-
-  if (quota.status === 'error') {
-    const errorMessage = resolveQuotaErrorMessage(
-      t,
-      quota.errorStatus,
-      quota.error || t('common.unknown_error')
-    );
-    return (
-      <div className={styles.quotaSection}>
-        <div className={styles.quotaError}>
-          {t(`${config.i18nPrefix}.load_failed`, { message: errorMessage })}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className={styles.quotaSection}>

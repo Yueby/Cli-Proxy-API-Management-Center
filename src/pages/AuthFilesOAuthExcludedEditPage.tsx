@@ -13,6 +13,7 @@ import { useEdgeSwipeBack } from '@/hooks/useEdgeSwipeBack';
 import { useAuthStore, useNotificationStore } from '@/stores';
 import { authFilesApi } from '@/services/api';
 import type { AuthFileItem, OAuthModelAliasEntry } from '@/types';
+import { normalizeProviderKey } from '@/features/authFiles/constants';
 import styles from './AuthFilesOAuthExcludedEditPage.module.scss';
 
 type AuthFileModelItem = { id: string; display_name?: string; type?: string; owned_by?: string };
@@ -32,8 +33,6 @@ const OAUTH_PROVIDER_PRESETS = [
 ];
 
 const OAUTH_PROVIDER_EXCLUDES = new Set(['all', 'unknown', 'empty']);
-
-const normalizeProviderKey = (value: string) => value.trim().toLowerCase();
 
 export function AuthFilesOAuthExcludedEditPage() {
   const { t } = useTranslation();
@@ -76,13 +75,17 @@ export function AuthFilesOAuthExcludedEditPage() {
       }
     });
 
-    const normalizedExtras = Array.from(extraProviders)
-      .map((value) => value.trim())
-      .filter((value) => value && !OAUTH_PROVIDER_EXCLUDES.has(value.toLowerCase()));
+    const normalizedExtras = Array.from(
+      new Set(
+        Array.from(extraProviders)
+          .map((value) => normalizeProviderKey(value))
+          .filter((value) => value && !OAUTH_PROVIDER_EXCLUDES.has(value))
+      )
+    );
 
-    const baseSet = new Set(OAUTH_PROVIDER_PRESETS.map((value) => value.toLowerCase()));
+    const baseSet = new Set(OAUTH_PROVIDER_PRESETS.map((value) => normalizeProviderKey(value)));
     const extraList = normalizedExtras
-      .filter((value) => !baseSet.has(value.toLowerCase()))
+      .filter((value) => !baseSet.has(value))
       .sort((a, b) => a.localeCompare(b));
 
     return [...OAUTH_PROVIDER_PRESETS, ...extraList];
@@ -352,7 +355,7 @@ export function AuthFilesOAuthExcludedEditPage() {
               {providerOptions.length > 0 && (
                 <div className={styles.tagList}>
                   {providerOptions.map((option) => {
-                    const isActive = normalizeProviderKey(provider) === option.toLowerCase();
+                    const isActive = normalizeProviderKey(provider) === normalizeProviderKey(option);
                     return (
                       <button
                         key={option}

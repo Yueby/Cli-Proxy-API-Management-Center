@@ -123,7 +123,6 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
     Record<string, TState>
   >;
 
-  /* Removed useRef */
   const [viewMode, setViewMode] = useState<ViewMode>('paged');
   const [showTooManyWarning, setShowTooManyWarning] = useState(false);
   const [search, setSearch] = useState('');
@@ -231,11 +230,19 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
 
   const pendingQuotaRefreshRef = useRef(false);
   const prevFilesLoadingRef = useRef(loading);
+  const [isRefreshQueued, setIsRefreshQueued] = useState(false);
+
+  const isSectionQuotaLoading = sectionLoading;
+  const showRefreshSpinner = isRefreshQueued || isSectionQuotaLoading;
+  const disableRefreshButton = disabled || loading || showRefreshSpinner;
 
   const handleRefresh = useCallback(() => {
+    if (disableRefreshButton) return;
+
     pendingQuotaRefreshRef.current = true;
+    setIsRefreshQueued(true);
     void triggerHeaderRefresh();
-  }, []);
+  }, [disableRefreshButton]);
 
   useEffect(() => {
     const wasLoading = prevFilesLoadingRef.current;
@@ -248,8 +255,12 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
     pendingQuotaRefreshRef.current = false;
     const scope = effectiveViewMode === 'all' ? 'all' : 'page';
     const targets = effectiveViewMode === 'all' ? filteredFiles : pageItems;
-    if (targets.length === 0) return;
+    if (targets.length === 0) {
+      setIsRefreshQueued(false);
+      return;
+    }
     loadQuota(targets, scope, setLoading);
+    setIsRefreshQueued(false);
   }, [loading, effectiveViewMode, filteredFiles, pageItems, loadQuota, setLoading]);
 
   const refreshQuotaForFile = useCallback(
@@ -297,8 +308,6 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
       )}
     </div>
   );
-
-  const isRefreshing = sectionLoading || loading;
 
   return (
     <Card
@@ -368,12 +377,12 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
             size="sm"
             className={styles.refreshAllButton}
             onClick={handleRefresh}
-            disabled={disabled || isRefreshing}
-            loading={isRefreshing}
+            disabled={disableRefreshButton}
+            loading={showRefreshSpinner}
             title={t('quota_management.refresh_all_credentials')}
             aria-label={t('quota_management.refresh_all_credentials')}
           >
-            {!isRefreshing && <IconRefreshCw size={16} />}
+            {!showRefreshSpinner && <IconRefreshCw size={16} />}
             {t('quota_management.refresh_all_credentials')}
           </Button>
         </div>

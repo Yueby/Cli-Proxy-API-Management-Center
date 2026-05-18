@@ -171,14 +171,23 @@ export function AuthFileCard(props: AuthFileCardProps) {
     return q && q.status === 'success' ? q.tierId ?? null : null;
   });
 
+  const isPlanPremium = (plan: string) => {
+    const normalized = plan.trim().toLowerCase();
+    const isPro = normalized === 'pro';
+    const isPremiumTier = geminiTierId === 'g1-ultra-tier';
+    return (providerKey === 'codex' && isPro) || (providerKey === 'gemini-cli' && isPremiumTier);
+  };
+
   const getPlanBadgeStyle = (plan: string) => {
     const normalized = plan.trim().toLowerCase();
     const isPro = normalized === 'pro';
     const isProLite = normalized === 'prolite' || normalized === 'pro-lite' || normalized === 'pro_lite';
     const isPlus = normalized === 'plus' || normalized === 'chatgpt-plus' || normalized === 'chatgptplus';
     const isTeam = normalized === 'team' || normalized === 'enterprise';
-    const isPremiumTier = geminiTierId === 'g1-ultra-tier';
-    if (isPro || isPremiumTier)
+
+    if (isPlanPremium(plan)) return undefined;
+
+    if (isPro)
       return { backgroundColor: 'rgba(139, 92, 246, 0.12)', color: '#8b5cf6', border: '1px solid rgba(139, 92, 246, 0.3)' };
     if (isProLite)
       return { backgroundColor: 'rgba(217, 165, 22, 0.15)', color: '#e0aa14', border: '1px solid rgba(217, 165, 22, 0.3)' };
@@ -233,8 +242,13 @@ export function AuthFileCard(props: AuthFileCardProps) {
 
         // Plan/tier badge
         if (resolvedPlanLabel) {
+          const isPremium = isPlanPremium(resolvedPlanLabel);
           badges.push(
-            <span key="plan" className={ItemCard.styles.typeBadge} style={getPlanBadgeStyle(resolvedPlanLabel)}>
+            <span
+              key="plan"
+              className={`${ItemCard.styles.typeBadge} ${isPremium ? styles.premiumPlanValue : ''}`.trim()}
+              style={getPlanBadgeStyle(resolvedPlanLabel)}
+            >
               {resolvedPlanLabel}
             </span>
           );

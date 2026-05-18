@@ -75,6 +75,7 @@ export function QuotaCard<TState extends QuotaStatusState>({
   i18nPrefix,
   cardIdleMessageKey,
   cardClassName,
+  defaultType,
   canRefresh = false,
   onRefresh,
   renderQuotaItems
@@ -103,22 +104,25 @@ export function QuotaCard<TState extends QuotaStatusState>({
   // Gemini CLI premium tiers
   const tierId = quota && 'tierId' in quota ? (quota as Record<string, unknown>).tierId as string | null | undefined : undefined;
   const isPremiumTier = tierId ? tierId === 'g1-ultra-tier' : false;
-  const planBadgeStyle = (isPro || isPremiumTier)
-    ? { backgroundColor: 'rgba(139, 92, 246, 0.12)', color: '#8b5cf6', border: '1px solid rgba(139, 92, 246, 0.3)' }
-    : isProLite
-      ? { backgroundColor: 'rgba(217, 165, 22, 0.15)', color: '#e0aa14', border: '1px solid rgba(217, 165, 22, 0.3)' }
-      : isPlus
-        ? { backgroundColor: 'rgba(16, 163, 127, 0.12)', color: '#10a37f', border: '1px solid rgba(16, 163, 127, 0.3)' }
-        : isTeam
-          ? { backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)' }
-          : { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' };
+  const isPremium = (defaultType === 'codex' && isPro) || (defaultType === 'gemini-cli' && isPremiumTier);
+  const planBadgeStyle = isPremium
+    ? undefined
+    : isPro
+      ? { backgroundColor: 'rgba(139, 92, 246, 0.12)', color: '#8b5cf6', border: '1px solid rgba(139, 92, 246, 0.3)' }
+      : isProLite
+        ? { backgroundColor: 'rgba(217, 165, 22, 0.15)', color: '#e0aa14', border: '1px solid rgba(217, 165, 22, 0.3)' }
+        : isPlus
+          ? { backgroundColor: 'rgba(16, 163, 127, 0.12)', color: '#10a37f', border: '1px solid rgba(16, 163, 127, 0.3)' }
+          : isTeam
+            ? { backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)' }
+            : { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' };
 
   return (
     <div className={`${styles.fileCard} ${cardClassName}`}>
       <div className={styles.cardHeader}>
         {planType && (
           <span
-            className={styles.typeBadge}
+            className={`${styles.typeBadge} ${isPremium ? styles.premiumPlanValue : ''}`.trim()}
             style={planBadgeStyle}
           >
             {planType}

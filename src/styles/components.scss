@@ -249,80 +249,123 @@ textarea {
   flex-direction: column;
   gap: $spacing-sm;
   z-index: $z-notification;
-  max-width: 360px;
+  width: 360px;
+  max-width: calc(100vw - #{$spacing-lg * 2});
+
+  @media (max-width: $breakpoint-mobile) {
+    top: env(safe-area-inset-top, 16px);
+    right: 16px;
+    left: 16px;
+    max-width: none;
+    width: auto;
+  }
 }
 
 @keyframes notification-enter {
   from {
     opacity: 0;
-    transform: translateX(100%);
+    transform: translate3d(20px, -10px, 0) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
 @keyframes notification-exit {
   from {
     opacity: 1;
-    transform: translateX(0);
+    transform: scale(1);
   }
   to {
     opacity: 0;
-    transform: translateX(100%);
+    transform: scale(0.95);
   }
 }
 
 .notification {
-  padding: $spacing-md;
+  padding: 12px 14px;
   border-radius: $radius-lg;
-  box-shadow: var(--shadow);
   border: 1px solid var(--border-color);
-  background: var(--bg-primary);
+  background: color-mix(in srgb, var(--bg-primary) 85%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
   color: var(--text-primary);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: $spacing-sm;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
 
   // Animation states
   &.entering {
-    animation: notification-enter 0.3s ease-out forwards;
+    animation: notification-enter 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1) forwards;
   }
 
   &.exiting {
-    animation: notification-exit 0.3s ease-in forwards;
+    animation: notification-exit 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--border-color);
   }
 
   &.success {
-    border-color: rgba($success-color, 0.4);
+    border-color: rgba($success-color, 0.3);
+    &::before { background-color: $success-color; }
+    .notification-icon { color: $success-color; }
   }
   &.warning {
-    border-color: rgba($warning-color, 0.4);
+    border-color: rgba($warning-color, 0.3);
+    &::before { background-color: $warning-color; }
+    .notification-icon { color: $warning-color; }
   }
   &.error {
-    border-color: rgba($error-color, 0.4);
+    border-color: rgba($error-color, 0.3);
+    &::before { background-color: $error-color; }
+    .notification-icon { color: $error-color; }
+  }
+  &.info {
+    border-color: rgba($primary-color, 0.3);
+    &::before { background-color: $primary-color; }
+    .notification-icon { color: $primary-color; }
+  }
+
+  .notification-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
   }
 
   .message {
     flex: 1;
+    font-size: 13px;
     font-weight: 500;
+    line-height: 1.4;
+    word-break: break-word;
   }
 
   .close-btn {
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 24px;
+    height: 24px;
     padding: 0;
     background: transparent;
-    border: 2px solid transparent;
-    color: var(--text-secondary);
+    border: none;
+    color: var(--text-tertiary);
     border-radius: $radius-md;
     cursor: pointer;
-    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    transition: all 0.15s ease;
+    margin: -4px -4px -4px 0;
 
     svg {
       display: block;
@@ -333,6 +376,16 @@ textarea {
       background: var(--bg-secondary);
     }
   }
+}
+
+[data-theme='dark'] .notification {
+  background: color-mix(in srgb, var(--bg-secondary) 85%, transparent);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2);
+
+  &.success { border-color: rgba($success-color, 0.4); }
+  &.warning { border-color: rgba($warning-color, 0.4); }
+  &.error { border-color: rgba($error-color, 0.4); }
+  &.info { border-color: rgba($primary-color, 0.4); }
 }
 
 .switch {
