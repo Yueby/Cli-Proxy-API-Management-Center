@@ -20,7 +20,14 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { IconDownload, IconFilterAll, IconRefreshCw, IconTrash2, IconUpload } from '@/components/ui/icons';
+import {
+  IconDownload,
+  IconFilterAll,
+  IconRefreshCw,
+  IconSearch,
+  IconTrash2,
+  IconUpload,
+} from '@/components/ui/icons';
 import { Pagination } from '@/components/ui/Pagination';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
@@ -69,8 +76,7 @@ const BATCH_BAR_HIDDEN_TRANSFORM = 'translateX(-50%) translateY(56px)';
 const DEFAULT_REGULAR_PAGE_SIZE = 9;
 const DEFAULT_COMPACT_PAGE_SIZE = 12;
 
-const escapeWildcardSearchSegment = (value: string) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const escapeWildcardSearchSegment = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const buildWildcardSearch = (value: string): RegExp | null => {
   if (!value.includes('*')) return null;
@@ -103,6 +109,7 @@ export function AuthFilesPage() {
   const [batchActionBarVisible, setBatchActionBarVisible] = useState(false);
   const [uiStateHydrated, setUiStateHydrated] = useState(false);
   const floatingBatchActionsRef = useRef<HTMLDivElement>(null);
+  const filterTabsRef = useRef<HTMLDivElement>(null);
   const batchActionAnimationRef = useRef<AnimationPlaybackControlsWithThen | null>(null);
   const previousSelectionCountRef = useRef(0);
   const selectionCountRef = useRef(0);
@@ -204,10 +211,7 @@ export function AuthFilesPage() {
       if (typeof persisted.disabledOnly === 'boolean') {
         setDisabledOnly(persisted.disabledOnly);
       }
-      if (
-        typeof persistedCompactMode !== 'boolean' &&
-        typeof persisted.compactMode === 'boolean'
-      ) {
+      if (typeof persistedCompactMode !== 'boolean' && typeof persisted.compactMode === 'boolean') {
         setCompactMode(persisted.compactMode);
       }
       if (typeof persisted.search === 'string') {
@@ -223,11 +227,11 @@ export function AuthFilesPage() {
       const regularPageSize =
         typeof persisted.regularPageSize === 'number' && Number.isFinite(persisted.regularPageSize)
           ? clampCardPageSize(persisted.regularPageSize)
-          : legacyPageSize ?? DEFAULT_REGULAR_PAGE_SIZE;
+          : (legacyPageSize ?? DEFAULT_REGULAR_PAGE_SIZE);
       const compactPageSize =
         typeof persisted.compactPageSize === 'number' && Number.isFinite(persisted.compactPageSize)
           ? clampCardPageSize(persisted.compactPageSize)
-          : legacyPageSize ?? DEFAULT_COMPACT_PAGE_SIZE;
+          : (legacyPageSize ?? DEFAULT_COMPACT_PAGE_SIZE);
       setPageSizeByMode({
         regular: regularPageSize,
         compact: compactPageSize,
@@ -357,6 +361,15 @@ export function AuthFilesPage() {
     return Array.from(types);
   }, [files]);
 
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      const activeEl = filterTabsRef.current?.querySelector(`[data-tab-id="${normalizedFilter}"]`);
+      activeEl?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [normalizedFilter, existingTypes]);
+
   const filesMatchingStatusFilters = useMemo(
     () =>
       files.filter((file) => {
@@ -385,6 +398,8 @@ export function AuthFilesPage() {
     });
     return counts;
   }, [filesMatchingStatusFilters]);
+
+  const activeFilterTabId = existingTypes.includes(normalizedFilter) ? normalizedFilter : 'all';
 
   const normalizedSearch = search.trim();
   const wildcardSearch = useMemo(() => buildWildcardSearch(normalizedSearch), [normalizedSearch]);
@@ -586,8 +601,13 @@ export function AuthFilesPage() {
   );
 
   const renderFilterTags = () => (
-    <div className={styles.filterRail}>
-      <div className={styles.filterTags}>
+    <div className={styles.filterSection}>
+      <div
+        className={styles.tabsContainer}
+        role="tablist"
+        aria-label={t('auth_files.type_filter_label', { defaultValue: 'Auth file type filter' })}
+        ref={filterTabsRef}
+      >
         {existingTypes.map((type) => {
           const isActive = normalizedFilter === type;
           const iconSrc = getAuthFileIcon(type, resolvedTheme);
@@ -604,32 +624,32 @@ export function AuthFilesPage() {
           return (
             <button
               key={type}
-              className={`${styles.filterTag} ${isActive ? styles.filterTagActive : ''}`}
+              id={`auth-files-filter-tab-${type}`}
+              role="tab"
+              data-tab-id={type}
+              aria-selected={isActive}
+              aria-controls="auth-files-list"
+              className={`${styles.tabButton} ${isActive ? styles.tabButtonActive : ''}`}
               style={buttonStyle}
               onClick={() => {
                 setFilter(type);
                 setPage(1);
               }}
+              type="button"
             >
-              <span className={styles.filterTagLabel}>
+              <span className={styles.tabIconWrap}>
                 {type === 'all' ? (
-                  <span className={`${styles.filterTagIconWrap} ${styles.filterAllIconWrap}`}>
-                    <IconFilterAll className={styles.filterAllIcon} size={16} />
-                  </span>
+                  <IconFilterAll className={styles.filterAllIcon} size={16} />
+                ) : iconSrc ? (
+                  <img src={iconSrc} alt="" className={styles.tabIcon} />
                 ) : (
-                  <span className={styles.filterTagIconWrap}>
-                    {iconSrc ? (
-                      <img src={iconSrc} alt="" className={styles.filterTagIcon} />
-                    ) : (
-                      <span className={styles.filterTagIconFallback}>
-                        {getTypeLabel(t, type).slice(0, 1).toUpperCase()}
-                      </span>
-                    )}
+                  <span className={styles.tabIconFallback}>
+                    {getTypeLabel(t, type).slice(0, 1).toUpperCase()}
                   </span>
                 )}
-                <span className={styles.filterTagText}>{getTypeLabel(t, type)}</span>
               </span>
-              <span className={styles.filterTagCount}>{typeCounts[type] ?? 0}</span>
+              <span className={styles.tabLabel}>{getTypeLabel(t, type)}</span>
+              <span className={styles.tabCount}>{typeCounts[type] ?? 0}</span>
             </button>
           );
         })}
@@ -671,7 +691,14 @@ export function AuthFilesPage() {
         title={titleNode}
         extra={
           <div className={styles.headerActions}>
-            <Button variant="secondary" size="sm" onClick={handleHeaderRefresh} disabled={loading} title={t('common.refresh')} aria-label={t('common.refresh')}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleHeaderRefresh}
+              disabled={loading}
+              title={t('common.refresh')}
+              aria-label={t('common.refresh')}
+            >
               <IconRefreshCw size={16} />
             </Button>
             <Button
@@ -715,21 +742,28 @@ export function AuthFilesPage() {
       >
         {error && <div className={styles.errorBox}>{error}</div>}
 
-        <div className={styles.filterSection}>
+        <div className={styles.filterSectionLayout}>
           {renderFilterTags()}
 
-          <div className={styles.filterContent}>
+          <div
+            className={styles.filterContent}
+            id="auth-files-list"
+            role="tabpanel"
+            aria-labelledby={`auth-files-filter-tab-${activeFilterTabId}`}
+          >
             <div className={styles.filterControlsPanel}>
               <div className={styles.filterControls}>
                 <div className={styles.filterItem}>
                   <label>{t('auth_files.search_label')}</label>
                   <Input
+                    className={styles.searchInput}
                     value={search}
                     onChange={(e) => {
                       setSearch(e.target.value);
                       setPage(1);
                     }}
                     placeholder={t('auth_files.search_placeholder')}
+                    rightElement={<IconSearch className={styles.searchIcon} size={18} />}
                   />
                 </div>
                 <div className={styles.filterItem}>

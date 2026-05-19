@@ -79,9 +79,12 @@ const useQuotaPagination = <T,>(items: T[], defaultPageSize = 6): QuotaPaginatio
     setPage((prev) => Math.min(totalPages, prev + 1));
   }, [totalPages]);
 
-  const goToPage = useCallback((target: number) => {
-    setPage(Math.max(1, Math.min(totalPages, target)));
-  }, [totalPages]);
+  const goToPage = useCallback(
+    (target: number) => {
+      setPage(Math.max(1, Math.min(totalPages, target)));
+    },
+    [totalPages]
+  );
 
   const setLoading = useCallback((isLoading: boolean, scope?: 'page' | 'all' | null) => {
     setLoadingState(isLoading);
@@ -99,7 +102,7 @@ const useQuotaPagination = <T,>(items: T[], defaultPageSize = 6): QuotaPaginatio
     goToPage,
     loading,
     loadingScope,
-    setLoading
+    setLoading,
   };
 };
 
@@ -114,7 +117,7 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
   config,
   files,
   loading,
-  disabled
+  disabled,
 }: QuotaSectionProps<TState, TData>) {
   const { t } = useTranslation();
   const resolvedTheme: ResolvedTheme = useThemeStore((state) => state.resolvedTheme);
@@ -126,13 +129,13 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
   const [viewMode, setViewMode] = useState<ViewMode>('paged');
   const [showTooManyWarning, setShowTooManyWarning] = useState(false);
   const [search, setSearch] = useState('');
-  const [userPageSize, setUserPageSize] = useState<number>(9);
-  const [pageSizeInput, setPageSizeInput] = useState<string>('9');
+  const [userPageSize, setUserPageSize] = useState<number>(18);
+  const [pageSizeInput, setPageSizeInput] = useState<string>('18');
 
-  const typeFilteredFiles = useMemo(() => files.filter((file) => config.filterFn(file)), [
-    files,
-    config
-  ]);
+  const typeFilteredFiles = useMemo(
+    () => files.filter((file) => config.filterFn(file)),
+    [files, config]
+  );
 
   const filteredFiles = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -157,7 +160,7 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
     goToNext,
     goToPage,
     loading: sectionLoading,
-    setLoading
+    setLoading,
   } = useQuotaPagination(filteredFiles);
 
   useEffect(() => {
@@ -270,14 +273,14 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
 
       setQuota((prev) => ({
         ...prev,
-        [file.name]: config.buildLoadingState()
+        [file.name]: config.buildLoadingState(),
       }));
 
       try {
         const data = await config.fetchQuota(file, t);
         setQuota((prev) => ({
           ...prev,
-          [file.name]: config.buildSuccessState(data)
+          [file.name]: config.buildSuccessState(data),
         }));
         showNotification(t('auth_files.quota_refresh_success', { name: file.name }), 'success');
       } catch (err: unknown) {
@@ -285,7 +288,7 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
         const status = getStatusFromError(err);
         setQuota((prev) => ({
           ...prev,
-          [file.name]: config.buildErrorState(message, status)
+          [file.name]: config.buildErrorState(message, status),
         }));
         showNotification(
           t('auth_files.quota_refresh_failed', { name: file.name, message }),

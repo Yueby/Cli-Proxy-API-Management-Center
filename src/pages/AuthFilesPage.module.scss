@@ -79,37 +79,30 @@
 }
 
 // 筛选区域
-.filterSection {
+.filterSectionLayout {
   display: flex;
   flex-direction: column;
   gap: $spacing-md;
   margin-bottom: $spacing-lg;
 }
 
-.filterRail {
+.filterSection {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: $radius-lg;
-  border: 1px solid color-mix(in srgb, var(--border-color) 60%, transparent);
-  background: color-mix(in srgb, var(--bg-secondary) 60%, transparent);
-
-  @include mobile {
-    padding: 10px;
-  }
 }
 
+.tabsContainer {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  overflow-x: auto;
+  padding-bottom: $spacing-xs;
 
-.filterAllIconWrap {
-  position: relative;
-  border-color: color-mix(in srgb, var(--primary-color) 20%, var(--border-color));
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--bg-secondary) 94%, var(--primary-color) 8%),
-    color-mix(in srgb, var(--bg-primary) 92%, var(--primary-color) 5%)
-  );
-  box-shadow: 0 10px 22px -18px color-mix(in srgb, var(--primary-color) 50%, transparent);
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .filterAllIcon {
@@ -119,39 +112,22 @@
   color: color-mix(in srgb, var(--primary-color) 70%, var(--text-primary));
 }
 
-
-.filterContent {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
-  min-width: 0;
-}
-
-.filterTags {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.filterTag {
+.tabButton {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 12px 7px 8px;
-  border-radius: $radius-lg;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.2;
-  border: 1px solid color-mix(in srgb, var(--border-color) 60%, transparent);
-  background: color-mix(in srgb, var(--bg-secondary) 70%, transparent);
+  gap: $spacing-sm;
+  height: 36px;
+  padding: 0 16px 0 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: $radius-full;
   color: var(--text-secondary);
-  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
   white-space: nowrap;
-  transition:
-    border-color $transition-fast,
-    background-color $transition-fast,
-    color $transition-fast;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 
   &:hover {
     border-color: color-mix(in srgb, var(--filter-color) 40%, var(--border-color));
@@ -160,24 +136,22 @@
   }
 }
 
-.filterTagActive {
+.tabButtonActive {
   border-color: color-mix(in srgb, var(--filter-color) 50%, var(--border-color));
   background: color-mix(in srgb, var(--filter-surface) 22%, var(--bg-secondary));
   color: var(--text-primary);
 
-  .filterTagIconWrap {
+  &:hover {
+    border-color: color-mix(in srgb, var(--filter-color) 50%, var(--border-color));
+    background: color-mix(in srgb, var(--filter-surface) 22%, var(--bg-secondary));
+  }
+
+  .tabIconWrap {
     border-color: color-mix(in srgb, var(--filter-color) 40%, transparent);
   }
 }
 
-.filterTagLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.filterTagIconWrap {
+.tabIconWrap {
   width: 24px;
   height: 24px;
   flex: 0 0 auto;
@@ -189,49 +163,47 @@
   background: color-mix(in srgb, var(--bg-tertiary) 60%, transparent);
 }
 
-.filterTagIcon {
+.tabIcon {
   width: 16px;
   height: 16px;
   flex: 0 0 auto;
   object-fit: contain;
 }
 
-.filterTagIconFallback {
+.tabIconFallback {
   color: var(--filter-color);
   font-size: 14px;
   font-weight: 700;
   line-height: 1;
 }
 
-.filterTagText {
-  min-width: 0;
+.tabLabel {
+  line-height: 1;
   color: inherit;
   @include text-ellipsis;
 }
 
-.filterTagCount {
+.tabCount {
   display: inline-grid;
   place-items: center;
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
-  border-radius: $radius-md;
-  background: color-mix(in srgb, var(--filter-color) 12%, transparent);
-  color: var(--text-tertiary);
-  font-size: 11px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  flex: 0 0 auto;
+  border-radius: $radius-full;
+  background: color-mix(in srgb, var(--filter-color) 12%, var(--bg-tertiary));
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
   line-height: 1;
-  text-align: center;
+  flex-shrink: 0;
+
+  .tabButtonActive & {
+    background: color-mix(in srgb, var(--filter-color) 22%, transparent);
+    color: var(--filter-color);
+  }
 }
 
-.filterTagActive .filterTagCount {
-  background: color-mix(in srgb, var(--filter-color) 22%, transparent);
-  color: var(--filter-color);
-}
-
-.filterControlsPanel {
+.filterContent {
   padding: 14px;
   border-radius: $radius-lg;
   border: 1px solid color-mix(in srgb, var(--border-color) 60%, transparent);
@@ -261,6 +233,10 @@
   @include mobile {
     grid-template-columns: 1fr;
   }
+}
+
+.filterSearchItem {
+  min-width: 0;
 }
 
 .filterItem {
@@ -321,6 +297,16 @@
   white-space: nowrap;
 }
 
+.searchInput {
+  padding-right: 32px;
+}
+
+.searchIcon {
+  display: block;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
 .pageSizeSelect {
   width: 100%;
   padding: 0 12px;
@@ -332,7 +318,10 @@
   cursor: text;
   height: 32px;
   box-sizing: border-box;
-  transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+  transition:
+    border-color $transition-fast,
+    background-color $transition-fast,
+    box-shadow $transition-fast;
 
   &:hover:not(:focus):not(:disabled) {
     border-color: var(--primary-color);
@@ -467,11 +456,16 @@
 }
 
 // 卡片品牌色类保留为空 no-op — 品牌色已由 typeBadge / providerAvatar 表达
-.antigravityCard {}
-.claudeCard {}
-.codexCard {}
-.geminiCliCard {}
-.kimiCard {}
+.antigravityCard {
+}
+.claudeCard {
+}
+.codexCard {
+}
+.geminiCliCard {
+}
+.kimiCard {
+}
 
 .quotaSection {
   display: flex;
@@ -1383,7 +1377,10 @@ span.premiumPlanValue {
   resize: vertical;
   min-height: 120px;
   box-sizing: border-box;
-  transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+  transition:
+    border-color $transition-fast,
+    background-color $transition-fast,
+    box-shadow $transition-fast;
 
   &:hover:not(:focus):not(:disabled) {
     border-color: var(--primary-color);
@@ -1395,6 +1392,23 @@ span.premiumPlanValue {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba($primary-color, 0.18);
   }
+}
+
+.prefixProxyInvalidContentPreview {
+  width: 100%;
+  max-height: 220px;
+  margin: 0;
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid var(--border-color);
+  border-radius: $radius-md;
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: monospace;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow: auto;
+  box-sizing: border-box;
 }
 
 .prefixProxyFields {
@@ -1848,7 +1862,10 @@ span.premiumPlanValue {
   font-size: 14px;
   font-family: monospace;
   resize: vertical;
-  transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+  transition:
+    border-color $transition-fast,
+    background-color $transition-fast,
+    box-shadow $transition-fast;
 
   &:hover:not(:focus):not(:disabled) {
     border-color: var(--primary-color);

@@ -594,6 +594,7 @@
     "prefix_proxy_loading": "Loading auth file...",
     "prefix_proxy_info_label": "Auth file info (info)",
     "prefix_proxy_source_label": "Auth file JSON (preview)",
+    "prefix_proxy_invalid_content_label": "Downloaded content (truncated)",
     "prefix_label": "Prefix (prefix)",
     "proxy_url_label": "Proxy URL (proxy_url)",
     "prefix_placeholder": "",
@@ -618,6 +619,7 @@
     "headers_invalid_object": "Custom headers must be a JSON object.",
     "headers_invalid_value": "Each custom header value must be a string.",
     "prefix_proxy_invalid_json": "This auth file is not a JSON object, so fields cannot be edited.",
+    "prefix_proxy_html_challenge": "Downloaded content is an HTML challenge page, not an auth JSON object. Re-authenticate or replace this auth file before editing fields.",
     "prefix_proxy_saved_success": "Updated auth file \"{{name}}\" successfully",
     "quota_refresh_success": "Quota refreshed for \"{{name}}\"",
     "quota_refresh_failed": "Failed to refresh quota for \"{{name}}\": {{message}}"
@@ -1096,6 +1098,8 @@
           "allow_remote_desc": "Allow management access from other hosts",
           "disable_panel": "Disable Control Panel",
           "disable_panel_desc": "Disable the built-in web control panel",
+          "disable_auto_update_panel": "Disable Panel Auto Updates",
+          "disable_auto_update_panel_desc": "Download the panel when first missing, but never auto-update it from GitHub",
           "secret_key": "Management Key",
           "secret_key_placeholder": "Set management key",
           "panel_repo": "Panel Repository"
@@ -1115,7 +1119,16 @@
           "commercial_mode_desc": "Disable high-overhead middleware to support high concurrency",
           "logging_to_file": "Log to File",
           "logging_to_file_desc": "Save logs to files",
-          "logs_max_size": "Log File Size Limit (MB)"
+          "logs_max_size": "Log File Size Limit (MB)",
+          "error_logs_max_files": "Retained Error Log Files",
+          "redis_usage_retention": "Redis Usage Queue Retention (seconds)",
+          "redis_usage_retention_hint": "In-memory retention for RESP LPOP/RPOP usage output, max 3600 seconds",
+          "usage_statistics_enabled": "Enable In-memory Usage Statistics",
+          "usage_statistics_enabled_desc": "Aggregate request usage statistics in memory",
+          "antigravity_signature_cache": "Enable Antigravity Signature Cache",
+          "antigravity_signature_cache_desc": "Prefer and validate cached thinking-block signatures",
+          "antigravity_signature_strict": "Strict Bypass Signature Validation",
+          "antigravity_signature_strict_desc": "Only applies when the signature cache is disabled; validates the full Claude protobuf tree"
         },
         "network": {
           "title": "Network Configuration",
@@ -1134,7 +1147,20 @@
           "force_model_prefix_desc": "Unprefixed model requests only use credentials without prefix",
           "session_affinity": "Session Affinity Routing",
           "ws_auth": "WebSocket Authentication",
-          "ws_auth_desc": "Enable WebSocket authentication (/v1/ws)"
+          "ws_auth_desc": "Enable WebSocket authentication (/v1/ws)",
+          "passthrough_headers": "Pass Through Upstream Headers",
+          "passthrough_headers_desc": "Forward filtered upstream response headers to downstream clients",
+          "disable_cooling": "Disable Cooling",
+          "disable_cooling_desc": "Globally disable auth/model cooldown windows after failures",
+          "disable_image_generation": "Disable Image Generation",
+          "disable_image_generation_hint": "false enables it; true disables all image generation; chat only disables non-image endpoint injection",
+          "disable_image_generation_false": "false (enabled)",
+          "disable_image_generation_true": "true (disabled everywhere)",
+          "disable_image_generation_chat": "chat (disable chat injection only)",
+          "enable_gemini_cli_endpoint": "Enable Gemini CLI Internal Endpoint",
+          "enable_gemini_cli_endpoint_desc": "Enable /v1internal:* compatibility endpoints",
+          "auth_auto_refresh_workers": "Auth Auto-refresh Workers",
+          "auth_auto_refresh_workers_hint": "When greater than 0, overrides the default worker count (16)"
         },
         "quota": {
           "title": "Quota Fallback",
@@ -1170,6 +1196,21 @@
           "override_raw_rules_desc": "Always overwrite parameter values as raw JSON fragments, useful for response_format, schemas, and other complex fields",
           "filter_rules": "Filter Rules",
           "filter_rules_desc": "Pre-filter upstream request body via JSON Path, automatically remove non-compliant/redundant parameters (Request Sanitization)"
+        },
+        "headers": {
+          "title": "Header Defaults",
+          "description": "Default headers for Claude and Codex OAuth requests when the client omits them",
+          "claude_title": "Claude Header Defaults",
+          "codex_title": "Codex Header Defaults",
+          "user_agent": "User-Agent",
+          "package_version": "Package Version",
+          "runtime_version": "Runtime Version",
+          "os": "OS",
+          "arch": "Arch",
+          "timeout": "Timeout",
+          "stabilize_device": "Stabilize Device Profile",
+          "stabilize_device_desc": "Pin OS/Arch and stabilize the software fingerprint per credential/API key",
+          "beta_features": "Beta Features"
         }
       },
       "api_keys": {
@@ -1199,11 +1240,15 @@
         "param_type": "Parameter Type",
         "param_value": "Parameter Value",
         "add_param": "Add Parameter",
+        "headers": "Request Header Matches",
+        "header_name": "Header Name",
+        "header_value": "Header Value",
+        "add_header": "Add Header",
+        "add_condition": "Add Condition",
         "no_rules": "No rules",
         "add_rule": "Add Rule",
         "provider_default": "Default",
         "provider_openai": "OpenAI",
-        "provider_openai_response": "OpenAI Response",
         "provider_gemini": "Gemini",
         "provider_claude": "Claude",
         "provider_codex": "Codex",
@@ -1219,7 +1264,17 @@
         "value_raw_json": "Raw JSON fragment, e.g. true, 123, \"high\", or {\"type\":\"object\"}",
         "value_default": "Value",
         "boolean_true": "true",
-        "boolean_false": "false"
+        "boolean_false": "false",
+        "provider_responses": "Responses",
+        "advanced": "Advanced",
+        "hide_advanced": "Hide Advanced",
+        "from_protocol": "Source Protocol (from-protocol)",
+        "match": "Required Matches (match)",
+        "notMatch": "Forbidden Matches (not-match)",
+        "exist": "Required Paths (exist)",
+        "notExist": "Forbidden Paths (not-exist)",
+        "condition_path": "Match Path",
+        "condition_value": "Match Value"
       },
       "validation": {
         "validation_blocked": "Fix validation errors before saving",

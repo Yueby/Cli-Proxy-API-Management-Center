@@ -80,6 +80,85 @@
   font-size: 14px;
 }
 
+.tabsContainer {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  overflow-x: auto;
+  padding-bottom: $spacing-xs; // for scrollbar
+  margin-bottom: $spacing-sm;
+
+  // hide scrollbar visually but keep functionality
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.tabIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.tabButton {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-sm;
+  height: 36px;
+  padding: 0 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: $radius-full;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+}
+
+.activeTab {
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary-color) 15%, transparent);
+    color: var(--primary-color);
+  }
+}
+
+.tabLabel {
+  line-height: 1;
+}
+
+.tabCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: $radius-full;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+
+  .activeTab & {
+    background: var(--primary-color);
+    color: var(--primary-contrast, #fff);
+  }
+}
+
 .pageSizeSelect {
   padding: 0 12px;
   border: 1px solid var(--border-color);
@@ -91,7 +170,10 @@
   height: 32px;
   width: 72px;
   box-sizing: border-box;
-  transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+  transition:
+    border-color $transition-fast,
+    background-color $transition-fast,
+    box-shadow $transition-fast;
 
   &:hover:not(:focus):not(:disabled) {
     border-color: var(--primary-color);
@@ -224,7 +306,11 @@
   font-size: 13px;
   background: var(--bg-secondary);
   border-color: var(--border-color);
-  transition: width $transition-fast, border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+  transition:
+    width $transition-fast,
+    border-color $transition-fast,
+    background-color $transition-fast,
+    box-shadow $transition-fast;
 
   &:hover:not(:focus) {
     border-color: var(--primary-color);
@@ -282,11 +368,16 @@
 }
 
 // 卡片品牌色类保留为空 no-op — 品牌色已由 typeBadge 表达
-.claudeCard {}
-.antigravityCard {}
-.codexCard {}
-.geminiCliCard {}
-.kimiCard {}
+.claudeCard {
+}
+.antigravityCard {
+}
+.codexCard {
+}
+.geminiCliCard {
+}
+.kimiCard {
+}
 
 .quotaSection {
   display: flex;
