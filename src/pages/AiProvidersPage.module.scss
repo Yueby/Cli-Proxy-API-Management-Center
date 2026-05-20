@@ -21,6 +21,41 @@ $openai-toolbar-control-height: 32px;
   height: 24px;
 }
 
+.providerButtonGroup {
+  display: inline-flex;
+  align-items: center;
+  border-radius: $radius-md;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+
+  :global(.btn) {
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    position: relative;
+    background: transparent !important;
+    box-shadow: none !important;
+    height: 32px;
+    padding: 0 12px;
+    color: var(--text-secondary);
+
+    &:hover:not(:disabled) {
+      background: var(--bg-tertiary) !important;
+      color: var(--text-primary);
+    }
+
+    &:not(:first-child) {
+      border-left: 1px solid var(--border-color) !important;
+    }
+
+    &:focus-visible {
+      z-index: 2;
+      box-shadow: inset 0 0 0 1.5px var(--primary-color) !important;
+    }
+  }
+}
+
 .content {
   display: flex;
   flex-direction: column;
@@ -513,28 +548,47 @@ $openai-toolbar-control-height: 32px;
 .modelDropdownHeader {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: $spacing-xs;
   padding: 6px;
   border-bottom: 1px solid var(--border-primary);
   background: var(--bg-tertiary);
 }
 
-.modelDropdownSelectAll:global(.btn.btn-ghost),
-.modelDropdownClear:global(.btn.btn-ghost) {
-  height: 28px;
-  padding: 0 8px;
-  color: var(--primary-color);
-  font-size: 12px;
+.modelDropdownButtonGroup {
+  display: inline-flex;
+  align-items: center;
+  border-radius: $radius-sm;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  width: 100%;
 
-  &:hover {
-    background: var(--bg-secondary);
+  :global(.btn) {
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    position: relative;
+    background: transparent !important;
+    box-shadow: none !important;
+    height: 26px;
+    padding: 0 10px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    flex: 1;
+
+    &:hover:not(:disabled) {
+      background: var(--bg-tertiary) !important;
+      color: var(--text-primary);
+    }
+
+    &:not(:first-child) {
+      border-left: 1px solid var(--border-color) !important;
+    }
+
+    &:focus-visible {
+      z-index: 2;
+      box-shadow: inset 0 0 0 1px var(--primary-color) !important;
+    }
   }
-}
-
-.openaiAddButton:global(.btn.btn-primary) {
-  height: $openai-toolbar-control-height;
-  padding: 0 12px;
 }
 
 .modelDropdownItems {

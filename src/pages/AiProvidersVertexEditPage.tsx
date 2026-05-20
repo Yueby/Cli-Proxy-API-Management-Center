@@ -18,7 +18,7 @@ import { buildHeaderObject, headersToEntries, normalizeHeaderEntries } from '@/u
 import { areKeyValueEntriesEqual, areModelEntriesEqual, areStringArraysEqual } from '@/utils/compare';
 import type { VertexFormState } from '@/components/providers';
 import layoutStyles from './AiProvidersEditLayout.module.scss';
-import { IconChevronLeft, IconCheck } from '@/components/ui/icons';
+import { IconSave } from '@/components/ui/icons';
 
 
 type LocationState = { fromAiProviders?: boolean } | null;
@@ -306,28 +306,19 @@ export function AiProvidersVertexEditPage() {
       onBack={handleBack}
       backLabel={t('common.back')}
       backAriaLabel={t('common.back')}
-      hideTopBarBackButton
-      hideTopBarRightAction
-      floatingAction={
-        <div className={layoutStyles.floatingActions}>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleBack}
-            className={layoutStyles.floatingBackButton}
-          >
-            <IconChevronLeft size={16} />
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleSave}
-            loading={saving}
-            disabled={!canSave}
-            className={layoutStyles.floatingSaveButton}
-          >
-            <IconCheck size={16} />
-          </Button>
-        </div>
+      rightAction={
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleSave}
+          loading={saving}
+          disabled={!canSave}
+          className={layoutStyles.headerActionButton}
+          title={t('common.save')}
+          aria-label={t('common.save')}
+        >
+          <IconSave size={16} />
+        </Button>
       }
       isLoading={loading}
       loadingLabel={t('common.loading')}

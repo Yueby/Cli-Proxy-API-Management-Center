@@ -7,8 +7,9 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { SelectionCheckbox } from '@/components/ui/SelectionCheckbox';
 import { AutocompleteInput } from '@/components/ui/AutocompleteInput';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { IconInfo } from '@/components/ui/icons';
+import { IconInfo, IconSave } from '@/components/ui/icons';
 import { SecondaryScreenShell } from '@/components/common/SecondaryScreenShell';
+import layoutStyles from './AiProvidersEditLayout.module.scss';
 import { useEdgeSwipeBack } from '@/hooks/useEdgeSwipeBack';
 import { useAuthStore, useNotificationStore } from '@/stores';
 import { authFilesApi } from '@/services/api';
@@ -308,8 +309,17 @@ export function AuthFilesOAuthExcludedEditPage() {
       backAriaLabel={t('common.back')}
       contentClassName={styles.pageContent}
       rightAction={
-        <Button size="sm" onClick={handleSave} loading={saving} disabled={!canSave}>
-          {t('oauth_excluded.save')}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleSave}
+          loading={saving}
+          disabled={!canSave}
+          className={layoutStyles.headerActionButton}
+          title={t('oauth_excluded.save')}
+          aria-label={t('oauth_excluded.save')}
+        >
+          <IconSave size={16} />
         </Button>
       }
       isLoading={initialLoading}

@@ -531,7 +531,7 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
                       <div className={styles.authUrlBox}>
                         <div className={styles.authUrlLabel}>{t(provider.urlLabelKey)}</div>
                         <div className={styles.authUrlValue}>{state.url}</div>
-                        <div className={styles.authUrlActions}>
+                        <div className={`segmented-button-group ${styles.authUrlActions}`}>
                           <Button variant="secondary" size="sm" onClick={() => copyLink(state.url!)} title={t(getAuthKey(provider.id, 'copy_link'))} aria-label={t(getAuthKey(provider.id, 'copy_link'))}>
                             <IconCopy size={16} />
                           </Button>

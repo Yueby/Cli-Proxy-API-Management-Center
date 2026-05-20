@@ -58,7 +58,7 @@ export function ProviderCard({
         </span>
       }
       extra={
-        <>
+        <div className={styles.providerButtonGroup}>
           {hasConfigs && (
             <Button
               variant="secondary"
@@ -85,6 +85,7 @@ export function ProviderCard({
           )}
           {extraActions}
           <Button
+            variant="secondary"
             size="sm"
             onClick={onAdd}
             disabled={disabled}
@@ -93,7 +94,7 @@ export function ProviderCard({
           >
             <IconPlus size={16} />
           </Button>
-        </>
+        </div>
       }
     >
       {children}

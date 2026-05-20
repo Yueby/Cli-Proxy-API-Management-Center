@@ -14,7 +14,7 @@ import { buildOpenAIModelsEndpoint } from '@/components/providers/utils';
 import type { OpenAIEditOutletContext } from './AiProvidersOpenAIEditLayout';
 import styles from './AiProvidersPage.module.scss';
 import layoutStyles from './AiProvidersEditLayout.module.scss';
-import { IconCheck, IconChevronLeft } from '@/components/ui/icons';
+import { IconSave } from '@/components/ui/icons';
 
 
 const getErrorMessage = (err: unknown) => {
@@ -183,29 +183,18 @@ export function AiProvidersOpenAIModelsPage() {
       onBack={handleBack}
       backLabel={t('common.back')}
       backAriaLabel={t('common.back')}
-      hideTopBarBackButton
-      hideTopBarRightAction
-      floatingAction={
-        <div className={layoutStyles.floatingActions}>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleBack}
-            className={layoutStyles.floatingBackButton}
-          >
-            <IconChevronLeft size={16} />
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleApply}
-            disabled={!canApply}
-            className={layoutStyles.floatingSaveButton}
-            title={t('ai_providers.openai_models_fetch_apply')}
-            aria-label={t('ai_providers.openai_models_fetch_apply')}
-          >
-            <IconCheck size={16} />
-          </Button>
-        </div>
+      rightAction={
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleApply}
+          disabled={!canApply}
+          className={layoutStyles.headerActionButton}
+          title={t('ai_providers.openai_models_fetch_apply')}
+          aria-label={t('ai_providers.openai_models_fetch_apply')}
+        >
+          <IconSave size={16} />
+        </Button>
       }
       isLoading={initialLoading}
       loadingLabel={t('common.loading')}
@@ -243,7 +232,7 @@ export function AiProvidersOpenAIModelsPage() {
           />
           {models.length > 0 && (
             <div className={styles.modelDiscoveryToolbar}>
-              <div className={styles.modelDiscoveryToolbarActions}>
+              <div className={`segmented-button-group ${styles.modelDiscoveryToolbarActions}`}>
                 <Button
                   variant="secondary"
                   size="sm"
@@ -259,7 +248,7 @@ export function AiProvidersOpenAIModelsPage() {
                   {t('ai_providers.model_discovery_select_visible')}
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="secondary"
                   size="sm"
                   onClick={handleClearSelection}
                   disabled={disableControls || saving || fetching || selected.size === 0}

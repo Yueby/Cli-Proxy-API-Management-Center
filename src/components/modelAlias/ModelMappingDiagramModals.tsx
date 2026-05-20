@@ -34,12 +34,12 @@ export function RenameAliasModal({
       title={t('oauth_model_alias.diagram_rename_alias_title')}
       width={400}
       footer={
-        <>
+        <div className="segmented-button-group">
           <Button variant="secondary" onClick={onClose}>
             {t('common.cancel')}
           </Button>
           <Button onClick={onSubmit}>{t('oauth_model_alias.diagram_rename_btn')}</Button>
-        </>
+        </div>
       }
     >
       <Input
@@ -83,12 +83,12 @@ export function AddAliasModal({
       title={t('oauth_model_alias.diagram_add_alias_title')}
       width={400}
       footer={
-        <>
+        <div className="segmented-button-group">
           <Button variant="secondary" onClick={onClose}>
             {t('common.cancel')}
           </Button>
           <Button onClick={onSubmit}>{t('oauth_model_alias.diagram_add_btn')}</Button>
-        </>
+        </div>
       }
     >
       <Input
@@ -208,7 +208,12 @@ export function SettingsSourceModal({
       open={open}
       onClose={onClose}
       title={t('oauth_model_alias.diagram_settings_source_title')}
-      width={720}
+      width={400}
+      footer={
+        <Button variant="secondary" onClick={onClose}>
+          {t('common.close')}
+        </Button>
+      }
     >
       {source ? (
         source.aliases.length === 0 ? (

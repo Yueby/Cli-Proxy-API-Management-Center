@@ -916,3 +916,51 @@ textarea {
 .hint {
   color: var(--text-secondary);
 }
+
+// ─── Segmented Button Group (Fused Block + Divider Lines) ───
+.segmented-button-group {
+  display: inline-flex;
+  align-items: center;
+  border-radius: $radius-md;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+
+  > .btn,
+  > button.btn {
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    height: 32px;
+    width: auto !important;
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transform: none !important;
+
+    &:hover:not(:disabled) {
+      background: var(--bg-tertiary) !important;
+      color: var(--text-primary);
+      transform: none !important;
+    }
+
+    &:not(:first-child) {
+      border-left: 1px solid var(--border-color) !important;
+    }
+
+    &:focus-visible {
+      z-index: 2;
+      box-shadow: inset 0 0 0 1.5px var(--primary-color) !important;
+    }
+
+    &.btn-danger {
+      color: var(--danger-color) !important;
+      &:hover:not(:disabled) {
+        background: rgba($error-color, 0.08) !important;
+      }
+    }
+  }
+}

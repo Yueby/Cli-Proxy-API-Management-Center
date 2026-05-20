@@ -3,10 +3,12 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import type { ReactElement, ReactNode } from 'react';
+import { useState, type ReactElement, type ReactNode } from 'react';
 import type { TFunction } from 'i18next';
 import type { AuthFileItem, ResolvedTheme } from '@/types';
 import { resolveCodexPlanType } from '@/utils/quota/resolvers';
+import { Modal } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
 import styles from '@/pages/QuotaPage.module.scss';
 
 type QuotaStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -81,6 +83,7 @@ export function QuotaCard<TState extends QuotaStatusState>({
   renderQuotaItems
 }: QuotaCardProps<TState>) {
   const { t } = useTranslation();
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   const quotaStatus = quota?.status ?? 'idle';
   const quotaErrorMessage = resolveQuotaErrorMessage(
@@ -148,11 +151,55 @@ export function QuotaCard<TState extends QuotaStatusState>({
             <div className={styles.quotaMessage}>{t(idleMessageKey)}</div>
           )
         ) : quotaStatus === 'error' ? (
-          <div className={styles.quotaError}>
-            {t(`${i18nPrefix}.load_failed`, {
-              message: quotaErrorMessage
-            })}
-          </div>
+          <>
+            <button
+              type="button"
+              className={styles.quotaError}
+              onClick={() => setShowErrorModal(true)}
+              title={t(`${i18nPrefix}.load_failed`, { message: quotaErrorMessage })}
+            >
+              {t(`${i18nPrefix}.load_failed`, {
+                message: quotaErrorMessage
+              })}
+            </button>
+
+            <Modal
+              open={showErrorModal}
+              title={t('common.error_details', { defaultValue: 'Error Details' })}
+              onClose={() => setShowErrorModal(false)}
+              footer={
+                <Button variant="secondary" size="sm" onClick={() => setShowErrorModal(false)}>
+                  {t('common.close')}
+                </Button>
+              }
+              width={480}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>
+                  {t('quota_management.quota_error_detail_desc', { defaultValue: 'Quota load error details:' })}
+                </p>
+                <pre style={{
+                  margin: 0,
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-all',
+                  background: 'var(--bg-secondary)',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-color)',
+                  fontFamily: 'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
+                  fontSize: '13px',
+                  lineHeight: '1.5',
+                  color: 'var(--text-primary)',
+                  maxHeight: '240px',
+                  overflowY: 'auto'
+                }}>
+                  {t(`${i18nPrefix}.load_failed`, {
+                    message: quotaErrorMessage
+                  })}
+                </pre>
+              </div>
+            </Modal>
+          </>
         ) : quota ? (
           renderQuotaItems(quota, t, { styles, QuotaProgressBar })
         ) : (

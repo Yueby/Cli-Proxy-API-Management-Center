@@ -892,24 +892,24 @@ export function LogsPage() {
         open={Boolean(requestLogId)}
         onClose={closeRequestLogModal}
         title={t('logs.request_log_download_title')}
-        footer={
-          <>
-            <Button variant="secondary" onClick={closeRequestLogModal} disabled={requestLogDownloading}>
-              {t('common.cancel')}
-            </Button>
-            <Button
-              onClick={() => {
-                if (requestLogId) {
-                  void downloadRequestLog(requestLogId);
-                }
-              }}
-              loading={requestLogDownloading}
-              disabled={!requestLogId}
-            >
-              {t('common.confirm')}
-            </Button>
-          </>
-        }
+      footer={
+        <div className="segmented-button-group">
+          <Button variant="secondary" onClick={closeRequestLogModal} disabled={requestLogDownloading}>
+            {t('common.cancel')}
+          </Button>
+          <Button
+            onClick={() => {
+              if (requestLogId) {
+                void downloadRequestLog(requestLogId);
+              }
+            }}
+            loading={requestLogDownloading}
+            disabled={!requestLogId}
+          >
+            {t('common.confirm')}
+          </Button>
+        </div>
+      }
       >
         {requestLogId ? t('logs.request_log_download_confirm', { id: requestLogId }) : null}
       </Modal>

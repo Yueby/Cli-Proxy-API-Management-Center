@@ -81,6 +81,17 @@
     font-size: 14px;
   }
 
+  .avatarNoBg {
+    background-color: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+
+    .avatarImage {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
   .headerContent {
     gap: 3px;
   }
@@ -115,16 +126,15 @@
   }
 
   .utilityActions {
-    gap: 2px;
-    padding: 2px;
+    padding: 0;
+    gap: 0;
     border-radius: $radius-md;
-  }
 
-  .iconButton:global(.btn.btn-sm) {
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
-    border-radius: $radius-md;
+    :global(.btn) {
+      width: 28px !important;
+      height: 28px !important;
+      min-width: 28px !important;
+    }
   }
 
   .toggleArea {
@@ -180,6 +190,17 @@
   font-size: 18px;
   font-weight: 700;
   line-height: 1;
+}
+
+.avatarNoBg {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+
+  .avatarImage {
+    width: 28px;
+    height: 28px;
+  }
 }
 
 .headerContent {
@@ -410,12 +431,50 @@
 }
 
 .utilityActions {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 2px;
   border-radius: $radius-md;
-  background: color-mix(in srgb, var(--bg-tertiary) 50%, transparent);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  padding: 0;
+  gap: 0;
+
+  :global(.btn) {
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    padding: 0;
+    color: var(--text-secondary);
+
+    &:hover:not(:disabled) {
+      background: var(--bg-tertiary) !important;
+      color: var(--text-primary);
+    }
+
+    &:global(.btn-danger) {
+      color: var(--danger-color);
+
+      &:hover:not(:disabled) {
+        background: var(--bg-error-light) !important;
+        color: var(--danger-color);
+      }
+    }
+
+    &:not(:first-child) {
+      border-left: 1px solid var(--border-color) !important;
+    }
+
+    &:focus-visible {
+      z-index: 2;
+      box-shadow: inset 0 0 0 1.5px var(--primary-color) !important;
+    }
+  }
 }
 
 .iconButton:global(.btn.btn-sm) {
@@ -424,7 +483,6 @@
   min-width: 32px;
   padding: 0;
   box-sizing: border-box;
-  border-radius: $radius-md;
   gap: 0;
 }
 

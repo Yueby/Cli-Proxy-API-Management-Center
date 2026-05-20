@@ -48,7 +48,7 @@ export function AuthFilesPrefixProxyEditorModal(props: AuthFilesPrefixProxyEdito
           : t('auth_files.prefix_proxy_button')
       }
       footer={
-        <>
+        <div className="segmented-button-group">
           {dirty && (
             <Button variant="secondary" onClick={onClose} disabled={editor?.saving === true}>
               {t('common.cancel')}
@@ -77,7 +77,7 @@ export function AuthFilesPrefixProxyEditorModal(props: AuthFilesPrefixProxyEdito
           >
             {t('common.save')}
           </Button>
-        </>
+        </div>
       }
     >
       {editor && (

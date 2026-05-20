@@ -17,7 +17,7 @@ import { buildClaudeMessagesEndpoint, parseTextList } from '@/components/provide
 import type { ClaudeEditOutletContext } from './AiProvidersClaudeEditLayout';
 import styles from './AiProvidersPage.module.scss';
 import layoutStyles from './AiProvidersEditLayout.module.scss';
-import { IconChevronLeft, IconCheck } from '@/components/ui/icons';
+import { IconSave } from '@/components/ui/icons';
 
 
 const CLAUDE_TEST_TIMEOUT_MS = 30_000;
@@ -274,28 +274,19 @@ export function AiProvidersClaudeEditPage() {
       onBack={handleBack}
       backLabel={t('common.back')}
       backAriaLabel={t('common.back')}
-      hideTopBarBackButton
-      hideTopBarRightAction
-      floatingAction={
-        <div className={layoutStyles.floatingActions}>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleBack}
-            className={layoutStyles.floatingBackButton}
-          >
-            <IconChevronLeft size={16} />
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => void handleSave()}
-            loading={saving}
-            disabled={!canSave}
-            className={layoutStyles.floatingSaveButton}
-          >
-            <IconCheck size={16} />
-          </Button>
-        </div>
+      rightAction={
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => void handleSave()}
+          loading={saving}
+          disabled={!canSave}
+          className={layoutStyles.headerActionButton}
+          title={t('common.save')}
+          aria-label={t('common.save')}
+        >
+          <IconSave size={16} />
+        </Button>
       }
       isLoading={loading}
       loadingLabel={t('common.loading')}
@@ -361,7 +352,7 @@ export function AiProvidersClaudeEditPage() {
             <div className={styles.modelConfigSection}>
               <div className={styles.modelConfigHeader}>
                 <label className={styles.modelConfigTitle}>{t('ai_providers.claude_models_label')}</label>
-                <div className={styles.modelConfigToolbar}>
+                <div className={`segmented-button-group ${styles.modelConfigToolbar}`}>
                   <Button
                     variant="secondary"
                     size="sm"

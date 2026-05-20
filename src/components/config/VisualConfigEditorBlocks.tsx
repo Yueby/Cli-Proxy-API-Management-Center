@@ -327,36 +327,38 @@ export const ApiKeysCardEditor = memo(function ApiKeysCardEditor({
                 <div className="item-subtitle">{maskApiKey(String(key || ''))}</div>
               </div>
               <div className="item-actions">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleCopy(key)}
-                  disabled={disabled}
-                  title={t('common.copy')}
-                  aria-label={t('common.copy')}
-                >
-                  <IconCopy size={15} />
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => openEditModal(renderApiKeyIds[index] ?? '')}
-                  disabled={disabled}
-                  title={t('config_management.visual.common.edit')}
-                  aria-label={t('config_management.visual.common.edit')}
-                >
-                  <IconPencil size={15} />
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => handleDelete(renderApiKeyIds[index] ?? '')}
-                  disabled={disabled}
-                  title={t('config_management.visual.common.delete')}
-                  aria-label={t('config_management.visual.common.delete')}
-                >
-                  <IconTrash2 size={15} />
-                </Button>
+                <div className="segmented-button-group">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleCopy(key)}
+                    disabled={disabled}
+                    title={t('common.copy')}
+                    aria-label={t('common.copy')}
+                  >
+                    <IconCopy size={15} />
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => openEditModal(renderApiKeyIds[index] ?? '')}
+                    disabled={disabled}
+                    title={t('config_management.visual.common.edit')}
+                    aria-label={t('config_management.visual.common.edit')}
+                  >
+                    <IconPencil size={15} />
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleDelete(renderApiKeyIds[index] ?? '')}
+                    disabled={disabled}
+                    title={t('config_management.visual.common.delete')}
+                    aria-label={t('config_management.visual.common.delete')}
+                  >
+                    <IconTrash2 size={15} />
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
@@ -374,7 +376,7 @@ export const ApiKeysCardEditor = memo(function ApiKeysCardEditor({
             : t('config_management.visual.api_keys.add_title')
         }
         footer={
-          <>
+          <div className="segmented-button-group">
             <Button variant="secondary" onClick={closeModal} disabled={disabled}>
               {t('config_management.visual.common.cancel')}
             </Button>
@@ -383,7 +385,7 @@ export const ApiKeysCardEditor = memo(function ApiKeysCardEditor({
                 ? t('config_management.visual.common.update')
                 : t('config_management.visual.common.add')}
             </Button>
-          </>
+          </div>
         }
       >
         <div className="form-group">
@@ -935,33 +937,35 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
                         />
                       </>
                     )}
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className={`${styles.payloadRowActionButton} ${styles.payloadAdvancedToggleButton} ${advancedExpanded ? styles.payloadAdvancedToggleButtonActive : ''}`}
-                      onClick={() => toggleModelAdvanced(model.id, hasAdvancedSettings)}
-                      disabled={disabled}
-                      title={advancedExpanded ? t('common.collapse') : t('common.expand')}
-                      aria-label={advancedExpanded ? t('common.collapse') : t('common.expand')}
-                      aria-expanded={advancedExpanded}
-                    >
-                      {advancedExpanded ? (
-                        <IconChevronUp size={14} />
-                      ) : (
-                        <IconChevronDown size={14} />
-                      )}
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className={styles.payloadRowActionButton}
-                      onClick={() => removeModel(ruleIndex, modelIndex)}
-                      disabled={disabled}
-                      title={t('config_management.visual.common.delete')}
-                      aria-label={t('config_management.visual.common.delete')}
-                    >
-                      <IconX size={14} />
-                    </Button>
+                    <div className="segmented-button-group">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className={`${styles.payloadRowActionButton} ${styles.payloadAdvancedToggleButton} ${advancedExpanded ? styles.payloadAdvancedToggleButtonActive : ''}`}
+                        onClick={() => toggleModelAdvanced(model.id, hasAdvancedSettings)}
+                        disabled={disabled}
+                        title={advancedExpanded ? t('common.collapse') : t('common.expand')}
+                        aria-label={advancedExpanded ? t('common.collapse') : t('common.expand')}
+                        aria-expanded={advancedExpanded}
+                      >
+                        {advancedExpanded ? (
+                          <IconChevronUp size={14} />
+                        ) : (
+                          <IconChevronDown size={14} />
+                        )}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className={styles.payloadRowActionButton}
+                        onClick={() => removeModel(ruleIndex, modelIndex)}
+                        disabled={disabled}
+                        title={t('config_management.visual.common.delete')}
+                        aria-label={t('config_management.visual.common.delete')}
+                      >
+                        <IconX size={14} />
+                      </Button>
+                    </div>
                   </div>
 
                   {advancedExpanded ? (

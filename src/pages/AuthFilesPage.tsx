@@ -128,7 +128,6 @@ export function AuthFilesPage() {
     error,
     uploading,
     deleting,
-    deletingAll,
     statusUpdating,
     batchStatusUpdating,
     fileInputRef,
@@ -136,7 +135,6 @@ export function AuthFilesPage() {
     handleUploadClick,
     handleFileChange,
     handleDelete,
-    handleDeleteAll,
     handleDownload,
     handleStatusToggle,
     toggleSelect,
@@ -606,22 +604,6 @@ export function AuthFilesPage() {
     []
   );
 
-  const deleteAllButtonLabel = (() => {
-    if (disabledOnly) {
-      return t('auth_files.delete_filtered_result_button');
-    }
-    if (problemOnly) {
-      return normalizedFilter === 'all'
-        ? t('auth_files.delete_problem_button')
-        : t('auth_files.delete_problem_button_with_type', {
-            type: getTypeLabel(t, normalizedFilter),
-          });
-    }
-    return normalizedFilter === 'all'
-      ? t('auth_files.delete_all_button')
-      : `${t('common.delete')} ${getTypeLabel(t, normalizedFilter)}`;
-  })();
-
   const renderFilterTags = () => (
     <div className={styles.filterSection}>
       <div
@@ -720,24 +702,6 @@ export function AuthFilesPage() {
               </Button>
             </div>
 
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() =>
-                handleDeleteAll({
-                  filter,
-                  problemOnly,
-                  disabledOnly,
-                  onResetFilterToAll: () => setFilter('all'),
-                  onResetProblemOnly: () => setProblemOnly(false),
-                  onResetDisabledOnly: () => setDisabledOnly(false),
-                })
-              }
-              disabled={disableControls || loading || deletingAll}
-              loading={deletingAll}
-            >
-              {deleteAllButtonLabel}
-            </Button>
             <input
               ref={fileInputRef}
               type="file"
@@ -956,68 +920,75 @@ export function AuthFilesPage() {
                   <span className={styles.batchSelectionText}>
                     {t('auth_files.batch_selected', { count: selectionCount })}
                   </span>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => selectAllVisible(pageItems)}
-                    disabled={selectablePageItems.length === 0}
-                  >
-                    {t('auth_files.batch_select_page')}
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => selectAllVisible(sorted)}
-                    disabled={selectableFilteredItems.length === 0}
-                  >
-                    {t('auth_files.batch_select_filtered')}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => invertVisibleSelection(pageItems)}
-                    disabled={selectablePageItems.length === 0}
-                  >
-                    {t('auth_files.batch_invert_page')}
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={deselectAll}>
-                    {t('auth_files.batch_deselect')}
-                  </Button>
+                  <div className={styles.batchButtonGroup}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => selectAllVisible(pageItems)}
+                      disabled={selectablePageItems.length === 0}
+                    >
+                      {t('auth_files.batch_select_page')}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => selectAllVisible(sorted)}
+                      disabled={selectableFilteredItems.length === 0}
+                    >
+                      {t('auth_files.batch_select_filtered')}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => invertVisibleSelection(pageItems)}
+                      disabled={selectablePageItems.length === 0}
+                    >
+                      {t('auth_files.batch_invert_page')}
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={deselectAll}>
+                      {t('auth_files.batch_deselect')}
+                    </Button>
+                  </div>
                 </div>
                 <div className={styles.batchActionRight}>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => void batchDownload(selectedNames)}
-                    disabled={disableControls || selectedNames.length === 0}
-                    title={t('auth_files.batch_download')}
-                    aria-label={t('auth_files.batch_download')}
-                  >
-                    <IconDownload size={16} />
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => batchSetStatus(selectedNames, true)}
-                    disabled={batchStatusButtonsDisabled}
-                  >
-                    {t('auth_files.batch_enable')}
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => batchSetStatus(selectedNames, false)}
-                    disabled={batchStatusButtonsDisabled}
-                  >
-                    {t('auth_files.batch_disable')}
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => batchDelete(selectedNames)}
-                    disabled={disableControls || selectedNames.length === 0}
-                  >
-                    <IconTrash2 size={16} />
-                  </Button>
+                  <div className={styles.batchButtonGroup}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => void batchDownload(selectedNames)}
+                      disabled={disableControls || selectedNames.length === 0}
+                      title={t('auth_files.batch_download')}
+                      aria-label={t('auth_files.batch_download')}
+                    >
+                      <IconDownload size={16} />
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => batchSetStatus(selectedNames, true)}
+                      disabled={batchStatusButtonsDisabled}
+                    >
+                      {t('auth_files.batch_enable')}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => batchSetStatus(selectedNames, false)}
+                      disabled={batchStatusButtonsDisabled}
+                    >
+                      {t('auth_files.batch_disable')}
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => batchDelete(selectedNames)}
+                      disabled={disableControls || selectedNames.length === 0}
+                      title={t('auth_files.batch_delete_title')}
+                      aria-label={t('auth_files.batch_delete_title')}
+                    >
+                      <IconTrash2 size={16} />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>,

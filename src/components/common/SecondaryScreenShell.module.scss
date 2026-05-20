@@ -34,31 +34,15 @@
 }
 
 .backButton {
-  padding-left: 6px;
-  padding-right: 10px;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
   justify-self: start;
-  gap: 0;
-}
-
-.backButton > span:last-child {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.backIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
-  svg {
-    display: block;
-  }
-}
-
-.backText {
-  font-weight: 600;
-  line-height: 18px;
+  border-radius: $radius-md;
 }
 
 .rightSlot {

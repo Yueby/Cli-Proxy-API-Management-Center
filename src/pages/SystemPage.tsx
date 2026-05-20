@@ -533,7 +533,7 @@ export function SystemPage() {
         onClose={handleRequestLogClose}
         title={t('basic_settings.request_log_title')}
         footer={
-          <>
+          <div className="segmented-button-group">
             <Button variant="secondary" onClick={handleRequestLogClose} disabled={requestLogSaving}>
               {t('common.cancel')}
             </Button>
@@ -544,7 +544,7 @@ export function SystemPage() {
             >
               <IconCheck size={16} />
             </Button>
-          </>
+          </div>
         }
       >
         <div className="request-log-modal">

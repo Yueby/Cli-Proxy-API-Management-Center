@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { SelectionCheckbox } from '@/components/ui/SelectionCheckbox';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import { ItemCard } from '@/components/ui/ItemCard';
+import { Modal } from '@/components/ui/Modal';
 import {
   IconDownload,
   IconInfo,
@@ -70,6 +71,7 @@ const resolveQuotaType = (file: AuthFileItem): QuotaProviderType | null => {
 
 export function AuthFileCard(props: AuthFileCardProps) {
   const { t } = useTranslation();
+  const [showStatusDetailModal, setShowStatusDetailModal] = useState(false);
   const {
     file,
     compact,
@@ -207,9 +209,9 @@ export function AuthFileCard(props: AuthFileCardProps) {
       avatar={{
         icon: providerIcon || undefined,
         fallback: typeLabel.slice(0, 1).toUpperCase(),
-        bgColor: typeColor.bg,
+        bgColor: providerIcon ? 'transparent' : typeColor.bg,
         textColor: typeColor.text,
-        border: typeColor.border || undefined,
+        border: providerIcon ? '1px solid transparent' : (typeColor.border || undefined),
       }}
       title={file.name}
       subtitle={
@@ -297,10 +299,52 @@ export function AuthFileCard(props: AuthFileCardProps) {
 
           {/* Health warning */}
           {rawStatusMessage && hasStatusWarning && (
-            <div className={styles.healthStatusMessage} title={rawStatusMessage}>
-              <IconInfo className={styles.messageIcon} size={14} />
-              <span>{rawStatusMessage}</span>
-            </div>
+            <>
+              <button
+                type="button"
+                className={styles.healthStatusMessage}
+                title={rawStatusMessage}
+                onClick={() => setShowStatusDetailModal(true)}
+              >
+                <IconInfo className={styles.messageIcon} size={14} />
+                <span>{rawStatusMessage}</span>
+              </button>
+
+              <Modal
+                open={showStatusDetailModal}
+                title={t('auth_files.status_detail', { defaultValue: 'Status Detail' })}
+                onClose={() => setShowStatusDetailModal(false)}
+                footer={
+                  <Button variant="secondary" size="sm" onClick={() => setShowStatusDetailModal(false)}>
+                    {t('common.close')}
+                  </Button>
+                }
+                width={480}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>
+                    {t('auth_files.status_detail_desc', { defaultValue: 'Detailed warning or error message:' })}
+                  </p>
+                  <pre style={{
+                    margin: 0,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-all',
+                    background: 'var(--bg-secondary)',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-color)',
+                    fontFamily: 'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
+                    fontSize: '13px',
+                    lineHeight: '1.5',
+                    color: 'var(--text-primary)',
+                    maxHeight: '240px',
+                    overflowY: 'auto'
+                  }}>
+                    {rawStatusMessage}
+                  </pre>
+                </div>
+              </Modal>
+            </>
           )}
 
           {/* Stats */}

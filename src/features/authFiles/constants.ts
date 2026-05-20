@@ -42,62 +42,51 @@ export const INTEGER_STRING_PATTERN = /^[+-]?\d+$/;
 export const TRUTHY_TEXT_VALUES = new Set(['true', '1', 'yes', 'y', 'on']);
 export const FALSY_TEXT_VALUES = new Set(['false', '0', 'no', 'n', 'off']);
 
-// 标签类型颜色配置 — 基于各提供商 Logo 品牌色调配，确保彼此不重复
+// 标签类型颜色配置 — 统一低饱和 graphite 风格，融合微弱的品牌色偏
 export const TYPE_COLORS: Record<string, TypeColorSet> = {
-  // Qwen logo: 紫罗兰渐变 #6336E7 → #6F69F7
   qwen: {
-    light: { bg: '#ede5fd', text: '#5530c7' },
-    dark: { bg: '#36208a', text: '#b5a3f0' },
+    light: { bg: '#f1f0f7', text: '#4e4376', border: '1px solid #e1dee9' },
+    dark: { bg: '#292831', text: '#d0ccdb', border: '1px solid #3f3d4c' },
   },
-  // Kimi logo: 亮蓝 #027AFF（K字 + 蓝色圆点）
   kimi: {
-    light: { bg: '#dce8ff', text: '#0560cf' },
-    dark: { bg: '#003880', text: '#70b5ff' },
+    light: { bg: '#ecf1f6', text: '#2c4a6f', border: '1px solid #d9e2ea' },
+    dark: { bg: '#242a32', text: '#cbd5e1', border: '1px solid #3b4452' },
   },
-  // Gemini logo: 多色蓝 #3186FF（偏柔和的蓝）
   gemini: {
-    light: { bg: '#e3f2fd', text: '#1565c0' },
-    dark: { bg: '#0d47a1', text: '#64b5f6' },
+    light: { bg: '#ecf1f7', text: '#2a4c7e', border: '1px solid #dae3ee' },
+    dark: { bg: '#232a35', text: '#cbd6e2', border: '1px solid #3a4454' },
   },
-  // Gemini-CLI: 同 Gemini 图标，用更深的海军蓝区分
   'gemini-cli': {
-    light: { bg: '#e0e8ff', text: '#1e4fa3' },
-    dark: { bg: '#1c3f73', text: '#a8c7ff' },
+    light: { bg: '#ecf1f7', text: '#2a4c7e', border: '1px solid #dae3ee' },
+    dark: { bg: '#232a35', text: '#cbd6e2', border: '1px solid #3a4454' },
   },
-  // AI Studio: 使用 Gemini 图标，中性灰标签
   aistudio: {
-    light: { bg: '#f0f2f5', text: '#2f343c' },
-    dark: { bg: '#373c42', text: '#cfd3db' },
+    light: { bg: '#eff1f3', text: '#3f454d', border: '1px solid #dee1e5' },
+    dark: { bg: '#282b30', text: '#d1d4d9', border: '1px solid #3e4249' },
   },
-  // Claude logo: 陶土橙 #D97757
   claude: {
-    light: { bg: '#fbece4', text: '#c05621' },
-    dark: { bg: '#5e2c14', text: '#e8a882' },
+    light: { bg: '#f4f0ec', text: '#6b4c35', border: '1px solid #e7dfda' },
+    dark: { bg: '#2d2925', text: '#ded6cf', border: '1px solid #48413b' },
   },
-  // Codex logo: 靛蓝渐变 #B1A7FF → #3941FF
   codex: {
-    light: { bg: '#eae7ff', text: '#3538d4' },
-    dark: { bg: '#262395', text: '#b5b0ff' },
+    light: { bg: '#eff0f6', text: '#3c4281', border: '1px solid #dfdef0' },
+    dark: { bg: '#262833', text: '#d1d3df', border: '1px solid #3e404f' },
   },
-  // Antigravity logo: 多色（主色 #3789F9 蓝 + #53A89A 青绿），用青色区分
   antigravity: {
-    light: { bg: '#e0f7fa', text: '#006064' },
-    dark: { bg: '#004d40', text: '#80deea' },
+    light: { bg: '#ebf3f3', text: '#215357', border: '1px solid #d6e5e5' },
+    dark: { bg: '#202c2d', text: '#ccd9da', border: '1px solid #344446' },
   },
-  // xAI / Grok: graphite brand treatment, distinct from blue and purple providers
   xai: {
-    light: { bg: '#f3f4f6', text: '#111827', border: '1px solid #d1d5db' },
-    dark: { bg: '#111827', text: '#f9fafb', border: '1px solid #374151' },
+    light: { bg: '#eef0f2', text: '#343a40', border: '1px solid #d9dde2' },
+    dark: { bg: '#2a2d31', text: '#d7dbe0', border: '1px solid #444950' },
   },
-  // iFlow logo: 品红紫渐变 #5C5CFF → #AE5CFF，偏品红以区别于 Qwen 的紫罗兰
   iflow: {
-    light: { bg: '#f5e3fc', text: '#9025c8' },
-    dark: { bg: '#521490', text: '#d49cf5' },
+    light: { bg: '#f4eff6', text: '#5f3c83', border: '1px solid #e8def1' },
+    dark: { bg: '#2c2532', text: '#d8cbe2', border: '1px solid #433c4f' },
   },
-  // Vertex logo: Google 蓝 #4285F4
   vertex: {
-    light: { bg: '#e4edfd', text: '#2b5fbc' },
-    dark: { bg: '#1a3d80', text: '#89b3f7' },
+    light: { bg: '#edf1f5', text: '#324e75', border: '1px solid #dae1ea' },
+    dark: { bg: '#242a31', text: '#cbd4df', border: '1px solid #3b434e' },
   },
   empty: {
     light: { bg: '#f5f5f5', text: '#616161' },

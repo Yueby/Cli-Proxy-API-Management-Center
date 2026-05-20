@@ -67,11 +67,11 @@ export const SecondaryScreenShell = forwardRef<HTMLDivElement, SecondaryScreenSh
                 onClick={onBack}
                 className={styles.backButton}
                 aria-label={resolvedBackAriaLabel}
+                title={backLabel}
               >
                 <span className={styles.backIcon}>
                   <IconChevronLeft size={18} />
                 </span>
-                <span className={styles.backText}>{backLabel}</span>
               </Button>
             ) : (
               <div />

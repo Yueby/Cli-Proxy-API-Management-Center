@@ -18,7 +18,7 @@ import type { OpenAIEditOutletContext } from './AiProvidersOpenAIEditLayout';
 import type { KeyTestStatus } from '@/stores/useOpenAIEditDraftStore';
 import styles from './AiProvidersPage.module.scss';
 import layoutStyles from './AiProvidersEditLayout.module.scss';
-import { IconChevronLeft, IconCheck, IconTrash2 } from '@/components/ui/icons';
+import { IconSave, IconTrash2 } from '@/components/ui/icons';
 
 
 const OPENAI_TEST_TIMEOUT_MS = 30_000;
@@ -503,28 +503,19 @@ export function AiProvidersOpenAIEditPage() {
       onBack={handleBack}
       backLabel={t('common.back')}
       backAriaLabel={t('common.back')}
-      hideTopBarBackButton
-      hideTopBarRightAction
-      floatingAction={
-        <div className={layoutStyles.floatingActions}>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleBack}
-            className={layoutStyles.floatingBackButton}
-          >
-            <IconChevronLeft size={16} />
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => void handleSave()}
-            loading={saving}
-            disabled={!canSave}
-            className={layoutStyles.floatingSaveButton}
-          >
-            <IconCheck size={16} />
-          </Button>
-        </div>
+      rightAction={
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => void handleSave()}
+          loading={saving}
+          disabled={!canSave}
+          className={layoutStyles.headerActionButton}
+          title={t('common.save')}
+          aria-label={t('common.save')}
+        >
+          <IconSave size={16} />
+        </Button>
       }
       isLoading={loading}
       loadingLabel={t('common.loading')}
@@ -591,14 +582,16 @@ export function AiProvidersOpenAIEditPage() {
                     ? t('ai_providers.openai_edit_modal_models_label')
                     : t('ai_providers.openai_add_modal_models_label')}
                 </label>
-                <div className={styles.modelConfigToolbar}>
+                <div className={`segmented-button-group ${styles.modelConfigToolbar}`}>
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={() => setForm((prev) => ({
-                      ...prev,
-                      modelEntries: [...prev.modelEntries, { name: '', alias: '' }]
-                    }))}
+                    onClick={() =>
+                      setForm((prev) => ({
+                        ...prev,
+                        modelEntries: [...prev.modelEntries, { name: '', alias: '' }]
+                      }))
+                    }
                     disabled={saving || disableControls || isTestingKeys}
                   >
                     {t('ai_providers.openai_models_add_btn')}

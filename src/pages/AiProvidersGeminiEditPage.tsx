@@ -22,7 +22,7 @@ import { excludedModelsToText, parseExcludedModels } from '@/components/provider
 import type { GeminiFormState } from '@/components/providers';
 import layoutStyles from './AiProvidersEditLayout.module.scss';
 import styles from './AiProvidersPage.module.scss';
-import { IconChevronLeft, IconCheck } from '@/components/ui/icons';
+import { IconSave } from '@/components/ui/icons';
 
 
 type LocationState = { fromAiProviders?: boolean } | null;
@@ -509,28 +509,19 @@ export function AiProvidersGeminiEditPage() {
       onBack={handleBack}
       backLabel={t('common.back')}
       backAriaLabel={t('common.back')}
-      hideTopBarBackButton
-      hideTopBarRightAction
-      floatingAction={
-        <div className={layoutStyles.floatingActions}>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleBack}
-            className={layoutStyles.floatingBackButton}
-          >
-            <IconChevronLeft size={16} />
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleSave}
-            loading={saving}
-            disabled={!canSave}
-            className={layoutStyles.floatingSaveButton}
-          >
-            <IconCheck size={16} />
-          </Button>
-        </div>
+      rightAction={
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleSave}
+          loading={saving}
+          disabled={!canSave}
+          className={layoutStyles.headerActionButton}
+          title={t('common.save')}
+          aria-label={t('common.save')}
+        >
+          <IconSave size={16} />
+        </Button>
       }
       isLoading={loading}
       loadingLabel={t('common.loading')}
@@ -602,7 +593,7 @@ export function AiProvidersGeminiEditPage() {
                 <label className={styles.modelConfigTitle}>
                   {t('ai_providers.gemini_models_label')}
                 </label>
-                <div className={styles.modelConfigToolbar}>
+                <div className={`segmented-button-group ${styles.modelConfigToolbar}`}>
                   <Button
                     variant="secondary"
                     size="sm"
@@ -676,8 +667,10 @@ export function AiProvidersGeminiEditPage() {
                     size="sm"
                     onClick={handleApplyDiscoveredModels}
                     disabled={!canApplyModelDiscovery}
+                    title={t('ai_providers.gemini_models_fetch_apply')}
+                    aria-label={t('ai_providers.gemini_models_fetch_apply')}
                   >
-                    {t('ai_providers.gemini_models_fetch_apply')}
+                    <IconSave size={16} />
                   </Button>
                 </>
               }
@@ -716,7 +709,7 @@ export function AiProvidersGeminiEditPage() {
                 />
                 {discoveredModels.length > 0 && (
                   <div className={styles.modelDiscoveryToolbar}>
-                    <div className={styles.modelDiscoveryToolbarActions}>
+                    <div className={`segmented-button-group ${styles.modelDiscoveryToolbarActions}`}>
                       <Button
                         variant="secondary"
                         size="sm"
@@ -732,7 +725,7 @@ export function AiProvidersGeminiEditPage() {
                         {t('ai_providers.model_discovery_select_visible')}
                       </Button>
                       <Button
-                        variant="ghost"
+                        variant="secondary"
                         size="sm"
                         onClick={handleClearDiscoveredModelSelection}
                         disabled={

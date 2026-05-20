@@ -273,7 +273,7 @@ export function ItemCard({
           {selection && <div className={styles.selection}>{selection}</div>}
           {avatar && (
             <div
-              className={styles.avatar}
+              className={`${styles.avatar} ${avatar.bgColor === 'transparent' ? styles.avatarNoBg : ''}`}
               style={{
                 backgroundColor: avatar.bgColor,
                 color: avatar.textColor,

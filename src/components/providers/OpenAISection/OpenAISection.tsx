@@ -540,26 +540,28 @@ export function OpenAISection({
               style={{ maxHeight: `${dropdownLayout.maxHeight}px` }}
             >
               <div className={styles.modelDropdownHeader}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedModels(new Set(allModelNames))}
-                  className={styles.modelDropdownSelectAll}
-                  disabled={actionsDisabled || allModelNames.length === 0}
-                >
-                  {t('ai_providers.model_select_all')}
-                </Button>
-                {modelFilterActive && (
+                <div className={styles.modelDropdownButtonGroup}>
                   <Button
-                    variant="ghost"
+                    variant="secondary"
                     size="sm"
-                    onClick={clearAllModels}
-                    className={styles.modelDropdownClear}
-                    disabled={actionsDisabled}
+                    onClick={() => setSelectedModels(new Set(allModelNames))}
+                    className={styles.modelDropdownSelectAll}
+                    disabled={actionsDisabled || allModelNames.length === 0}
                   >
-                    {t('ai_providers.model_search_clear')}
+                    {t('ai_providers.model_select_all')}
                   </Button>
-                )}
+                  {modelFilterActive && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={clearAllModels}
+                      className={styles.modelDropdownClear}
+                      disabled={actionsDisabled}
+                    >
+                      {t('ai_providers.model_search_clear')}
+                    </Button>
+                  )}
+                </div>
               </div>
               <div
                 className={styles.modelDropdownItems}
@@ -588,43 +590,45 @@ export function OpenAISection({
           )}
         </div>
         {renderSortControls()}
-        {configs.length > 0 && (
+        <div className={styles.providerButtonGroup}>
+          {configs.length > 0 && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                const blob = new Blob([JSON.stringify(configs, null, 2)], { type: 'application/json' });
+                downloadBlob({ filename: 'openai-configs.json', blob });
+              }}
+              disabled={actionsDisabled}
+              title={t('ai_providers.export_configs')}
+              aria-label={t('ai_providers.export_configs')}
+            >
+              <IconUpload size={16} />
+            </Button>
+          )}
+          {onImport && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onImport}
+              disabled={actionsDisabled}
+              title={t('ai_providers.import_configs')}
+              aria-label={t('ai_providers.import_configs')}
+            >
+              <IconDownload size={16} />
+            </Button>
+          )}
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => {
-              const blob = new Blob([JSON.stringify(configs, null, 2)], { type: 'application/json' });
-              downloadBlob({ filename: 'openai-configs.json', blob });
-            }}
+            onClick={onAdd}
             disabled={actionsDisabled}
-            title={t('ai_providers.export_configs')}
-            aria-label={t('ai_providers.export_configs')}
+            title={t('ai_providers.openai_add_button')}
+            aria-label={t('ai_providers.openai_add_button')}
           >
-            <IconUpload size={16} />
+            <IconPlus size={16} />
           </Button>
-        )}
-        {onImport && (
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={onImport}
-            disabled={actionsDisabled}
-            title={t('ai_providers.import_configs')}
-            aria-label={t('ai_providers.import_configs')}
-          >
-            <IconDownload size={16} />
-          </Button>
-        )}
-        <Button
-          size="sm"
-          onClick={onAdd}
-          disabled={actionsDisabled}
-          title={t('ai_providers.openai_add_button')}
-          aria-label={t('ai_providers.openai_add_button')}
-          className={styles.openaiAddButton}
-        >
-          <IconPlus size={16} />
-        </Button>
+        </div>
       </div>
     );
   };

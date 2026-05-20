@@ -223,14 +223,14 @@ export function DiffModal({
       className={styles.diffModal}
       closeDisabled={loading}
       footer={
-        <>
+        <div className="segmented-button-group">
           <Button variant="secondary" onClick={onCancel} disabled={loading}>
             {t('common.cancel')}
           </Button>
           <Button onClick={onConfirm} loading={loading} disabled={loading}>
             {t('config_management.diff.confirm')}
           </Button>
-        </>
+        </div>
       }
     >
       <div className={styles.content}>

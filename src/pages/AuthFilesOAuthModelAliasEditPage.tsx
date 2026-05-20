@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/Button';
 import { AutocompleteInput } from '@/components/ui/AutocompleteInput';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
-import { IconInfo, IconX } from '@/components/ui/icons';
+import { IconInfo, IconX, IconSave } from '@/components/ui/icons';
 import { SecondaryScreenShell } from '@/components/common/SecondaryScreenShell';
+import layoutStyles from './AiProvidersEditLayout.module.scss';
 import { useEdgeSwipeBack } from '@/hooks/useEdgeSwipeBack';
 import { useAuthStore, useNotificationStore } from '@/stores';
 import { authFilesApi } from '@/services/api';
@@ -353,8 +354,17 @@ export function AuthFilesOAuthModelAliasEditPage() {
       backAriaLabel={t('common.back')}
       contentClassName={styles.pageContent}
       rightAction={
-        <Button size="sm" onClick={handleSave} loading={saving} disabled={!canSave}>
-          {t('oauth_model_alias.save')}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleSave}
+          loading={saving}
+          disabled={!canSave}
+          className={layoutStyles.headerActionButton}
+          title={t('oauth_model_alias.save')}
+          aria-label={t('oauth_model_alias.save')}
+        >
+          <IconSave size={16} />
         </Button>
       }
       isLoading={initialLoading}
