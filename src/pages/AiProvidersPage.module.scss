@@ -28,13 +28,18 @@ $openai-toolbar-control-height: 32px;
   padding-bottom: calc(12px + env(safe-area-inset-bottom) + #{$spacing-md});
 }
 
+.mainContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .tabsContainer {
   display: flex;
   align-items: center;
   gap: $spacing-sm;
   overflow-x: auto;
   padding-bottom: $spacing-xs; // for scrollbar
-  margin-bottom: $spacing-sm;
 
   // hide scrollbar visually but keep functionality
   scrollbar-width: none;

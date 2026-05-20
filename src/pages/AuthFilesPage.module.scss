@@ -29,6 +29,11 @@
   margin: 0;
 }
 
+.headerActionsRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .headerActions {
   display: flex;
   gap: $spacing-sm;
@@ -46,28 +51,6 @@
   }
 }
 
-.titleWrapper {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  line-height: 24px;
-}
-
-.countBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 24px;
-  min-width: 24px;
-  padding: 0 8px;
-  border-radius: $radius-full;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--count-badge-text);
-  background-color: var(--count-badge-bg);
-  box-sizing: border-box;
-}
-
 .errorBox {
   padding: $spacing-md;
   background-color: rgba($error-color, 0.1);
@@ -82,8 +65,7 @@
 .filterSectionLayout {
   display: flex;
   flex-direction: column;
-  gap: $spacing-md;
-  margin-bottom: $spacing-lg;
+  gap: 8px;
 }
 
 .filterSection {
@@ -117,7 +99,7 @@
   align-items: center;
   gap: $spacing-sm;
   height: 36px;
-  padding: 0 16px 0 8px;
+  padding: 0 16px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: $radius-full;
@@ -145,32 +127,21 @@
     border-color: color-mix(in srgb, var(--filter-color) 50%, var(--border-color));
     background: color-mix(in srgb, var(--filter-surface) 22%, var(--bg-secondary));
   }
-
-  .tabIconWrap {
-    border-color: color-mix(in srgb, var(--filter-color) 40%, transparent);
-  }
-}
-
-.tabIconWrap {
-  width: 24px;
-  height: 24px;
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: $radius-md;
-  border: 1px solid color-mix(in srgb, var(--border-color) 50%, transparent);
-  background: color-mix(in srgb, var(--bg-tertiary) 60%, transparent);
 }
 
 .tabIcon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   flex: 0 0 auto;
   object-fit: contain;
 }
 
 .tabIconFallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
   color: var(--filter-color);
   font-size: 14px;
   font-weight: 700;
@@ -204,10 +175,9 @@
 }
 
 .filterContent {
-  padding: 14px;
-  border-radius: $radius-lg;
-  border: 1px solid color-mix(in srgb, var(--border-color) 60%, transparent);
-  background: color-mix(in srgb, var(--bg-secondary) 50%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
 }
 
 .filterControls {

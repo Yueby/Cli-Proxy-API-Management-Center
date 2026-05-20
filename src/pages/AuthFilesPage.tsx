@@ -27,6 +27,7 @@ import {
   IconSearch,
   IconTrash2,
   IconUpload,
+  IconPlus,
 } from '@/components/ui/icons';
 import { Pagination } from '@/components/ui/Pagination';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -51,6 +52,7 @@ import { AuthFileCard } from '@/features/authFiles/components/AuthFileCard';
 import { ItemCard } from '@/components/ui/ItemCard';
 import { AuthFileModelsModal } from '@/features/authFiles/components/AuthFileModelsModal';
 import { AuthFilesPrefixProxyEditorModal } from '@/features/authFiles/components/AuthFilesPrefixProxyEditorModal';
+import { AuthFilesOAuthDialog } from '@/features/authFiles/components/AuthFilesOAuthDialog';
 import { OAuthExcludedCard } from '@/features/authFiles/components/OAuthExcludedCard';
 import { OAuthModelAliasCard } from '@/features/authFiles/components/OAuthModelAliasCard';
 import { useAuthFilesData } from '@/features/authFiles/hooks/useAuthFilesData';
@@ -108,6 +110,7 @@ export function AuthFilesPage() {
   const [sortMode, setSortMode] = useState<AuthFilesSortMode>('default');
   const [batchActionBarVisible, setBatchActionBarVisible] = useState(false);
   const [uiStateHydrated, setUiStateHydrated] = useState(false);
+  const [oauthDialogOpen, setOauthDialogOpen] = useState(false);
   const floatingBatchActionsRef = useRef<HTMLDivElement>(null);
   const filterTabsRef = useRef<HTMLDivElement>(null);
   const batchActionAnimationRef = useRef<AnimationPlaybackControlsWithThen | null>(null);
@@ -600,6 +603,22 @@ export function AuthFilesPage() {
     []
   );
 
+  const deleteAllButtonLabel = (() => {
+    if (disabledOnly) {
+      return t('auth_files.delete_filtered_result_button');
+    }
+    if (problemOnly) {
+      return normalizedFilter === 'all'
+        ? t('auth_files.delete_problem_button')
+        : t('auth_files.delete_problem_button_with_type', {
+            type: getTypeLabel(t, normalizedFilter),
+          });
+    }
+    return normalizedFilter === 'all'
+      ? t('auth_files.delete_all_button')
+      : `${t('common.delete')} ${getTypeLabel(t, normalizedFilter)}`;
+  })();
+
   const renderFilterTags = () => (
     <div className={styles.filterSection}>
       <div
@@ -637,17 +656,15 @@ export function AuthFilesPage() {
               }}
               type="button"
             >
-              <span className={styles.tabIconWrap}>
-                {type === 'all' ? (
-                  <IconFilterAll className={styles.filterAllIcon} size={16} />
-                ) : iconSrc ? (
-                  <img src={iconSrc} alt="" className={styles.tabIcon} />
-                ) : (
-                  <span className={styles.tabIconFallback}>
-                    {getTypeLabel(t, type).slice(0, 1).toUpperCase()}
-                  </span>
-                )}
-              </span>
+              {type === 'all' ? (
+                <IconFilterAll className={styles.filterAllIcon} size={18} />
+              ) : iconSrc ? (
+                <img src={iconSrc} alt="" className={styles.tabIcon} />
+              ) : (
+                <span className={styles.tabIconFallback}>
+                  {getTypeLabel(t, type).slice(0, 1).toUpperCase()}
+                </span>
+              )}
               <span className={styles.tabLabel}>{getTypeLabel(t, type)}</span>
               <span className={styles.tabCount}>{typeCounts[type] ?? 0}</span>
             </button>
@@ -657,29 +674,6 @@ export function AuthFilesPage() {
     </div>
   );
 
-  const titleNode = (
-    <div className={styles.titleWrapper}>
-      <span>{t('auth_files.title_section')}</span>
-      {files.length > 0 && <span className={styles.countBadge}>{files.length}</span>}
-    </div>
-  );
-
-  const deleteAllButtonLabel = (() => {
-    if (disabledOnly) {
-      return t('auth_files.delete_filtered_result_button');
-    }
-    if (problemOnly) {
-      return normalizedFilter === 'all'
-        ? t('auth_files.delete_problem_button')
-        : t('auth_files.delete_problem_button_with_type', {
-            type: getTypeLabel(t, normalizedFilter),
-          });
-    }
-    return normalizedFilter === 'all'
-      ? t('auth_files.delete_all_button')
-      : `${t('common.delete')} ${getTypeLabel(t, normalizedFilter)}`;
-  })();
-
   return (
     <div className={styles.container}>
       <div className={styles.pageHeader}>
@@ -687,9 +681,8 @@ export function AuthFilesPage() {
         <p className={styles.description}>{t('auth_files.description')}</p>
       </div>
 
-      <Card
-        title={titleNode}
-        extra={
+      <div className={styles.filterSectionLayout}>
+        <div className={styles.headerActionsRow}>
           <div className={styles.headerActions}>
             <Button
               variant="secondary"
@@ -710,6 +703,15 @@ export function AuthFilesPage() {
               aria-label={t('auth_files.upload_button')}
             >
               <IconUpload size={16} />
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setOauthDialogOpen(true)}
+              disabled={disableControls}
+              title={t('nav.oauth', { defaultValue: 'OAuth' })}
+              aria-label={t('nav.oauth', { defaultValue: 'OAuth' })}
+            >
+              <IconPlus size={16} />
             </Button>
             <Button
               variant="danger"
@@ -738,12 +740,12 @@ export function AuthFilesPage() {
               onChange={handleFileChange}
             />
           </div>
-        }
-      >
-        {error && <div className={styles.errorBox}>{error}</div>}
+        </div>
 
-        <div className={styles.filterSectionLayout}>
-          {renderFilterTags()}
+        {renderFilterTags()}
+
+        <Card>
+          {error && <div className={styles.errorBox}>{error}</div>}
 
           <div
             className={styles.filterContent}
@@ -889,8 +891,8 @@ export function AuthFilesPage() {
               />
             )}
           </div>
-        </div>
-      </Card>
+        </Card>
+      </div>
 
       <OAuthExcludedCard
         disableControls={disableControls}
@@ -1017,6 +1019,15 @@ export function AuthFilesPage() {
             document.body
           )
         : null}
+
+      <AuthFilesOAuthDialog
+        open={oauthDialogOpen}
+        onClose={() => setOauthDialogOpen(false)}
+        onAuthFileCreated={() => {
+          setPage(1);
+          void loadFiles().catch(() => {});
+        }}
+      />
     </div>
   );
 }

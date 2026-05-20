@@ -233,7 +233,6 @@ export function MainLayout() {
     { path: '/config', label: t('nav.config_management'), icon: navIcons.config },
     { path: '/ai-providers', label: t('nav.ai_providers'), icon: navIcons.aiProviders },
     { path: '/auth-files', label: t('nav.auth_files'), icon: navIcons.authFiles },
-    { path: '/oauth', label: t('nav.oauth', { defaultValue: 'OAuth' }), icon: navIcons.oauth },
     { path: '/quota', label: t('nav.quota_management'), icon: navIcons.quota },
     ...(config?.loggingToFile ? [{ path: '/logs', label: t('nav.logs'), icon: navIcons.logs }] : []),
     { path: '/system', label: t('nav.system_info'), icon: navIcons.system },

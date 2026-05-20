@@ -80,13 +80,18 @@
   font-size: 14px;
 }
 
+.mainContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .tabsContainer {
   display: flex;
   align-items: center;
   gap: $spacing-sm;
   overflow-x: auto;
   padding-bottom: $spacing-xs; // for scrollbar
-  margin-bottom: $spacing-sm;
 
   // hide scrollbar visually but keep functionality
   scrollbar-width: none;

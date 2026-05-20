@@ -524,12 +524,13 @@ export function AiProvidersPage() {
       <div className={styles.content}>
         {error && <div className="error-box">{error}</div>}
 
-        <div
-          className={styles.tabsContainer}
-          role="tablist"
-          aria-label={t('ai_providers.title')}
-          ref={tabsContainerRef}
-        >
+        <div className={styles.mainContent}>
+          <div
+            className={styles.tabsContainer}
+            role="tablist"
+            aria-label={t('ai_providers.title')}
+            ref={tabsContainerRef}
+          >
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -691,6 +692,7 @@ export function AiProvidersPage() {
             />
           </div>
         )}
+        </div>
       </div>
     </div>
   );

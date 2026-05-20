@@ -175,12 +175,13 @@ export function QuotaPage() {
 
       {error && <div className={styles.errorBox}>{error}</div>}
 
-      <div
-        className={styles.tabsContainer}
-        role="tablist"
-        aria-label={t('quota_management.title')}
-        ref={tabsContainerRef}
-      >
+      <div className={styles.mainContent}>
+        <div
+          className={styles.tabsContainer}
+          role="tablist"
+          aria-label={t('quota_management.title')}
+          ref={tabsContainerRef}
+        >
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -200,12 +201,13 @@ export function QuotaPage() {
         ))}
       </div>
 
-      <div
-        role="tabpanel"
-        id={`quota-panel-${activeTab}`}
-        aria-labelledby={`quota-tab-${activeTab}`}
-      >
-        {renderActiveSection()}
+        <div
+          role="tabpanel"
+          id={`quota-panel-${activeTab}`}
+          aria-labelledby={`quota-tab-${activeTab}`}
+        >
+          {renderActiveSection()}
+        </div>
       </div>
     </div>
   );
