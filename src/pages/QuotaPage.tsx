@@ -5,6 +5,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
+import { useHorizontalWheelScroll } from '@/hooks/useHorizontalWheelScroll';
+import { PageHeader } from '@/components/common/PageHeader';
 import { useAuthStore, useThemeStore } from '@/stores';
 import { authFilesApi, configFileApi } from '@/services/api';
 import {
@@ -39,6 +41,7 @@ export function QuotaPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const tabsContainerRef = useRef<HTMLDivElement>(null);
+  useHorizontalWheelScroll(tabsContainerRef);
 
   const [activeTab, setActiveTab] = useState<QuotaProviderId>(() => {
     try {
@@ -168,10 +171,7 @@ export function QuotaPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>{t('quota_management.title')}</h1>
-        <p className={styles.description}>{t('quota_management.description')}</p>
-      </div>
+      <PageHeader title={t('quota_management.title')} description={t('quota_management.description')} />
 
       {error && <div className={styles.errorBox}>{error}</div>}
 

@@ -15,7 +15,9 @@ import { animate } from 'motion/mini';
 import type { AnimationPlaybackControlsWithThen } from 'motion-dom';
 import { useInterval } from '@/hooks/useInterval';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
+import { useHorizontalWheelScroll } from '@/hooks/useHorizontalWheelScroll';
 import { usePageTransitionLayer } from '@/components/common/PageTransitionLayer';
+import { PageHeader } from '@/components/common/PageHeader';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -113,6 +115,7 @@ export function AuthFilesPage() {
   const [oauthDialogOpen, setOauthDialogOpen] = useState(false);
   const floatingBatchActionsRef = useRef<HTMLDivElement>(null);
   const filterTabsRef = useRef<HTMLDivElement>(null);
+  useHorizontalWheelScroll(filterTabsRef);
   const batchActionAnimationRef = useRef<AnimationPlaybackControlsWithThen | null>(null);
   const previousSelectionCountRef = useRef(0);
   const selectionCountRef = useRef(0);
@@ -676,43 +679,47 @@ export function AuthFilesPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>{t('auth_files.title')}</h1>
-        <p className={styles.description}>{t('auth_files.description')}</p>
-      </div>
+      <PageHeader title={t('auth_files.title')} description={t('auth_files.description')} />
 
       <div className={styles.filterSectionLayout}>
-        <div className={styles.headerActionsRow}>
+        <div className={styles.toolbarRow}>
+          {renderFilterTags()}
+
           <div className={styles.headerActions}>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleHeaderRefresh}
-              disabled={loading}
-              title={t('common.refresh')}
-              aria-label={t('common.refresh')}
-            >
-              <IconRefreshCw size={16} />
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleUploadClick}
-              disabled={disableControls || uploading}
-              loading={uploading}
-              title={t('auth_files.upload_button')}
-              aria-label={t('auth_files.upload_button')}
-            >
-              <IconUpload size={16} />
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => setOauthDialogOpen(true)}
-              disabled={disableControls}
-              title={t('nav.oauth', { defaultValue: 'OAuth' })}
-              aria-label={t('nav.oauth', { defaultValue: 'OAuth' })}
-            >
-              <IconPlus size={16} />
-            </Button>
+            <div className={styles.buttonGroup}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleHeaderRefresh}
+                disabled={loading}
+                title={t('common.refresh')}
+                aria-label={t('common.refresh')}
+              >
+                <IconRefreshCw size={16} />
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleUploadClick}
+                disabled={disableControls || uploading}
+                loading={uploading}
+                title={t('auth_files.upload_button')}
+                aria-label={t('auth_files.upload_button')}
+              >
+                <IconUpload size={16} />
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setOauthDialogOpen(true)}
+                disabled={disableControls}
+                title={t('nav.oauth', { defaultValue: 'OAuth' })}
+                aria-label={t('nav.oauth', { defaultValue: 'OAuth' })}
+              >
+                <IconPlus size={16} />
+              </Button>
+            </div>
+
             <Button
               variant="danger"
               size="sm"
@@ -741,8 +748,6 @@ export function AuthFilesPage() {
             />
           </div>
         </div>
-
-        {renderFilterTags()}
 
         <Card>
           {error && <div className={styles.errorBox}>{error}</div>}

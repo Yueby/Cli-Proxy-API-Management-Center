@@ -17,6 +17,7 @@ import {
 import { usePageTransitionLayer } from '@/components/common/PageTransitionLayer';
 import { PageHeader } from '@/components/common/PageHeader';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
+import { useHorizontalWheelScroll } from '@/hooks/useHorizontalWheelScroll';
 import { ampcodeApi, providersApi } from '@/services/api';
 import { useAuthStore, useConfigStore, useNotificationStore, useThemeStore } from '@/stores';
 import type { GeminiKeyConfig, OpenAIProviderConfig, ProviderKeyConfig } from '@/types';
@@ -96,6 +97,7 @@ export function AiProvidersPage() {
   });
 
   const tabsContainerRef = useRef<HTMLDivElement>(null);
+  useHorizontalWheelScroll(tabsContainerRef);
 
   useEffect(() => {
     try {
