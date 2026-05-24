@@ -133,8 +133,23 @@ export function QuotaPage() {
     },
   ] as const;
 
+  const tabsWithCounts = tabs.map((tab) => ({
+    ...tab,
+    count: files.filter(tab.config.filterFn).length,
+  }));
+  const nonEmptyTabs = tabsWithCounts.filter((tab) => tab.count > 0);
+  // While loading, or when the user truly has no auth files yet, fall back to showing
+  // every tab so the page never collapses into nothing.
+  const visibleTabs = loading || nonEmptyTabs.length === 0 ? tabsWithCounts : nonEmptyTabs;
+  // If the user's last selection (`activeTab`) is currently hidden because its provider
+  // has zero files, render the first visible tab instead. We keep `activeTab` untouched
+  // so the page auto-restores when a file for that provider reappears.
+  const effectiveActiveTab: QuotaProviderId = visibleTabs.some((tab) => tab.id === activeTab)
+    ? activeTab
+    : visibleTabs[0]?.id ?? activeTab;
+
   const renderActiveSection = () => {
-    switch (activeTab) {
+    switch (effectiveActiveTab) {
       case 'antigravity':
         return (
           <QuotaSection
@@ -206,29 +221,29 @@ export function QuotaPage() {
           aria-label={t('quota_management.title')}
           ref={tabsContainerRef}
         >
-          {tabs.map((tab) => (
+          {visibleTabs.map((tab) => (
             <button
               key={tab.id}
               role="tab"
               id={`quota-tab-${tab.id}`}
               data-tab-id={tab.id}
-              aria-selected={activeTab === tab.id}
+              aria-selected={effectiveActiveTab === tab.id}
               aria-controls={`quota-panel-${tab.id}`}
-              className={`${styles.tabButton} ${activeTab === tab.id ? styles.activeTab : ''}`}
+              className={`${styles.tabButton} ${effectiveActiveTab === tab.id ? styles.activeTab : ''}`}
               onClick={() => setActiveTab(tab.id)}
               type="button"
             >
               <img src={tab.getIcon(resolvedTheme)} alt="" className={styles.tabIcon} />
               <span className={styles.tabLabel}>{t(`${tab.config.i18nPrefix}.title`)}</span>
-              <span className={styles.tabCount}>{files.filter(tab.config.filterFn).length}</span>
+              <span className={styles.tabCount}>{tab.count}</span>
             </button>
           ))}
         </div>
 
         <div
           role="tabpanel"
-          id={`quota-panel-${activeTab}`}
-          aria-labelledby={`quota-tab-${activeTab}`}
+          id={`quota-panel-${effectiveActiveTab}`}
+          aria-labelledby={`quota-tab-${effectiveActiveTab}`}
         >
           {renderActiveSection()}
         </div>
