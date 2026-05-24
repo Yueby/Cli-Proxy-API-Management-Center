@@ -150,6 +150,16 @@ export function MainLayout() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
+
+  // Reset mobile nav drawer when the route changes. React-recommended pattern:
+  // store previous prop in state and compare during render instead of using an effect.
+  // https://react.dev/reference/react/useState#storing-information-from-previous-renders
+  const [previousPathname, setPreviousPathname] = useState(location.pathname);
+  if (location.pathname !== previousPathname) {
+    setPreviousPathname(location.pathname);
+    setMobileNavOpen(false);
+  }
+
   const contentRef = useRef<HTMLDivElement | null>(null);
   const languageMenuRef = useRef<HTMLDivElement | null>(null);
   const themeMenuRef = useRef<HTMLDivElement | null>(null);
@@ -197,11 +207,6 @@ export function MainLayout() {
       document.removeEventListener('keydown', handleEscape);
     };
   }, [languageMenuOpen, themeMenuOpen]);
-
-  // Close mobile nav on route change
-  useEffect(() => {
-    setMobileNavOpen(false);
-  }, [location.pathname]);
 
   const toggleLanguageMenu = useCallback(() => {
     setLanguageMenuOpen((p) => !p);

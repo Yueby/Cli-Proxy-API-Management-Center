@@ -16,6 +16,7 @@ import type { ProviderKeyConfig } from '@/types';
 import { excludedModelsToText, parseExcludedModels } from '@/components/providers/utils';
 import { buildHeaderObject, headersToEntries, normalizeHeaderEntries } from '@/utils/headers';
 import { areKeyValueEntriesEqual, areModelEntriesEqual, areStringArraysEqual } from '@/utils/compare';
+import { parseRouteIndexParam } from '@/utils/routeParams';
 import type { VertexFormState } from '@/components/providers';
 import layoutStyles from './AiProvidersEditLayout.module.scss';
 import { IconSave } from '@/components/ui/icons';
@@ -34,12 +35,6 @@ const buildEmptyForm = (): VertexFormState => ({
   modelEntries: [{ name: '', alias: '' }],
   excludedText: '',
 });
-
-const parseIndexParam = (value: string | undefined) => {
-  if (!value) return null;
-  const parsed = Number.parseInt(value, 10);
-  return Number.isFinite(parsed) ? parsed : null;
-};
 
 const normalizeModelEntries = (entries: Array<{ name: string; alias: string }>) =>
   (entries ?? []).reduce<Array<{ name: string; alias: string }>>((acc, entry) => {
@@ -95,7 +90,7 @@ export function AiProvidersVertexEditPage() {
   const [baseline, setBaseline] = useState(() => buildVertexBaseline(buildEmptyForm()));
 
   const hasIndexParam = typeof params.index === 'string';
-  const editIndex = useMemo(() => parseIndexParam(params.index), [params.index]);
+  const editIndex = useMemo(() => parseRouteIndexParam(params.index), [params.index]);
   const invalidIndexParam = hasIndexParam && editIndex === null;
 
   const initialData = useMemo(() => {

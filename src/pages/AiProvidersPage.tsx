@@ -34,7 +34,7 @@ import iconAmp from '@/assets/icons/amp.svg';
 type ProviderId = 'gemini' | 'codex' | 'claude' | 'vertex' | 'ampcode' | 'openai';
 
 const PROVIDER_TAB_STORAGE_KEY = 'ai-providers.active-tab';
-const PROVIDER_TAB_IDS: ProviderId[] = ['gemini', 'codex', 'claude', 'vertex', 'ampcode', 'openai'];
+const PROVIDER_TAB_IDS: ProviderId[] = ['openai', 'gemini', 'codex', 'claude', 'vertex', 'ampcode'];
 
 interface ProviderTab {
   id: ProviderId;
@@ -93,7 +93,7 @@ export function AiProvidersPage() {
     } catch {
       // localStorage can be unavailable in hardened/privacy contexts.
     }
-    return 'gemini';
+    return 'openai';
   });
 
   const tabsContainerRef = useRef<HTMLDivElement>(null);
@@ -115,17 +115,17 @@ export function AiProvidersPage() {
   }, [activeTab]);
 
   const tabs: ProviderTab[] = [
-    { id: 'gemini', label: 'Gemini', getIcon: () => iconGemini, count: geminiKeys.length },
-    { id: 'codex', label: 'Codex', getIcon: () => iconCodex, count: codexConfigs.length },
-    { id: 'claude', label: 'Claude', getIcon: () => iconClaude, count: claudeConfigs.length },
-    { id: 'vertex', label: 'Vertex', getIcon: () => iconVertex, count: vertexConfigs.length },
-    { id: 'ampcode', label: 'Ampcode', getIcon: () => iconAmp, count: config?.ampcode ? 1 : 0 },
     {
       id: 'openai',
       label: 'OpenAI',
       getIcon: (theme) => (theme === 'dark' ? iconOpenaiDark : iconOpenaiLight),
       count: openaiProviders.length,
     },
+    { id: 'gemini', label: 'Gemini', getIcon: () => iconGemini, count: geminiKeys.length },
+    { id: 'codex', label: 'Codex', getIcon: () => iconCodex, count: codexConfigs.length },
+    { id: 'claude', label: 'Claude', getIcon: () => iconClaude, count: claudeConfigs.length },
+    { id: 'vertex', label: 'Vertex', getIcon: () => iconVertex, count: vertexConfigs.length },
+    { id: 'ampcode', label: 'Ampcode', getIcon: () => iconAmp, count: config?.ampcode ? 1 : 0 },
   ];
 
   const { usageByProvider, loadRecentRequests, refreshRecentRequests } = useProviderRecentRequests({

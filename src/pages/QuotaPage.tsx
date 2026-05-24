@@ -16,6 +16,7 @@ import {
   CODEX_CONFIG,
   GEMINI_CLI_CONFIG,
   KIMI_CONFIG,
+  XAI_CONFIG,
 } from '@/components/quota';
 import type { AuthFileItem } from '@/types';
 import styles from './QuotaPage.module.scss';
@@ -26,11 +27,20 @@ import iconAntigravity from '@/assets/icons/antigravity.svg';
 import iconGemini from '@/assets/icons/gemini.svg';
 import iconKimiLight from '@/assets/icons/kimi-light.svg';
 import iconKimiDark from '@/assets/icons/kimi-dark.svg';
+import iconGrokLight from '@/assets/icons/grok.svg';
+import iconGrokDark from '@/assets/icons/grok-dark.svg';
 
-type QuotaProviderId = 'claude' | 'antigravity' | 'codex' | 'gemini-cli' | 'kimi';
+type QuotaProviderId = 'claude' | 'antigravity' | 'codex' | 'gemini-cli' | 'kimi' | 'xai';
 
 const QUOTA_TAB_STORAGE_KEY = 'quota-management.active-tab';
-const QUOTA_TAB_IDS: QuotaProviderId[] = ['claude', 'antigravity', 'codex', 'gemini-cli', 'kimi'];
+const QUOTA_TAB_IDS: QuotaProviderId[] = [
+  'claude',
+  'antigravity',
+  'codex',
+  'gemini-cli',
+  'kimi',
+  'xai',
+];
 
 export function QuotaPage() {
   const { t } = useTranslation();
@@ -116,10 +126,30 @@ export function QuotaPage() {
       config: KIMI_CONFIG,
       getIcon: (theme: string) => (theme === 'dark' ? iconKimiDark : iconKimiLight),
     },
+    {
+      id: 'xai',
+      config: XAI_CONFIG,
+      getIcon: (theme: string) => (theme === 'dark' ? iconGrokDark : iconGrokLight),
+    },
   ] as const;
 
+  const tabsWithCounts = tabs.map((tab) => ({
+    ...tab,
+    count: files.filter(tab.config.filterFn).length,
+  }));
+  const nonEmptyTabs = tabsWithCounts.filter((tab) => tab.count > 0);
+  // While loading, or when the user truly has no auth files yet, fall back to showing
+  // every tab so the page never collapses into nothing.
+  const visibleTabs = loading || nonEmptyTabs.length === 0 ? tabsWithCounts : nonEmptyTabs;
+  // If the user's last selection (`activeTab`) is currently hidden because its provider
+  // has zero files, render the first visible tab instead. We keep `activeTab` untouched
+  // so the page auto-restores when a file for that provider reappears.
+  const effectiveActiveTab: QuotaProviderId = visibleTabs.some((tab) => tab.id === activeTab)
+    ? activeTab
+    : visibleTabs[0]?.id ?? activeTab;
+
   const renderActiveSection = () => {
-    switch (activeTab) {
+    switch (effectiveActiveTab) {
       case 'antigravity':
         return (
           <QuotaSection
@@ -156,6 +186,15 @@ export function QuotaPage() {
             disabled={disableControls}
           />
         );
+      case 'xai':
+        return (
+          <QuotaSection
+            config={XAI_CONFIG}
+            files={files}
+            loading={loading}
+            disabled={disableControls}
+          />
+        );
       case 'claude':
       default:
         return (
@@ -182,29 +221,29 @@ export function QuotaPage() {
           aria-label={t('quota_management.title')}
           ref={tabsContainerRef}
         >
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            role="tab"
-            id={`quota-tab-${tab.id}`}
-            data-tab-id={tab.id}
-            aria-selected={activeTab === tab.id}
-            aria-controls={`quota-panel-${tab.id}`}
-            className={`${styles.tabButton} ${activeTab === tab.id ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-            type="button"
-          >
-            <img src={tab.getIcon(resolvedTheme)} alt="" className={styles.tabIcon} />
-            <span className={styles.tabLabel}>{t(`${tab.config.i18nPrefix}.title`)}</span>
-            <span className={styles.tabCount}>{files.filter(tab.config.filterFn).length}</span>
-          </button>
-        ))}
-      </div>
+          {visibleTabs.map((tab) => (
+            <button
+              key={tab.id}
+              role="tab"
+              id={`quota-tab-${tab.id}`}
+              data-tab-id={tab.id}
+              aria-selected={effectiveActiveTab === tab.id}
+              aria-controls={`quota-panel-${tab.id}`}
+              className={`${styles.tabButton} ${effectiveActiveTab === tab.id ? styles.activeTab : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+              type="button"
+            >
+              <img src={tab.getIcon(resolvedTheme)} alt="" className={styles.tabIcon} />
+              <span className={styles.tabLabel}>{t(`${tab.config.i18nPrefix}.title`)}</span>
+              <span className={styles.tabCount}>{tab.count}</span>
+            </button>
+          ))}
+        </div>
 
         <div
           role="tabpanel"
-          id={`quota-panel-${activeTab}`}
-          aria-labelledby={`quota-tab-${activeTab}`}
+          id={`quota-panel-${effectiveActiveTab}`}
+          aria-labelledby={`quota-tab-${effectiveActiveTab}`}
         >
           {renderActiveSection()}
         </div>
