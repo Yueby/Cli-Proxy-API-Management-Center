@@ -1,4 +1,4 @@
-import type { HTMLAttributes, PropsWithChildren, ReactNode } from 'react';
+import { useState, type HTMLAttributes, type PropsWithChildren, type ReactNode } from 'react';
 import { IconChevronDown } from '../icons';
 import styles from './Collapsible.module.scss';
 
@@ -15,19 +15,29 @@ export function Collapsible({
   label,
   hint,
   defaultOpen = false,
-  open,
+  open: controlledOpen,
   onToggle,
   flush,
   children,
   className,
   ...rest
 }: PropsWithChildren<CollapsibleProps>) {
-  const detailsProps =
-    open !== undefined ? { open } : { defaultOpen };
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
+  const isOpen = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen;
+
+  const handleToggle = (e: React.SyntheticEvent<HTMLDetailsElement>) => {
+    if (controlledOpen === undefined) {
+      setUncontrolledOpen(e.currentTarget.open);
+    }
+    if (onToggle) {
+      onToggle(e);
+    }
+  };
+
   const cls = [styles.root, className].filter(Boolean).join(' ');
   const contentCls = flush ? styles.contentFlush : styles.content;
   return (
-    <details className={cls} onToggle={onToggle} {...detailsProps} {...rest}>
+    <details className={cls} open={isOpen} onToggle={handleToggle} {...rest}>
       <summary className={styles.summary}>
         <span className={styles.summaryLabel}>
           <span>{label}</span>

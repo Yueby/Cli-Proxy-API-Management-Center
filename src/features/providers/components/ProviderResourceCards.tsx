@@ -1,3 +1,5 @@
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import iconAmp from '@/assets/icons/amp.svg';
 import iconClaude from '@/assets/icons/claude.svg';
@@ -24,7 +26,7 @@ import {
   stripDisableAllModelsRule,
   type ProviderRecentUsageMap,
 } from '@/components/providers/utils';
-import { IconEye, IconPencil, IconSignal, IconTrash2 } from '@/components/ui/icons';
+import { IconEye, IconKey, IconPencil, IconSignal, IconTrash2 } from '@/components/ui/icons';
 import type {
   AmpcodeConfig,
   GeminiKeyConfig,
@@ -33,8 +35,10 @@ import type {
 } from '@/types';
 import type { StatusBarData } from '@/utils/recentRequests';
 import { useThemeStore } from '@/stores';
+import { maskApiKey } from '@/utils/format';
 import type { ProviderBrand, ProviderResource } from '../types';
 import statusBarStyles from './providerStatusBar.module.scss';
+import keyBadgeStyles from '@/components/providers/OpenAISection/KeyCountBadge.module.scss';
 
 interface ProviderResourceCardsProps {
   resources: ProviderResource[];
@@ -139,6 +143,91 @@ const getStats = (
   );
 };
 
+interface KeyCountBadgeProps {
+  entries: NonNullable<OpenAIProviderConfig['apiKeyEntries']>;
+  providerName: string;
+  baseUrl: string;
+  usageByProvider?: ProviderRecentUsageMap;
+}
+
+function KeyCountBadge({ entries, providerName, baseUrl, usageByProvider }: KeyCountBadgeProps) {
+  const [show, setShow] = useState(false);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const ref = useRef<HTMLDivElement>(null);
+
+  const openBadge = () => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setPos({ top: rect.top, left: rect.left + rect.width / 2 });
+    }
+    setShow(true);
+  };
+
+  useEffect(() => {
+    if (!show) return;
+    const dismiss = () => setShow(false);
+    const handlePointerDown = (e: PointerEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setShow(false);
+      }
+    };
+    window.addEventListener('scroll', dismiss, true);
+    window.addEventListener('touchmove', dismiss, true);
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => {
+      window.removeEventListener('scroll', dismiss, true);
+      window.removeEventListener('touchmove', dismiss, true);
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [show]);
+
+  if (!entries || entries.length === 0) return null;
+
+  return (
+    <>
+      <div
+        ref={ref}
+        className={keyBadgeStyles.badge}
+        onPointerEnter={(e) => {
+          if (e.pointerType === 'mouse') openBadge();
+        }}
+        onPointerLeave={(e) => {
+          if (e.pointerType === 'mouse') setShow(false);
+        }}
+        onClick={() => setShow((v) => !v)}
+      >
+        <span className={keyBadgeStyles.badgeIcon}>
+          <IconKey size={13} />
+        </span>
+        <span className={keyBadgeStyles.badgeCount}>{entries.length}</span>
+      </div>
+      {show &&
+        createPortal(
+          <div className={keyBadgeStyles.tooltip} style={{ top: pos.top, left: pos.left }}>
+            <div className={keyBadgeStyles.tooltipList}>
+              {entries.map((entry, i) => {
+                const entryStats = usageByProvider
+                  ? getProviderTotalStats(usageByProvider, providerName, entry.apiKey, baseUrl)
+                  : { success: 0, failure: 0 };
+                return (
+                  <div key={i} className={keyBadgeStyles.tooltipItem}>
+                    <span className={keyBadgeStyles.tooltipIndex}>{i + 1}</span>
+                    <span className={keyBadgeStyles.tooltipKey}>{maskApiKey(entry.apiKey)}</span>
+                    <span className={keyBadgeStyles.tooltipStats}>
+                      <span className={keyBadgeStyles.tooltipSuccess}>✓{entryStats.success}</span>
+                      <span className={keyBadgeStyles.tooltipFailure}>✗{entryStats.failure}</span>
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>,
+          document.body
+        )}
+    </>
+  );
+}
+
 export function ProviderResourceCards({
   resources,
   disableMutations,
@@ -168,7 +257,7 @@ export function ProviderResourceCards({
           bgColor: meta.badgeBg,
           textColor: meta.badgeColor,
         }}
-        title={resource.apiKeyPreview ?? resource.identifier}
+        title={resource.identifier}
         badges={[
           {
             label: meta.label,
@@ -176,9 +265,24 @@ export function ProviderResourceCards({
             style: { backgroundColor: meta.badgeBg, color: meta.badgeColor },
           },
         ]}
+        headerExtra={
+          resource.apiKeyPreview ? (
+            <span
+              className={ItemCard.styles.typeBadge}
+              style={{
+                backgroundColor: 'var(--bg-tertiary)',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border-color)',
+                fontFamily: 'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
+                fontSize: '11px',
+              }}
+            >
+              {resource.apiKeyPreview}
+            </span>
+          ) : undefined
+        }
         content={
           <>
-            <FieldRow label={t('common.api_key')} value={resource.apiKeyPreview} />
             <FieldRow label={t('common.prefix')} value={raw.prefix} />
             <FieldRow label={t('common.base_url')} value={raw.baseUrl} />
             <FieldRow label={t('common.proxy_url')} value={raw.proxyUrl} />
@@ -205,6 +309,8 @@ export function ProviderResourceCards({
     const provider = openAIConfig(resource);
     const stats = getStats(resource, usageByProvider);
     const statusData = getStatusData(resource, usageByProvider);
+    const apiKeyEntries = provider.apiKeyEntries || [];
+
     return (
       <ItemCard
         key={resource.id}
@@ -212,26 +318,30 @@ export function ProviderResourceCards({
         title={provider.name}
         subtitle={provider.baseUrl}
         headerExtra={
-          provider.priority !== undefined ? (
-            <span
-              className={ItemCard.styles.typeBadge}
-              style={{
-                backgroundColor: 'rgba(16, 185, 129, 0.10)',
-                color: '#10b981',
-                border: '1px solid rgba(16, 185, 129, 0.25)',
-              }}
-            >
-              <IconSignal size={12} /> P{provider.priority}
-            </span>
-          ) : null
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <KeyCountBadge
+              entries={apiKeyEntries}
+              providerName={provider.name}
+              baseUrl={provider.baseUrl}
+              usageByProvider={usageByProvider}
+            />
+            {provider.priority !== undefined ? (
+              <span
+                className={ItemCard.styles.typeBadge}
+                style={{
+                  backgroundColor: 'rgba(16, 185, 129, 0.10)',
+                  color: '#10b981',
+                  border: '1px solid rgba(16, 185, 129, 0.25)',
+                }}
+              >
+                <IconSignal size={12} /> P{provider.priority}
+              </span>
+            ) : null}
+          </div>
         }
         content={
           <>
             <FieldRow label={t('common.prefix')} value={provider.prefix} />
-            <FieldRow
-              label={t('providersPage.table.metrics.keys')}
-              value={provider.apiKeyEntries?.length}
-            />
             <ModelCategoryBadges models={provider.models} resolvedTheme={resolvedTheme} />
             <FieldRow
               label={t('ai_providers.openai_test_model', { defaultValue: 'Test Model' })}
@@ -265,17 +375,27 @@ export function ProviderResourceCards({
             },
           },
         ]}
+        headerExtra={
+          resource.apiKeyPreview ? (
+            <span
+              className={ItemCard.styles.typeBadge}
+              style={{
+                backgroundColor: 'var(--bg-tertiary)',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border-color)',
+                fontFamily: 'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
+                fontSize: '11px',
+              }}
+            >
+              {resource.apiKeyPreview}
+            </span>
+          ) : undefined
+        }
         content={
           <>
             <FieldRow
               label={t('ai_providers.ampcode_upstream_url_label', { defaultValue: 'Upstream URL' })}
               value={config.upstreamUrl}
-            />
-            <FieldRow
-              label={t('ai_providers.ampcode_upstream_api_key_label', {
-                defaultValue: 'Upstream API Key',
-              })}
-              value={resource.apiKeyPreview}
             />
             <FieldRow
               label={t('ai_providers.ampcode_force_model_mappings_label', {

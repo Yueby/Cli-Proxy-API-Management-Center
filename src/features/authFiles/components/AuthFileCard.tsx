@@ -13,11 +13,11 @@ import {
   IconSettings,
   IconSignal,
   IconTrash2,
+  IconZap,
 } from '@/components/ui/icons';
 import { ProviderStatusBar } from '@/components/providers/ProviderStatusBar';
 import { useQuotaStore } from '@/stores';
 import type { AuthFileItem } from '@/types';
-import { resolveAuthProvider } from '@/utils/quota';
 import { resolveCodexPlanType } from '@/utils/quota/resolvers';
 import {
   normalizeRecentRequestAuthIndex,
@@ -27,7 +27,6 @@ import {
 } from '@/utils/recentRequests';
 import { formatFileSize } from '@/utils/format';
 import {
-  QUOTA_PROVIDER_TYPES,
   formatModified,
   getAuthFileIcon,
   getAuthFileStatusMessage,
@@ -41,6 +40,7 @@ import {
 } from '@/features/authFiles/constants';
 import type { AuthFileStatusBarData } from '@/features/authFiles/hooks/useAuthFilesStatusBarCache';
 import { AuthFileQuotaSection } from '@/features/authFiles/components/AuthFileQuotaSection';
+import { resolveAuthFileQuotaType } from '@/features/authFiles/quotaConfig';
 import styles from '@/pages/AuthFilesPage.module.scss';
 
 const HEALTHY_STATUS_MESSAGES = new Set(['ok', 'healthy', 'ready', 'success', 'available']);
@@ -61,14 +61,10 @@ export type AuthFileCardProps = {
   onDelete: (name: string) => void;
   onToggleStatus: (file: AuthFileItem, enabled: boolean) => void;
   onToggleSelect: (name: string) => void;
+  onRefreshQuota: (file: AuthFileItem, quotaType: QuotaProviderType) => void;
 };
 
-const resolveQuotaType = (file: AuthFileItem): QuotaProviderType | null => {
-  const provider = resolveAuthProvider(file);
-  if (!QUOTA_PROVIDER_TYPES.has(provider as QuotaProviderType)) return null;
-  return provider as QuotaProviderType;
-};
-
+// Force reload card
 export function AuthFileCard(props: AuthFileCardProps) {
   const { t } = useTranslation();
   const [showStatusDetailModal, setShowStatusDetailModal] = useState(false);
@@ -88,6 +84,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
     onDelete,
     onToggleStatus,
     onToggleSelect,
+    onRefreshQuota,
   } = props;
 
   const recentBuckets = normalizeRecentRequestBuckets(file.recent_requests ?? file.recentRequests);
@@ -104,9 +101,9 @@ export function AuthFileCard(props: AuthFileCardProps) {
   const providerIcon = getAuthFileIcon(providerKey, resolvedTheme);
 
   const quotaType =
-    quotaFilterType && resolveQuotaType(file) === quotaFilterType ? quotaFilterType : null;
-  const cachedQuotaType = resolveQuotaType(file);
-  const showCachedQuota = Boolean(cachedQuotaType) && !isRuntimeOnly;
+    quotaFilterType && resolveAuthFileQuotaType(file) === quotaFilterType ? quotaFilterType : null;
+  const cachedQuotaType = resolveAuthFileQuotaType(file);
+  const showQuota = Boolean(cachedQuotaType) && !isRuntimeOnly;
 
   const providerCardClass =
     quotaType === 'antigravity'
@@ -172,7 +169,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
   // Gemini CLI premium tier detection
   const geminiTierId = useQuotaStore((state) => {
     const q = state.geminiCliQuota[file.name];
-    return q && q.status === 'success' ? q.tierId ?? null : null;
+    return q && q.status === 'success' ? (q.tierId ?? null) : null;
   });
 
   const isPlanPremium = (plan: string) => {
@@ -185,21 +182,43 @@ export function AuthFileCard(props: AuthFileCardProps) {
   const getPlanBadgeStyle = (plan: string) => {
     const normalized = plan.trim().toLowerCase();
     const isPro = normalized === 'pro';
-    const isProLite = normalized === 'prolite' || normalized === 'pro-lite' || normalized === 'pro_lite';
-    const isPlus = normalized === 'plus' || normalized === 'chatgpt-plus' || normalized === 'chatgptplus';
+    const isProLite =
+      normalized === 'prolite' || normalized === 'pro-lite' || normalized === 'pro_lite';
+    const isPlus =
+      normalized === 'plus' || normalized === 'chatgpt-plus' || normalized === 'chatgptplus';
     const isTeam = normalized === 'team' || normalized === 'enterprise';
 
     if (isPlanPremium(plan)) return undefined;
 
     if (isPro)
-      return { backgroundColor: 'rgba(139, 92, 246, 0.12)', color: '#8b5cf6', border: '1px solid rgba(139, 92, 246, 0.3)' };
+      return {
+        backgroundColor: 'rgba(139, 92, 246, 0.12)',
+        color: '#8b5cf6',
+        border: '1px solid rgba(139, 92, 246, 0.3)',
+      };
     if (isProLite)
-      return { backgroundColor: 'rgba(217, 165, 22, 0.15)', color: '#e0aa14', border: '1px solid rgba(217, 165, 22, 0.3)' };
+      return {
+        backgroundColor: 'rgba(217, 165, 22, 0.15)',
+        color: '#e0aa14',
+        border: '1px solid rgba(217, 165, 22, 0.3)',
+      };
     if (isPlus)
-      return { backgroundColor: 'rgba(16, 163, 127, 0.12)', color: '#10a37f', border: '1px solid rgba(16, 163, 127, 0.3)' };
+      return {
+        backgroundColor: 'rgba(16, 163, 127, 0.12)',
+        color: '#10a37f',
+        border: '1px solid rgba(16, 163, 127, 0.3)',
+      };
     if (isTeam)
-      return { backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)' };
-    return { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' };
+      return {
+        backgroundColor: 'rgba(59, 130, 246, 0.12)',
+        color: '#3b82f6',
+        border: '1px solid rgba(59, 130, 246, 0.3)',
+      };
+    return {
+      backgroundColor: 'var(--bg-tertiary)',
+      color: 'var(--text-secondary)',
+      border: '1px solid var(--border-color)',
+    };
   };
 
   return (
@@ -213,7 +232,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
         fallback: typeLabel.slice(0, 1).toUpperCase(),
         bgColor: providerIcon ? 'transparent' : typeColor.bg,
         textColor: typeColor.text,
-        border: providerIcon ? '1px solid transparent' : (typeColor.border || undefined),
+        border: providerIcon ? '1px solid transparent' : typeColor.border || undefined,
       }}
       title={file.name}
       subtitle={
@@ -235,11 +254,15 @@ export function AuthFileCard(props: AuthFileCardProps) {
           },
         },
         // 只在有警告或虚拟文件时显示状态 badge，启用/禁用由 toggle 表达
-        ...((isRuntimeOnly || hasStatusWarning) ? [{
-          label: stateLabel,
-          variant: stateBadgeVariant as 'active' | 'warning' | 'disabled' | 'custom',
-          className: isRuntimeOnly ? styles.stateBadgeVirtual : undefined,
-        }] : []),
+        ...(isRuntimeOnly || hasStatusWarning
+          ? [
+              {
+                label: stateLabel,
+                variant: stateBadgeVariant as 'active' | 'warning' | 'disabled' | 'custom',
+                className: isRuntimeOnly ? styles.stateBadgeVirtual : undefined,
+              },
+            ]
+          : []),
       ]}
       headerExtra={(() => {
         const badges: ReactNode[] = [];
@@ -264,7 +287,11 @@ export function AuthFileCard(props: AuthFileCardProps) {
             <span
               key="priority"
               className={ItemCard.styles.typeBadge}
-              style={{ backgroundColor: 'rgba(16, 185, 129, 0.10)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.25)' }}
+              style={{
+                backgroundColor: 'rgba(16, 185, 129, 0.10)',
+                color: '#10b981',
+                border: '1px solid rgba(16, 185, 129, 0.25)',
+              }}
             >
               <IconSignal size={12} /> P{priorityValue}
             </span>
@@ -293,10 +320,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
               label={t('auth_files.file_size')}
               value={file.size ? formatFileSize(file.size) : '-'}
             />
-            <ItemCard.MetaItem
-              label={t('auth_files.file_modified')}
-              value={formatModified(file)}
-            />
+            <ItemCard.MetaItem label={t('auth_files.file_modified')} value={formatModified(file)} />
           </ItemCard.Meta>
 
           {/* Health warning */}
@@ -317,7 +341,11 @@ export function AuthFileCard(props: AuthFileCardProps) {
                 title={t('auth_files.status_detail', { defaultValue: 'Status Detail' })}
                 onClose={() => setShowStatusDetailModal(false)}
                 footer={
-                  <Button variant="secondary" size="sm" onClick={() => setShowStatusDetailModal(false)}>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowStatusDetailModal(false)}
+                  >
                     {t('common.close')}
                   </Button>
                 }
@@ -325,23 +353,27 @@ export function AuthFileCard(props: AuthFileCardProps) {
               >
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>
-                    {t('auth_files.status_detail_desc', { defaultValue: 'Detailed warning or error message:' })}
+                    {t('auth_files.status_detail_desc', {
+                      defaultValue: 'Detailed warning or error message:',
+                    })}
                   </p>
-                  <pre style={{
-                    margin: 0,
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-all',
-                    background: 'var(--bg-secondary)',
-                    padding: '12px',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)',
-                    fontFamily: 'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
-                    fontSize: '13px',
-                    lineHeight: '1.5',
-                    color: 'var(--text-primary)',
-                    maxHeight: '240px',
-                    overflowY: 'auto'
-                  }}>
+                  <pre
+                    style={{
+                      margin: 0,
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-all',
+                      background: 'var(--bg-secondary)',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      fontFamily: 'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
+                      fontSize: '13px',
+                      lineHeight: '1.5',
+                      color: 'var(--text-primary)',
+                      maxHeight: '240px',
+                      overflowY: 'auto',
+                    }}
+                  >
                     {rawStatusMessage}
                   </pre>
                 </div>
@@ -351,15 +383,23 @@ export function AuthFileCard(props: AuthFileCardProps) {
 
           {/* Stats */}
           <ItemCard.Stats>
-            <ItemCard.StatPill label={t('stats.success')} value={fileStats.success} variant="success" />
-            <ItemCard.StatPill label={t('stats.failure')} value={fileStats.failure} variant="failure" />
+            <ItemCard.StatPill
+              label={t('stats.success')}
+              value={fileStats.success}
+              variant="success"
+            />
+            <ItemCard.StatPill
+              label={t('stats.failure')}
+              value={fileStats.failure}
+              variant="failure"
+            />
           </ItemCard.Stats>
 
           {/* Status bar */}
-          <ProviderStatusBar statusData={statusData} />
+          <ProviderStatusBar statusData={statusData} styles={styles} />
 
           {/* Quota */}
-          {showCachedQuota && cachedQuotaType && (
+          {showQuota && cachedQuotaType && (
             <AuthFileQuotaSection file={file} quotaType={cachedQuotaType} />
           )}
         </>
@@ -384,6 +424,18 @@ export function AuthFileCard(props: AuthFileCardProps) {
             )}
             {!isRuntimeOnly && (
               <ItemCard.UtilityActions>
+                {showQuota && cachedQuotaType && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => onRefreshQuota(file, cachedQuotaType)}
+                    className={ItemCard.styles.iconButton}
+                    title={t('auth_files.quota_refresh_one')}
+                    disabled={disableControls || file.disabled}
+                  >
+                    <IconZap size={16} />
+                  </Button>
+                )}
                 <Button
                   variant="secondary"
                   size="sm"
@@ -412,11 +464,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
                   title={t('auth_files.delete_button')}
                   disabled={disableControls || deleting === file.name}
                 >
-                  {deleting === file.name ? (
-                    <LoadingSpinner size={14} />
-                  ) : (
-                    <IconTrash2 size={16} />
-                  )}
+                  {deleting === file.name ? <LoadingSpinner size={14} /> : <IconTrash2 size={16} />}
                 </Button>
               </ItemCard.UtilityActions>
             )}

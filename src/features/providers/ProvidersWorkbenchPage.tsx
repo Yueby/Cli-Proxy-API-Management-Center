@@ -96,9 +96,7 @@ export function ProvidersWorkbenchPage() {
     }
 
     const timeoutId = window.setTimeout(() => {
-      const activeEl = tabsContainerRef.current?.querySelector(
-        `[data-tab-id="${activeBrand}"]`
-      );
+      const activeEl = tabsContainerRef.current?.querySelector(`[data-tab-id="${activeBrand}"]`);
       activeEl?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
     }, 0);
 
@@ -118,7 +116,15 @@ export function ProvidersWorkbenchPage() {
 
   const disableMutations = connectionStatus !== 'connected' || workbench.mutating;
 
-  const groups = useMemo(() => workbench.snapshot?.groups ?? [], [workbench.snapshot]);
+  const groups = useMemo(() => {
+    const rawGroups = workbench.snapshot?.groups ?? [];
+    const orderMap = new Map(PROVIDER_TAB_IDS.map((t, idx) => [t, idx]));
+    return [...rawGroups].sort((a, b) => {
+      const oa = orderMap.has(a.id) ? orderMap.get(a.id)! : 999;
+      const ob = orderMap.has(b.id) ? orderMap.get(b.id)! : 999;
+      return oa - ob;
+    });
+  }, [workbench.snapshot]);
   const activeGroup = groups.find((g) => g.id === activeBrand) ?? groups[0] ?? null;
 
   const filteredResources = useMemo(() => {

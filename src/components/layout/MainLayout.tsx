@@ -415,28 +415,22 @@ export function MainLayout() {
         },
       ],
     },
-    {
-      id: 'observe',
-      labelKey: 'nav_groups.observe',
-      items: [
-        {
-          path: '/quota',
-          labelKey: 'nav.quota_management',
-          metaKey: 'nav_meta.quota_management',
-          icon: sidebarIcons.quota,
-        },
-        ...(config?.loggingToFile
-          ? [
+    ...(config?.loggingToFile
+      ? [
+          {
+            id: 'observe',
+            labelKey: 'nav_groups.observe',
+            items: [
               {
                 path: '/logs',
                 labelKey: 'nav.logs',
                 metaKey: 'nav_meta.logs',
                 icon: sidebarIcons.logs,
               },
-            ]
-          : []),
-      ],
-    },
+            ],
+          },
+        ]
+      : []),
     {
       id: 'control',
       labelKey: 'nav_groups.control',

@@ -368,6 +368,12 @@
     "prefix_proxy_invalid_json": "This auth file is not a JSON object, so fields cannot be edited.",
     "prefix_proxy_html_challenge": "Downloaded content is an HTML challenge page, not an auth JSON object. Re-authenticate or replace this auth file before editing fields.",
     "prefix_proxy_saved_success": "Updated auth file \"{{name}}\" successfully",
+    "quota_label": "Quota",
+    "quota_refresh_page": "Refresh page quota",
+    "quota_refresh_one": "Refresh this credential quota",
+    "quota_refresh_no_targets": "No auth files with refreshable quota on this page",
+    "quota_refresh_page_success": "Refreshed quota for {{count}} auth files on this page",
+    "quota_refresh_page_partial": "Page quota refresh finished: {{success}} succeeded, {{failed}} failed",
     "quota_refresh_success": "Quota refreshed for \"{{name}}\"",
     "quota_refresh_failed": "Failed to refresh quota for \"{{name}}\": {{message}}"
   },
