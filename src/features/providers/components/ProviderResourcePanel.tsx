@@ -1,28 +1,12 @@
-import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import ampcodeLogo from '@/assets/icons/amp.svg';
-import claudeLogo from '@/assets/icons/claude.svg';
-import codexLogo from '@/assets/icons/codex.svg';
-import geminiLogo from '@/assets/icons/gemini.svg';
-import openaiLogo from '@/assets/icons/openai-light.svg';
-import vertexLogo from '@/assets/icons/vertex.svg';
 import { IconPlus } from '@/components/ui/icons';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import type { ProviderRecentUsageMap } from '@/components/providers/utils';
-import type { ProviderBrand, ProviderGroup, ProviderResource } from '../types';
+import type { ProviderGroup, ProviderResource } from '../types';
 import { ProviderResourceCards } from './ProviderResourceCards';
 import { OpenAIBrandToolbar } from './OpenAIBrandToolbar';
 import styles from './ProviderResourcePanel.module.scss';
-
-const LOGOS: Record<ProviderBrand, { src: string; invertOnDark?: boolean }> = {
-  gemini: { src: geminiLogo },
-  claude: { src: claudeLogo },
-  codex: { src: codexLogo },
-  vertex: { src: vertexLogo },
-  openaiCompatibility: { src: openaiLogo, invertOnDark: true },
-  ampcode: { src: ampcodeLogo },
-};
 
 interface ProviderResourcePanelProps {
   group: ProviderGroup;
@@ -44,7 +28,6 @@ interface ProviderResourcePanelProps {
   onDelete: (resource: ProviderResource) => void;
   onToggleDisabled?: (resource: ProviderResource, disabled: boolean) => void;
   onCreate: () => void;
-  headerActions?: ReactNode;
 }
 
 export function ProviderResourcePanel({
@@ -59,30 +42,22 @@ export function ProviderResourcePanel({
   onDelete,
   onToggleDisabled,
   onCreate,
-  headerActions,
 }: ProviderResourcePanelProps) {
   const { t } = useTranslation();
-  const logo = LOGOS[group.id];
   const realResources = filteredResources.filter((r) => !r.flags.isPlaceholder);
 
-  const title = (
-    <span className={styles.cardTitle}>
-      {logo ? (
-        <img
-          src={logo.src}
-          alt=""
-          aria-hidden="true"
-          className={`${styles.cardTitleIcon} ${logo.invertOnDark ? styles.logoInvertOnDark : ''}`}
-        />
+  return (
+    <Card className={styles.panel}>
+      {group.issue ? (
+        <div className="error-box" style={{ marginBottom: 16 }}>
+          <strong>{t('providersPage.table.providerIssue')}</strong>
+          {group.issue.status ? ` · ${group.issue.status}` : ''}
+          <div>{group.issue.message}</div>
+        </div>
       ) : null}
-      {t(`providersPage.providerNames.${group.id}`)}
-    </span>
-  );
 
-  const extra = (
-    <div className={styles.cardHeaderActions}>
       {openaiControls && (
-        <div className={styles.openaiToolbarRow}>
+        <div className={styles.openaiToolbarRow} style={{ marginBottom: 16 }}>
           <OpenAIBrandToolbar
             sortBy={openaiControls.sortBy}
             sortDir={openaiControls.sortDir}
@@ -94,19 +69,6 @@ export function ProviderResourcePanel({
           />
         </div>
       )}
-      {headerActions}
-    </div>
-  );
-
-  return (
-    <Card title={title} extra={extra} className={styles.panel}>
-      {group.issue ? (
-        <div className="error-box" style={{ marginBottom: 16 }}>
-          <strong>{t('providersPage.table.providerIssue')}</strong>
-          {group.issue.status ? ` · ${group.issue.status}` : ''}
-          <div>{group.issue.message}</div>
-        </div>
-      ) : null}
 
       {realResources.length === 0 && group.id !== 'ampcode' ? (
         <div className={styles.empty}>

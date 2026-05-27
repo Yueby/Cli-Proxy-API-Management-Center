@@ -29,19 +29,6 @@ interface SheetState {
   resource: ProviderResource | null;
 }
 
-const formatDateTime = (iso: string, locale?: string) => {
-  try {
-    const date = new Date(iso);
-    if (Number.isNaN(date.getTime())) return iso;
-    return new Intl.DateTimeFormat(locale, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(date);
-  } catch {
-    return iso;
-  }
-};
-
 const matchesFilter = (r: ProviderResource, normalized: string): boolean => {
   if (!normalized) return true;
   const haystack = [
@@ -60,7 +47,7 @@ const matchesFilter = (r: ProviderResource, normalized: string): boolean => {
 };
 
 export function ProvidersWorkbenchPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const connectionStatus = useAuthStore((s) => s.connectionStatus);
   const { showNotification, showConfirmation } = useNotificationStore();
 
@@ -110,7 +97,6 @@ export function ProvidersWorkbenchPage() {
   }, [activeGroup, filter]);
 
   const isOpenAI = activeGroup?.id === 'openaiCompatibility';
-
   const availableOpenaiModels = useMemo(() => {
     if (!isOpenAI || !activeGroup) return [];
     const seen = new Set<string>();
@@ -190,42 +176,9 @@ export function ProvidersWorkbenchPage() {
     openaiSortDir,
   ]);
 
-  const totalResources = useMemo(
-    () =>
-      groups.reduce(
-        (sum, g) => sum + g.resources.filter((r) => !r.flags.isPlaceholder).length,
-        0
-      ),
-    [groups]
-  );
-
-  const totalActive = useMemo(
-    () =>
-      groups.reduce(
-        (sum, g) =>
-          sum +
-          g.resources.filter((r) => !r.disabled && !r.flags.isPlaceholder).length,
-        0
-      ),
-    [groups]
-  );
-
-  const providerFamilies = useMemo(
-    () =>
-      groups.filter(
-        (g) => g.resources.some((r) => !r.flags.isPlaceholder)
-      ).length,
-    [groups]
-  );
-
-  const updatedAtLabel = workbench.snapshot
-    ? formatDateTime(workbench.snapshot.fetchedAt, i18n.language)
-    : t('providersPage.modelCatalog.notLoaded');
-
   const openCreate = useCallback(() => {
     const brand = activeBrand;
     if (brand === 'ampcode') {
-      // ampcode 走单例编辑
       const r =
         groups.find((g) => g.id === 'ampcode')?.resources[0] ?? null;
       setSheetState({ open: true, brand: 'ampcode', mode: 'edit', resource: r });
@@ -255,7 +208,6 @@ export function ProvidersWorkbenchPage() {
   const closeSheet = useCallback(() => {
     setSheetState((s) => ({ ...s, open: false }));
   }, []);
-
   const handleDelete = useCallback(
     (resource: ProviderResource) => {
       const isAmpcode = resource.brand === 'ampcode';
@@ -317,7 +269,6 @@ export function ProvidersWorkbenchPage() {
     closeSheet();
   }, [closeSheet, showNotification, t]);
 
-  // 加载状态
   if (!workbench.snapshot && workbench.isPending) {
     return (
       <div className={styles.page}>
@@ -358,25 +309,41 @@ export function ProvidersWorkbenchPage() {
       />
 
       <div className={styles.layout}>
-        <ProviderCategoryList
-          groups={groups}
-          activeBrand={activeGroup.id}
-          onSelect={(brand) => {
-            const isSwitching = sheetState.open && sheetState.brand !== brand;
-            const proceed = isSwitching && sheetRef.current
-              ? sheetRef.current.confirmDiscardIfDirty()
-              : Promise.resolve(true);
-            void proceed.then((ok) => {
-              if (!ok) return;
-              setActiveBrand(brand);
-              setFilter('');
-              setOpenaiSelectedModels(new Set());
-              if (isSwitching) {
-                closeSheet();
+        <div className={styles.toolbarRow}>
+          <ProviderCategoryList
+            groups={groups}
+            activeBrand={activeGroup.id}
+            onSelect={(brand) => {
+              const isSwitching = sheetState.open && sheetState.brand !== brand;
+              const proceed = isSwitching && sheetRef.current
+                ? sheetRef.current.confirmDiscardIfDirty()
+                : Promise.resolve(true);
+              void proceed.then((ok) => {
+                if (!ok) return;
+                setActiveBrand(brand);
+                setFilter('');
+                setOpenaiSelectedModels(new Set());
+                if (isSwitching) {
+                  closeSheet();
+                }
+              });
+            }}
+          />
+          <div className={styles.headerActions}>
+            <ProviderHeaderCard
+              isFetching={workbench.isFetching}
+              isNewDisabled={disableMutations && !ampcodeBrandActive}
+              newLabel={
+                ampcodeBrandActive
+                  ? t('providersPage.actions.edit')
+                  : t('providersPage.actions.new')
               }
-            });
-          }}
-        />
+              onRefresh={() => void handleRefresh()}
+              onNew={openCreate}
+            />
+          </div>
+        </div>
+
         <ProviderResourcePanel
           group={activeGroup}
           filteredResources={visibleResources}
@@ -389,24 +356,6 @@ export function ProvidersWorkbenchPage() {
           onDelete={handleDelete}
           onToggleDisabled={handleToggleDisabled}
           onCreate={openCreate}
-          headerActions={
-            <ProviderHeaderCard
-              totalActive={totalActive}
-              totalResources={totalResources}
-              providerFamilies={providerFamilies}
-              updatedAtLabel={updatedAtLabel}
-              issueCount={workbench.snapshot?.issues.length ?? 0}
-              isFetching={workbench.isFetching}
-              isNewDisabled={disableMutations && !ampcodeBrandActive}
-              newLabel={
-                ampcodeBrandActive
-                  ? t('providersPage.actions.edit')
-                  : t('providersPage.actions.new')
-              }
-              onRefresh={() => void handleRefresh()}
-              onNew={openCreate}
-            />
-          }
         />
       </div>
 

@@ -8,11 +8,6 @@ import { Button } from '@/components/ui/Button';
 import styles from './ProviderHeaderCard.module.scss';
 
 interface ProviderHeaderCardProps {
-  totalActive: number;
-  totalResources: number;
-  providerFamilies: number;
-  updatedAtLabel: string;
-  issueCount?: number;
   isFetching?: boolean;
   isNewDisabled?: boolean;
   newLabel?: string;
