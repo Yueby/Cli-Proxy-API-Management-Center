@@ -53,51 +53,79 @@
   }
 }
 
-// ─── Sidebar drawer (fixed left edge, hidden by default) ─
+// ─── Sidebar drawer (right side, away from main app sidebar) ─
 
 .sidebarToggle {
   position: fixed;
-  left: 0;
+  right: 0;
   top: 50%;
-  transform: translateY(-50%);
   z-index: 46;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 24px;
-  height: 48px;
-  border: 1px solid var(--border-color);
-  border-left: none;
-  border-radius: 0 $radius-md $radius-md 0;
+  height: 52px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--border-color) 78%, transparent);
+  border-radius: 14px;
   background: var(--bg-primary);
-  color: var(--text-secondary);
+  color: color-mix(in srgb, var(--text-secondary) 88%, transparent);
   cursor: pointer;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
-  transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1), color $transition-fast, background-color $transition-fast;
+  box-shadow:
+    -4px 0 14px rgb(0 0 0 / 0.18),
+    inset 0 1px 0 rgb(255 255 255 / 0.03);
+  transform: translateY(-50%);
+  transition:
+    background $transition-fast,
+    border-color $transition-fast,
+    color $transition-fast,
+    transform $transition-fast,
+    right $transition-normal;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
 
   &:hover {
     color: var(--text-primary);
-    background: var(--bg-tertiary);
+    background: color-mix(in srgb, var(--bg-primary) 90%, var(--text-primary) 10%);
+    border-color: color-mix(in srgb, var(--border-hover) 86%, transparent);
+    transform: translateY(-50%) translateX(-2px);
+  }
+
+  &:active {
+    transform: translateY(-50%) translateX(0);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--primary-color) 24%, transparent),
+      -4px 0 14px rgb(0 0 0 / 0.18);
   }
 }
 
 .sidebarToggleOpen {
-  left: 200px;
+  right: calc(200px - 12px);
 }
 
 .sidebarDrawer {
   position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
+  right: 0;
+  top: 50%;
   width: 200px;
+  max-height: calc(
+    100vh - var(--shell-gutter, 24px) - 6px - var(--floating-control-size, 38px) - 24px
+  );
   z-index: 45;
-  padding: $spacing-md $spacing-sm;
-  padding-top: calc(var(--header-height, 50px) + $spacing-md);
+  padding: $spacing-sm;
   background: var(--bg-primary);
-  border-right: 1px solid var(--border-color);
-  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.08);
-  transform: translateX(-100%);
+  border: 1px solid var(--border-color);
+  border-right: none;
+  border-radius: $radius-lg 0 0 $radius-lg;
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.08);
+  transform: translate(100%, -50%);
   transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
   scrollbar-width: none;
@@ -108,33 +136,46 @@
 }
 
 .sidebarDrawerOpen {
-  transform: translateX(0);
+  transform: translate(0, -50%);
 }
 
 .sidebarBackdrop {
   position: fixed;
   inset: 0;
   z-index: 44;
-  background: rgba(0, 0, 0, 0.12);
-  animation: sidebarBackdropIn 0.2s ease-out;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: rgb(8 8 8 / 0.34);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity $transition-fast;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
-@keyframes sidebarBackdropIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.sidebarBackdropVisible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 :global([data-theme='dark']) {
   .sidebarToggle {
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+    box-shadow:
+      -4px 0 14px rgb(0 0 0 / 0.3),
+      inset 0 1px 0 rgb(255 255 255 / 0.03);
   }
 
   .sidebarDrawer {
-    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.35);
+    box-shadow: -4px 0 16px rgba(0, 0, 0, 0.35);
   }
+}
 
+@include mobile {
   .sidebarBackdrop {
-    background: rgba(0, 0, 0, 0.35);
+    background: rgb(8 8 8 / 0.46);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
 
@@ -149,16 +190,19 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 8px 12px;
+  padding: 8px 10px;
   border-radius: $radius-md;
-  border: 2px solid transparent;
+  border: 1px solid transparent;
   background: transparent;
   color: var(--text-secondary);
   text-align: left;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: color $transition-fast, background-color $transition-fast;
+  transition:
+    color $transition-fast,
+    background-color $transition-fast,
+    border-color $transition-fast;
 
   &:hover {
     color: var(--text-primary);
@@ -167,19 +211,19 @@
 }
 
 .navButtonActive {
-  color: var(--primary-contrast, #fff);
-  background: var(--primary-color);
-  border-color: var(--primary-color);
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--primary-color) 13%, transparent);
+  border-color: color-mix(in srgb, var(--primary-color) 28%, transparent);
   font-weight: 600;
 
   &:hover {
-    color: var(--primary-contrast, #fff);
-    background: var(--primary-hover);
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--primary-color) 17%, transparent);
   }
 
   &:focus-visible {
-    border-color: var(--primary-contrast, #fff);
-    box-shadow: 0 0 0 3px rgba($primary-color, 0.38);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.2);
   }
 }
 
@@ -193,6 +237,7 @@
 
 .navButtonActive .navIcon {
   opacity: 1;
+  color: var(--primary-color);
 }
 
 .navLabel {
@@ -607,7 +652,10 @@
   padding: 2px;
   color: var(--text-secondary);
   opacity: 0.5;
-  transition: opacity 0.15s, border-color 0.15s, box-shadow 0.15s;
+  transition:
+    opacity 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s;
   z-index: 1;
 
   &:hover {

@@ -1219,16 +1219,17 @@ export function VisualConfigEditor({
                 aria-label={sidebarOpen ? 'Close navigation' : 'Open navigation'}
                 aria-expanded={sidebarOpen}
               >
-                {sidebarOpen ? <IconChevronLeft size={14} /> : <IconChevronRight size={14} />}
+                {sidebarOpen ? <IconChevronRight size={14} /> : <IconChevronLeft size={14} />}
               </button>
               <div
                 className={`${styles.sidebarDrawer} ${sidebarOpen ? styles.sidebarDrawerOpen : ''}`}
               >
                 {navContent}
               </div>
-              {sidebarOpen && (
-                <div className={styles.sidebarBackdrop} onClick={() => setSidebarOpen(false)} />
-              )}
+              <div
+                className={`${styles.sidebarBackdrop} ${sidebarOpen ? styles.sidebarBackdropVisible : ''}`}
+                onClick={() => setSidebarOpen(false)}
+              />
             </>,
             document.body
           )
