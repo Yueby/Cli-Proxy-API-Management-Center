@@ -33,7 +33,6 @@ export function ProviderCategoryList({
 
   return (
     <aside className={styles.aside}>
-      <p className={styles.eyebrow}>{t('providersPage.categories.title')}</p>
       <div className={styles.list}>
         {groups.map((group) => {
           const active = group.id === activeBrand;
@@ -41,7 +40,6 @@ export function ProviderCategoryList({
             (r) => !r.flags.isPlaceholder
           );
           const total = realResources.length || (group.id === 'ampcode' ? 1 : 0);
-          const activeCount = realResources.filter((r) => !r.disabled).length;
           const logo = PROVIDER_LOGOS[group.id];
           const itemClass = `${styles.item} ${active ? styles.active : ''}`;
 
@@ -66,24 +64,12 @@ export function ProviderCategoryList({
                   <span className={styles.itemTitle}>
                     {t(`providersPage.providerNames.${group.id}`)}
                   </span>
-                  <span className={styles.itemSubtitle}>
-                    {group.id === 'ampcode'
-                      ? t(
-                          group.resources[0]?.disabled
-                            ? 'providersPage.categories.ampcodeInactive'
-                            : 'providersPage.categories.ampcodeActive'
-                        )
-                      : t('providersPage.categories.activeCount', {
-                          active: activeCount,
-                          total,
-                        })}
-                  </span>
                 </span>
               </span>
               {group.issue ? (
                 <IconAlertTriangle
-                  size={16}
-                  style={{ color: 'var(--amber-text)', flexShrink: 0 }}
+                  size={14}
+                  style={{ color: 'var(--amber-text)', flexShrink: 0, marginLeft: 4 }}
                 />
               ) : (
                 <span

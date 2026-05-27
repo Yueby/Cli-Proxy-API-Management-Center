@@ -413,12 +413,6 @@ export function MainLayout() {
           metaKey: 'nav_meta.auth_files',
           icon: sidebarIcons.authFiles,
         },
-        {
-          path: '/oauth',
-          labelKey: 'nav.oauth',
-          metaKey: 'nav_meta.oauth',
-          icon: sidebarIcons.oauth,
-        },
       ],
     },
     {
@@ -721,9 +715,11 @@ export function MainLayout() {
           <div className="nav-section">
             {navGroups.map((group, idx) => (
               <div className="nav-group" key={group.id}>
-                {showSidebarLabels
-                  ? <div className="nav-group-label">{t(group.labelKey)}</div>
-                  : idx > 0 && <div className="nav-group-divider" aria-hidden="true" />}
+                {showSidebarLabels ? (
+                  <div className="nav-group-label">{t(group.labelKey)}</div>
+                ) : (
+                  idx > 0 && <div className="nav-group-divider" aria-hidden="true" />
+                )}
                 {group.items.map((item) => {
                   const itemLabel = t(item.labelKey);
                   return (
