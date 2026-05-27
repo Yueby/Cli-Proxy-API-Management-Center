@@ -158,7 +158,6 @@
 
 .actions {
   display: flex;
-  gap: 4px;
   align-items: center;
   justify-content: flex-end;
 }
@@ -166,36 +165,54 @@
 .toggleWrap {
   display: inline-flex;
   align-items: center;
-  margin-right: 4px;
+  margin-right: 12px;
 }
 
 .iconBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   padding: 0;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 0;
+  background: var(--bg-secondary);
   color: var(--text-secondary);
   cursor: pointer;
-  transition: background-color $transition-fast, color $transition-fast;
+  transition: background-color $transition-fast, color $transition-fast, border-color $transition-fast;
+
+  &:first-of-type {
+    border-top-left-radius: var(--radius-md);
+    border-bottom-left-radius: var(--radius-md);
+  }
+
+  &:last-of-type {
+    border-top-right-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-md);
+  }
+
+  &:not(:last-of-type) {
+    border-right: none;
+  }
 
   &:hover:not(:disabled) {
     background: var(--bg-tertiary);
     color: var(--text-primary);
+    border-color: var(--primary-color);
+    z-index: 1;
   }
 
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
   }
 
   &:focus-visible {
-    outline: 2px solid var(--primary-color);
-    outline-offset: -1px;
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(139, 134, 128, 0.18);
+    z-index: 2;
   }
 }
 
@@ -205,5 +222,6 @@
   &:hover:not(:disabled) {
     background: var(--destructive-10);
     color: var(--destructive-color);
+    border-color: var(--destructive-color);
   }
 }
