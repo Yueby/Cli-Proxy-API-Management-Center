@@ -5,10 +5,11 @@ import codexLogo from '@/assets/icons/codex.svg';
 import geminiLogo from '@/assets/icons/gemini.svg';
 import openaiLogo from '@/assets/icons/openai-light.svg';
 import vertexLogo from '@/assets/icons/vertex.svg';
-import { IconPlus, IconSearch } from '@/components/ui/icons';
+import { IconPlus } from '@/components/ui/icons';
+import { SearchInput } from '@/components/ui/SearchInput';
 import type { ProviderRecentUsageMap } from '@/components/providers/utils';
 import type { ProviderBrand, ProviderGroup, ProviderResource } from '../types';
-import { ProviderResourceTable } from './ProviderResourceTable';
+import { ProviderResourceCards } from './ProviderResourceCards';
 import {
   OpenAIBrandToolbar,
   type OpenAISortBy,
@@ -92,14 +93,10 @@ export function ProviderResourcePanel({
           </div>
           {group.id !== 'ampcode' ? (
             <div className={styles.searchWrap}>
-              <span className={styles.searchIcon} aria-hidden="true">
-                <IconSearch size={14} />
-              </span>
-              <input
-                type="search"
-                className={styles.searchInput}
+              <SearchInput
                 value={filter}
-                onChange={(event) => onFilterChange(event.target.value)}
+                onChange={onFilterChange}
+                className={styles.searchInput}
                 placeholder={t('providersPage.table.filterPlaceholder')}
               />
             </div>
@@ -155,7 +152,7 @@ export function ProviderResourcePanel({
           </div>
         </div>
       ) : (
-        <ProviderResourceTable
+        <ProviderResourceCards
           resources={filteredResources}
           selectedId={selectedId}
           disableMutations={disableMutations}

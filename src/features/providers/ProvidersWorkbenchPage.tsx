@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PageHeader } from '@/components/common/PageHeader';
 import { usePageTransitionLayer } from '@/components/common/PageTransitionLayer';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -351,6 +352,7 @@ export function ProvidersWorkbenchPage() {
 
   return (
     <div className={styles.page}>
+      <PageHeader title={t('providersPage.header.title')} />
       <ProviderHeaderCard
         totalActive={totalActive}
         totalResources={totalResources}

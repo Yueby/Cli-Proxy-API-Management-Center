@@ -4,6 +4,7 @@ import {
   IconPlus,
   IconRefreshCw,
 } from '@/components/ui/icons';
+import { Button } from '@/components/ui/Button';
 import styles from './ProviderHeaderCard.module.scss';
 
 interface ProviderHeaderCardProps {
@@ -34,63 +35,48 @@ export function ProviderHeaderCard({
   const { t } = useTranslation();
 
   return (
-    <section className={styles.card}>
-      <div className={styles.row}>
-        <div className={styles.titleArea}>
-          <h1 className={styles.title}>{t('providersPage.header.title')}</h1>
-        </div>
-        <div className={styles.actions}>
-          <button
-            type="button"
-            className={`${styles.btn} ${styles.btnOutline}`}
-            onClick={onRefresh}
-            disabled={isFetching}
-            aria-label={
-              isFetching
-                ? t('providersPage.actions.syncing')
-                : t('providersPage.actions.refresh')
-            }
-          >
-            <span className={`${styles.btnIcon} ${isFetching ? styles.spin : ''}`.trim()}>
-              {isFetching ? <IconLoader2 size={14} /> : <IconRefreshCw size={14} />}
-            </span>
-            <span>
-              {isFetching
-                ? t('providersPage.actions.syncing')
-                : t('providersPage.actions.refresh')}
-            </span>
-          </button>
-          <button
-            type="button"
-            className={`${styles.btn} ${styles.btnPrimary}`}
-            onClick={onNew}
-            disabled={isNewDisabled}
-          >
-            <IconPlus size={14} />
-            <span>{newLabel ?? t('providersPage.actions.new')}</span>
-          </button>
-        </div>
-      </div>
-
-      <div className={styles.chips}>
-        <span className={`${styles.chip} ${styles.chipPrimary}`}>
+    <div className={styles.actions}>
+      <div className={styles.summary}>
+        <span>
           {t('providersPage.header.activeResources', {
             active: totalActive,
             total: totalResources,
           })}
         </span>
-        <span className={styles.chip}>
-          {t('providersPage.header.providerFamilies', { count: providerFamilies })}
-        </span>
-        <span className={styles.chip}>
-          {t('providersPage.header.updatedAt', { time: updatedAtLabel })}
-        </span>
+        <span>{t('providersPage.header.providerFamilies', { count: providerFamilies })}</span>
+        <span>{t('providersPage.header.updatedAt', { time: updatedAtLabel })}</span>
         {issueCount > 0 ? (
-          <span className={`${styles.chip} ${styles.chipAmber}`}>
+          <span className={styles.issue}>
             {t('providersPage.header.issueCount', { count: issueCount })}
           </span>
         ) : null}
       </div>
-    </section>
+      <div className={styles.buttonGroup}>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={onRefresh}
+          disabled={isFetching}
+          aria-label={
+            isFetching
+              ? t('providersPage.actions.syncing')
+              : t('providersPage.actions.refresh')
+          }
+        >
+          <span className={`${styles.btnIcon} ${isFetching ? styles.spin : ''}`.trim()}>
+            {isFetching ? <IconLoader2 size={14} /> : <IconRefreshCw size={14} />}
+          </span>
+          <span>
+            {isFetching
+              ? t('providersPage.actions.syncing')
+              : t('providersPage.actions.refresh')}
+          </span>
+        </Button>
+        <Button variant="primary" size="sm" onClick={onNew} disabled={isNewDisabled}>
+          <IconPlus size={14} />
+          <span>{newLabel ?? t('providersPage.actions.new')}</span>
+        </Button>
+      </div>
+    </div>
   );
 }
