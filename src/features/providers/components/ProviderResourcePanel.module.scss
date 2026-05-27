@@ -103,9 +103,9 @@
   font-size: 13px;
   box-sizing: border-box;
   transition:
-    border-color -fast,
-    background-color -fast,
-    box-shadow -fast;
+    border-color $transition-fast,
+    background-color $transition-fast,
+    box-shadow $transition-fast;
 
   &::placeholder {
     color: var(--text-tertiary);

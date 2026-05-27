@@ -17,7 +17,7 @@
 .list {
   display: flex;
   align-items: center;
-  gap: -sm;
+  gap: $spacing-sm;
   width: 100%;
   overflow-x: auto;
   padding-bottom: 4px;
@@ -36,12 +36,12 @@
 .item {
   display: inline-flex;
   align-items: center;
-  gap: -sm;
+  gap: $spacing-sm;
   height: 36px;
   padding: 0 16px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: -full;
+  border-radius: $radius-full;
   color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
@@ -126,7 +126,7 @@
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
-  border-radius: -full;
+  border-radius: $radius-full;
   background: var(--bg-tertiary);
   color: var(--text-secondary);
   font-size: 12px;
