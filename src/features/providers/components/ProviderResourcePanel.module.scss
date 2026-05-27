@@ -1,0 +1,25 @@
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+.panel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  overflow: visible;
+}
+
+.openaiToolbarRow {
+  display: flex;
+  align-items: center;
+}
+
+.empty {
+  border: 1px dashed var(--border-color);
+  border-radius: $radius-lg;
+  padding: 32px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+  background: var(--bg-secondary);
+}

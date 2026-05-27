@@ -8,7 +8,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import { IconInfo, IconX, IconSave } from '@/components/ui/icons';
 import { SecondaryScreenShell } from '@/components/common/SecondaryScreenShell';
-import layoutStyles from './AiProvidersEditLayout.module.scss';
+import layoutStyles from './AuthFilesEditLayout.module.scss';
 import { useEdgeSwipeBack } from '@/hooks/useEdgeSwipeBack';
 import { useAuthStore, useNotificationStore } from '@/stores';
 import { authFilesApi } from '@/services/api';

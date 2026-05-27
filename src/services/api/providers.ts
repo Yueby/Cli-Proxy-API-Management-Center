@@ -87,6 +87,9 @@ const API_KEY_ENTRY_FIELDS = [
   'api-key',
   'apiKey',
   'key',
+  'auth-index',
+  'authIndex',
+  'auth_index',
   'proxy-url',
   'proxyUrl',
   'proxy_url',
@@ -322,6 +325,7 @@ const serializeModelAliases = (models?: ModelAlias[]) =>
 
 const serializeApiKeyEntry = (entry: ApiKeyEntry) => {
   const payload: Record<string, unknown> = { 'api-key': entry.apiKey };
+  if (entry.authIndex?.trim()) payload['auth-index'] = entry.authIndex.trim();
   if (entry.proxyUrl) payload['proxy-url'] = entry.proxyUrl;
   const headers = serializeHeaders(entry.headers);
   if (headers) payload.headers = headers;

@@ -6,30 +6,43 @@ import type { TFunction } from 'i18next';
 import type { CodexUsageWindow } from '@/types';
 import { normalizeNumberValue } from './parsers';
 
+function formatRelativeTime(diffMs: number): string {
+  const diffSeconds = Math.floor(diffMs / 1000);
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays > 0) {
+    const hoursPart = diffHours % 24;
+    return hoursPart > 0 ? `in ${diffDays}d ${hoursPart}h` : `in ${diffDays}d`;
+  }
+  if (diffHours > 0) {
+    const minutesPart = diffMinutes % 60;
+    return minutesPart > 0 ? `in ${diffHours}h ${minutesPart}m` : `in ${diffHours}h`;
+  }
+  if (diffMinutes > 0) {
+    return `in ${diffMinutes}m`;
+  }
+  return '< 1m';
+}
+
 export function formatQuotaResetTime(value?: string): string {
   if (!value) return '-';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleString(undefined, {
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  });
+  if (Number.isNaN(date.getTime())) return value;
+
+  const diffMs = date.getTime() - Date.now();
+  if (diffMs <= 0) return '-';
+
+  return formatRelativeTime(diffMs);
 }
 
 export function formatUnixSeconds(value: number | null): string {
   if (!value) return '-';
-  const date = new Date(value * 1000);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleString(undefined, {
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  });
+  const diffMs = value * 1000 - Date.now();
+  if (diffMs <= 0) return '-';
+
+  return formatRelativeTime(diffMs);
 }
 
 export function formatCodexResetLabel(window?: CodexUsageWindow | null): string {

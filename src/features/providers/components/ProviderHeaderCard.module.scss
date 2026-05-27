@@ -1,0 +1,55 @@
+@use '../../../styles/variables' as *;
+
+.providerButtonGroup {
+  display: inline-flex;
+  align-items: center;
+  border-radius: $radius-md;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+
+  :global(.btn) {
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    position: relative;
+    background: transparent !important;
+    box-shadow: none !important;
+    height: 32px;
+    padding: 0 12px;
+    color: var(--text-secondary);
+
+    &:hover:not(:disabled) {
+      background: var(--bg-tertiary) !important;
+      color: var(--text-primary);
+    }
+
+    &:not(:first-child) {
+      border-left: 1px solid var(--border-color) !important;
+    }
+
+    &:focus-visible {
+      z-index: 2;
+      box-shadow: inset 0 0 0 1.5px var(--primary-color) !important;
+    }
+  }
+}
+
+.btnIcon,
+.spin {
+  display: inline-flex;
+  align-items: center;
+}
+
+.spin {
+  animation: pwc-spin 0.9s linear infinite;
+}
+
+@keyframes pwc-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

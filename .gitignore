@@ -20,6 +20,7 @@ dist
 dist-ssr
 *.local
 skills
+.pi-lens/
 
 # Editor directories and files
 settings.local.json

@@ -1,0 +1,152 @@
+@use '../../../styles/mixins' as *;
+@use '../../../styles/variables' as *;
+
+.aside {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  overflow: visible;
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: $spacing-xs; // for scrollbar
+
+  // hide scrollbar visually but keep functionality
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @include mobile {
+    mask-image: linear-gradient(to right, transparent, black 12px, black calc(100% - 12px), transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 12px, black calc(100% - 12px), transparent);
+  }
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-sm;
+  height: 36px;
+  padding: 0 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: $radius-full;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: -2px;
+  }
+
+  &.active {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+
+    &:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+  }
+
+  @include mobile {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 13px;
+    gap: 6px;
+  }
+}
+
+.itemLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.logo {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+
+  @include mobile {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.logoInvertOnDark {
+  [data-theme='dark'] & {
+    filter: invert(1) hue-rotate(180deg);
+  }
+}
+
+.itemText {
+  display: flex;
+  align-items: center;
+}
+
+.itemTitle {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+
+  @include mobile {
+    font-size: 13px;
+  }
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: $radius-full;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  margin-left: 4px;
+
+  .active & {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+  }
+}
+
+.badgeAmber {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+
+  .active & {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+  }
+}

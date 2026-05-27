@@ -1,40 +1,23 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ANTIGRAVITY_CONFIG,
-  CLAUDE_CONFIG,
-  CODEX_CONFIG,
-  GEMINI_CLI_CONFIG,
-  KIMI_CONFIG,
-  XAI_CONFIG,
-} from '@/components/quota';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useQuotaStore } from '@/stores';
 import type { AuthFileItem } from '@/types';
-import type { QuotaProviderType } from '@/features/authFiles/constants';
+import { resolveQuotaErrorMessage, type QuotaProviderType } from '@/features/authFiles/constants';
+import { getAuthFileQuotaConfig } from '@/features/authFiles/quotaConfig';
 import { QuotaProgressBar } from '@/features/authFiles/components/QuotaProgressBar';
 import styles from '@/pages/AuthFilesPage.module.scss';
 
-type QuotaState = { status?: string } | undefined;
-
-const getQuotaConfig = (type: QuotaProviderType) => {
-  if (type === 'antigravity') return ANTIGRAVITY_CONFIG;
-  if (type === 'claude') return CLAUDE_CONFIG;
-  if (type === 'codex') return CODEX_CONFIG;
-  if (type === 'kimi') return KIMI_CONFIG;
-  if (type === 'xai') return XAI_CONFIG;
-  return GEMINI_CLI_CONFIG;
-};
+type QuotaState =
+  | { status?: 'idle' | 'loading' | 'success' | 'error'; error?: string; errorStatus?: number }
+  | undefined;
 
 export type AuthFileQuotaSectionProps = {
   file: AuthFileItem;
   quotaType: QuotaProviderType;
 };
 
-/**
- * 只读 — 从全局 quota store 里读取该账号的缓存配额数据。
- * 仅当存在 success 状态的缓存时才渲染;loading / error / idle 一律不渲染,
- * 保持认证文件卡片干净。所有拉取逻辑都发生在配额管理页面,这里不发任何请求。
- */
+// Force reload
 export function AuthFileQuotaSection(props: AuthFileQuotaSectionProps) {
   const { file, quotaType } = props;
   const { t } = useTranslation();
@@ -48,13 +31,47 @@ export function AuthFileQuotaSection(props: AuthFileQuotaSectionProps) {
     return state.geminiCliQuota[file.name] as QuotaState;
   });
 
-  if (!quota || quota.status !== 'success') return null;
+  const config = getAuthFileQuotaConfig(quotaType);
+  const quotaStatus = quota?.status ?? 'idle';
+  const isLoading = quotaStatus === 'loading';
+  const quotaErrorMessage = resolveQuotaErrorMessage(
+    t,
+    quota?.errorStatus,
+    quota?.error || t('common.unknown_error')
+  );
 
-  const config = getQuotaConfig(quotaType);
+  const getQuotaItemsCount = (): number => {
+    if (!quota || quotaStatus !== 'success') return 0;
+    if (quotaType === 'antigravity') return (quota as { groups?: unknown[] }).groups?.length ?? 0;
+    if (quotaType === 'claude') return (quota as { windows?: unknown[] }).windows?.length ?? 0;
+    if (quotaType === 'codex') return (quota as { windows?: unknown[] }).windows?.length ?? 0;
+    if (quotaType === 'gemini-cli') return (quota as { buckets?: unknown[] }).buckets?.length ?? 0;
+    if (quotaType === 'kimi') return (quota as { rows?: unknown[] }).rows?.length ?? 0;
+    if (quotaType === 'xai') return 1;
+    return 0;
+  };
+
+  if (quotaStatus === 'idle') return null;
+
+  const itemsCount = getQuotaItemsCount();
+  const gridClass = itemsCount <= 1 ? styles.quotaGridSingle : styles.quotaGrid;
 
   return (
     <div className={styles.quotaSection}>
-      {config.renderQuotaItems(quota as never, t, { styles, QuotaProgressBar }) as ReactNode}
+      {quotaStatus === 'success' && quota ? (
+        <div className={gridClass}>
+          {config.renderQuotaItems(quota as never, t, { styles, QuotaProgressBar }) as ReactNode}
+        </div>
+      ) : isLoading ? (
+        <div className={styles.quotaMessage}>
+          <LoadingSpinner size={14} />
+          <span>{t(`${config.i18nPrefix}.loading`)}</span>
+        </div>
+      ) : (
+        <div className={styles.quotaError} title={quotaErrorMessage}>
+          {t(`${config.i18nPrefix}.load_failed`, { message: quotaErrorMessage })}
+        </div>
+      )}
     </div>
   );
 }
