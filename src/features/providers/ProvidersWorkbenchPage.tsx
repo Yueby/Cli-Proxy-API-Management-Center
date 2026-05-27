@@ -1,8 +1,9 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/common/PageHeader';
 import { usePageTransitionLayer } from '@/components/common/PageTransitionLayer';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
+import { useHorizontalWheelScroll } from '@/hooks/useHorizontalWheelScroll';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuthStore, useNotificationStore } from '@/stores';
 import { useProviderRecentRequests } from '@/components/providers/hooks/useProviderRecentRequests';
@@ -18,6 +19,16 @@ import type { ProviderBrand, ProviderResource } from './types';
 import styles from './ProvidersWorkbenchPage.module.scss';
 
 type SheetMode = 'detail' | 'create' | 'edit';
+
+const PROVIDER_TAB_STORAGE_KEY = 'ai-providers.active-tab';
+const PROVIDER_TAB_IDS: ProviderBrand[] = [
+  'openaiCompatibility',
+  'gemini',
+  'codex',
+  'claude',
+  'vertex',
+  'ampcode',
+];
 
 interface SheetState {
   open: boolean;
@@ -52,7 +63,17 @@ export function ProvidersWorkbenchPage() {
   const isCurrentLayer = pageTransitionLayer ? pageTransitionLayer.status === 'current' : true;
 
   const workbench = useProviderWorkbench();
-  const [activeBrand, setActiveBrand] = useState<ProviderBrand>('gemini');
+  const [activeBrand, setActiveBrand] = useState<ProviderBrand>(() => {
+    try {
+      const saved = localStorage.getItem(PROVIDER_TAB_STORAGE_KEY);
+      if (saved && PROVIDER_TAB_IDS.includes(saved as ProviderBrand)) {
+        return saved as ProviderBrand;
+      }
+    } catch {
+      // localStorage can be unavailable in hardened/privacy contexts.
+    }
+    return 'openaiCompatibility';
+  });
   const [filter, setFilter] = useState('');
   const [openaiSortBy, setOpenaiSortBy] = useState<OpenAISortBy>('name');
   const [openaiSortDir, setOpenaiSortDir] = useState<SortDir>('asc');
@@ -64,6 +85,25 @@ export function ProvidersWorkbenchPage() {
     resource: null,
   });
   const sheetRef = useRef<ProviderSheetHandle>(null);
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  useHorizontalWheelScroll(tabsContainerRef);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PROVIDER_TAB_STORAGE_KEY, activeBrand);
+    } catch {
+      // Persistence is a convenience; tab switching should keep working without it.
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      const activeEl = tabsContainerRef.current?.querySelector(
+        `[data-tab-id="${activeBrand}"]`
+      );
+      activeEl?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [activeBrand]);
 
   const connected = connectionStatus === 'connected';
   const { usageByProvider, refreshRecentRequests } = useProviderRecentRequests({
@@ -119,9 +159,14 @@ export function ProvidersWorkbenchPage() {
         const bn = (b.name ?? b.identifier ?? '').toLowerCase();
         diff = an.localeCompare(bn);
       } else if (openaiSortBy === 'priority') {
-        const ap = (a.raw as OpenAIProviderConfig).priority ?? 0;
-        const bp = (b.raw as OpenAIProviderConfig).priority ?? 0;
+        const ap = (a.raw as OpenAIProviderConfig).priority ?? Number.MAX_SAFE_INTEGER;
+        const bp = (b.raw as OpenAIProviderConfig).priority ?? Number.MAX_SAFE_INTEGER;
         diff = ap - bp;
+        if (diff === 0) {
+          const an = (a.name ?? a.identifier ?? '').toLowerCase();
+          const bn = (b.name ?? b.identifier ?? '').toLowerCase();
+          diff = an.localeCompare(bn);
+        }
       } else {
         const aStats = getOpenAIProviderRecentWindowStats(
           a.raw as OpenAIProviderConfig,
@@ -135,6 +180,8 @@ export function ProvidersWorkbenchPage() {
       }
       return openaiSortDir === 'asc' ? diff : -diff;
     });
+
+    sorted.sort((a, b) => Number(a.disabled) - Number(b.disabled));
 
     return sorted;
   }, [
@@ -296,6 +343,7 @@ export function ProvidersWorkbenchPage() {
       <div className={styles.layout}>
         <div className={styles.toolbarRow}>
           <ProviderCategoryList
+            listRef={tabsContainerRef}
             groups={groups}
             activeBrand={activeGroup.id}
             onSelect={(brand) => {

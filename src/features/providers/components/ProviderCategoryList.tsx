@@ -1,3 +1,4 @@
+import type { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import ampcodeLogo from '@/assets/icons/amp.svg';
 import claudeLogo from '@/assets/icons/claude.svg';
@@ -19,12 +20,14 @@ const PROVIDER_LOGOS: Record<ProviderBrand, { src: string; invertOnDark?: boolea
 };
 
 interface ProviderCategoryListProps {
+  listRef?: RefObject<HTMLDivElement | null>;
   groups: ProviderGroup[];
   activeBrand: ProviderBrand;
   onSelect: (brand: ProviderBrand) => void;
 }
 
 export function ProviderCategoryList({
+  listRef,
   groups,
   activeBrand,
   onSelect,
@@ -33,7 +36,7 @@ export function ProviderCategoryList({
 
   return (
     <aside className={styles.aside}>
-      <div className={styles.list}>
+      <div className={styles.list} ref={listRef}>
         {groups.map((group) => {
           const active = group.id === activeBrand;
           const realResources = group.resources.filter(
@@ -50,6 +53,7 @@ export function ProviderCategoryList({
               className={itemClass}
               onClick={() => onSelect(group.id)}
               aria-current={active ? 'page' : undefined}
+              data-tab-id={group.id}
             >
               <span className={styles.itemLeft}>
                 {logo ? (
