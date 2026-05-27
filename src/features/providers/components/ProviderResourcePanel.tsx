@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import ampcodeLogo from '@/assets/icons/amp.svg';
 import claudeLogo from '@/assets/icons/claude.svg';
@@ -6,15 +7,12 @@ import geminiLogo from '@/assets/icons/gemini.svg';
 import openaiLogo from '@/assets/icons/openai-light.svg';
 import vertexLogo from '@/assets/icons/vertex.svg';
 import { IconPlus } from '@/components/ui/icons';
-import { SearchInput } from '@/components/ui/SearchInput';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import type { ProviderRecentUsageMap } from '@/components/providers/utils';
 import type { ProviderBrand, ProviderGroup, ProviderResource } from '../types';
 import { ProviderResourceCards } from './ProviderResourceCards';
-import {
-  OpenAIBrandToolbar,
-  type OpenAISortBy,
-  type SortDir,
-} from './OpenAIBrandToolbar';
+import { OpenAIBrandToolbar } from './OpenAIBrandToolbar';
 import styles from './ProviderResourcePanel.module.scss';
 
 const LOGOS: Record<ProviderBrand, { src: string; invertOnDark?: boolean }> = {
@@ -26,36 +24,31 @@ const LOGOS: Record<ProviderBrand, { src: string; invertOnDark?: boolean }> = {
   ampcode: { src: ampcodeLogo },
 };
 
-export interface OpenAIPanelControls {
-  sortBy: OpenAISortBy;
-  sortDir: SortDir;
-  onSortBy: (value: OpenAISortBy) => void;
-  onSortDir: (value: SortDir) => void;
-  availableModels: ReadonlyArray<string>;
-  selectedModels: ReadonlySet<string>;
-  onSelectedModelsChange: (next: Set<string>) => void;
-}
-
 interface ProviderResourcePanelProps {
   group: ProviderGroup;
-  filter: string;
-  onFilterChange: (value: string) => void;
   filteredResources: ProviderResource[];
   selectedId: string | null;
   disableMutations?: boolean;
   usageByProvider?: ProviderRecentUsageMap;
-  openaiControls?: OpenAIPanelControls;
+  openaiControls?: {
+    sortBy: any;
+    sortDir: any;
+    onSortBy: (v: any) => void;
+    onSortDir: (v: any) => void;
+    availableModels: ReadonlyArray<string>;
+    selectedModels: ReadonlySet<string>;
+    onSelectedModelsChange: (v: any) => void;
+  };
   onView: (resource: ProviderResource) => void;
   onEdit: (resource: ProviderResource) => void;
   onDelete: (resource: ProviderResource) => void;
   onToggleDisabled?: (resource: ProviderResource, disabled: boolean) => void;
   onCreate: () => void;
+  headerActions?: ReactNode;
 }
 
 export function ProviderResourcePanel({
   group,
-  filter,
-  onFilterChange,
   filteredResources,
   selectedId,
   disableMutations,
@@ -66,90 +59,62 @@ export function ProviderResourcePanel({
   onDelete,
   onToggleDisabled,
   onCreate,
+  headerActions,
 }: ProviderResourcePanelProps) {
   const { t } = useTranslation();
   const logo = LOGOS[group.id];
-
   const realResources = filteredResources.filter((r) => !r.flags.isPlaceholder);
 
-  return (
-    <section className={styles.panel}>
-      <div className={styles.header}>
-        <div className={styles.headerMain}>
-          <div className={styles.titleArea}>
-            <div className={styles.titleRow}>
-              {logo ? (
-                <img
-                  src={logo.src}
-                  alt=""
-                  aria-hidden="true"
-                  className={`${styles.logo} ${logo.invertOnDark ? styles.logoInvertOnDark : ''}`}
-                />
-              ) : null}
-              <h2 className={styles.title}>
-                {t(`providersPage.providerNames.${group.id}`)}
-              </h2>
-            </div>
-          </div>
-          {group.id !== 'ampcode' ? (
-            <div className={styles.searchWrap}>
-              <SearchInput
-                value={filter}
-                onChange={onFilterChange}
-                className={styles.searchInput}
-                placeholder={t('providersPage.table.filterPlaceholder')}
-              />
-            </div>
-          ) : null}
-        </div>
-        {openaiControls ? (
-          <div className={styles.headerToolbarRow}>
-            <OpenAIBrandToolbar
-              sortBy={openaiControls.sortBy}
-              sortDir={openaiControls.sortDir}
-              onSortBy={openaiControls.onSortBy}
-              onSortDir={openaiControls.onSortDir}
-              availableModels={openaiControls.availableModels}
-              selectedModels={openaiControls.selectedModels}
-              onSelectedModelsChange={openaiControls.onSelectedModelsChange}
-            />
-          </div>
-        ) : null}
-      </div>
+  const title = (
+    <span className={styles.cardTitle}>
+      {logo ? (
+        <img
+          src={logo.src}
+          alt=""
+          aria-hidden="true"
+          className={`${styles.cardTitleIcon} ${logo.invertOnDark ? styles.logoInvertOnDark : ''}`}
+        />
+      ) : null}
+      {t(`providersPage.providerNames.${group.id}`)}
+    </span>
+  );
 
+  const extra = (
+    <div className={styles.cardHeaderActions}>
+      {openaiControls && (
+        <div className={styles.openaiToolbarRow}>
+          <OpenAIBrandToolbar
+            sortBy={openaiControls.sortBy}
+            sortDir={openaiControls.sortDir}
+            onSortBy={openaiControls.onSortBy}
+            onSortDir={openaiControls.onSortDir}
+            availableModels={openaiControls.availableModels}
+            selectedModels={openaiControls.selectedModels}
+            onSelectedModelsChange={openaiControls.onSelectedModelsChange}
+          />
+        </div>
+      )}
+      {headerActions}
+    </div>
+  );
+
+  return (
+    <Card title={title} extra={extra} className={styles.panel}>
       {group.issue ? (
-        <div className={styles.issue}>
-          <div className={styles.issueTitle}>
-            {t('providersPage.table.providerIssue')}
-            {group.issue.status ? ` · ${group.issue.status}` : ''}
-          </div>
+        <div className="error-box" style={{ marginBottom: 16 }}>
+          <strong>{t('providersPage.table.providerIssue')}</strong>
+          {group.issue.status ? ` · ${group.issue.status}` : ''}
           <div>{group.issue.message}</div>
         </div>
       ) : null}
 
       {realResources.length === 0 && group.id !== 'ampcode' ? (
         <div className={styles.empty}>
-          <div>{t('providersPage.table.empty')}</div>
-          <div className={styles.emptyAction}>
-            <button
-              type="button"
-              onClick={onCreate}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '6px 12px',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border-color)',
-                background: 'var(--bg-primary)',
-                cursor: 'pointer',
-                fontSize: 13,
-              }}
-            >
-              <IconPlus size={14} />
-              <span>{t('providersPage.actions.new')}</span>
-            </button>
-          </div>
+          <div style={{ marginBottom: 12 }}>{t('providersPage.table.empty')}</div>
+          <Button variant="secondary" size="sm" onClick={onCreate} disabled={disableMutations}>
+            <IconPlus size={14} />
+            <span>{t('providersPage.actions.new')}</span>
+          </Button>
         </div>
       ) : (
         <ProviderResourceCards
@@ -163,6 +128,6 @@ export function ProviderResourcePanel({
           onToggleDisabled={onToggleDisabled}
         />
       )}
-    </section>
+    </Card>
   );
 }

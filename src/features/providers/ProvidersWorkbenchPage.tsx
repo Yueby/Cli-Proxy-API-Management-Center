@@ -11,7 +11,6 @@ import type { OpenAIProviderConfig } from '@/types';
 import { ProviderHeaderCard } from './components/ProviderHeaderCard';
 import { ProviderCategoryList } from './components/ProviderCategoryList';
 import { ProviderResourcePanel } from './components/ProviderResourcePanel';
-import type { OpenAIPanelControls } from './components/ProviderResourcePanel';
 import type {
   OpenAISortBy,
   SortDir,
@@ -172,7 +171,7 @@ export function ProvidersWorkbenchPage() {
     usageByProvider,
   ]);
 
-  const openaiControls = useMemo<OpenAIPanelControls | undefined>(() => {
+  const openaiControls = useMemo(() => {
     if (!isOpenAI) return undefined;
     return {
       sortBy: openaiSortBy,
@@ -334,16 +333,15 @@ export function ProvidersWorkbenchPage() {
   if (!activeGroup) {
     return (
       <div className={styles.page}>
-        <ProviderHeaderCard
-          totalActive={0}
-          totalResources={0}
-          providerFamilies={0}
-          updatedAtLabel={updatedAtLabel}
-          isFetching={workbench.isFetching}
-          onRefresh={() => void handleRefresh()}
-          onNew={() => {}}
-          isNewDisabled
+        <PageHeader
+          title={t('providersPage.header.title')}
+          description={t('ai_providers.description', {
+            defaultValue: '管理 Gemini、Codex、Claude、Vertex 及 OpenAI 兼容提供方的 API 密钥与配置。',
+          })}
         />
+        <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-secondary)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+          {t('common.loading')}
+        </div>
       </div>
     );
   }
@@ -352,22 +350,11 @@ export function ProvidersWorkbenchPage() {
 
   return (
     <div className={styles.page}>
-      <PageHeader title={t('providersPage.header.title')} />
-      <ProviderHeaderCard
-        totalActive={totalActive}
-        totalResources={totalResources}
-        providerFamilies={providerFamilies}
-        updatedAtLabel={updatedAtLabel}
-        issueCount={workbench.snapshot?.issues.length ?? 0}
-        isFetching={workbench.isFetching}
-        isNewDisabled={disableMutations && !ampcodeBrandActive}
-        newLabel={
-          ampcodeBrandActive
-            ? t('providersPage.actions.edit')
-            : t('providersPage.actions.new')
-        }
-        onRefresh={() => void handleRefresh()}
-        onNew={openCreate}
+      <PageHeader
+        title={t('providersPage.header.title')}
+        description={t('ai_providers.description', {
+          defaultValue: '管理 Gemini、Codex、Claude、Vertex 及 OpenAI 兼容提供方的 API 密钥与配置。',
+        })}
       />
 
       <div className={styles.layout}>
@@ -392,8 +379,6 @@ export function ProvidersWorkbenchPage() {
         />
         <ProviderResourcePanel
           group={activeGroup}
-          filter={filter}
-          onFilterChange={setFilter}
           filteredResources={visibleResources}
           selectedId={sheetState.open ? sheetState.resource?.id ?? null : null}
           disableMutations={disableMutations}
@@ -404,6 +389,24 @@ export function ProvidersWorkbenchPage() {
           onDelete={handleDelete}
           onToggleDisabled={handleToggleDisabled}
           onCreate={openCreate}
+          headerActions={
+            <ProviderHeaderCard
+              totalActive={totalActive}
+              totalResources={totalResources}
+              providerFamilies={providerFamilies}
+              updatedAtLabel={updatedAtLabel}
+              issueCount={workbench.snapshot?.issues.length ?? 0}
+              isFetching={workbench.isFetching}
+              isNewDisabled={disableMutations && !ampcodeBrandActive}
+              newLabel={
+                ampcodeBrandActive
+                  ? t('providersPage.actions.edit')
+                  : t('providersPage.actions.new')
+              }
+              onRefresh={() => void handleRefresh()}
+              onNew={openCreate}
+            />
+          }
         />
       </div>
 

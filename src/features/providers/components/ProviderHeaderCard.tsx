@@ -21,11 +21,6 @@ interface ProviderHeaderCardProps {
 }
 
 export function ProviderHeaderCard({
-  totalActive,
-  totalResources,
-  providerFamilies,
-  updatedAtLabel,
-  issueCount = 0,
   isFetching = false,
   isNewDisabled = false,
   newLabel,
@@ -35,48 +30,37 @@ export function ProviderHeaderCard({
   const { t } = useTranslation();
 
   return (
-    <div className={styles.actions}>
-      <div className={styles.summary}>
-        <span>
-          {t('providersPage.header.activeResources', {
-            active: totalActive,
-            total: totalResources,
-          })}
+    <div className={styles.providerButtonGroup}>
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={onRefresh}
+        disabled={isFetching}
+        aria-label={
+          isFetching
+            ? t('providersPage.actions.syncing')
+            : t('providersPage.actions.refresh')
+        }
+        title={
+          isFetching
+            ? t('providersPage.actions.syncing')
+            : t('providersPage.actions.refresh')
+        }
+      >
+        <span className={`${styles.btnIcon} ${isFetching ? styles.spin : ''}`.trim()}>
+          {isFetching ? <IconLoader2 size={14} /> : <IconRefreshCw size={14} />}
         </span>
-        <span>{t('providersPage.header.providerFamilies', { count: providerFamilies })}</span>
-        <span>{t('providersPage.header.updatedAt', { time: updatedAtLabel })}</span>
-        {issueCount > 0 ? (
-          <span className={styles.issue}>
-            {t('providersPage.header.issueCount', { count: issueCount })}
-          </span>
-        ) : null}
-      </div>
-      <div className={styles.buttonGroup}>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={onRefresh}
-          disabled={isFetching}
-          aria-label={
-            isFetching
-              ? t('providersPage.actions.syncing')
-              : t('providersPage.actions.refresh')
-          }
-        >
-          <span className={`${styles.btnIcon} ${isFetching ? styles.spin : ''}`.trim()}>
-            {isFetching ? <IconLoader2 size={14} /> : <IconRefreshCw size={14} />}
-          </span>
-          <span>
-            {isFetching
-              ? t('providersPage.actions.syncing')
-              : t('providersPage.actions.refresh')}
-          </span>
-        </Button>
-        <Button variant="primary" size="sm" onClick={onNew} disabled={isNewDisabled}>
-          <IconPlus size={14} />
-          <span>{newLabel ?? t('providersPage.actions.new')}</span>
-        </Button>
-      </div>
+      </Button>
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={onNew}
+        disabled={isNewDisabled}
+        aria-label={newLabel ?? t('providersPage.actions.new')}
+        title={newLabel ?? t('providersPage.actions.new')}
+      >
+        <IconPlus size={14} />
+      </Button>
     </div>
   );
 }

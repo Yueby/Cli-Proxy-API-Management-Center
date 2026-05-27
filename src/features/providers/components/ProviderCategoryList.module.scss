@@ -20,8 +20,9 @@
   gap: $spacing-sm;
   width: 100%;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: $spacing-xs; // for scrollbar
 
+  // hide scrollbar visually but keep functionality
   scrollbar-width: none;
   &::-webkit-scrollbar {
     display: none;
