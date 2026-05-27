@@ -11,10 +11,7 @@ import type { OpenAIProviderConfig } from '@/types';
 import { ProviderHeaderCard } from './components/ProviderHeaderCard';
 import { ProviderCategoryList } from './components/ProviderCategoryList';
 import { ProviderResourcePanel } from './components/ProviderResourcePanel';
-import type {
-  OpenAISortBy,
-  SortDir,
-} from './components/OpenAIBrandToolbar';
+import type { OpenAISortBy, SortDir } from './components/OpenAIBrandToolbar';
 import { ProviderSheet, type ProviderSheetHandle } from './sheets/ProviderSheet';
 import { useProviderWorkbench } from './useProviderWorkbench';
 import type { ProviderBrand, ProviderResource } from './types';
@@ -59,9 +56,7 @@ export function ProvidersWorkbenchPage() {
   const [filter, setFilter] = useState('');
   const [openaiSortBy, setOpenaiSortBy] = useState<OpenAISortBy>('name');
   const [openaiSortDir, setOpenaiSortDir] = useState<SortDir>('asc');
-  const [openaiSelectedModels, setOpenaiSelectedModels] = useState<Set<string>>(
-    () => new Set()
-  );
+  const [openaiSelectedModels, setOpenaiSelectedModels] = useState<Set<string>>(() => new Set());
   const [sheetState, setSheetState] = useState<SheetState>({
     open: false,
     brand: 'gemini',
@@ -76,10 +71,7 @@ export function ProvidersWorkbenchPage() {
   });
 
   const handleRefresh = useCallback(async () => {
-    await Promise.allSettled([
-      workbench.refetch(),
-      refreshRecentRequests().catch(() => undefined),
-    ]);
+    await Promise.allSettled([workbench.refetch(), refreshRecentRequests().catch(() => undefined)]);
   }, [refreshRecentRequests, workbench]);
 
   useHeaderRefresh(handleRefresh, isCurrentLayer);
@@ -87,8 +79,7 @@ export function ProvidersWorkbenchPage() {
   const disableMutations = connectionStatus !== 'connected' || workbench.mutating;
 
   const groups = useMemo(() => workbench.snapshot?.groups ?? [], [workbench.snapshot]);
-  const activeGroup =
-    groups.find((g) => g.id === activeBrand) ?? groups[0] ?? null;
+  const activeGroup = groups.find((g) => g.id === activeBrand) ?? groups[0] ?? null;
 
   const filteredResources = useMemo(() => {
     if (!activeGroup) return [];
@@ -117,9 +108,7 @@ export function ProvidersWorkbenchPage() {
     if (openaiSelectedModels.size > 0) {
       arr = arr.filter((r) => {
         const cfg = r.raw as OpenAIProviderConfig;
-        return Boolean(
-          cfg.models?.some((m) => openaiSelectedModels.has((m.name ?? '').trim()))
-        );
+        return Boolean(cfg.models?.some((m) => openaiSelectedModels.has((m.name ?? '').trim())));
       });
     }
 
@@ -168,24 +157,26 @@ export function ProvidersWorkbenchPage() {
       selectedModels: openaiSelectedModels,
       onSelectedModelsChange: setOpenaiSelectedModels,
     };
-  }, [
-    availableOpenaiModels,
-    isOpenAI,
-    openaiSelectedModels,
-    openaiSortBy,
-    openaiSortDir,
-  ]);
+  }, [availableOpenaiModels, isOpenAI, openaiSelectedModels, openaiSortBy, openaiSortDir]);
 
   const openCreate = useCallback(() => {
     const brand = activeBrand;
     if (brand === 'ampcode') {
-      const r =
-        groups.find((g) => g.id === 'ampcode')?.resources[0] ?? null;
+      const r = groups.find((g) => g.id === 'ampcode')?.resources[0] ?? null;
       setSheetState({ open: true, brand: 'ampcode', mode: 'edit', resource: r });
     } else {
       setSheetState({ open: true, brand, mode: 'create', resource: null });
     }
   }, [activeBrand, groups]);
+
+  const openView = useCallback((resource: ProviderResource) => {
+    setSheetState({
+      open: true,
+      brand: resource.brand,
+      mode: 'detail',
+      resource,
+    });
+  }, []);
 
   const openEdit = useCallback((resource: ProviderResource) => {
     setSheetState({
@@ -202,12 +193,9 @@ export function ProvidersWorkbenchPage() {
   const handleDelete = useCallback(
     (resource: ProviderResource) => {
       const isAmpcode = resource.brand === 'ampcode';
-      const name =
-        resource.name ?? resource.apiKeyPreview ?? resource.identifier ?? '';
+      const name = resource.name ?? resource.apiKeyPreview ?? resource.identifier ?? '';
       showConfirmation({
-        title: isAmpcode
-          ? t('providersPage.delete.ampcodeTitle')
-          : t('providersPage.delete.title'),
+        title: isAmpcode ? t('providersPage.delete.ampcodeTitle') : t('providersPage.delete.title'),
         message: isAmpcode
           ? t('providersPage.delete.ampcodeConfirm')
           : t('providersPage.delete.confirm', { name }),
@@ -234,17 +222,12 @@ export function ProvidersWorkbenchPage() {
       try {
         await workbench.toggleDisabled(resource, disabled);
         showNotification(
-          disabled
-            ? t('providersPage.toast.disabled')
-            : t('providersPage.toast.enabled'),
+          disabled ? t('providersPage.toast.disabled') : t('providersPage.toast.enabled'),
           'success'
         );
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
-        showNotification(
-          `${t('providersPage.toast.toggleFailed')}: ${msg}`,
-          'error'
-        );
+        showNotification(`${t('providersPage.toast.toggleFailed')}: ${msg}`, 'error');
       }
     },
     [showNotification, t, workbench]
@@ -278,10 +261,20 @@ export function ProvidersWorkbenchPage() {
         <PageHeader
           title={t('providersPage.header.title')}
           description={t('ai_providers.description', {
-            defaultValue: '管理 Gemini、Codex、Claude、Vertex 及 OpenAI 兼容提供方的 API 密钥与配置。',
+            defaultValue:
+              '管理 Gemini、Codex、Claude、Vertex 及 OpenAI 兼容提供方的 API 密钥与配置。',
           })}
         />
-        <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-secondary)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+        <div
+          style={{
+            padding: 32,
+            textAlign: 'center',
+            color: 'var(--text-secondary)',
+            background: 'var(--bg-secondary)',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--border-color)',
+          }}
+        >
           {t('common.loading')}
         </div>
       </div>
@@ -295,7 +288,8 @@ export function ProvidersWorkbenchPage() {
       <PageHeader
         title={t('providersPage.header.title')}
         description={t('ai_providers.description', {
-          defaultValue: '管理 Gemini、Codex、Claude、Vertex 及 OpenAI 兼容提供方的 API 密钥与配置。',
+          defaultValue:
+            '管理 Gemini、Codex、Claude、Vertex 及 OpenAI 兼容提供方的 API 密钥与配置。',
         })}
       />
 
@@ -306,9 +300,10 @@ export function ProvidersWorkbenchPage() {
             activeBrand={activeGroup.id}
             onSelect={(brand) => {
               const isSwitching = sheetState.open && sheetState.brand !== brand;
-              const proceed = isSwitching && sheetRef.current
-                ? sheetRef.current.confirmDiscardIfDirty()
-                : Promise.resolve(true);
+              const proceed =
+                isSwitching && sheetRef.current
+                  ? sheetRef.current.confirmDiscardIfDirty()
+                  : Promise.resolve(true);
               void proceed.then((ok) => {
                 if (!ok) return;
                 setActiveBrand(brand);
@@ -341,6 +336,7 @@ export function ProvidersWorkbenchPage() {
           disableMutations={disableMutations}
           usageByProvider={usageByProvider}
           openaiControls={openaiControls}
+          onView={openView}
           onEdit={openEdit}
           onDelete={handleDelete}
           onToggleDisabled={handleToggleDisabled}
@@ -353,9 +349,7 @@ export function ProvidersWorkbenchPage() {
         state={sheetState}
         onClose={closeSheet}
         onSwitchToEdit={() => {
-          setSheetState((s) =>
-            s.resource ? { ...s, mode: 'edit' } : s
-          );
+          setSheetState((s) => (s.resource ? { ...s, mode: 'edit' } : s));
         }}
         workbench={workbench}
         onCreated={handleCreated}

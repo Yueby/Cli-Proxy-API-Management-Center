@@ -12,7 +12,6 @@ import { ModelCategoryBadges } from '@/components/providers/ModelCategoryBadges'
 import {
   ExcludedModelsList,
   FieldRow,
-  HeaderBadgeList,
   ModelTagList,
   StatsPills,
 } from '@/components/providers/ProviderCardParts';
@@ -25,7 +24,7 @@ import {
   stripDisableAllModelsRule,
   type ProviderRecentUsageMap,
 } from '@/components/providers/utils';
-import { IconPencil, IconSignal, IconTrash2 } from '@/components/ui/icons';
+import { IconEye, IconPencil, IconSignal, IconTrash2 } from '@/components/ui/icons';
 import type {
   AmpcodeConfig,
   GeminiKeyConfig,
@@ -41,18 +40,22 @@ interface ProviderResourceCardsProps {
   resources: ProviderResource[];
   disableMutations?: boolean;
   usageByProvider?: ProviderRecentUsageMap;
+  onView: (resource: ProviderResource) => void;
   onEdit: (resource: ProviderResource) => void;
   onDelete: (resource: ProviderResource) => void;
   onToggleDisabled?: (resource: ProviderResource, disabled: boolean) => void;
 }
 
-const BRAND_META: Record<ProviderBrand, {
-  icon: string;
-  label: string;
-  badgeBg: string;
-  badgeColor: string;
-  avatarBg?: string;
-}> = {
+const BRAND_META: Record<
+  ProviderBrand,
+  {
+    icon: string;
+    label: string;
+    badgeBg: string;
+    badgeColor: string;
+    avatarBg?: string;
+  }
+> = {
   gemini: {
     icon: iconGemini,
     label: 'Gemini',
@@ -140,6 +143,7 @@ export function ProviderResourceCards({
   resources,
   disableMutations,
   usageByProvider,
+  onView,
   onEdit,
   onDelete,
   onToggleDisabled,
@@ -178,12 +182,14 @@ export function ProviderResourceCards({
             <FieldRow label={t('common.prefix')} value={raw.prefix} />
             <FieldRow label={t('common.base_url')} value={raw.baseUrl} />
             <FieldRow label={t('common.proxy_url')} value={raw.proxyUrl} />
-            <HeaderBadgeList headers={raw.headers} />
             <ModelTagList
               models={raw.models}
-              countLabel={t(`ai_providers.${resource.brand === 'gemini' ? 'gemini' : resource.brand}_models_count`, {
-                defaultValue: t('providersPage.table.metrics.models'),
-              })}
+              countLabel={t(
+                `ai_providers.${resource.brand === 'gemini' ? 'gemini' : resource.brand}_models_count`,
+                {
+                  defaultValue: t('providersPage.table.metrics.models'),
+                }
+              )}
             />
             <ExcludedModelsList models={excludedModels} />
             <StatsPills success={stats.success} failure={stats.failure} />
@@ -199,8 +205,6 @@ export function ProviderResourceCards({
     const provider = openAIConfig(resource);
     const stats = getStats(resource, usageByProvider);
     const statusData = getStatusData(resource, usageByProvider);
-    const headerEntries = Object.entries(provider.headers || {});
-
     return (
       <ItemCard
         key={resource.id}
@@ -224,10 +228,15 @@ export function ProviderResourceCards({
         content={
           <>
             <FieldRow label={t('common.prefix')} value={provider.prefix} />
-            <FieldRow label={t('providersPage.table.metrics.keys')} value={provider.apiKeyEntries?.length} />
-            {headerEntries.length > 0 && <HeaderBadgeList headers={provider.headers} />}
+            <FieldRow
+              label={t('providersPage.table.metrics.keys')}
+              value={provider.apiKeyEntries?.length}
+            />
             <ModelCategoryBadges models={provider.models} resolvedTheme={resolvedTheme} />
-            <FieldRow label={t('ai_providers.openai_test_model', { defaultValue: 'Test Model' })} value={provider.testModel} />
+            <FieldRow
+              label={t('ai_providers.openai_test_model', { defaultValue: 'Test Model' })}
+              value={provider.testModel}
+            />
             <StatsPills success={stats.success} failure={stats.failure} />
             <ProviderStatusBar statusData={statusData} styles={statusBarStyles} />
           </>
@@ -250,16 +259,42 @@ export function ProviderResourceCards({
           {
             label: BRAND_META.ampcode.label,
             variant: 'custom',
-            style: { backgroundColor: BRAND_META.ampcode.badgeBg, color: BRAND_META.ampcode.badgeColor },
+            style: {
+              backgroundColor: BRAND_META.ampcode.badgeBg,
+              color: BRAND_META.ampcode.badgeColor,
+            },
           },
         ]}
         content={
           <>
-            <FieldRow label={t('ai_providers.ampcode_upstream_url_label', { defaultValue: 'Upstream URL' })} value={config.upstreamUrl} />
-            <FieldRow label={t('ai_providers.ampcode_upstream_api_key_label', { defaultValue: 'Upstream API Key' })} value={resource.apiKeyPreview} />
-            <FieldRow label={t('ai_providers.ampcode_force_model_mappings_label', { defaultValue: 'Force Model Mappings' })} value={config.forceModelMappings ? t('common.enabled') : undefined} />
-            <FieldRow label={t('ai_providers.ampcode_model_mappings_count', { defaultValue: 'Model Mappings' })} value={config.modelMappings?.length || 0} />
-            <FieldRow label={t('ai_providers.ampcode_upstream_api_keys_count', { defaultValue: 'Upstream API Keys' })} value={config.upstreamApiKeys?.length || 0} />
+            <FieldRow
+              label={t('ai_providers.ampcode_upstream_url_label', { defaultValue: 'Upstream URL' })}
+              value={config.upstreamUrl}
+            />
+            <FieldRow
+              label={t('ai_providers.ampcode_upstream_api_key_label', {
+                defaultValue: 'Upstream API Key',
+              })}
+              value={resource.apiKeyPreview}
+            />
+            <FieldRow
+              label={t('ai_providers.ampcode_force_model_mappings_label', {
+                defaultValue: 'Force Model Mappings',
+              })}
+              value={config.forceModelMappings ? t('common.enabled') : undefined}
+            />
+            <FieldRow
+              label={t('ai_providers.ampcode_model_mappings_count', {
+                defaultValue: 'Model Mappings',
+              })}
+              value={config.modelMappings?.length || 0}
+            />
+            <FieldRow
+              label={t('ai_providers.ampcode_upstream_api_keys_count', {
+                defaultValue: 'Upstream API Keys',
+              })}
+              value={config.upstreamApiKeys?.length || 0}
+            />
             {config.modelMappings && config.modelMappings.length > 0 ? (
               <div className={ItemCard.styles.modelTagList}>
                 {config.modelMappings.slice(0, 5).map((mapping) => (
@@ -270,7 +305,9 @@ export function ProviderResourceCards({
                 ))}
                 {config.modelMappings.length > 5 ? (
                   <span className={ItemCard.styles.modelTag}>
-                    <span className={ItemCard.styles.modelName}>+{config.modelMappings.length - 5}</span>
+                    <span className={ItemCard.styles.modelName}>
+                      +{config.modelMappings.length - 5}
+                    </span>
                   </span>
                 ) : null}
               </div>
@@ -288,6 +325,16 @@ export function ProviderResourceCards({
       <>
         <ItemCard.ActionsMain>
           <ItemCard.UtilityActions>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => onView(resource)}
+              title={t('providersPage.actions.view')}
+              aria-label={t('providersPage.actions.view')}
+              className={ItemCard.styles.iconButton}
+            >
+              <IconEye size={15} />
+            </Button>
             <Button
               variant="secondary"
               size="sm"
@@ -313,7 +360,9 @@ export function ProviderResourceCards({
           </ItemCard.UtilityActions>
         </ItemCard.ActionsMain>
         {!isAmpcode && onToggleDisabled ? (
-          <ItemCard.ToggleArea label={t('ai_providers.config_toggle_label', { defaultValue: 'Enabled' })}>
+          <ItemCard.ToggleArea
+            label={t('ai_providers.config_toggle_label', { defaultValue: 'Enabled' })}
+          >
             <ToggleSwitch
               checked={!resource.disabled}
               disabled={disableMutations}

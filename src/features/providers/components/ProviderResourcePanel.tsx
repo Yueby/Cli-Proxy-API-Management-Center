@@ -22,6 +22,7 @@ interface ProviderResourcePanelProps {
     selectedModels: ReadonlySet<string>;
     onSelectedModelsChange: (v: any) => void;
   };
+  onView: (resource: ProviderResource) => void;
   onEdit: (resource: ProviderResource) => void;
   onDelete: (resource: ProviderResource) => void;
   onToggleDisabled?: (resource: ProviderResource, disabled: boolean) => void;
@@ -34,6 +35,7 @@ export function ProviderResourcePanel({
   disableMutations,
   usageByProvider,
   openaiControls,
+  onView,
   onEdit,
   onDelete,
   onToggleDisabled,
@@ -79,6 +81,7 @@ export function ProviderResourcePanel({
           resources={filteredResources}
           disableMutations={disableMutations}
           usageByProvider={usageByProvider}
+          onView={onView}
           onEdit={onEdit}
           onDelete={onDelete}
           onToggleDisabled={onToggleDisabled}
