@@ -187,15 +187,6 @@ export function ProvidersWorkbenchPage() {
     }
   }, [activeBrand, groups]);
 
-  const openView = useCallback((resource: ProviderResource) => {
-    setSheetState({
-      open: true,
-      brand: resource.brand,
-      mode: 'detail',
-      resource,
-    });
-  }, []);
-
   const openEdit = useCallback((resource: ProviderResource) => {
     setSheetState({
       open: true,
@@ -347,11 +338,9 @@ export function ProvidersWorkbenchPage() {
         <ProviderResourcePanel
           group={activeGroup}
           filteredResources={visibleResources}
-          selectedId={sheetState.open ? sheetState.resource?.id ?? null : null}
           disableMutations={disableMutations}
           usageByProvider={usageByProvider}
           openaiControls={openaiControls}
-          onView={openView}
           onEdit={openEdit}
           onDelete={handleDelete}
           onToggleDisabled={handleToggleDisabled}

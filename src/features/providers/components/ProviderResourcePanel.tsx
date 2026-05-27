@@ -11,7 +11,6 @@ import styles from './ProviderResourcePanel.module.scss';
 interface ProviderResourcePanelProps {
   group: ProviderGroup;
   filteredResources: ProviderResource[];
-  selectedId: string | null;
   disableMutations?: boolean;
   usageByProvider?: ProviderRecentUsageMap;
   openaiControls?: {
@@ -23,7 +22,6 @@ interface ProviderResourcePanelProps {
     selectedModels: ReadonlySet<string>;
     onSelectedModelsChange: (v: any) => void;
   };
-  onView: (resource: ProviderResource) => void;
   onEdit: (resource: ProviderResource) => void;
   onDelete: (resource: ProviderResource) => void;
   onToggleDisabled?: (resource: ProviderResource, disabled: boolean) => void;
@@ -33,11 +31,9 @@ interface ProviderResourcePanelProps {
 export function ProviderResourcePanel({
   group,
   filteredResources,
-  selectedId,
   disableMutations,
   usageByProvider,
   openaiControls,
-  onView,
   onEdit,
   onDelete,
   onToggleDisabled,
@@ -81,10 +77,8 @@ export function ProviderResourcePanel({
       ) : (
         <ProviderResourceCards
           resources={filteredResources}
-          selectedId={selectedId}
           disableMutations={disableMutations}
           usageByProvider={usageByProvider}
-          onView={onView}
           onEdit={onEdit}
           onDelete={onDelete}
           onToggleDisabled={onToggleDisabled}
