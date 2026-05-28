@@ -8,13 +8,19 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuthStore, useNotificationStore } from '@/stores';
 import { useProviderRecentRequests } from '@/components/providers/hooks/useProviderRecentRequests';
 import { getOpenAIProviderRecentWindowStats } from '@/components/providers/utils';
-import type { OpenAIProviderConfig } from '@/types';
+import type {
+  AmpcodeConfig,
+  GeminiKeyConfig,
+  OpenAIProviderConfig,
+  ProviderKeyConfig,
+} from '@/types';
 import { ProviderHeaderCard } from './components/ProviderHeaderCard';
 import { ProviderCategoryList } from './components/ProviderCategoryList';
 import { ProviderResourcePanel } from './components/ProviderResourcePanel';
 import type { OpenAISortBy, SortDir } from './components/OpenAIBrandToolbar';
 import { ProviderSheet, type ProviderSheetHandle } from './sheets/ProviderSheet';
 import { useProviderWorkbench } from './useProviderWorkbench';
+import { ModelsListModal, type SharedModelItem } from '@/components/common/ModelsListModal';
 import type { ProviderBrand, ProviderResource } from './types';
 import styles from './ProvidersWorkbenchPage.module.scss';
 
@@ -212,6 +218,53 @@ export function ProvidersWorkbenchPage() {
     };
   }, [availableOpenaiModels, isOpenAI, openaiSelectedModels, openaiSortBy, openaiSortDir]);
 
+  const [modelsModal, setModelsModal] = useState<{
+    open: boolean;
+    providerName: string;
+    models: SharedModelItem[];
+  }>({
+    open: false,
+    providerName: '',
+    models: [],
+  });
+
+  const showModels = useCallback((resource: ProviderResource) => {
+    if (resource.brand === 'ampcode') {
+      const cfg = resource.raw as AmpcodeConfig;
+      const mappings = (cfg.modelMappings || []).map((m: any) => ({
+        id: m.from,
+        display_name: m.to,
+      }));
+      setModelsModal({
+        open: true,
+        providerName: 'Ampcode',
+        models: mappings,
+      });
+    } else if (resource.brand === 'openaiCompatibility') {
+      const cfg = resource.raw as OpenAIProviderConfig;
+      const models = (cfg.models || []).map((m: any) => ({
+        id: m.name,
+        display_name: m.alias,
+      }));
+      setModelsModal({
+        open: true,
+        providerName: cfg.name || 'OpenAI',
+        models,
+      });
+    } else {
+      const cfg = resource.raw as ProviderKeyConfig | GeminiKeyConfig;
+      const models = (cfg.models || []).map((m: any) => ({
+        id: m.name,
+        display_name: m.alias,
+      }));
+      setModelsModal({
+        open: true,
+        providerName: resource.identifier,
+        models,
+      });
+    }
+  }, []);
+
   const openCreate = useCallback(() => {
     const brand = activeBrand;
     if (brand === 'ampcode') {
@@ -311,13 +364,7 @@ export function ProvidersWorkbenchPage() {
   if (!activeGroup) {
     return (
       <div className={styles.page}>
-        <PageHeader
-          title={t('providersPage.header.title')}
-          description={t('ai_providers.description', {
-            defaultValue:
-              '管理 Gemini、Codex、Claude、Vertex 及 OpenAI 兼容提供方的 API 密钥与配置。',
-          })}
-        />
+        <PageHeader title={t('providersPage.header.title')} />
         <div
           style={{
             padding: 32,
@@ -338,13 +385,7 @@ export function ProvidersWorkbenchPage() {
 
   return (
     <div className={styles.page}>
-      <PageHeader
-        title={t('providersPage.header.title')}
-        description={t('ai_providers.description', {
-          defaultValue:
-            '管理 Gemini、Codex、Claude、Vertex 及 OpenAI 兼容提供方的 API 密钥与配置。',
-        })}
-      />
+      <PageHeader title={t('providersPage.header.title')} />
 
       <div className={styles.layout}>
         <div className={styles.toolbarRow}>
@@ -394,6 +435,7 @@ export function ProvidersWorkbenchPage() {
           onEdit={openEdit}
           onDelete={handleDelete}
           onToggleDisabled={handleToggleDisabled}
+          onShowModels={showModels}
           onCreate={openCreate}
         />
       </div>
@@ -409,6 +451,16 @@ export function ProvidersWorkbenchPage() {
         onCreated={handleCreated}
         onUpdated={handleUpdated}
         usageByProvider={usageByProvider}
+      />
+
+      <ModelsListModal
+        open={modelsModal.open}
+        title={
+          t('auth_files.models_title', { defaultValue: '支持的模型' }) +
+          ` - ${modelsModal.providerName}`
+        }
+        models={modelsModal.models}
+        onClose={() => setModelsModal((prev) => ({ ...prev, open: false }))}
       />
     </div>
   );

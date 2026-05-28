@@ -54,7 +54,8 @@
     "model_alias_placeholder": "模型別名（選填）",
     "invalid_provider_index": "無效的供應商索引。",
     "unsaved_changes_title": "未儲存的變更",
-    "unsaved_changes_message": "你有未儲存的變更，離開後將遺失這些變更。確定要離開嗎？"
+    "unsaved_changes_message": "你有未儲存的變更，離開後將遺失這些變更。確定要離開嗎？",
+    "enabled": "已啟用"
   },
   "title": {
     "main": "CLI Proxy API Management Center",
@@ -1430,5 +1431,24 @@
     "modelCatalog": {
       "notLoaded": "未載入"
     }
+  },
+  "ai_providers": {
+    "description": "管理 Gemini、Codex、Claude、Vertex 及 OpenAI 相容提供方的 API 金鑰與設定。",
+    "config_toggle_label": "啟用",
+    "openai_test_model": "測試模型",
+    "ampcode_upstream_url_label": "上游 URL",
+    "ampcode_force_model_mappings_label": "強制模型映射",
+    "ampcode_model_mappings_count": "模型映射",
+    "ampcode_upstream_api_keys_count": "上游 API 金鑰",
+    "test_title": "測試模型",
+    "test_back": "返回列表",
+    "test_empty_hint": "發送首則訊息開始模型測試",
+    "test_responding": "正在回應...",
+    "test_latency": "耗時",
+    "test_input_placeholder": "輸入測試提示詞，按下 Enter 發送...",
+    "test_send": "測試",
+    "test_this_model": "測試此模型",
+    "models_button": "模型",
+    "test_no_api_key": "未找到用戶端 API Key，請先在 API Keys 中建立"
   }
 }

@@ -28,12 +28,7 @@ import { copyToClipboard } from '@/utils/clipboard';
 import { downloadBlob } from '@/utils/download';
 import { MANAGEMENT_API_PREFIX } from '@/utils/constants';
 import { formatUnixTimestamp } from '@/utils/format';
-import {
-  HTTP_METHODS,
-  STATUS_GROUPS,
-  resolveStatusGroup,
-  type LogState,
-} from './hooks/logTypes';
+import { HTTP_METHODS, STATUS_GROUPS, resolveStatusGroup, type LogState } from './hooks/logTypes';
 import { parseLogLine } from './hooks/logParsing';
 import { useLogFilters } from './hooks/useLogFilters';
 import { isNearBottom, useLogScroller } from './hooks/useLogScroller';
@@ -338,14 +333,14 @@ export function LogsPage() {
     return {
       filteredParsedLines: filteredParsed,
       filteredLines: filteredParsed.map((line) => line.raw),
-      removedCount: Math.max(baseLines.length - filteredParsed.length, 0)
+      removedCount: Math.max(baseLines.length - filteredParsed.length, 0),
     };
   }, [
     baseLines,
     filters.methodFilterSet,
     filters.pathFilterSet,
     filters.statusFilterSet,
-    parsedSearchLines
+    parsedSearchLines,
   ]);
 
   const parsedVisibleLines = useMemo(
@@ -362,7 +357,7 @@ export function LogsPage() {
     isSearching,
     filteredLineCount: filteredLines.length,
     hasStructuredFilters: filters.hasStructuredFilters,
-    showRawLogs
+    showRawLogs,
   });
 
   logScrollerRef.current = scroller;
@@ -428,7 +423,7 @@ export function LogsPage() {
       const response = await logsApi.downloadRequestLogById(id);
       downloadBlob({
         filename: `request-${id}.log`,
-        blob: new Blob([response.data], { type: 'text/plain' })
+        blob: new Blob([response.data], { type: 'text/plain' }),
       });
       showNotification(t('logs.request_log_download_success'), 'success');
       setRequestLogId(null);
@@ -454,12 +449,10 @@ export function LogsPage() {
 
   return (
     <div className={styles.container}>
-      <PageHeader
-        title={t('logs.title')}
-        description={t('logs.description')}
-      />
+      <PageHeader title={t('logs.title')} />
 
       <SegmentedControl
+        className={styles.tabControl}
         options={[
           { value: 'logs', label: t('logs.log_content') },
           { value: 'errors', label: t('logs.error_logs_modal_title') },
@@ -696,9 +689,7 @@ export function LogsPage() {
                   <div className={styles.loadMoreBanner}>
                     <span>{t('logs.load_more_hint')}</span>
                     <div className={styles.loadMoreStats}>
-                      <span>
-                        {t('logs.loaded_lines', { count: filteredLines.length })}
-                      </span>
+                      <span>{t('logs.loaded_lines', { count: filteredLines.length })}</span>
                       {removedCount > 0 && (
                         <span className={styles.loadMoreCount}>
                           {t('logs.filtered_lines', { count: removedCount })}
@@ -846,7 +837,9 @@ export function LogsPage() {
 
               {requestLogEnabled && (
                 <div>
-                  <div className="status-badge warning">{t('logs.error_logs_request_log_enabled')}</div>
+                  <div className="status-badge warning">
+                    {t('logs.error_logs_request_log_enabled')}
+                  </div>
                 </div>
               )}
 
@@ -892,24 +885,28 @@ export function LogsPage() {
         open={Boolean(requestLogId)}
         onClose={closeRequestLogModal}
         title={t('logs.request_log_download_title')}
-      footer={
-        <div className="segmented-button-group">
-          <Button variant="secondary" onClick={closeRequestLogModal} disabled={requestLogDownloading}>
-            {t('common.cancel')}
-          </Button>
-          <Button
-            onClick={() => {
-              if (requestLogId) {
-                void downloadRequestLog(requestLogId);
-              }
-            }}
-            loading={requestLogDownloading}
-            disabled={!requestLogId}
-          >
-            {t('common.confirm')}
-          </Button>
-        </div>
-      }
+        footer={
+          <div className="segmented-button-group">
+            <Button
+              variant="secondary"
+              onClick={closeRequestLogModal}
+              disabled={requestLogDownloading}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={() => {
+                if (requestLogId) {
+                  void downloadRequestLog(requestLogId);
+                }
+              }}
+              loading={requestLogDownloading}
+              disabled={!requestLogId}
+            >
+              {t('common.confirm')}
+            </Button>
+          </div>
+        }
       >
         {requestLogId ? t('logs.request_log_download_confirm', { id: requestLogId }) : null}
       </Modal>

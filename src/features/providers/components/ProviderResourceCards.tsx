@@ -10,13 +10,7 @@ import iconVertex from '@/assets/icons/vertex.svg';
 import { Button } from '@/components/ui/Button';
 import { ItemCard } from '@/components/ui/ItemCard';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
-import { ModelCategoryBadges } from '@/components/providers/ModelCategoryBadges';
-import {
-  ExcludedModelsList,
-  FieldRow,
-  ModelTagList,
-  StatsPills,
-} from '@/components/providers/ProviderCardParts';
+import { ExcludedModelsList, FieldRow, StatsPills } from '@/components/providers/ProviderCardParts';
 import { ProviderStatusBar } from '@/components/providers/ProviderStatusBar';
 import {
   getOpenAIProviderRecentStatusData,
@@ -26,7 +20,14 @@ import {
   stripDisableAllModelsRule,
   type ProviderRecentUsageMap,
 } from '@/components/providers/utils';
-import { IconEye, IconKey, IconPencil, IconSignal, IconTrash2 } from '@/components/ui/icons';
+import {
+  IconEye,
+  IconKey,
+  IconModelCluster,
+  IconPencil,
+  IconSignal,
+  IconTrash2,
+} from '@/components/ui/icons';
 import type {
   AmpcodeConfig,
   GeminiKeyConfig,
@@ -34,11 +35,11 @@ import type {
   ProviderKeyConfig,
 } from '@/types';
 import type { StatusBarData } from '@/utils/recentRequests';
-import { useThemeStore } from '@/stores';
 import { maskApiKey } from '@/utils/format';
 import type { ProviderBrand, ProviderResource } from '../types';
 import statusBarStyles from './providerStatusBar.module.scss';
 import keyBadgeStyles from '@/components/providers/OpenAISection/KeyCountBadge.module.scss';
+import modelStyles from '@/components/common/ModelsListModal.module.scss';
 
 interface ProviderResourceCardsProps {
   resources: ProviderResource[];
@@ -48,6 +49,7 @@ interface ProviderResourceCardsProps {
   onEdit: (resource: ProviderResource) => void;
   onDelete: (resource: ProviderResource) => void;
   onToggleDisabled?: (resource: ProviderResource, disabled: boolean) => void;
+  onShowModels: (resource: ProviderResource) => void;
 }
 
 const BRAND_META: Record<
@@ -236,9 +238,9 @@ export function ProviderResourceCards({
   onEdit,
   onDelete,
   onToggleDisabled,
+  onShowModels,
 }: ProviderResourceCardsProps) {
   const { t } = useTranslation();
-  const resolvedTheme = useThemeStore((state) => state.resolvedTheme);
 
   const renderCommonCard = (resource: ProviderResource) => {
     const meta = BRAND_META[resource.brand];
@@ -286,15 +288,6 @@ export function ProviderResourceCards({
             <FieldRow label={t('common.prefix')} value={raw.prefix} />
             <FieldRow label={t('common.base_url')} value={raw.baseUrl} />
             <FieldRow label={t('common.proxy_url')} value={raw.proxyUrl} />
-            <ModelTagList
-              models={raw.models}
-              countLabel={t(
-                `ai_providers.${resource.brand === 'gemini' ? 'gemini' : resource.brand}_models_count`,
-                {
-                  defaultValue: t('providersPage.table.metrics.models'),
-                }
-              )}
-            />
             <ExcludedModelsList models={excludedModels} />
             <StatsPills success={stats.success} failure={stats.failure} />
             <ProviderStatusBar statusData={statusData} styles={statusBarStyles} />
@@ -342,7 +335,6 @@ export function ProviderResourceCards({
         content={
           <>
             <FieldRow label={t('common.prefix')} value={provider.prefix} />
-            <ModelCategoryBadges models={provider.models} resolvedTheme={resolvedTheme} />
             <FieldRow
               label={t('ai_providers.openai_test_model', { defaultValue: 'Test Model' })}
               value={provider.testModel}
@@ -415,23 +407,6 @@ export function ProviderResourceCards({
               })}
               value={config.upstreamApiKeys?.length || 0}
             />
-            {config.modelMappings && config.modelMappings.length > 0 ? (
-              <div className={ItemCard.styles.modelTagList}>
-                {config.modelMappings.slice(0, 5).map((mapping) => (
-                  <span key={`${mapping.from}→${mapping.to}`} className={ItemCard.styles.modelTag}>
-                    <span className={ItemCard.styles.modelName}>{mapping.from}</span>
-                    <span className={ItemCard.styles.modelAlias}>{mapping.to}</span>
-                  </span>
-                ))}
-                {config.modelMappings.length > 5 ? (
-                  <span className={ItemCard.styles.modelTag}>
-                    <span className={ItemCard.styles.modelName}>
-                      +{config.modelMappings.length - 5}
-                    </span>
-                  </span>
-                ) : null}
-              </div>
-            ) : null}
           </>
         }
         actions={renderActions(resource)}
@@ -441,9 +416,37 @@ export function ProviderResourceCards({
 
   const renderActions = (resource: ProviderResource) => {
     const isAmpcode = resource.brand === 'ampcode';
+    let showModelsButton = false;
+    if (resource.brand === 'ampcode') {
+      const cfg = ampcodeConfig(resource);
+      showModelsButton = !!(cfg.modelMappings && cfg.modelMappings.length > 0);
+    } else if (resource.brand === 'openaiCompatibility') {
+      const cfg = openAIConfig(resource);
+      showModelsButton = !!(cfg.models && cfg.models.length > 0);
+    } else {
+      const cfg =
+        resource.brand === 'gemini' ? geminiConfig(resource) : providerKeyConfig(resource);
+      showModelsButton = !!(cfg.models && cfg.models.length > 0);
+    }
+
     return (
       <>
         <ItemCard.ActionsMain>
+          {showModelsButton && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => onShowModels(resource)}
+              title={t('ai_providers.models_button')}
+              className={modelStyles.modelsActionButton}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            >
+              <>
+                <IconModelCluster size={15} />
+                <span>{t('ai_providers.models_button')}</span>
+              </>
+            </Button>
+          )}
           <ItemCard.UtilityActions>
             <Button
               variant="secondary"

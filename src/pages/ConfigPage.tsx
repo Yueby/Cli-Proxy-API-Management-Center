@@ -3,13 +3,9 @@ import { useTranslation } from 'react-i18next';
 import type { ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { parse as parseYaml, parseDocument } from 'yaml';
 import { usePageTransitionLayer } from '@/components/common/PageTransitionLayer';
-import { Card } from '@/components/ui/Card';
 import { FloatingDock } from '@/components/ui/FloatingDock';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
-import {
-  IconCheck,
-  IconRefreshCw,
-} from '@/components/ui/icons';
+import { IconCheck, IconRefreshCw } from '@/components/ui/icons';
 import { VisualConfigEditor } from '@/components/config/VisualConfigEditor';
 import { DiffModal } from '@/components/config/DiffModal';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -342,7 +338,9 @@ export function ConfigPage() {
 
   const floatingActions = (
     <FloatingDock visible={shouldRenderFloatingActions} heightVar="--config-action-bar-height">
-      <FloatingDock.Status className={`${isMobile ? styles.floatingStatusCompact : ''} ${getStatusClass()}`}>
+      <FloatingDock.Status
+        className={`${isMobile ? styles.floatingStatusCompact : ''} ${getStatusClass()}`}
+      >
         {getFloatingStatusText()}
       </FloatingDock.Status>
       <FloatingDock.Button
@@ -373,68 +371,62 @@ export function ConfigPage() {
     </FloatingDock>
   );
 
-  const pageDescription =
-    activeTab === 'visual'
-      ? t('config_management.visual.notice')
-      : t('config_management.description');
-
   return (
     <div className={styles.container}>
-      <PageHeader
-        title={t('config_management.title')}
-        description={pageDescription}
-      />
+      <PageHeader title={t('config_management.title')} />
 
-      <Card
-        title={
-          <SegmentedControl
-            options={[
-              { value: 'visual', label: t('config_management.tabs.visual', { defaultValue: '可视化编辑' }) },
-              { value: 'source', label: t('config_management.tabs.source', { defaultValue: '源代码编辑' }) },
-            ]}
-            value={activeTab}
-            onChange={(tab) => handleTabChange(tab as ConfigEditorTab)}
-            disabled={saving || loading}
+      <div className={styles.workspaceHeader}>
+        <SegmentedControl
+          options={[
+            {
+              value: 'visual',
+              label: t('config_management.tabs.visual', { defaultValue: '可视化编辑' }),
+            },
+            {
+              value: 'source',
+              label: t('config_management.tabs.source', { defaultValue: '源代码编辑' }),
+            },
+          ]}
+          value={activeTab}
+          onChange={(tab) => handleTabChange(tab as ConfigEditorTab)}
+          disabled={saving || loading}
+        />
+        <div className={`${styles.statusBadge} ${getStatusClass()}`}>{getStatusText()}</div>
+      </div>
+
+      <div className={styles.content}>
+        {error && <div className="error-box">{error}</div>}
+        {!error && visualParseError && (
+          <div className="error-box">
+            {t('config_management.visual_mode_unavailable_detail', { message: visualParseError })}
+          </div>
+        )}
+
+        {activeTab === 'visual' ? (
+          <VisualConfigEditor
+            values={visualValues}
+            validationErrors={visualValidationErrors}
+            hasPayloadValidationErrors={visualHasPayloadValidationErrors}
+            disabled={disableControls || loading}
+            onChange={setVisualValues}
           />
-        }
-        extra={
-          <div className={`${styles.statusBadge} ${getStatusClass()}`}>{getStatusText()}</div>
-        }
-      >
-        <div className={styles.content}>
-          {error && <div className="error-box">{error}</div>}
-          {!error && visualParseError && (
-            <div className="error-box">
-              {t('config_management.visual_mode_unavailable_detail', { message: visualParseError })}
+        ) : (
+          <div className={styles.sourceWorkspace}>
+            <div className={styles.editorWrapper}>
+              <Suspense fallback={null}>
+                <LazyConfigSourceEditor
+                  editorRef={editorRef}
+                  value={content}
+                  onChange={handleChange}
+                  theme={resolvedTheme}
+                  editable={!disableControls && !loading}
+                  placeholder={t('config_management.editor_placeholder')}
+                />
+              </Suspense>
             </div>
-          )}
-
-          {activeTab === 'visual' ? (
-            <VisualConfigEditor
-              values={visualValues}
-              validationErrors={visualValidationErrors}
-              hasPayloadValidationErrors={visualHasPayloadValidationErrors}
-              disabled={disableControls || loading}
-              onChange={setVisualValues}
-            />
-          ) : (
-            <div className={styles.sourceWorkspace}>
-              <div className={styles.editorWrapper}>
-                <Suspense fallback={null}>
-                  <LazyConfigSourceEditor
-                    editorRef={editorRef}
-                    value={content}
-                    onChange={handleChange}
-                    theme={resolvedTheme}
-                    editable={!disableControls && !loading}
-                    placeholder={t('config_management.editor_placeholder')}
-                  />
-                </Suspense>
-              </div>
-            </div>
-          )}
-        </div>
-      </Card>
+          </div>
+        )}
+      </div>
 
       {floatingActions}
       <DiffModal

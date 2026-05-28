@@ -12,6 +12,14 @@
   );
 }
 
+.workspaceHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-md;
+  flex-wrap: wrap;
+}
+
 .statusBadge {
   display: inline-flex;
   align-items: center;

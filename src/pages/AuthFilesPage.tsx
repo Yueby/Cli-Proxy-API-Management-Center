@@ -791,7 +791,7 @@ export function AuthFilesPage() {
 
   return (
     <div className={styles.container}>
-      <PageHeader title={t('auth_files.title')} description={t('auth_files.description')} />
+      <PageHeader title={t('auth_files.title')} />
 
       <div className={styles.filterSectionLayout}>
         <div className={styles.toolbarRow}>
@@ -1050,7 +1050,6 @@ export function AuthFilesPage() {
         models={modelsList}
         excluded={excluded}
         onClose={closeModelsModal}
-        onCopyText={copyTextWithNotification}
       />
 
       <AuthFilesPrefixProxyEditorModal

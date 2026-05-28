@@ -146,7 +146,7 @@ export function QuotaPage() {
   // so the page auto-restores when a file for that provider reappears.
   const effectiveActiveTab: QuotaProviderId = visibleTabs.some((tab) => tab.id === activeTab)
     ? activeTab
-    : visibleTabs[0]?.id ?? activeTab;
+    : (visibleTabs[0]?.id ?? activeTab);
 
   const renderActiveSection = () => {
     switch (effectiveActiveTab) {
@@ -210,7 +210,7 @@ export function QuotaPage() {
 
   return (
     <div className={styles.container}>
-      <PageHeader title={t('quota_management.title')} description={t('quota_management.description')} />
+      <PageHeader title={t('quota_management.title')} />
 
       {error && <div className={styles.errorBox}>{error}</div>}
 

@@ -4,7 +4,14 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
-import { IconGithub, IconBookOpen, IconExternalLink, IconCode, IconRefreshCw, IconCheck } from '@/components/ui/icons';
+import {
+  IconGithub,
+  IconBookOpen,
+  IconExternalLink,
+  IconCode,
+  IconRefreshCw,
+  IconCheck,
+} from '@/components/ui/icons';
 import {
   useAuthStore,
   useConfigStore,
@@ -346,10 +353,7 @@ export function SystemPage() {
 
   return (
     <div className={styles.container}>
-      <PageHeader
-        title={t('system_info.title')}
-        description={t('system_info.description')}
-      />
+      <PageHeader title={t('system_info.title')} />
       <div className={styles.content}>
         <Card className={styles.aboutCard}>
           <div className={styles.aboutHeader}>
@@ -492,7 +496,13 @@ export function SystemPage() {
                   <div key={group.id} className="item-row">
                     <div className="item-meta">
                       <div className={styles.groupTitle}>
-                        {iconSrc && <img src={iconSrc} alt="" className={`${styles.groupIcon} ${group.id === 'mimo' ? styles.groupIconMimo : ''}`} />}
+                        {iconSrc && (
+                          <img
+                            src={iconSrc}
+                            alt=""
+                            className={`${styles.groupIcon} ${group.id === 'mimo' ? styles.groupIconMimo : ''}`}
+                          />
+                        )}
                         <span className="item-title">{group.label}</span>
                       </div>
                       <div className="item-subtitle">

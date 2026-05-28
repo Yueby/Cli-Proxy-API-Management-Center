@@ -54,7 +54,8 @@
     "model_alias_placeholder": "Псевдоним модели (необязательно)",
     "invalid_provider_index": "Неверный индекс провайдера.",
     "unsaved_changes_title": "Несохранённые изменения",
-    "unsaved_changes_message": "У вас есть несохранённые изменения. Если вы уйдёте, они будут потеряны. Выйти?"
+    "unsaved_changes_message": "У вас есть несохранённые изменения. Если вы уйдёте, они будут потеряны. Выйти?",
+    "enabled": "Включено"
   },
   "title": {
     "main": "Центр управления CLI Proxy API",
@@ -1401,5 +1402,24 @@
     "modelCatalog": {
       "notLoaded": "Не загружено"
     }
+  },
+  "ai_providers": {
+    "description": "Управляйте API-ключами и настройками для Gemini, Codex, Claude, Vertex и OpenAI-совместимых провайдеров.",
+    "config_toggle_label": "Включено",
+    "openai_test_model": "Тестовая модель",
+    "ampcode_upstream_url_label": "Upstream URL",
+    "ampcode_force_model_mappings_label": "Принудительные сопоставления моделей",
+    "ampcode_model_mappings_count": "Сопоставления моделей",
+    "ampcode_upstream_api_keys_count": "Upstream API-ключи",
+    "test_title": "Тест модели",
+    "test_back": "Назад",
+    "test_empty_hint": "Отправьте первое сообщение для начала тестирования",
+    "test_responding": "Отвечает...",
+    "test_latency": "Задержка",
+    "test_input_placeholder": "Введите тестовый запрос, нажмите Enter для отправки...",
+    "test_send": "Тест",
+    "test_this_model": "Тестировать модель",
+    "models_button": "Модели",
+    "test_no_api_key": "Клиентский API-ключ не найден. Сначала создайте его в API Keys"
   }
 }

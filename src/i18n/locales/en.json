@@ -54,7 +54,8 @@
     "model_alias_placeholder": "Model alias (optional)",
     "invalid_provider_index": "Invalid provider index.",
     "unsaved_changes_title": "Unsaved changes",
-    "unsaved_changes_message": "You have unsaved changes. Leaving now will discard them. Do you want to leave?"
+    "unsaved_changes_message": "You have unsaved changes. Leaving now will discard them. Do you want to leave?",
+    "enabled": "Enabled"
   },
   "title": {
     "main": "CLI Proxy API Management Center",
@@ -1404,5 +1405,24 @@
     "modelCatalog": {
       "notLoaded": "Not loaded"
     }
+  },
+  "ai_providers": {
+    "description": "Manage API keys and settings for Gemini, Codex, Claude, Vertex, and OpenAI-compatible providers.",
+    "config_toggle_label": "Enabled",
+    "openai_test_model": "Test Model",
+    "ampcode_upstream_url_label": "Upstream URL",
+    "ampcode_force_model_mappings_label": "Force Model Mappings",
+    "ampcode_model_mappings_count": "Model Mappings",
+    "ampcode_upstream_api_keys_count": "Upstream API Keys",
+    "test_title": "Test Model",
+    "test_back": "Back",
+    "test_empty_hint": "Send your first message to start testing",
+    "test_responding": "Responding...",
+    "test_latency": "Latency",
+    "test_input_placeholder": "Enter a test prompt, press Enter to send...",
+    "test_send": "Test",
+    "test_this_model": "Test this model",
+    "models_button": "Models",
+    "test_no_api_key": "No client API Key found. Please create one in API Keys first"
   }
 }
