@@ -1,0 +1,197 @@
+@use '../../styles/mixins' as *;
+@use '../../styles/variables' as *;
+
+.container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  overflow: visible;
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: $spacing-xs; // for scrollbar
+
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @include mobile {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 12px,
+      black calc(100% - 12px),
+      transparent
+    );
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 12px,
+      black calc(100% - 12px),
+      transparent
+    );
+  }
+}
+
+:global(.category-item) {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-sm;
+  height: 36px;
+  padding: 0 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: $radius-full;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    border-color: color-mix(
+      in srgb,
+      var(--filter-color, var(--primary-color)) 40%,
+      var(--border-color)
+    );
+    background: color-mix(in srgb, var(--bg-secondary) 90%, transparent);
+    color: var(--text-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: -2px;
+  }
+
+  @include mobile {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 13px;
+    gap: 6px;
+  }
+}
+
+:global(.category-item-active) {
+  border-color: color-mix(
+    in srgb,
+    var(--filter-color, var(--border-color)) 50%,
+    var(--border-color)
+  );
+  background: color-mix(
+    in srgb,
+    var(--filter-surface, var(--bg-tertiary)) 22%,
+    var(--bg-secondary)
+  );
+  color: var(--text-primary);
+
+  &:hover {
+    border-color: color-mix(
+      in srgb,
+      var(--filter-color, var(--border-color)) 50%,
+      var(--border-color)
+    );
+    background: color-mix(
+      in srgb,
+      var(--filter-surface, var(--bg-tertiary)) 22%,
+      var(--bg-secondary)
+    );
+  }
+}
+
+:global(.category-item-left) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+:global(.category-item-icon) {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+
+  @include mobile {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+:global(.category-item-fallback) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--filter-color, var(--text-secondary));
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+
+  @include mobile {
+    width: 16px;
+    height: 16px;
+    font-size: 12px;
+  }
+}
+
+:global(.category-item-title) {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+
+  @include mobile {
+    font-size: 13px;
+  }
+}
+
+:global(.category-item-badge) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  margin-left: 2px;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+:global(.category-item-active) :global(.category-item-badge) {
+  background: color-mix(in srgb, var(--filter-color, var(--primary-color)) 22%, transparent);
+  color: var(--filter-color, var(--primary-color));
+}
+
+:global(.category-item-icon-invert) {
+  [data-theme='dark'] & {
+    filter: invert(1) hue-rotate(180deg);
+  }
+}
+
+:global(.category-item-badge-amber) {
+  color: var(--amber-text, #92400e);
+  background: var(--amber-10, #fef3c7);
+  border: 1px solid var(--amber-30, #fcd34d);
+}

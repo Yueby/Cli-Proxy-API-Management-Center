@@ -1303,7 +1303,7 @@ span.premiumPlanValue {
 }
 
 .statusPanelCompact .statusBar {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
   row-gap: 6px;
 }
@@ -1342,11 +1342,7 @@ span.premiumPlanValue {
   min-width: 0;
   padding: 0;
   max-width: none;
-
-  @include mobile {
-    flex-direction: column;
-    align-items: stretch;
-  }
+  flex-wrap: nowrap;
 }
 
 .statusBlocks {

@@ -22,6 +22,11 @@
  */
 
 import type { CSSProperties, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ProviderStatusBar } from '@/components/providers/ProviderStatusBar';
+import type { StatusBarData } from '@/utils/recentRequests';
+import { Button } from './Button';
+import { IconBot } from './icons';
 import styles from './ItemCard.module.scss';
 
 // ─── Types ──────────────────────────────────
@@ -136,13 +141,7 @@ function UtilityActions({ children }: { children: ReactNode }) {
 }
 
 /** 开关区域 */
-function ToggleArea({
-  label,
-  children,
-}: {
-  label?: string;
-  children: ReactNode;
-}) {
+function ToggleArea({ label, children }: { label?: string; children: ReactNode }) {
   return (
     <div className={styles.toggleArea}>
       {label && <span className={styles.toggleLabel}>{label}</span>}
@@ -185,30 +184,56 @@ function FieldRow({
 }
 
 /** 统计 pills */
-function Stats({ children }: { children: ReactNode }) {
-  return <div className={styles.stats}>{children}</div>;
+/** 统计与请求状态监控组件 */
+function Stats({
+  success,
+  failure,
+  statusData,
+}: {
+  success: number;
+  failure: number;
+  statusData: StatusBarData;
+}) {
+  const { t } = useTranslation();
+  return (
+    <>
+      <div className={styles.stats}>
+        <div className={`${styles.statPill} ${styles.statSuccess}`}>
+          <span className={styles.statLabel}>{t('stats.success')}</span>
+          <span className={styles.statValue}>{success}</span>
+        </div>
+        <div className={`${styles.statPill} ${styles.statFailure}`}>
+          <span className={styles.statLabel}>{t('stats.failure')}</span>
+          <span className={styles.statValue}>{failure}</span>
+        </div>
+      </div>
+      <ProviderStatusBar statusData={statusData} />
+    </>
+  );
 }
 
-/** 单个统计 pill */
-function StatPill({
-  label,
-  value,
-  variant,
+/** 模型按钮 */
+function ModelsButton({
+  onClick,
+  disabled,
+  title,
 }: {
-  label: string;
-  value: number | string;
-  variant: 'success' | 'failure';
+  onClick: (e: React.MouseEvent) => void;
+  disabled?: boolean;
+  title: string;
 }) {
-  const cls = [
-    styles.statPill,
-    variant === 'success' ? styles.statSuccess : styles.statFailure,
-  ].join(' ');
-
   return (
-    <div className={cls}>
-      <span className={styles.statLabel}>{label}</span>
-      <span className={styles.statValue}>{value}</span>
-    </div>
+    <Button
+      variant="secondary"
+      size="sm"
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      aria-label={title}
+      className={styles.modelsButton}
+    >
+      <IconBot size={15} />
+    </Button>
   );
 }
 
@@ -224,12 +249,7 @@ function Grid({
   className?: string;
   children: ReactNode;
 }) {
-  const cls = [
-    styles.grid,
-    compact && styles.gridCompact,
-    wide && styles.gridWide,
-    className,
-  ]
+  const cls = [styles.grid, compact && styles.gridCompact, wide && styles.gridWide, className]
     .filter(Boolean)
     .join(' ');
 
@@ -283,9 +303,7 @@ export function ItemCard({
               {avatar.icon ? (
                 <img src={avatar.icon} alt="" className={styles.avatarImage} />
               ) : (
-                <span className={styles.avatarFallback}>
-                  {avatar.fallback || '?'}
-                </span>
+                <span className={styles.avatarFallback}>{avatar.fallback || '?'}</span>
               )}
             </div>
           )}
@@ -357,6 +375,6 @@ ItemCard.Meta = Meta;
 ItemCard.MetaItem = MetaItem;
 ItemCard.FieldRow = FieldRow;
 ItemCard.Stats = Stats;
-ItemCard.StatPill = StatPill;
+ItemCard.ModelsButton = ModelsButton;
 ItemCard.Grid = Grid;
 ItemCard.styles = styles;

@@ -4,7 +4,7 @@ import { Modal } from '@/components/ui/Modal';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { IconBot, IconChevronLeft, IconZap } from '@/components/ui/icons';
+import { IconChevronLeft, IconFlaskConical, IconSend } from '@/components/ui/icons';
 import { copyToClipboard } from '@/utils/clipboard';
 import { useNotificationStore, useAuthStore } from '@/stores';
 import { apiKeysApi } from '@/services/api/apiKeys';
@@ -268,7 +268,7 @@ export function ModelsListModal({
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 placeholder={t('ai_providers.test_input_placeholder')}
                 disabled={isRequesting}
-                style={{ flex: 1, height: '38px' }}
+                style={{ flex: 1 }}
               />
               <Button
                 variant="primary"
@@ -276,16 +276,11 @@ export function ModelsListModal({
                 onClick={handleSend}
                 disabled={isRequesting || !promptInput.trim()}
                 loading={isRequesting}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  height: '38px',
-                  minWidth: '76px',
-                }}
+                title={t('ai_providers.test_send')}
+                aria-label={t('ai_providers.test_send')}
+                className={sharedStyles.iconButton}
               >
-                <IconZap size={14} />
-                <span>{t('ai_providers.test_send')}</span>
+                <IconSend size={15} />
               </Button>
             </div>
           </div>
@@ -312,10 +307,7 @@ export function ModelsListModal({
               })}
             />
           ) : (
-            <div
-              className={sharedStyles.modelsList}
-              style={{ maxHeight: '60vh', overflowY: 'auto' }}
-            >
+            <div className={sharedStyles.modelsList}>
               {models.map((model, idx) => {
                 const isExcluded = model.isExcluded === true;
                 return (
@@ -351,19 +343,18 @@ export function ModelsListModal({
                           setActiveTestModel(model);
                         }}
                         title={t('ai_providers.test_this_model')}
+                        aria-label={t('ai_providers.test_this_model')}
                         className={sharedStyles.modelsActionButton}
                         style={{
-                          padding: '2px 8px',
+                          padding: '2px 6px',
                           height: '24px',
-                          fontSize: '11px',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '4px',
+                          justifyContent: 'center',
                           marginLeft: model.type ? '8px' : 'auto',
                         }}
                       >
-                        <IconBot size={12} />
-                        <span>{t('ai_providers.test_send')}</span>
+                        <IconFlaskConical size={12} />
                       </Button>
                     )}
                   </div>

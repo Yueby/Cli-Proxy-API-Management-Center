@@ -8,6 +8,13 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuthStore, useNotificationStore } from '@/stores';
 import { useProviderRecentRequests } from '@/components/providers/hooks/useProviderRecentRequests';
 import { getOpenAIProviderRecentWindowStats } from '@/components/providers/utils';
+import ampcodeLogo from '@/assets/icons/amp.svg';
+import claudeLogo from '@/assets/icons/claude.svg';
+import codexLogo from '@/assets/icons/codex.svg';
+import geminiLogo from '@/assets/icons/gemini.svg';
+import openaiLogo from '@/assets/icons/openai-light.svg';
+import vertexLogo from '@/assets/icons/vertex.svg';
+import { CategoryList, type CategoryItem } from '@/components/common/CategoryList';
 import type {
   AmpcodeConfig,
   GeminiKeyConfig,
@@ -15,7 +22,6 @@ import type {
   ProviderKeyConfig,
 } from '@/types';
 import { ProviderHeaderCard } from './components/ProviderHeaderCard';
-import { ProviderCategoryList } from './components/ProviderCategoryList';
 import { ProviderResourcePanel } from './components/ProviderResourcePanel';
 import type { OpenAISortBy, SortDir } from './components/OpenAIBrandToolbar';
 import { ProviderSheet, type ProviderSheetHandle } from './sheets/ProviderSheet';
@@ -27,6 +33,14 @@ import styles from './ProvidersWorkbenchPage.module.scss';
 type SheetMode = 'detail' | 'create' | 'edit';
 
 const PROVIDER_TAB_STORAGE_KEY = 'ai-providers.active-tab';
+const PROVIDER_LOGOS: Record<ProviderBrand, string> = {
+  gemini: geminiLogo,
+  claude: claudeLogo,
+  codex: codexLogo,
+  vertex: vertexLogo,
+  openaiCompatibility: openaiLogo,
+  ampcode: ampcodeLogo,
+};
 const PROVIDER_TAB_IDS: ProviderBrand[] = [
   'openaiCompatibility',
   'gemini',
@@ -131,6 +145,23 @@ export function ProvidersWorkbenchPage() {
       return oa - ob;
     });
   }, [workbench.snapshot]);
+
+  const categoryItems = useMemo<CategoryItem[]>(() => {
+    return groups.map((group) => {
+      const realResources = group.resources.filter((r) => !r.flags.isPlaceholder);
+      const total = realResources.length || (group.id === 'ampcode' ? 1 : 0);
+      const count = group.id === 'ampcode' ? (group.resources[0]?.disabled ? 0 : 1) : total;
+      return {
+        id: group.id,
+        label: t(`providersPage.providerNames.${group.id}`),
+        icon: PROVIDER_LOGOS[group.id],
+        count,
+        hasIssue: !!group.issue,
+        invertOnDark: group.id === 'openaiCompatibility',
+      };
+    });
+  }, [groups, t]);
+
   const activeGroup = groups.find((g) => g.id === activeBrand) ?? groups[0] ?? null;
 
   const filteredResources = useMemo(() => {
@@ -389,11 +420,18 @@ export function ProvidersWorkbenchPage() {
 
       <div className={styles.layout}>
         <div className={styles.toolbarRow}>
-          <ProviderCategoryList
+          <CategoryList
             listRef={tabsContainerRef}
-            groups={groups}
-            activeBrand={activeGroup.id}
-            onSelect={(brand) => {
+            items={categoryItems}
+            activeId={activeGroup.id}
+            buttonStyles={() =>
+              ({
+                '--filter-color': 'var(--text-primary)',
+                '--filter-surface': 'var(--bg-tertiary)',
+              }) as React.CSSProperties
+            }
+            onSelect={(brandId) => {
+              const brand = brandId as ProviderBrand;
               const isSwitching = sheetState.open && sheetState.brand !== brand;
               const proceed =
                 isSwitching && sheetRef.current

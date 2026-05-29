@@ -528,7 +528,6 @@
   }
 }
 
-
 // ─── Header Badges (custom headers) ────────
 
 .headerBadgeList {
@@ -880,6 +879,22 @@
   .statusRateLow {
     background: rgba($error-color, 0.24);
     color: #f1b0a6;
+  }
+}
+
+.modelsButton:global(.btn.btn-sm) {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--primary-color) 10%, var(--bg-secondary));
+  border-color: color-mix(in srgb, var(--primary-color) 20%, var(--border-color));
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--primary-color) 35%, var(--border-color));
+    background: color-mix(in srgb, var(--primary-color) 14%, var(--bg-secondary));
   }
 }
 

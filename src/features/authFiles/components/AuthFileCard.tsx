@@ -9,13 +9,11 @@ import { Modal } from '@/components/ui/Modal';
 import {
   IconDownload,
   IconInfo,
-  IconModelCluster,
   IconSettings,
   IconSignal,
   IconTrash2,
   IconZap,
 } from '@/components/ui/icons';
-import { ProviderStatusBar } from '@/components/providers/ProviderStatusBar';
 import { useQuotaStore } from '@/stores';
 import type { AuthFileItem } from '@/types';
 import { resolveCodexPlanType } from '@/utils/quota/resolvers';
@@ -381,22 +379,12 @@ export function AuthFileCard(props: AuthFileCardProps) {
             </>
           )}
 
-          {/* Stats */}
-          <ItemCard.Stats>
-            <ItemCard.StatPill
-              label={t('stats.success')}
-              value={fileStats.success}
-              variant="success"
-            />
-            <ItemCard.StatPill
-              label={t('stats.failure')}
-              value={fileStats.failure}
-              variant="failure"
-            />
-          </ItemCard.Stats>
-
-          {/* Status bar */}
-          <ProviderStatusBar statusData={statusData} styles={styles} />
+          {/* Stats & Status bar */}
+          <ItemCard.Stats
+            success={fileStats.success}
+            failure={fileStats.failure}
+            statusData={statusData}
+          />
 
           {/* Quota */}
           {showQuota && cachedQuotaType && (
@@ -408,19 +396,11 @@ export function AuthFileCard(props: AuthFileCardProps) {
         <>
           <ItemCard.ActionsMain>
             {showModelsButton && (
-              <Button
-                variant="secondary"
-                size="sm"
+              <ItemCard.ModelsButton
                 onClick={() => onShowModels(file)}
-                className={styles.modelsActionButton}
-                title={t('auth_files.models_button', { defaultValue: '模型' })}
                 disabled={disableControls}
-              >
-                <>
-                  <IconModelCluster size={16} />
-                  <span>{t('auth_files.models_button', { defaultValue: '模型' })}</span>
-                </>
-              </Button>
+                title={t('auth_files.models_button', { defaultValue: '模型' })}
+              />
             )}
             {!isRuntimeOnly && (
               <ItemCard.UtilityActions>
@@ -470,7 +450,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
             )}
           </ItemCard.ActionsMain>
           {!isRuntimeOnly && (
-            <ItemCard.ToggleArea label={t('auth_files.status_toggle_label')}>
+            <ItemCard.ToggleArea>
               <ToggleSwitch
                 ariaLabel={t('auth_files.status_toggle_label')}
                 checked={!file.disabled}

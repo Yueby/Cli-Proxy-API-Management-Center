@@ -10,8 +10,7 @@ import iconVertex from '@/assets/icons/vertex.svg';
 import { Button } from '@/components/ui/Button';
 import { ItemCard } from '@/components/ui/ItemCard';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
-import { ExcludedModelsList, FieldRow, StatsPills } from '@/components/providers/ProviderCardParts';
-import { ProviderStatusBar } from '@/components/providers/ProviderStatusBar';
+import { ExcludedModelsList, FieldRow } from '@/components/providers/ProviderCardParts';
 import {
   getOpenAIProviderRecentStatusData,
   getOpenAIProviderTotalStats,
@@ -20,14 +19,7 @@ import {
   stripDisableAllModelsRule,
   type ProviderRecentUsageMap,
 } from '@/components/providers/utils';
-import {
-  IconEye,
-  IconKey,
-  IconModelCluster,
-  IconPencil,
-  IconSignal,
-  IconTrash2,
-} from '@/components/ui/icons';
+import { IconEye, IconKey, IconPencil, IconSignal, IconTrash2 } from '@/components/ui/icons';
 import type {
   AmpcodeConfig,
   GeminiKeyConfig,
@@ -37,9 +29,7 @@ import type {
 import type { StatusBarData } from '@/utils/recentRequests';
 import { maskApiKey } from '@/utils/format';
 import type { ProviderBrand, ProviderResource } from '../types';
-import statusBarStyles from './providerStatusBar.module.scss';
 import keyBadgeStyles from '@/components/providers/OpenAISection/KeyCountBadge.module.scss';
-import modelStyles from '@/components/common/ModelsListModal.module.scss';
 
 interface ProviderResourceCardsProps {
   resources: ProviderResource[];
@@ -165,6 +155,14 @@ function KeyCountBadge({ entries, providerName, baseUrl, usageByProvider }: KeyC
     setShow(true);
   };
 
+  const toggleBadge = () => {
+    if (!show && ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setPos({ top: rect.top, left: rect.left + rect.width / 2 });
+    }
+    setShow((v) => !v);
+  };
+
   useEffect(() => {
     if (!show) return;
     const dismiss = () => setShow(false);
@@ -196,7 +194,7 @@ function KeyCountBadge({ entries, providerName, baseUrl, usageByProvider }: KeyC
         onPointerLeave={(e) => {
           if (e.pointerType === 'mouse') setShow(false);
         }}
-        onClick={() => setShow((v) => !v)}
+        onClick={toggleBadge}
       >
         <span className={keyBadgeStyles.badgeIcon}>
           <IconKey size={13} />
@@ -277,6 +275,11 @@ export function ProviderResourceCards({
                 border: '1px solid var(--border-color)',
                 fontFamily: 'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
                 fontSize: '11px',
+                cursor: 'pointer',
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onView(resource);
               }}
             >
               {resource.apiKeyPreview}
@@ -289,8 +292,11 @@ export function ProviderResourceCards({
             <FieldRow label={t('common.base_url')} value={raw.baseUrl} />
             <FieldRow label={t('common.proxy_url')} value={raw.proxyUrl} />
             <ExcludedModelsList models={excludedModels} />
-            <StatsPills success={stats.success} failure={stats.failure} />
-            <ProviderStatusBar statusData={statusData} styles={statusBarStyles} />
+            <ItemCard.Stats
+              success={stats.success}
+              failure={stats.failure}
+              statusData={statusData}
+            />
           </>
         }
         actions={renderActions(resource)}
@@ -339,8 +345,11 @@ export function ProviderResourceCards({
               label={t('ai_providers.openai_test_model', { defaultValue: 'Test Model' })}
               value={provider.testModel}
             />
-            <StatsPills success={stats.success} failure={stats.failure} />
-            <ProviderStatusBar statusData={statusData} styles={statusBarStyles} />
+            <ItemCard.Stats
+              success={stats.success}
+              failure={stats.failure}
+              statusData={statusData}
+            />
           </>
         }
         actions={renderActions(resource)}
@@ -377,6 +386,11 @@ export function ProviderResourceCards({
                 border: '1px solid var(--border-color)',
                 fontFamily: 'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
                 fontSize: '11px',
+                cursor: 'pointer',
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onView(resource);
               }}
             >
               {resource.apiKeyPreview}
@@ -433,19 +447,10 @@ export function ProviderResourceCards({
       <>
         <ItemCard.ActionsMain>
           {showModelsButton && (
-            <Button
-              variant="secondary"
-              size="sm"
+            <ItemCard.ModelsButton
               onClick={() => onShowModels(resource)}
               title={t('ai_providers.models_button')}
-              className={modelStyles.modelsActionButton}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-            >
-              <>
-                <IconModelCluster size={15} />
-                <span>{t('ai_providers.models_button')}</span>
-              </>
-            </Button>
+            />
           )}
           <ItemCard.UtilityActions>
             <Button
@@ -483,9 +488,7 @@ export function ProviderResourceCards({
           </ItemCard.UtilityActions>
         </ItemCard.ActionsMain>
         {!isAmpcode && onToggleDisabled ? (
-          <ItemCard.ToggleArea
-            label={t('ai_providers.config_toggle_label', { defaultValue: 'Enabled' })}
-          >
+          <ItemCard.ToggleArea>
             <ToggleSwitch
               checked={!resource.disabled}
               disabled={disableMutations}

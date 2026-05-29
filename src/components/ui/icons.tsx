@@ -568,3 +568,33 @@ export function IconZap({ size = 20, ...props }: IconProps) {
     </svg>
   );
 }
+
+export function IconPlay({ size = 20, ...props }: IconProps) {
+  return (
+    <svg {...baseSvgProps} width={size} height={size} {...props}>
+      <polygon points="6 3 20 12 6 21 6 3" />
+    </svg>
+  );
+}
+
+export function IconFlaskConical({ size = 20, ...props }: IconProps) {
+  return (
+    <svg {...baseSvgProps} width={size} height={size} {...props}>
+      <path d="M10 2v4" />
+      <path d="M14 2v4" />
+      <path d="M8.5 2h7" />
+      <path d="M14 6H10" />
+      <path d="M8.5 6 3 17.5A2 2 0 0 0 4.7 20h14.6a2 2 0 0 0 1.7-2.5L15.5 6z" />
+      <path d="M15 11.5H9" />
+    </svg>
+  );
+}
+
+export function IconSend({ size = 20, ...props }: IconProps) {
+  return (
+    <svg {...baseSvgProps} width={size} height={size} {...props}>
+      <path d="m22 2-7 20-4-9-9-4Z" />
+      <path d="M22 2 11 13" />
+    </svg>
+  );
+}

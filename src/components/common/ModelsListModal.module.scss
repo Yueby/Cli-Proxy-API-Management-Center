@@ -237,3 +237,12 @@
   border: 1px solid var(--danger-color);
   flex-shrink: 0;
 }
+
+.iconButton:global(.btn.btn-sm) {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}

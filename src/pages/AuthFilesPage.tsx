@@ -37,6 +37,7 @@ import {
 import { Pagination } from '@/components/ui/Pagination';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
+import { CategoryList, type CategoryItem } from '@/components/common/CategoryList';
 import { copyToClipboard } from '@/utils/clipboard';
 import {
   MAX_CARD_PAGE_SIZE,
@@ -482,6 +483,24 @@ export function AuthFilesPage() {
     ? normalizedFilter
     : (existingTypes[0] ?? 'codex');
 
+  const authCategoryItems = useMemo<CategoryItem[]>(() => {
+    return existingTypes.map((type) => {
+      const iconSrc = getAuthFileIcon(type, resolvedTheme);
+      return {
+        id: type,
+        label: getTypeLabel(t, type),
+        icon: type === 'all' ? undefined : iconSrc || undefined,
+        fallback:
+          type === 'all' || iconSrc ? undefined : getTypeLabel(t, type).slice(0, 1).toUpperCase(),
+        customIcon:
+          type === 'all' ? (
+            <IconFilterAll style={{ width: '18px', height: '18px', flexShrink: 0 }} size={18} />
+          ) : undefined,
+        count: typeCounts[type] ?? 0,
+      };
+    });
+  }, [existingTypes, resolvedTheme, t, typeCounts]);
+
   const normalizedSearch = search.trim();
   const wildcardSearch = useMemo(() => buildWildcardSearch(normalizedSearch), [normalizedSearch]);
 
@@ -736,56 +755,27 @@ export function AuthFilesPage() {
 
   const renderFilterTags = () => (
     <div className={styles.filterSection}>
-      <div
-        className={styles.tabsContainer}
-        role="tablist"
-        aria-label={t('auth_files.type_filter_label', { defaultValue: 'Auth file type filter' })}
-        ref={filterTabsRef}
-      >
-        {existingTypes.map((type) => {
-          const isActive = normalizedFilter === type;
-          const iconSrc = getAuthFileIcon(type, resolvedTheme);
+      <CategoryList
+        listRef={filterTabsRef}
+        items={authCategoryItems}
+        activeId={activeFilterTabId}
+        onSelect={(type) => {
+          setFilter(type);
+          setPage(1);
+        }}
+        buttonStyles={(item) => {
+          const type = item.id;
           const color =
             type === 'all'
               ? { bg: 'var(--bg-tertiary)', text: 'var(--text-primary)' }
               : getTypeColor(type, resolvedTheme);
-          const buttonStyle = {
+          return {
             '--filter-color': color.text,
             '--filter-surface': color.bg,
             '--filter-active-text': resolvedTheme === 'dark' ? '#111827' : '#ffffff',
           } as CSSProperties;
-
-          return (
-            <button
-              key={type}
-              id={`auth-files-filter-tab-${type}`}
-              role="tab"
-              data-tab-id={type}
-              aria-selected={isActive}
-              aria-controls="auth-files-list"
-              className={`${styles.tabButton} ${isActive ? styles.tabButtonActive : ''}`}
-              style={buttonStyle}
-              onClick={() => {
-                setFilter(type);
-                setPage(1);
-              }}
-              type="button"
-            >
-              {type === 'all' ? (
-                <IconFilterAll className={styles.filterAllIcon} size={18} />
-              ) : iconSrc ? (
-                <img src={iconSrc} alt="" className={styles.tabIcon} />
-              ) : (
-                <span className={styles.tabIconFallback}>
-                  {getTypeLabel(t, type).slice(0, 1).toUpperCase()}
-                </span>
-              )}
-              <span className={styles.tabLabel}>{getTypeLabel(t, type)}</span>
-              <span className={styles.tabCount}>{typeCounts[type] ?? 0}</span>
-            </button>
-          );
-        })}
-      </div>
+        }}
+      />
     </div>
   );
 

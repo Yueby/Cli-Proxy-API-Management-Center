@@ -111,7 +111,6 @@ interface StatsPillsProps {
 
 export function StatsPills({ success, failure }: StatsPillsProps) {
   const { t } = useTranslation();
-  if (success === 0 && failure === 0) return null;
   return (
     <div className={styles.stats}>
       <div className={`${styles.statPill} ${styles.statSuccess}`}>
