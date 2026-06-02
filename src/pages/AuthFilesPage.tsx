@@ -25,7 +25,6 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import {
   IconDownload,
-  IconFilterAll,
   IconRefreshCw,
   IconZap,
   IconSearch,
@@ -68,9 +67,7 @@ import { useAuthFilesStatusBarCache } from '@/features/authFiles/hooks/useAuthFi
 import {
   isAuthFilesSortMode,
   readAuthFilesUiState,
-  readPersistedAuthFilesCompactMode,
   writeAuthFilesUiState,
-  writePersistedAuthFilesCompactMode,
   type AuthFilesSortMode,
 } from '@/features/authFiles/uiState';
 import { useAuthStore, useNotificationStore, useQuotaStore, useThemeStore } from '@/stores';
@@ -82,7 +79,6 @@ const easePower3Out = (progress: number) => 1 - (1 - progress) ** 4;
 const easePower2In = (progress: number) => progress ** 3;
 const BATCH_BAR_BASE_TRANSFORM = 'translateX(-50%)';
 const BATCH_BAR_HIDDEN_TRANSFORM = 'translateX(-50%) translateY(56px)';
-const DEFAULT_REGULAR_PAGE_SIZE = 9;
 const DEFAULT_COMPACT_PAGE_SIZE = 12;
 
 const escapeWildcardSearchSegment = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -106,14 +102,10 @@ export function AuthFilesPage() {
   const [filter, setFilter] = useState<string>('codex');
   const [problemOnly, setProblemOnly] = useState(false);
   const [disabledOnly, setDisabledOnly] = useState(false);
-  const [compactMode, setCompactMode] = useState(false);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [pageSizeByMode, setPageSizeByMode] = useState({
-    regular: DEFAULT_REGULAR_PAGE_SIZE,
-    compact: DEFAULT_COMPACT_PAGE_SIZE,
-  });
-  const [pageSizeInput, setPageSizeInput] = useState('9');
+  const [compactPageSize, setCompactPageSize] = useState(DEFAULT_COMPACT_PAGE_SIZE);
+  const [pageSizeInput, setPageSizeInput] = useState(String(DEFAULT_COMPACT_PAGE_SIZE));
   const [viewMode, setViewMode] = useState<'diagram' | 'list'>('list');
   const [sortMode, setSortMode] = useState<AuthFilesSortMode>('default');
   const [batchActionBarVisible, setBatchActionBarVisible] = useState(false);
@@ -204,22 +196,15 @@ export function AuthFilesPage() {
   )
     ? (normalizedFilter as QuotaProviderType)
     : null;
-  const pageSize = compactMode ? pageSizeByMode.compact : pageSizeByMode.regular;
+  const pageSize = compactPageSize;
 
   useEffect(() => {
-    const persistedCompactMode = readPersistedAuthFilesCompactMode();
-    if (typeof persistedCompactMode === 'boolean') {
-      setCompactMode(persistedCompactMode);
-    }
-
     const persisted = readAuthFilesUiState();
     if (persisted) {
-      if (
-        typeof persisted.filter === 'string' &&
-        persisted.filter.trim() &&
-        persisted.filter !== 'all'
-      ) {
-        setFilter(normalizeProviderKey(persisted.filter));
+      const persistedFilter =
+        typeof persisted.filter === 'string' ? normalizeProviderKey(persisted.filter) : '';
+      if (persistedFilter && persistedFilter !== 'all') {
+        setFilter(persistedFilter);
       } else {
         setFilter('codex');
       }
@@ -228,9 +213,6 @@ export function AuthFilesPage() {
       }
       if (typeof persisted.disabledOnly === 'boolean') {
         setDisabledOnly(persisted.disabledOnly);
-      }
-      if (typeof persistedCompactMode !== 'boolean' && typeof persisted.compactMode === 'boolean') {
-        setCompactMode(persisted.compactMode);
       }
       if (typeof persisted.search === 'string') {
         setSearch(persisted.search);
@@ -242,18 +224,11 @@ export function AuthFilesPage() {
         typeof persisted.pageSize === 'number' && Number.isFinite(persisted.pageSize)
           ? clampCardPageSize(persisted.pageSize)
           : null;
-      const regularPageSize =
-        typeof persisted.regularPageSize === 'number' && Number.isFinite(persisted.regularPageSize)
-          ? clampCardPageSize(persisted.regularPageSize)
-          : (legacyPageSize ?? DEFAULT_REGULAR_PAGE_SIZE);
-      const compactPageSize =
+      const persistedCompactPageSize =
         typeof persisted.compactPageSize === 'number' && Number.isFinite(persisted.compactPageSize)
           ? clampCardPageSize(persisted.compactPageSize)
           : (legacyPageSize ?? DEFAULT_COMPACT_PAGE_SIZE);
-      setPageSizeByMode({
-        regular: regularPageSize,
-        compact: compactPageSize,
-      });
+      setCompactPageSize(persistedCompactPageSize);
       if (isAuthFilesSortMode(persisted.sortMode)) {
         setSortMode(persisted.sortMode);
       }
@@ -269,22 +244,18 @@ export function AuthFilesPage() {
       filter,
       problemOnly,
       disabledOnly,
-      compactMode,
       search,
       page,
       pageSize,
-      regularPageSize: pageSizeByMode.regular,
-      compactPageSize: pageSizeByMode.compact,
+      compactPageSize,
       sortMode,
     });
-    writePersistedAuthFilesCompactMode(compactMode);
   }, [
-    compactMode,
+    compactPageSize,
     disabledOnly,
     filter,
     page,
     pageSize,
-    pageSizeByMode,
     problemOnly,
     search,
     sortMode,
@@ -295,14 +266,9 @@ export function AuthFilesPage() {
     setPageSizeInput(String(pageSize));
   }, [pageSize]);
 
-  const setCurrentModePageSize = useCallback(
-    (next: number) => {
-      setPageSizeByMode((current) =>
-        compactMode ? { ...current, compact: next } : { ...current, regular: next }
-      );
-    },
-    [compactMode]
-  );
+  const setCurrentPageSize = useCallback((next: number) => {
+    setCompactPageSize(next);
+  }, []);
 
   const commitPageSizeInput = (rawValue: string) => {
     const trimmed = rawValue.trim();
@@ -318,7 +284,7 @@ export function AuthFilesPage() {
     }
 
     const next = clampCardPageSize(value);
-    setCurrentModePageSize(next);
+    setCurrentPageSize(next);
     setPageSizeInput(String(next));
     setPage(1);
   };
@@ -336,7 +302,7 @@ export function AuthFilesPage() {
     const rounded = Math.round(parsed);
     if (rounded < MIN_CARD_PAGE_SIZE || rounded > MAX_CARD_PAGE_SIZE) return;
 
-    setCurrentModePageSize(rounded);
+    setCurrentPageSize(rounded);
     setPage(1);
   };
 
@@ -412,13 +378,12 @@ export function AuthFilesPage() {
   );
 
   const existingTypes = useMemo(() => {
-    const types = new Set<string>(['all']);
+    const types = new Set<string>();
     files.forEach((file) => {
       const type = normalizeProviderKey(String(file.type ?? file.provider ?? ''));
       if (type) types.add(type);
     });
     const tabOrder = [
-      'all',
       'codex',
       'openaiCompatibility',
       'openai',
@@ -489,13 +454,8 @@ export function AuthFilesPage() {
       return {
         id: type,
         label: getTypeLabel(t, type),
-        icon: type === 'all' ? undefined : iconSrc || undefined,
-        fallback:
-          type === 'all' || iconSrc ? undefined : getTypeLabel(t, type).slice(0, 1).toUpperCase(),
-        customIcon:
-          type === 'all' ? (
-            <IconFilterAll style={{ width: '18px', height: '18px', flexShrink: 0 }} size={18} />
-          ) : undefined,
+        icon: iconSrc || undefined,
+        fallback: iconSrc ? undefined : getTypeLabel(t, type).slice(0, 1).toUpperCase(),
         count: typeCounts[type] ?? 0,
       };
     });
@@ -634,7 +594,7 @@ export function AuthFilesPage() {
   const openExcludedEditor = useCallback(
     (provider?: string) => {
       setOauthSettingsOpen(false);
-      const providerValue = (provider || (filter !== 'all' ? String(filter) : '')).trim();
+      const providerValue = (provider || String(filter)).trim();
       const params = new URLSearchParams();
       if (providerValue) {
         params.set('provider', providerValue);
@@ -650,7 +610,7 @@ export function AuthFilesPage() {
   const openModelAliasEditor = useCallback(
     (provider?: string) => {
       setOauthSettingsOpen(false);
-      const providerValue = (provider || (filter !== 'all' ? String(filter) : '')).trim();
+      const providerValue = (provider || String(filter)).trim();
       const params = new URLSearchParams();
       if (providerValue) {
         params.set('provider', providerValue);
@@ -765,10 +725,7 @@ export function AuthFilesPage() {
         }}
         buttonStyles={(item) => {
           const type = item.id;
-          const color =
-            type === 'all'
-              ? { bg: 'var(--bg-tertiary)', text: 'var(--text-primary)' }
-              : getTypeColor(type, resolvedTheme);
+          const color = getTypeColor(type, resolvedTheme);
           return {
             '--filter-color': color.text,
             '--filter-surface': color.bg,
@@ -942,18 +899,6 @@ export function AuthFilesPage() {
                         }
                       />
                     </div>
-                    <div className={styles.filterToggleCard}>
-                      <ToggleSwitch
-                        checked={compactMode}
-                        onChange={(value) => setCompactMode(value)}
-                        ariaLabel={t('auth_files.compact_mode_label')}
-                        label={
-                          <span className={styles.filterToggleLabel}>
-                            {t('auth_files.compact_mode_label')}
-                          </span>
-                        }
-                      />
-                    </div>
                   </div>
                 </div>
               </div>
@@ -967,12 +912,11 @@ export function AuthFilesPage() {
                 description={t('auth_files.search_empty_desc')}
               />
             ) : (
-              <ItemCard.Grid compact={compactMode} wide={!!quotaFilterType}>
+              <ItemCard.Grid compact wide={!!quotaFilterType}>
                 {pageItems.map((file) => (
                   <AuthFileCard
                     key={file.name}
                     file={file}
-                    compact={compactMode}
                     selected={selectedFiles.has(file.name)}
                     resolvedTheme={resolvedTheme}
                     disableControls={disableControls}

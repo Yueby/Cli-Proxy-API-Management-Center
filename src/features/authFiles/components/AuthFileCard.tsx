@@ -45,7 +45,6 @@ const HEALTHY_STATUS_MESSAGES = new Set(['ok', 'healthy', 'ready', 'success', 'a
 
 export type AuthFileCardProps = {
   file: AuthFileItem;
-  compact: boolean;
   selected: boolean;
   resolvedTheme: ResolvedTheme;
   disableControls: boolean;
@@ -68,7 +67,6 @@ export function AuthFileCard(props: AuthFileCardProps) {
   const [showStatusDetailModal, setShowStatusDetailModal] = useState(false);
   const {
     file,
-    compact,
     selected,
     resolvedTheme,
     disableControls,
@@ -128,8 +126,6 @@ export function AuthFileCard(props: AuthFileCardProps) {
     Boolean(rawStatusMessage) && !HEALTHY_STATUS_MESSAGES.has(rawStatusMessage.toLowerCase());
 
   const priorityValue = parsePriorityValue(file.priority ?? file['priority']);
-  const noteValue = typeof file.note === 'string' ? file.note.trim() : '';
-
   const stateLabel = isRuntimeOnly
     ? t('auth_files.type_virtual') || '虚拟认证文件'
     : file.disabled
@@ -223,7 +219,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
     <ItemCard
       selected={selected}
       disabled={file.disabled}
-      compact={compact}
+      compact
       className={providerCardClass}
       avatar={{
         icon: providerIcon || undefined,
@@ -233,14 +229,6 @@ export function AuthFileCard(props: AuthFileCardProps) {
         border: providerIcon ? '1px solid transparent' : typeColor.border || undefined,
       }}
       title={file.name}
-      subtitle={
-        !compact && noteValue ? (
-          <>
-            <span className={styles.noteLabel}>{t('auth_files.note_display')}</span>
-            <span className={styles.noteValue}>{noteValue}</span>
-          </>
-        ) : undefined
-      }
       badges={[
         {
           label: typeLabel,

@@ -269,7 +269,6 @@
     "problem_filter_only": "Only show problematic credentials",
     "disabled_filter_only": "Only show disabled credentials",
     "display_options_label": "Display options",
-    "compact_mode_label": "Compact mode",
     "sort_label": "Sort",
     "sort_default": "Default",
     "sort_az": "A-Z Name",

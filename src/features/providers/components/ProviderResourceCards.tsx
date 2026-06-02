@@ -5,7 +5,8 @@ import iconAmp from '@/assets/icons/amp.svg';
 import iconClaude from '@/assets/icons/claude.svg';
 import iconCodex from '@/assets/icons/codex.svg';
 import iconGemini from '@/assets/icons/gemini.svg';
-import iconOpenAI from '@/assets/icons/openai-light.svg';
+import iconOpenAIDark from '@/assets/icons/openai-dark.svg';
+import iconOpenAILight from '@/assets/icons/openai-light.svg';
 import iconVertex from '@/assets/icons/vertex.svg';
 import { Button } from '@/components/ui/Button';
 import { ItemCard } from '@/components/ui/ItemCard';
@@ -22,12 +23,15 @@ import {
 import { IconEye, IconKey, IconPencil, IconSignal, IconTrash2 } from '@/components/ui/icons';
 import type {
   AmpcodeConfig,
+  ApiKeyEntry,
   GeminiKeyConfig,
   OpenAIProviderConfig,
   ProviderKeyConfig,
 } from '@/types';
 import type { StatusBarData } from '@/utils/recentRequests';
 import { maskApiKey } from '@/utils/format';
+import { useThemeStore } from '@/stores';
+import type { ResolvedTheme } from '@/features/authFiles/constants';
 import type { ProviderBrand, ProviderResource } from '../types';
 import keyBadgeStyles from '@/components/providers/OpenAISection/KeyCountBadge.module.scss';
 
@@ -42,52 +46,38 @@ interface ProviderResourceCardsProps {
   onShowModels: (resource: ProviderResource) => void;
 }
 
-const BRAND_META: Record<
-  ProviderBrand,
-  {
-    icon: string;
-    label: string;
-    badgeBg: string;
-    badgeColor: string;
-    avatarBg?: string;
-  }
-> = {
-  gemini: {
-    icon: iconGemini,
-    label: 'Gemini',
-    badgeBg: 'rgba(66, 133, 244, 0.10)',
-    badgeColor: '#4285f4',
-  },
-  codex: {
-    icon: iconCodex,
-    label: 'Codex',
-    badgeBg: 'rgba(17, 24, 39, 0.10)',
-    badgeColor: '#111827',
-  },
-  claude: {
-    icon: iconClaude,
-    label: 'Claude',
-    badgeBg: 'rgba(217, 119, 6, 0.10)',
-    badgeColor: '#d97706',
-  },
-  vertex: {
-    icon: iconVertex,
-    label: 'Vertex',
-    badgeBg: 'rgba(52, 168, 83, 0.10)',
-    badgeColor: '#34a853',
-  },
-  openaiCompatibility: {
-    icon: iconOpenAI,
-    label: 'OpenAI',
-    badgeBg: 'rgba(16, 185, 129, 0.10)',
-    badgeColor: '#10b981',
-  },
-  ampcode: {
-    icon: iconAmp,
-    label: 'Ampcode',
-    badgeBg: 'rgba(139, 134, 128, 0.12)',
-    badgeColor: 'var(--text-secondary)',
-  },
+type ProviderIconAsset = string | { light: string; dark: string };
+
+const PROVIDER_ICONS: Record<ProviderBrand, ProviderIconAsset> = {
+  gemini: iconGemini,
+  codex: iconCodex,
+  claude: iconClaude,
+  vertex: iconVertex,
+  openaiCompatibility: { light: iconOpenAILight, dark: iconOpenAIDark },
+  ampcode: iconAmp,
+};
+
+const PROVIDER_FALLBACKS: Record<ProviderBrand, string> = {
+  gemini: 'G',
+  codex: 'C',
+  claude: 'C',
+  vertex: 'V',
+  openaiCompatibility: 'O',
+  ampcode: 'A',
+};
+
+const PROVIDER_LABELS: Record<ProviderBrand, string> = {
+  gemini: 'Gemini',
+  codex: 'Codex',
+  claude: 'Claude',
+  vertex: 'Vertex',
+  openaiCompatibility: 'OpenAI',
+  ampcode: 'Ampcode',
+};
+
+const getProviderIcon = (brand: ProviderBrand, resolvedTheme: ResolvedTheme): string => {
+  const icon = PROVIDER_ICONS[brand];
+  return typeof icon === 'string' ? icon : resolvedTheme === 'dark' ? icon.dark : icon.light;
 };
 
 const EMPTY_STATUS_BAR: StatusBarData = {
@@ -239,57 +229,72 @@ export function ProviderResourceCards({
   onShowModels,
 }: ProviderResourceCardsProps) {
   const { t } = useTranslation();
+  const resolvedTheme: ResolvedTheme = useThemeStore((state) => state.resolvedTheme);
+
+  const renderPriorityBadge = (priority?: number) =>
+    priority !== undefined ? (
+      <span
+        className={ItemCard.styles.typeBadge}
+        style={{
+          backgroundColor: 'rgba(16, 185, 129, 0.10)',
+          color: '#10b981',
+          border: '1px solid rgba(16, 185, 129, 0.25)',
+        }}
+      >
+        <IconSignal size={12} /> P{priority}
+      </span>
+    ) : null;
+
+  const renderHeaderExtra = (
+    entries: ApiKeyEntry[],
+    providerName: string,
+    baseUrl: string,
+    priority?: number
+  ) => {
+    if (!entries.length && priority === undefined) return undefined;
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <KeyCountBadge
+          entries={entries}
+          providerName={providerName}
+          baseUrl={baseUrl}
+          usageByProvider={usageByProvider}
+        />
+        {renderPriorityBadge(priority)}
+      </div>
+    );
+  };
 
   const renderCommonCard = (resource: ProviderResource) => {
-    const meta = BRAND_META[resource.brand];
     const raw = resource.brand === 'gemini' ? geminiConfig(resource) : providerKeyConfig(resource);
     const excludedModels = stripDisableAllModelsRule(raw.excludedModels);
     const stats = getStats(resource, usageByProvider);
     const statusData = getStatusData(resource, usageByProvider);
+    const apiKeyEntries = raw.apiKey
+      ? [{ apiKey: raw.apiKey, proxyUrl: raw.proxyUrl, authIndex: raw.authIndex }]
+      : [];
 
     return (
       <ItemCard
         key={resource.id}
         disabled={resource.disabled}
+        compact
         avatar={{
-          icon: meta.icon,
-          fallback: meta.label.slice(0, 1),
-          bgColor: meta.badgeBg,
-          textColor: meta.badgeColor,
+          icon: getProviderIcon(resource.brand, resolvedTheme),
+          fallback: PROVIDER_FALLBACKS[resource.brand],
+          bgColor: 'transparent',
         }}
         title={resource.identifier}
-        badges={[
-          {
-            label: meta.label,
-            variant: 'custom',
-            style: { backgroundColor: meta.badgeBg, color: meta.badgeColor },
-          },
-        ]}
-        headerExtra={
-          resource.apiKeyPreview ? (
-            <span
-              className={ItemCard.styles.typeBadge}
-              style={{
-                backgroundColor: 'var(--bg-tertiary)',
-                color: 'var(--text-secondary)',
-                border: '1px solid var(--border-color)',
-                fontFamily: 'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
-                fontSize: '11px',
-                cursor: 'pointer',
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                onView(resource);
-              }}
-            >
-              {resource.apiKeyPreview}
-            </span>
-          ) : undefined
-        }
+        subtitle={raw.baseUrl}
+        headerExtra={renderHeaderExtra(
+          apiKeyEntries,
+          PROVIDER_LABELS[resource.brand],
+          raw.baseUrl ?? '',
+          raw.priority
+        )}
         content={
           <>
             <FieldRow label={t('common.prefix')} value={raw.prefix} />
-            <FieldRow label={t('common.base_url')} value={raw.baseUrl} />
             <FieldRow label={t('common.proxy_url')} value={raw.proxyUrl} />
             <ExcludedModelsList models={excludedModels} />
             <ItemCard.Stats
@@ -314,6 +319,12 @@ export function ProviderResourceCards({
       <ItemCard
         key={resource.id}
         disabled={resource.disabled}
+        compact
+        avatar={{
+          icon: getProviderIcon('openaiCompatibility', resolvedTheme),
+          fallback: PROVIDER_FALLBACKS.openaiCompatibility,
+          bgColor: 'transparent',
+        }}
         title={provider.name}
         subtitle={provider.baseUrl}
         headerExtra={
@@ -364,39 +375,21 @@ export function ProviderResourceCards({
       <ItemCard
         key={resource.id}
         disabled={resource.disabled}
-        avatar={{ icon: BRAND_META.ampcode.icon, fallback: 'A', bgColor: 'transparent' }}
+        compact
+        avatar={{
+          icon: getProviderIcon('ampcode', resolvedTheme),
+          fallback: PROVIDER_FALLBACKS.ampcode,
+          bgColor: 'transparent',
+        }}
         title="Amp CLI"
-        badges={[
-          {
-            label: BRAND_META.ampcode.label,
-            variant: 'custom',
-            style: {
-              backgroundColor: BRAND_META.ampcode.badgeBg,
-              color: BRAND_META.ampcode.badgeColor,
-            },
-          },
-        ]}
-        headerExtra={
-          resource.apiKeyPreview ? (
-            <span
-              className={ItemCard.styles.typeBadge}
-              style={{
-                backgroundColor: 'var(--bg-tertiary)',
-                color: 'var(--text-secondary)',
-                border: '1px solid var(--border-color)',
-                fontFamily: 'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
-                fontSize: '11px',
-                cursor: 'pointer',
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                onView(resource);
-              }}
-            >
-              {resource.apiKeyPreview}
-            </span>
-          ) : undefined
-        }
+        subtitle={config.upstreamUrl}
+        headerExtra={renderHeaderExtra(
+          config.upstreamApiKey
+            ? [{ apiKey: config.upstreamApiKey, proxyUrl: undefined, authIndex: undefined }]
+            : [],
+          PROVIDER_LABELS.ampcode,
+          config.upstreamUrl ?? ''
+        )}
         content={
           <>
             <FieldRow

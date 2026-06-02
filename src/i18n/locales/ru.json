@@ -269,7 +269,6 @@
     "problem_filter_only": "Показывать только проблемные учётные данные",
     "disabled_filter_only": "Показывать только отключённые учётные данные",
     "display_options_label": "Параметры отображения",
-    "compact_mode_label": "Компактный режим",
     "sort_label": "Сортировка",
     "sort_default": "По умолчанию",
     "sort_az": "A-Z Имя",
