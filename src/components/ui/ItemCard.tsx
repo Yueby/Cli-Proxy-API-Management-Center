@@ -49,6 +49,7 @@ export interface ItemCardBadge {
   variant?: 'active' | 'warning' | 'disabled' | 'custom';
   style?: CSSProperties;
   className?: string;
+  title?: string;
 }
 
 export interface ItemCardProps {
@@ -317,6 +318,7 @@ export function ItemCard({
                         key={i}
                         className={`${styles.typeBadge} ${badge.className || ''}`}
                         style={badge.style}
+                        title={badge.title}
                       >
                         {badge.label}
                       </span>
@@ -335,6 +337,7 @@ export function ItemCard({
                       key={i}
                       className={`${styles.stateBadge} ${badgeClass}`}
                       style={badge.style}
+                      title={badge.title}
                     >
                       {badge.label}
                     </span>

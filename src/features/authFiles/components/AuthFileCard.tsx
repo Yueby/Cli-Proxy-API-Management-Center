@@ -39,6 +39,7 @@ import {
 import type { AuthFileStatusBarData } from '@/features/authFiles/hooks/useAuthFilesStatusBarCache';
 import { AuthFileQuotaSection } from '@/features/authFiles/components/AuthFileQuotaSection';
 import { resolveAuthFileQuotaType } from '@/features/authFiles/quotaConfig';
+import { resolveCodexSubscriptionBadge } from '@/features/authFiles/codexSubscription';
 import styles from '@/pages/AuthFilesPage.module.scss';
 
 const HEALTHY_STATUS_MESSAGES = new Set(['ok', 'healthy', 'ready', 'success', 'available']);
@@ -63,7 +64,7 @@ export type AuthFileCardProps = {
 
 // Force reload card
 export function AuthFileCard(props: AuthFileCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [showStatusDetailModal, setShowStatusDetailModal] = useState(false);
   const {
     file,
@@ -159,6 +160,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
     return null;
   });
   const resolvedPlanLabel = codexPlan || quotaStorePlan || null;
+  const codexSubscriptionBadge = resolveCodexSubscriptionBadge(file, t, i18n.resolvedLanguage);
 
   // Gemini CLI premium tier detection
   const geminiTierId = useQuotaStore((state) => {
@@ -239,6 +241,16 @@ export function AuthFileCard(props: AuthFileCardProps) {
             ...(typeColor.border ? { border: typeColor.border } : {}),
           },
         },
+        ...(codexSubscriptionBadge
+          ? [
+              {
+                label: codexSubscriptionBadge.label,
+                variant: 'custom' as const,
+                style: codexSubscriptionBadge.style,
+                title: codexSubscriptionBadge.title,
+              },
+            ]
+          : []),
         // 只在有警告或虚拟文件时显示状态 badge，启用/禁用由 toggle 表达
         ...(isRuntimeOnly || hasStatusWarning
           ? [
@@ -253,7 +265,6 @@ export function AuthFileCard(props: AuthFileCardProps) {
       headerExtra={(() => {
         const badges: ReactNode[] = [];
 
-        // Plan/tier badge
         if (resolvedPlanLabel) {
           const isPremium = isPlanPremium(resolvedPlanLabel);
           badges.push(

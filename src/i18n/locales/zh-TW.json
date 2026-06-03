@@ -368,6 +368,11 @@
     "prefix_proxy_invalid_json": "該驗證檔案不是 JSON 物件，無法編輯欄位。",
     "prefix_proxy_html_challenge": "下載到的是 HTML 驗證頁面，不是驗證 JSON 物件。請重新驗證或替換該驗證檔案後再編輯欄位。",
     "prefix_proxy_saved_success": "已更新驗證檔案「{{name}}」",
+    "subscription_expires_in_days": "還剩{{count}}天",
+    "subscription_expires_in_hours": "還剩{{count}}小時",
+    "subscription_expires_in_minutes": "還剩{{count}}分鐘",
+    "subscription_expires_title": "{{plan}} 訂閱到期時間：{{date}}",
+    "subscription_plan_unknown": "未知方案",
     "quota_label": "配額",
     "quota_refresh_page": "重新整理本頁配額",
     "quota_refresh_one": "重新整理此憑證配額",
@@ -430,18 +435,26 @@
     "no_access": "該憑證已無 Codex 存取權限（free）。",
     "refresh_button": "重新整理配額",
     "fetch_all": "取得全部",
-    "primary_window": "5 小時限額",
-    "secondary_window": "週限額",
-    "code_review_primary_window": "程式碼審查 5 小時限額",
-    "code_review_secondary_window": "程式碼審查週限額",
-    "additional_primary_window": "{{name}} 5 小時限額",
-    "additional_secondary_window": "{{name}} 週限額",
+    "primary_window": "5小時",
+    "secondary_window": "7天",
+    "monthly_window": "30天",
+    "additional_primary_window": "{{name}} 5小時",
+    "additional_secondary_window": "{{name}} 7天",
+    "additional_monthly_window": "{{name}} 30天",
     "plan_label": "方案",
     "plan_plus": "Plus",
     "plan_team": "Team",
     "plan_free": "Free",
     "plan_pro": "Pro 20x",
     "plan_prolite": "Pro 5x"
+  },
+  "quota_time": {
+    "in_days_hours": "{{days}}天 {{hours}}小時後",
+    "in_days": "{{days}}天後",
+    "in_hours_minutes": "{{hours}}小時 {{minutes}}分鐘後",
+    "in_hours": "{{hours}}小時後",
+    "in_minutes": "{{minutes}}分鐘後",
+    "less_than_minute": "< 1分鐘"
   },
   "gemini_cli_quota": {
     "title": "Gemini CLI 配額",
@@ -1217,10 +1230,10 @@
   },
   "language": {
     "switch": "語言",
-    "chinese": "簡體中文",
+    "chinese": "简体中文",
     "chinese_tw": "繁體中文（台灣）",
-    "english": "英文",
-    "russian": "俄文"
+    "english": "English",
+    "russian": "Русский"
   },
   "theme": {
     "switch": "主題",
