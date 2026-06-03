@@ -23,7 +23,8 @@ import {
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useAuthStore, useConfigStore, useNotificationStore } from '@/stores';
-import { logsApi } from '@/services/api/logs';
+import { logsApi, type LogsQuery } from '@/services/api/logs';
+import { versionApi } from '@/services/api/version';
 import { copyToClipboard } from '@/utils/clipboard';
 import { downloadBlob } from '@/utils/download';
 import { MANAGEMENT_API_PREFIX } from '@/utils/constants';
@@ -58,14 +59,44 @@ const getErrorMessage = (err: unknown): string => {
   return typeof message === 'string' ? message : '';
 };
 
+const getErrorPayloadText = (err: unknown): string => {
+  if (typeof err !== 'object' || err === null) return '';
+  const payloads = [
+    (err as { data?: unknown }).data,
+    (err as { details?: unknown }).details
+  ].filter((payload) => payload !== undefined);
+  return payloads
+    .map((payload) => {
+      if (typeof payload === 'string') return payload;
+      try {
+        return JSON.stringify(payload);
+      } catch {
+        return '';
+      }
+    })
+    .join(' ');
+};
+
+const isLoggingToFileDisabledError = (err: unknown): boolean => {
+  const text = `${getErrorMessage(err)} ${getErrorPayloadText(err)}`.toLowerCase();
+  return text.includes('logging to file disabled');
+};
+
 type TabType = 'logs' | 'errors';
 
 export function LogsPage() {
   const { t } = useTranslation();
   const { showNotification, showConfirmation } = useNotificationStore();
   const connectionStatus = useAuthStore((state) => state.connectionStatus);
+  const serverRuntimeKind = useAuthStore((state) => state.serverRuntimeKind);
+  const updateServerRuntimeKind = useAuthStore((state) => state.updateServerRuntimeKind);
   const config = useConfigStore((state) => state.config);
   const requestLogEnabled = config?.requestLog ?? false;
+  const loggingToFileEnabled = config?.loggingToFile ?? false;
+  const cpaNeedsFileLogging = serverRuntimeKind === 'cpa' && !loggingToFileEnabled;
+  const isHomeRuntime = serverRuntimeKind === 'home';
+  const [fileLoggingRequired, setFileLoggingRequired] = useState(false);
+  const showFileLoggingRequired = cpaNeedsFileLogging || fileLoggingRequired;
 
   const [activeTab, setActiveTab] = useState<TabType>('logs');
   const [logState, setLogState] = useState<LogState>({ buffer: [], visibleFrom: 0 });
@@ -90,6 +121,7 @@ export function LogsPage() {
   const [requestLogDownloading, setRequestLogDownloading] = useState(false);
 
   const logScrollerRef = useRef<ReturnType<typeof useLogScroller> | null>(null);
+  const requestLogHomeIpByIdRef = useRef<Record<string, string>>({});
   const longPressRef = useRef<{
     timer: number | null;
     startX: number;
@@ -99,14 +131,29 @@ export function LogsPage() {
   const logRequestInFlightRef = useRef(false);
   const pendingFullReloadRef = useRef(false);
 
-  // 保存最新时间戳用于增量获取
-  const latestTimestampRef = useRef<number>(0);
+  // 保存最新游标用于增量获取
+  const latestCursorRef = useRef<LogsQuery['after']>(undefined);
 
   const disableControls = connectionStatus !== 'connected';
+  const refreshDisabled = disableControls || loading || cpaNeedsFileLogging;
+  const autoRefreshDisabled = disableControls || showFileLoggingRequired;
+  const clearDisabled = disableControls || showFileLoggingRequired || isHomeRuntime;
 
   const loadLogs = async (incremental = false) => {
     if (connectionStatus !== 'connected') {
       setLoading(false);
+      return;
+    }
+
+    if (cpaNeedsFileLogging) {
+      if (!incremental) {
+        latestCursorRef.current = undefined;
+        requestLogHomeIpByIdRef.current = {};
+        setFileLoggingRequired(false);
+        setLogState({ buffer: [], visibleFrom: 0 });
+        setError('');
+        setLoading(false);
+      }
       return;
     }
 
@@ -132,13 +179,25 @@ export function LogsPage() {
         scrollerInstance?.requestScrollToBottom();
       }
 
-      const params =
-        incremental && latestTimestampRef.current > 0 ? { after: latestTimestampRef.current } : {};
+      const params: LogsQuery =
+        incremental && latestCursorRef.current
+          ? { after: latestCursorRef.current, limit: MAX_BUFFER_LINES }
+          : { limit: MAX_BUFFER_LINES };
       const data = await logsApi.fetchLogs(params);
+      setFileLoggingRequired(false);
 
-      // 更新时间戳
-      if (data['latest-timestamp']) {
-        latestTimestampRef.current = data['latest-timestamp'];
+      // 更新游标
+      if (data.latestCursor) {
+        latestCursorRef.current = data.latestCursor;
+      } else if (!incremental) {
+        latestCursorRef.current = undefined;
+      }
+      if (data.requestLogHomeIpById) {
+        requestLogHomeIpByIdRef.current = incremental
+          ? { ...requestLogHomeIpByIdRef.current, ...data.requestLogHomeIpById }
+          : data.requestLogHomeIpById;
+      } else if (!incremental) {
+        requestLogHomeIpByIdRef.current = {};
       }
 
       const newLines = Array.isArray(data.lines) ? data.lines : [];
@@ -167,6 +226,16 @@ export function LogsPage() {
       }
     } catch (err: unknown) {
       console.error('Failed to load logs:', err);
+      if (isLoggingToFileDisabledError(err)) {
+        if (!incremental) {
+          latestCursorRef.current = undefined;
+          requestLogHomeIpByIdRef.current = {};
+          setFileLoggingRequired(true);
+          setLogState({ buffer: [], visibleFrom: 0 });
+          setError('');
+        }
+        return;
+      }
       if (!incremental) {
         setError(getErrorMessage(err) || t('logs.load_error'));
       }
@@ -185,6 +254,18 @@ export function LogsPage() {
   useHeaderRefresh(() => loadLogs(false));
 
   const clearLogs = async () => {
+    if (isHomeRuntime) {
+      showNotification(t('logs.home_clear_unavailable'), 'warning');
+      return;
+    }
+    if (cpaNeedsFileLogging) {
+      showNotification(t('logs.cpa_file_logging_required'), 'warning');
+      return;
+    }
+    if (fileLoggingRequired) {
+      showNotification(t('logs.file_logging_required'), 'warning');
+      return;
+    }
     showConfirmation({
       title: t('logs.clear_confirm_title', { defaultValue: 'Clear Logs' }),
       message: t('logs.clear_confirm'),
@@ -194,7 +275,9 @@ export function LogsPage() {
         try {
           await logsApi.clearLogs();
           setLogState({ buffer: [], visibleFrom: 0 });
-          latestTimestampRef.current = 0;
+          latestCursorRef.current = undefined;
+          requestLogHomeIpByIdRef.current = {};
+          setFileLoggingRequired(false);
           showNotification(t('logs.clear_success'), 'success');
         } catch (err: unknown) {
           const message = getErrorMessage(err);
@@ -216,6 +299,12 @@ export function LogsPage() {
   const loadErrorLogs = async () => {
     if (connectionStatus !== 'connected') {
       setLoadingErrors(false);
+      return;
+    }
+    if (isHomeRuntime) {
+      setLoadingErrors(false);
+      setErrorLogs([]);
+      setErrorLogsError('');
       return;
     }
 
@@ -253,11 +342,28 @@ export function LogsPage() {
 
   useEffect(() => {
     if (connectionStatus === 'connected') {
-      latestTimestampRef.current = 0;
+      latestCursorRef.current = undefined;
+      requestLogHomeIpByIdRef.current = {};
+      setFileLoggingRequired(false);
       loadLogs(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectionStatus]);
+  }, [connectionStatus, loggingToFileEnabled]);
+
+  useEffect(() => {
+    if (connectionStatus !== 'connected' || serverRuntimeKind !== 'unknown') return;
+    let cancelled = false;
+    const detectRuntime = async () => {
+      const runtimeKind = await versionApi.detectRuntimeKind();
+      if (!cancelled && (runtimeKind === 'cpa' || runtimeKind === 'home')) {
+        updateServerRuntimeKind(runtimeKind);
+      }
+    };
+    void detectRuntime();
+    return () => {
+      cancelled = true;
+    };
+  }, [connectionStatus, serverRuntimeKind, updateServerRuntimeKind]);
 
   useEffect(() => {
     if (activeTab !== 'errors') return;
@@ -267,7 +373,7 @@ export function LogsPage() {
   }, [activeTab, connectionStatus, requestLogEnabled]);
 
   useEffect(() => {
-    if (!autoRefresh || connectionStatus !== 'connected') {
+    if (!autoRefresh || connectionStatus !== 'connected' || showFileLoggingRequired) {
       return;
     }
     const id = window.setInterval(() => {
@@ -275,7 +381,7 @@ export function LogsPage() {
     }, 8000);
     return () => window.clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoRefresh, connectionStatus]);
+  }, [autoRefresh, connectionStatus, showFileLoggingRequired]);
 
   const visibleLines = useMemo(
     () => logState.buffer.slice(logState.visibleFrom),
@@ -420,7 +526,10 @@ export function LogsPage() {
   const downloadRequestLog = async (id: string) => {
     setRequestLogDownloading(true);
     try {
-      const response = await logsApi.downloadRequestLogById(id);
+      const response = await logsApi.downloadRequestLogById(
+        id,
+        requestLogHomeIpByIdRef.current[id]
+      );
       downloadBlob({
         filename: `request-${id}.log`,
         blob: new Blob([response.data], { type: 'text/plain' }),
@@ -464,6 +573,15 @@ export function LogsPage() {
       <div className={styles.content}>
         {activeTab === 'logs' && (
           <Card className={styles.logCard}>
+            {showFileLoggingRequired && (
+              <div className="status-badge warning">
+                {t(
+                  cpaNeedsFileLogging
+                    ? 'logs.cpa_file_logging_required'
+                    : 'logs.file_logging_required'
+                )}
+              </div>
+            )}
             {error && <div className="error-box">{error}</div>}
 
             <div className={styles.filters}>
@@ -637,7 +755,8 @@ export function LogsPage() {
                   variant="secondary"
                   size="sm"
                   onClick={() => loadLogs(false)}
-                  disabled={disableControls || loading}
+                  disabled={refreshDisabled}
+                  className={styles.actionButton}
                   title={t('logs.refresh_button')}
                   aria-label={t('logs.refresh_button')}
                 >
@@ -646,7 +765,7 @@ export function LogsPage() {
                 <ToggleSwitch
                   checked={autoRefresh}
                   onChange={(value) => setAutoRefresh(value)}
-                  disabled={disableControls}
+                  disabled={autoRefreshDisabled}
                   label={
                     <span className={styles.switchLabel}>
                       <IconTimer size={16} />
@@ -668,7 +787,8 @@ export function LogsPage() {
                   variant="danger"
                   size="sm"
                   onClick={clearLogs}
-                  disabled={disableControls}
+                  disabled={clearDisabled}
+                  className={styles.actionButton}
                   title={t('logs.clear_button')}
                   aria-label={t('logs.clear_button')}
                 >
@@ -810,6 +930,19 @@ export function LogsPage() {
                 title={t('logs.search_empty_title')}
                 description={t('logs.search_empty_desc')}
               />
+            ) : showFileLoggingRequired ? (
+              <EmptyState
+                title={t(
+                  cpaNeedsFileLogging
+                    ? 'logs.cpa_file_logging_required_title'
+                    : 'logs.file_logging_required_title'
+                )}
+                description={t(
+                  cpaNeedsFileLogging
+                    ? 'logs.cpa_file_logging_required_desc'
+                    : 'logs.file_logging_required_desc'
+                )}
+              />
             ) : (
               <EmptyState title={t('logs.empty_title')} description={t('logs.empty_desc')} />
             )}
@@ -835,7 +968,11 @@ export function LogsPage() {
             <div className="stack">
               <div className="hint">{t('logs.error_logs_description')}</div>
 
-              {requestLogEnabled && (
+              {isHomeRuntime && (
+                <div className="status-badge warning">{t('logs.error_logs_home_unavailable')}</div>
+              )}
+
+              {requestLogEnabled && !isHomeRuntime && (
                 <div>
                   <div className="status-badge warning">
                     {t('logs.error_logs_request_log_enabled')}

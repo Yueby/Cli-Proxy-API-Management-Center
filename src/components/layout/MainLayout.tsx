@@ -213,7 +213,6 @@ export function MainLayout() {
 
   const logout = useAuthStore((state) => state.logout);
 
-  const config = useConfigStore((state) => state.config);
   const fetchConfig = useConfigStore((state) => state.fetchConfig);
   const clearCache = useConfigStore((state) => state.clearCache);
 
@@ -415,22 +414,18 @@ export function MainLayout() {
         },
       ],
     },
-    ...(config?.loggingToFile
-      ? [
-          {
-            id: 'observe',
-            labelKey: 'nav_groups.observe',
-            items: [
-              {
-                path: '/logs',
-                labelKey: 'nav.logs',
-                metaKey: 'nav_meta.logs',
-                icon: sidebarIcons.logs,
-              },
-            ],
-          },
-        ]
-      : []),
+    {
+      id: 'observe',
+      labelKey: 'nav_groups.observe',
+      items: [
+        {
+          path: '/logs',
+          labelKey: 'nav.logs',
+          metaKey: 'nav_meta.logs',
+          icon: sidebarIcons.logs,
+        },
+      ],
+    },
     {
       id: 'control',
       labelKey: 'nav_groups.control',
