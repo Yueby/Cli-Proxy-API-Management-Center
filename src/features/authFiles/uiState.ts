@@ -6,6 +6,9 @@ export type AuthFilesUiState = {
   filter?: string;
   problemOnly?: boolean;
   disabledOnly?: boolean;
+  codexSubscriptionFirst?: boolean;
+  /** @deprecated use codexSubscriptionFirst */
+  codexNonFreeFirst?: boolean;
   search?: string;
   page?: number;
   pageSize?: number;

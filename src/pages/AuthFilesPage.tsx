@@ -73,6 +73,7 @@ import {
 import { useAuthStore, useNotificationStore, useQuotaStore, useThemeStore } from '@/stores';
 import { getStatusFromError } from '@/utils/quota';
 import { getAuthFileQuotaConfig, resolveAuthFileQuotaType } from '@/features/authFiles/quotaConfig';
+import { hasActiveCodexSubscription } from '@/features/authFiles/codexSubscription';
 import styles from './AuthFilesPage.module.scss';
 
 const easePower3Out = (progress: number) => 1 - (1 - progress) ** 4;
@@ -108,6 +109,7 @@ export function AuthFilesPage() {
   const [pageSizeInput, setPageSizeInput] = useState(String(DEFAULT_COMPACT_PAGE_SIZE));
   const [viewMode, setViewMode] = useState<'diagram' | 'list'>('list');
   const [sortMode, setSortMode] = useState<AuthFilesSortMode>('default');
+  const [codexSubscriptionFirst, setCodexSubscriptionFirst] = useState(false);
   const [batchActionBarVisible, setBatchActionBarVisible] = useState(false);
   const [uiStateHydrated, setUiStateHydrated] = useState(false);
   const [oauthDialogOpen, setOauthDialogOpen] = useState(false);
@@ -214,6 +216,15 @@ export function AuthFilesPage() {
       if (typeof persisted.disabledOnly === 'boolean') {
         setDisabledOnly(persisted.disabledOnly);
       }
+      const legacyCodexNonFreeFirst = (persisted as { codexNonFreeFirst?: unknown })
+        .codexNonFreeFirst;
+      const persistedCodexSubscriptionFirst =
+        typeof persisted.codexSubscriptionFirst === 'boolean'
+          ? persisted.codexSubscriptionFirst
+          : legacyCodexNonFreeFirst;
+      if (typeof persistedCodexSubscriptionFirst === 'boolean') {
+        setCodexSubscriptionFirst(persistedCodexSubscriptionFirst);
+      }
       if (typeof persisted.search === 'string') {
         setSearch(persisted.search);
       }
@@ -244,6 +255,7 @@ export function AuthFilesPage() {
       filter,
       problemOnly,
       disabledOnly,
+      codexSubscriptionFirst,
       search,
       page,
       pageSize,
@@ -251,6 +263,7 @@ export function AuthFilesPage() {
       sortMode,
     });
   }, [
+    codexSubscriptionFirst,
     compactPageSize,
     disabledOnly,
     filter,
@@ -510,8 +523,15 @@ export function AuthFilesPage() {
         return pb - pa; // 高优先级排前面
       });
     }
+
+    if (codexSubscriptionFirst && normalizedFilter === 'codex') {
+      copy.sort(
+        (a, b) => Number(hasActiveCodexSubscription(b)) - Number(hasActiveCodexSubscription(a))
+      );
+    }
+
     return copy;
-  }, [filtered, sortMode]);
+  }, [codexSubscriptionFirst, filtered, normalizedFilter, sortMode]);
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -899,6 +919,23 @@ export function AuthFilesPage() {
                         }
                       />
                     </div>
+                    {normalizedFilter === 'codex' && (
+                      <div className={styles.filterToggleCard}>
+                        <ToggleSwitch
+                          checked={codexSubscriptionFirst}
+                          onChange={(value) => {
+                            setCodexSubscriptionFirst(value);
+                            setPage(1);
+                          }}
+                          ariaLabel={t('auth_files.codex_subscription_first')}
+                          label={
+                            <span className={styles.filterToggleLabel}>
+                              {t('auth_files.codex_subscription_first')}
+                            </span>
+                          }
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

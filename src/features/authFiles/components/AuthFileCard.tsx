@@ -16,7 +16,11 @@ import {
 } from '@/components/ui/icons';
 import { useQuotaStore } from '@/stores';
 import type { AuthFileItem } from '@/types';
-import { resolveCodexPlanType } from '@/utils/quota/resolvers';
+import {
+  requiresGoogleProjectId,
+  resolveCodexPlanType,
+  resolveGoogleProjectId,
+} from '@/utils/quota/resolvers';
 import {
   normalizeRecentRequestAuthIndex,
   normalizeRecentRequestBuckets,
@@ -96,6 +100,8 @@ export function AuthFileCard(props: AuthFileCardProps) {
   const typeColor = getTypeColor(providerKey, resolvedTheme);
   const typeLabel = getTypeLabel(t, providerKey);
   const providerIcon = getAuthFileIcon(providerKey, resolvedTheme);
+  const googleProjectId = resolveGoogleProjectId(file);
+  const isMissingGoogleProjectId = requiresGoogleProjectId(file) && !googleProjectId;
 
   const quotaType =
     quotaFilterType && resolveAuthFileQuotaType(file) === quotaFilterType ? quotaFilterType : null;
@@ -248,6 +254,15 @@ export function AuthFileCard(props: AuthFileCardProps) {
                 variant: 'custom' as const,
                 style: codexSubscriptionBadge.style,
                 title: codexSubscriptionBadge.title,
+              },
+            ]
+          : []),
+        ...(isMissingGoogleProjectId
+          ? [
+              {
+                label: t('auth_files.project_id_missing'),
+                variant: 'warning' as const,
+                title: t('auth_files.project_id_missing_title'),
               },
             ]
           : []),

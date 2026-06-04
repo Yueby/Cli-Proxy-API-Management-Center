@@ -72,6 +72,27 @@ const subscriptionBadgeStyle = (status: 'active' | 'soon'): CSSProperties => {
   };
 };
 
+export function hasActiveCodexSubscription(file: AuthFileItem): boolean {
+  if (normalizeProvider(file) !== 'codex') return false;
+
+  const idToken = resolveCodexIdToken(file);
+  if (!idToken) return false;
+
+  const planType = normalizeString(idToken.plan_type ?? idToken.planType);
+  const normalizedPlanType = planType?.toLowerCase();
+  if (normalizedPlanType === 'free' || normalizedPlanType === 'free-tier') return false;
+
+  const expiresAtRaw = normalizeString(
+    idToken.chatgpt_subscription_active_until ?? idToken.chatgptSubscriptionActiveUntil
+  );
+  if (!expiresAtRaw) return false;
+
+  const expiresAt = new Date(expiresAtRaw);
+  if (Number.isNaN(expiresAt.getTime())) return false;
+
+  return expiresAt.getTime() > Date.now();
+}
+
 export function resolveCodexSubscriptionBadge(
   file: AuthFileItem,
   t: TFunction,

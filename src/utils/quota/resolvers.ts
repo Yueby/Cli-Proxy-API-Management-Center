@@ -3,11 +3,7 @@
  */
 
 import type { AuthFileItem } from '@/types';
-import {
-  normalizeStringValue,
-  normalizePlanType,
-  parseIdTokenPayload
-} from './parsers';
+import { normalizeStringValue, normalizePlanType, parseIdTokenPayload } from './parsers';
 
 export function extractCodexChatgptAccountId(value: unknown): string | null {
   const payload = parseIdTokenPayload(value);
@@ -67,7 +63,7 @@ export function resolveCodexPlanType(file: AuthFileItem): string | null {
     metadataIdToken?.planType,
     attributes?.plan_type,
     attributes?.planType,
-    attributes?.id_token
+    attributes?.id_token,
   ];
 
   for (const candidate of candidates) {
@@ -96,12 +92,7 @@ export function resolveGeminiCliProjectId(file: AuthFileItem): string | null {
       ? (file.attributes as Record<string, unknown>)
       : null;
 
-  const candidates = [
-    file.account,
-    file['account'],
-    metadata?.account,
-    attributes?.account
-  ];
+  const candidates = [file.account, file['account'], metadata?.account, attributes?.account];
 
   for (const candidate of candidates) {
     const projectId = extractGeminiCliProjectId(candidate);
@@ -109,4 +100,41 @@ export function resolveGeminiCliProjectId(file: AuthFileItem): string | null {
   }
 
   return null;
+}
+
+export function resolveGoogleProjectId(file: AuthFileItem): string | null {
+  const metadata =
+    file && typeof file.metadata === 'object' && file.metadata !== null
+      ? (file.metadata as Record<string, unknown>)
+      : null;
+  const attributes =
+    file && typeof file.attributes === 'object' && file.attributes !== null
+      ? (file.attributes as Record<string, unknown>)
+      : null;
+
+  const candidates = [
+    file.project_id,
+    file.projectId,
+    file['project_id'],
+    file['projectId'],
+    metadata?.project_id,
+    metadata?.projectId,
+    attributes?.project_id,
+    attributes?.projectId,
+  ];
+
+  for (const candidate of candidates) {
+    const projectId = normalizeStringValue(candidate);
+    if (projectId) return projectId;
+  }
+
+  return resolveGeminiCliProjectId(file);
+}
+
+export function requiresGoogleProjectId(file: AuthFileItem): boolean {
+  const provider = String(file.provider ?? file.type ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/_/g, '-');
+  return provider === 'antigravity' || provider === 'gemini-cli' || provider === 'vertex';
 }
