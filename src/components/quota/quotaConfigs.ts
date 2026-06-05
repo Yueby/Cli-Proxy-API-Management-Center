@@ -1411,9 +1411,17 @@ const renderXaiItems = (
     null,
     h(
       'div',
-      { key: 'pay-as-you-go', className: styleMap.codexPlan },
-      h('span', { className: styleMap.codexPlanLabel }, t('xai_quota.pay_as_you_go_label')),
-      h('span', { className: styleMap.codexPlanValue }, payAsYouGoLabel)
+      { key: 'pay-as-you-go', className: styleMap.quotaRow },
+      h(
+        'div',
+        { className: styleMap.quotaRowHeader },
+        h('span', { className: styleMap.quotaModel }, t('xai_quota.pay_as_you_go_label')),
+        h(
+          'div',
+          { className: styleMap.quotaMeta },
+          h('span', { className: styleMap.quotaAmount }, payAsYouGoLabel)
+        )
+      )
     ),
     h(
       'div',
