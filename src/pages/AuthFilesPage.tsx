@@ -175,6 +175,8 @@ export function AuthFilesPage() {
     modelsFileType,
     modelsError,
     showModels,
+    prefetchModels,
+    getCachedModels,
     closeModelsModal,
   } = useAuthFilesModels();
 
@@ -962,6 +964,8 @@ export function AuthFilesPage() {
                     quotaFilterType={quotaFilterType}
                     statusBarCache={statusBarCache}
                     onShowModels={showModels}
+                    onPrefetchModels={prefetchModels}
+                    getCachedModels={getCachedModels}
                     onDownload={handleDownload}
                     onOpenPrefixProxyEditor={openPrefixProxyEditor}
                     onDelete={handleDelete}

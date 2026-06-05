@@ -21,12 +21,21 @@
  *   </ItemCard.Root>
  */
 
-import type { CSSProperties, ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { ProviderStatusBar } from '@/components/providers/ProviderStatusBar';
 import type { StatusBarData } from '@/utils/recentRequests';
 import { Button } from './Button';
 import { IconBot } from './icons';
+import keyBadgeStyles from '@/components/providers/OpenAISection/KeyCountBadge.module.scss';
 import styles from './ItemCard.module.scss';
 
 // ─── Types ──────────────────────────────────
@@ -50,6 +59,11 @@ export interface ItemCardBadge {
   style?: CSSProperties;
   className?: string;
   title?: string;
+}
+
+export interface ModelsTooltipItem {
+  id: string;
+  displayName?: string;
 }
 
 export interface ItemCardProps {
@@ -216,25 +230,124 @@ function Stats({
 /** 模型按钮 */
 function ModelsButton({
   onClick,
+  onMouseEnter,
   disabled,
   title,
+  ariaLabel,
+  tooltip,
 }: {
   onClick: (e: React.MouseEvent) => void;
+  onMouseEnter?: () => void;
   disabled?: boolean;
   title: string;
+  ariaLabel?: string;
+  tooltip?: ReactNode;
 }) {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const ref = useRef<HTMLSpanElement>(null);
+
+  const openTooltip = useCallback(() => {
+    onMouseEnter?.();
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setPos({ top: rect.top, left: rect.left + rect.width / 2 });
+    }
+    setShowTooltip(Boolean(tooltip));
+  }, [onMouseEnter, tooltip]);
+
+  useEffect(() => {
+    if (!showTooltip) return;
+    const dismiss = () => setShowTooltip(false);
+    const handlePointerDown = (event: PointerEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setShowTooltip(false);
+      }
+    };
+    window.addEventListener('scroll', dismiss, true);
+    window.addEventListener('touchmove', dismiss, true);
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => {
+      window.removeEventListener('scroll', dismiss, true);
+      window.removeEventListener('touchmove', dismiss, true);
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [showTooltip]);
+
   return (
-    <Button
-      variant="secondary"
-      size="sm"
-      onClick={onClick}
-      disabled={disabled}
-      title={title}
-      aria-label={title}
-      className={styles.modelsButton}
-    >
-      <IconBot size={15} />
-    </Button>
+    <>
+      <span
+        ref={ref}
+        className={styles.modelsButtonWrap}
+        onPointerEnter={(event) => {
+          if (event.pointerType === 'mouse') openTooltip();
+        }}
+        onPointerLeave={(event) => {
+          if (event.pointerType === 'mouse') setShowTooltip(false);
+        }}
+      >
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={onClick}
+          disabled={disabled}
+          title={tooltip ? undefined : title}
+          aria-label={ariaLabel ?? title}
+          className={styles.modelsButton}
+        >
+          <IconBot size={15} />
+        </Button>
+      </span>
+      {showTooltip &&
+        tooltip &&
+        createPortal(
+          <div className={keyBadgeStyles.tooltip} style={{ top: pos.top, left: pos.left }}>
+            {tooltip}
+          </div>,
+          document.body
+        )}
+    </>
+  );
+}
+
+function ModelTooltip({
+  models,
+  loading,
+  loadingText,
+  emptyText,
+  maxItems = 24,
+}: {
+  models?: ModelsTooltipItem[];
+  loading?: boolean;
+  loadingText: string;
+  emptyText: string;
+  maxItems?: number;
+}) {
+  const visibleModels = models?.slice(0, maxItems) ?? [];
+  const hiddenCount = Math.max(0, (models?.length ?? 0) - visibleModels.length);
+
+  return (
+    <div className={keyBadgeStyles.tooltipList}>
+      {loading ? (
+        <div className={styles.modelsTooltipMore}>{loadingText}</div>
+      ) : visibleModels.length === 0 ? (
+        <div className={styles.modelsTooltipMore}>{emptyText}</div>
+      ) : (
+        visibleModels.map((model, index) => (
+          <div
+            key={`${model.id}-${model.displayName ?? ''}`}
+            className={keyBadgeStyles.tooltipItem}
+          >
+            <span className={keyBadgeStyles.tooltipIndex}>{index + 1}</span>
+            <span className={keyBadgeStyles.tooltipKey}>{model.id}</span>
+            {model.displayName && (
+              <span className={keyBadgeStyles.tooltipStats}>→ {model.displayName}</span>
+            )}
+          </div>
+        ))
+      )}
+      {hiddenCount > 0 && <div className={styles.modelsTooltipMore}>+{hiddenCount}</div>}
+    </div>
   );
 }
 
@@ -379,5 +492,6 @@ ItemCard.MetaItem = MetaItem;
 ItemCard.FieldRow = FieldRow;
 ItemCard.Stats = Stats;
 ItemCard.ModelsButton = ModelsButton;
+ItemCard.ModelTooltip = ModelTooltip;
 ItemCard.Grid = Grid;
 ItemCard.styles = styles;

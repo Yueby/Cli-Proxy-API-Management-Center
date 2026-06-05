@@ -15,6 +15,8 @@ export type UseAuthFilesModelsResult = {
   modelsFileType: string;
   modelsError: ModelsError;
   showModels: (item: AuthFileItem) => Promise<void>;
+  prefetchModels: (item: AuthFileItem) => Promise<void>;
+  getCachedModels: (name: string) => AuthFileModelItem[] | undefined;
   closeModelsModal: () => void;
 };
 
@@ -34,6 +36,29 @@ export function useAuthFilesModels(): UseAuthFilesModelsResult {
     setModelsModalOpen(false);
   }, []);
 
+  const getCachedModels = useCallback((name: string) => modelsCacheRef.current.get(name), []);
+
+  const loadModels = useCallback(async (item: AuthFileItem) => {
+    const cached = modelsCacheRef.current.get(item.name);
+    if (cached) return cached;
+
+    const models = await authFilesApi.getModelsForAuthFile(item.name);
+    modelsCacheRef.current.set(item.name, models);
+    return models;
+  }, []);
+
+  const prefetchModels = useCallback(
+    async (item: AuthFileItem) => {
+      if (modelsCacheRef.current.has(item.name)) return;
+      try {
+        await loadModels(item);
+      } catch {
+        // Hover prefetch is best-effort; click still reports actionable errors.
+      }
+    },
+    [loadModels]
+  );
+
   const showModels = useCallback(
     async (item: AuthFileItem) => {
       setModelsFileName(item.name);
@@ -51,8 +76,7 @@ export function useAuthFilesModels(): UseAuthFilesModelsResult {
 
       setModelsLoading(true);
       try {
-        const models = await authFilesApi.getModelsForAuthFile(item.name);
-        modelsCacheRef.current.set(item.name, models);
+        const models = await loadModels(item);
         setModelsList(models);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : '';
@@ -69,7 +93,7 @@ export function useAuthFilesModels(): UseAuthFilesModelsResult {
         setModelsLoading(false);
       }
     },
-    [showNotification, t]
+    [loadModels, showNotification, t]
   );
 
   return {
@@ -80,7 +104,8 @@ export function useAuthFilesModels(): UseAuthFilesModelsResult {
     modelsFileType,
     modelsError,
     showModels,
-    closeModelsModal
+    prefetchModels,
+    getCachedModels,
+    closeModelsModal,
   };
 }
-

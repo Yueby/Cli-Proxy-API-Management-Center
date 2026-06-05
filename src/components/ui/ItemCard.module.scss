@@ -882,6 +882,11 @@
   }
 }
 
+.modelsButtonWrap {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
 .modelsButton:global(.btn.btn-sm) {
   width: 32px;
   height: 32px;
@@ -896,6 +901,11 @@
     border-color: color-mix(in srgb, var(--primary-color) 35%, var(--border-color));
     background: color-mix(in srgb, var(--primary-color) 14%, var(--bg-secondary));
   }
+}
+
+.modelsTooltipMore {
+  margin-top: 6px;
+  color: var(--text-tertiary);
 }
 
 @include mobile {

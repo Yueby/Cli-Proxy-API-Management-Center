@@ -58,6 +58,8 @@ export type AuthFileCardProps = {
   quotaFilterType: QuotaProviderType | null;
   statusBarCache: Map<string, AuthFileStatusBarData>;
   onShowModels: (file: AuthFileItem) => void;
+  onPrefetchModels: (file: AuthFileItem) => void;
+  getCachedModels: (name: string) => Array<{ id: string; display_name?: string }> | undefined;
   onDownload: (name: string) => void;
   onOpenPrefixProxyEditor: (file: AuthFileItem) => void;
   onDelete: (name: string) => void;
@@ -80,6 +82,8 @@ export function AuthFileCard(props: AuthFileCardProps) {
     quotaFilterType,
     statusBarCache,
     onShowModels,
+    onPrefetchModels,
+    getCachedModels,
     onDownload,
     onOpenPrefixProxyEditor,
     onDelete,
@@ -167,6 +171,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
   });
   const resolvedPlanLabel = codexPlan || quotaStorePlan || null;
   const codexSubscriptionBadge = resolveCodexSubscriptionBadge(file, t, i18n.resolvedLanguage);
+  const cachedModels = getCachedModels(file.name);
 
   // Gemini CLI premium tier detection
   const geminiTierId = useQuotaStore((state) => {
@@ -412,8 +417,20 @@ export function AuthFileCard(props: AuthFileCardProps) {
             {showModelsButton && (
               <ItemCard.ModelsButton
                 onClick={() => onShowModels(file)}
+                onMouseEnter={() => onPrefetchModels(file)}
                 disabled={disableControls}
                 title={t('auth_files.models_button', { defaultValue: '模型' })}
+                tooltip={
+                  <ItemCard.ModelTooltip
+                    models={cachedModels?.map((model) => ({
+                      id: model.id,
+                      displayName: model.display_name,
+                    }))}
+                    loading={!cachedModels}
+                    loadingText={t('auth_files.models_loading')}
+                    emptyText={t('auth_files.models_empty')}
+                  />
+                }
               />
             )}
             {!isRuntimeOnly && (

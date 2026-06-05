@@ -423,18 +423,25 @@ export function ProviderResourceCards({
 
   const renderActions = (resource: ProviderResource) => {
     const isAmpcode = resource.brand === 'ampcode';
-    let showModelsButton = false;
+    let modelsTooltipItems: { id: string; displayName?: string }[] = [];
     if (resource.brand === 'ampcode') {
       const cfg = ampcodeConfig(resource);
-      showModelsButton = !!(cfg.modelMappings && cfg.modelMappings.length > 0);
+      modelsTooltipItems = (cfg.modelMappings || [])
+        .filter((model) => model.from?.trim())
+        .map((model) => ({ id: model.from, displayName: model.to }));
     } else if (resource.brand === 'openaiCompatibility') {
       const cfg = openAIConfig(resource);
-      showModelsButton = !!(cfg.models && cfg.models.length > 0);
+      modelsTooltipItems = (cfg.models || [])
+        .filter((model) => model.name?.trim())
+        .map((model) => ({ id: model.name, displayName: model.alias }));
     } else {
       const cfg =
         resource.brand === 'gemini' ? geminiConfig(resource) : providerKeyConfig(resource);
-      showModelsButton = !!(cfg.models && cfg.models.length > 0);
+      modelsTooltipItems = (cfg.models || [])
+        .filter((model) => model.name?.trim())
+        .map((model) => ({ id: model.name, displayName: model.alias }));
     }
+    const showModelsButton = modelsTooltipItems.length > 0;
 
     return (
       <>
@@ -443,6 +450,13 @@ export function ProviderResourceCards({
             <ItemCard.ModelsButton
               onClick={() => onShowModels(resource)}
               title={t('ai_providers.models_button')}
+              tooltip={
+                <ItemCard.ModelTooltip
+                  models={modelsTooltipItems}
+                  loadingText={t('common.loading')}
+                  emptyText={t('auth_files.models_empty')}
+                />
+              }
             />
           )}
           <ItemCard.UtilityActions>
