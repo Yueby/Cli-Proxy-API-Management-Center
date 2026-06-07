@@ -30,6 +30,7 @@ export function useAuthFilesModels(): UseAuthFilesModelsResult {
   const [modelsFileName, setModelsFileName] = useState('');
   const [modelsFileType, setModelsFileType] = useState('');
   const [modelsError, setModelsError] = useState<ModelsError>(null);
+  const [, setModelsCacheVersion] = useState(0);
   const modelsCacheRef = useRef<Map<string, AuthFileModelItem[]>>(new Map());
 
   const closeModelsModal = useCallback(() => {
@@ -44,6 +45,7 @@ export function useAuthFilesModels(): UseAuthFilesModelsResult {
 
     const models = await authFilesApi.getModelsForAuthFile(item.name);
     modelsCacheRef.current.set(item.name, models);
+    setModelsCacheVersion((version) => version + 1);
     return models;
   }, []);
 

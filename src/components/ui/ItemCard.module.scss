@@ -364,7 +364,7 @@
   max-width: 100%;
   overflow-wrap: anywhere;
   word-break: break-all;
-  font-family: 'Monaco', 'Menlo', 'Consolas', 'Ubuntu Mono', monospace;
+  font-family: $font-mono;
 }
 
 // 统计 pills
@@ -901,11 +901,6 @@
     border-color: color-mix(in srgb, var(--primary-color) 35%, var(--border-color));
     background: color-mix(in srgb, var(--primary-color) 14%, var(--bg-secondary));
   }
-}
-
-.modelsTooltipMore {
-  margin-top: 6px;
-  color: var(--text-tertiary);
 }
 
 @include mobile {

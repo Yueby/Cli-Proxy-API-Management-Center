@@ -439,9 +439,7 @@
   user-select: text;
   white-space: pre;
   color: var(--text-primary);
-  font-family:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
-    monospace;
+  font-family: $font-mono;
   font-size: 12.5px;
   line-height: 1.45;
 
@@ -464,9 +462,7 @@
   border-bottom: 1px solid var(--border-color);
   border-left: 3px solid transparent;
   cursor: copy;
-  font-family:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
-    monospace;
+  font-family: $font-mono;
   font-size: 12.5px;
   line-height: 1.45;
   color: var(--text-primary);
@@ -553,9 +549,7 @@
 }
 
 .requestIdBadge {
-  font-family:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
-    monospace;
+  font-family: $font-mono;
   font-size: 11px;
   color: #0891b2;
   background: rgba(8, 145, 178, 0.1);

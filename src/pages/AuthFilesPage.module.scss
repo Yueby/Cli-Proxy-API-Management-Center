@@ -1552,7 +1552,7 @@ span.premiumPlanValue {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
   font-size: 12px;
-  font-family: monospace;
+  font-family: $font-mono;
   resize: vertical;
   min-height: 120px;
   box-sizing: border-box;
@@ -1583,7 +1583,7 @@ span.premiumPlanValue {
   background-color: var(--bg-secondary);
   color: var(--text-secondary);
   font-size: 12px;
-  font-family: monospace;
+  font-family: $font-mono;
   line-height: 1.5;
   white-space: pre-wrap;
   overflow: auto;
@@ -2009,7 +2009,7 @@ span.premiumPlanValue {
   border: 1px solid var(--border-color);
   border-radius: $radius-md;
   padding: $spacing-md;
-  font-family: monospace;
+  font-family: $font-mono;
   font-size: 12px;
   white-space: pre-wrap;
   word-break: break-all;
@@ -2039,7 +2039,7 @@ span.premiumPlanValue {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   font-size: 14px;
-  font-family: monospace;
+  font-family: $font-mono;
   resize: vertical;
   transition:
     border-color $transition-fast,
@@ -2100,7 +2100,7 @@ span.premiumPlanValue {
 }
 
 .modelId {
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: $font-mono;
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
@@ -2187,7 +2187,7 @@ span.premiumPlanValue {
   align-items: center;
   gap: $spacing-sm;
   font-size: 13px;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: $font-mono;
   color: var(--text-primary);
   word-break: break-all;
 }

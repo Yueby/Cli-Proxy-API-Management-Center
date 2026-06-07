@@ -787,8 +787,7 @@ textarea {
 
   .item-subtitle {
     color: var(--text-secondary);
-    font-family: ui-monospace, SFMono-Regular, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
-      monospace;
+    font-family: $font-mono;
     word-break: break-all;
   }
 
@@ -895,7 +894,7 @@ textarea {
   max-height: 520px;
   overflow: auto;
   white-space: pre-wrap;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-family: $font-mono;
   color: var(--text-primary);
 }
 

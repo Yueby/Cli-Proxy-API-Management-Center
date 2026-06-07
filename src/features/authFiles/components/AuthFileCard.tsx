@@ -383,7 +383,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
                       padding: '12px',
                       borderRadius: '8px',
                       border: '1px solid var(--border-color)',
-                      fontFamily: 'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
+                      fontFamily: 'var(--font-mono)',
                       fontSize: '13px',
                       lineHeight: '1.5',
                       color: 'var(--text-primary)',

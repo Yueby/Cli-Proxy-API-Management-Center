@@ -169,7 +169,7 @@
 
     .value {
       color: var(--text-primary);
-      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-family: $font-mono;
     }
   }
 }
@@ -186,7 +186,7 @@
   padding: $spacing-sm $spacing-md;
   background-color: var(--bg-secondary);
   border-radius: $radius-md;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: $font-mono;
   font-size: 13px;
 
   &:hover {
@@ -226,9 +226,7 @@
   border-radius: $radius-full;
   border: 1px solid var(--border-color);
   background-color: var(--bg-secondary);
-  font-family:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
-    monospace;
+  font-family: $font-mono;
 }
 
 .modelName {
@@ -267,7 +265,7 @@
       font-size: 16px;
       font-weight: 600;
       color: var(--text-primary);
-      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-family: $font-mono;
     }
   }
 }

@@ -190,7 +190,7 @@
 }
 
 .modelId {
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: $font-mono;
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);

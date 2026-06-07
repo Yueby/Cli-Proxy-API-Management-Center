@@ -329,9 +329,13 @@ function ModelTooltip({
   return (
     <div className={keyBadgeStyles.tooltipList}>
       {loading ? (
-        <div className={styles.modelsTooltipMore}>{loadingText}</div>
+        <div className={keyBadgeStyles.tooltipItem}>
+          <span>{loadingText}</span>
+        </div>
       ) : visibleModels.length === 0 ? (
-        <div className={styles.modelsTooltipMore}>{emptyText}</div>
+        <div className={keyBadgeStyles.tooltipItem}>
+          <span>{emptyText}</span>
+        </div>
       ) : (
         visibleModels.map((model, index) => (
           <div
@@ -340,13 +344,14 @@ function ModelTooltip({
           >
             <span className={keyBadgeStyles.tooltipIndex}>{index + 1}</span>
             <span className={keyBadgeStyles.tooltipKey}>{model.id}</span>
-            {model.displayName && (
-              <span className={keyBadgeStyles.tooltipStats}>→ {model.displayName}</span>
-            )}
           </div>
         ))
       )}
-      {hiddenCount > 0 && <div className={styles.modelsTooltipMore}>+{hiddenCount}</div>}
+      {hiddenCount > 0 && (
+        <div className={keyBadgeStyles.tooltipItem}>
+          <span>+{hiddenCount}</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -107,7 +107,7 @@
 }
 
 .tooltipKey {
-  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-family: $font-mono;
   font-weight: 600;
   color: var(--text-primary);
   word-break: break-all;
