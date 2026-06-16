@@ -100,6 +100,11 @@ export interface CodexUsageWindow {
   resetAt?: number | string;
 }
 
+export interface CodexRateLimitResetCredits {
+  available_count?: number | string;
+  availableCount?: number | string;
+}
+
 export interface CodexRateLimitInfo {
   allowed?: boolean;
   limit_reached?: boolean;
@@ -128,6 +133,8 @@ export interface CodexUsagePayload {
   codeReviewRateLimit?: CodexRateLimitInfo | null;
   additional_rate_limits?: CodexAdditionalRateLimit[] | null;
   additionalRateLimits?: CodexAdditionalRateLimit[] | null;
+  rate_limit_reset_credits?: CodexRateLimitResetCredits | null;
+  rateLimitResetCredits?: CodexRateLimitResetCredits | null;
 }
 
 // Claude API payload types
@@ -242,6 +249,8 @@ export interface CodexQuotaState {
   status: 'idle' | 'loading' | 'success' | 'error';
   windows: CodexQuotaWindow[];
   planType?: string | null;
+  subscriptionActiveUntil?: string | number | null;
+  rateLimitResetCreditsAvailableCount?: number | null;
   error?: string;
   errorStatus?: number;
 }

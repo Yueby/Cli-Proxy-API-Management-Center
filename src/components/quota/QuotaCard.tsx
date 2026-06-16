@@ -68,6 +68,7 @@ interface QuotaCardProps<TState extends QuotaStatusState> {
   defaultType: string;
   canRefresh?: boolean;
   onRefresh?: () => void;
+  resetQuotaAction?: ReactNode;
   renderQuotaItems: (quota: TState, t: TFunction, helpers: QuotaRenderHelpers) => ReactNode;
 }
 
@@ -80,6 +81,7 @@ export function QuotaCard<TState extends QuotaStatusState>({
   defaultType,
   canRefresh = false,
   onRefresh,
+  resetQuotaAction,
   renderQuotaItems
 }: QuotaCardProps<TState>) {
   const { t } = useTranslation();
@@ -206,6 +208,8 @@ export function QuotaCard<TState extends QuotaStatusState>({
           <div className={styles.quotaMessage}>{t(idleMessageKey)}</div>
         )}
       </div>
+
+      {resetQuotaAction ? <div className={styles.quotaCardActions}>{resetQuotaAction}</div> : null}
     </div>
   );
 }
