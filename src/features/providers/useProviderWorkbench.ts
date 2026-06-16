@@ -74,6 +74,16 @@ const headersFromEntries = (
   return out;
 };
 
+const parseThinkingJson = (value: string | undefined): Record<string, unknown> | undefined => {
+  const trimmed = (value ?? '').trim();
+  if (!trimmed) return undefined;
+  const parsed = JSON.parse(trimmed) as unknown;
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Thinking config must be a JSON object');
+  }
+  return parsed as Record<string, unknown>;
+};
+
 const buildExcludedModels = (
   textValue: string,
   disabled: boolean,
@@ -115,6 +125,7 @@ const buildProviderKeyConfig = (
     models: models.length ? models : undefined,
     headers: Object.keys(headers).length ? headers : undefined,
     excludedModels: excluded,
+    disableCooling: input.disableCooling === true,
     authIndex: existing?.authIndex,
   };
   if (brand === 'codex' && input.websockets !== undefined) {
@@ -125,7 +136,11 @@ const buildProviderKeyConfig = (
       mode: input.cloak.mode.trim() || undefined,
       strictMode: input.cloak.strictMode,
       sensitiveWords: parseTextList(input.cloak.sensitiveWordsText),
+      cacheUserId: input.cloak.cacheUserId === true,
     };
+  }
+  if (brand === 'claude') {
+    next.experimentalCchSigning = input.experimentalCchSigning === true;
   }
   return next;
 };
@@ -141,6 +156,8 @@ const buildOpenAIConfig = (
       alias: m.alias?.trim() || undefined,
       priority: m.priority,
       testModel: m.testModel,
+      image: m.image === true,
+      thinking: parseThinkingJson(m.thinkingJson),
     }))
     .filter((m) => m.name);
   const apiKeyEntries =
@@ -163,6 +180,7 @@ const buildOpenAIConfig = (
     prefix: input.prefix.trim() || undefined,
     apiKeyEntries: apiKeyEntries.length ? apiKeyEntries : (existing?.apiKeyEntries ?? []),
     disabled: input.disabled,
+    disableCooling: input.disableCooling === true,
     headers: Object.keys(headers).length ? headers : undefined,
     models: models.length ? models : undefined,
     priority: input.priority,
@@ -234,7 +252,10 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
     if (hasFetchedRef.current) return;
     if (!connected) return;
     hasFetchedRef.current = true;
-    refetch().catch(() => {});
+    const id = window.setTimeout(() => {
+      refetch().catch(() => {});
+    }, 0);
+    return () => window.clearTimeout(id);
   }, [connected, refetch]);
 
   /* ------------------- snapshot 计算 ------------------- */
