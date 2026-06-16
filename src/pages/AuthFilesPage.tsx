@@ -84,6 +84,36 @@ const DEFAULT_COMPACT_PAGE_SIZE = 12;
 
 const escapeWildcardSearchSegment = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+function AuthFilesSkeletonGrid({ wide }: { wide: boolean }) {
+  return (
+    <ItemCard.Grid compact wide={wide} className={styles.skeletonGrid}>
+      {Array.from({ length: 6 }, (_, index) => (
+        <div key={index} className={styles.skeletonCard}>
+          <div className={styles.skeletonHeader}>
+            <div className={styles.skeletonCheckbox} />
+            <div className={styles.skeletonAvatar} />
+            <div className={styles.skeletonText}>
+              <div className={styles.skeletonLine} />
+              <div className={styles.skeletonLine} />
+            </div>
+          </div>
+          <div className={styles.skeletonMeta}>
+            <div className={styles.skeletonPill} />
+            <div className={styles.skeletonPill} />
+            <div className={styles.skeletonPill} />
+          </div>
+          <div className={styles.skeletonBody} />
+          <div className={styles.skeletonActions}>
+            <div className={styles.skeletonButton} />
+            <div className={styles.skeletonButton} />
+            <div className={styles.skeletonButton} />
+          </div>
+        </div>
+      ))}
+    </ItemCard.Grid>
+  );
+}
+
 const buildWildcardSearch = (value: string): RegExp | null => {
   if (!value.includes('*')) return null;
   const pattern = value.split('*').map(escapeWildcardSearchSegment).join('.*');
@@ -203,51 +233,55 @@ export function AuthFilesPage() {
   const pageSize = compactPageSize;
 
   useEffect(() => {
-    const persisted = readAuthFilesUiState();
-    if (persisted) {
-      const persistedFilter =
-        typeof persisted.filter === 'string' ? normalizeProviderKey(persisted.filter) : '';
-      if (persistedFilter && persistedFilter !== 'all') {
-        setFilter(persistedFilter);
-      } else {
-        setFilter('codex');
+    const timer = window.setTimeout(() => {
+      const persisted = readAuthFilesUiState();
+      if (persisted) {
+        const persistedFilter =
+          typeof persisted.filter === 'string' ? normalizeProviderKey(persisted.filter) : '';
+        if (persistedFilter && persistedFilter !== 'all') {
+          setFilter(persistedFilter);
+        } else {
+          setFilter('codex');
+        }
+        if (typeof persisted.problemOnly === 'boolean') {
+          setProblemOnly(persisted.problemOnly);
+        }
+        if (typeof persisted.disabledOnly === 'boolean') {
+          setDisabledOnly(persisted.disabledOnly);
+        }
+        const legacyCodexNonFreeFirst = (persisted as { codexNonFreeFirst?: unknown })
+          .codexNonFreeFirst;
+        const persistedCodexSubscriptionFirst =
+          typeof persisted.codexSubscriptionFirst === 'boolean'
+            ? persisted.codexSubscriptionFirst
+            : legacyCodexNonFreeFirst;
+        if (typeof persistedCodexSubscriptionFirst === 'boolean') {
+          setCodexSubscriptionFirst(persistedCodexSubscriptionFirst);
+        }
+        if (typeof persisted.search === 'string') {
+          setSearch(persisted.search);
+        }
+        if (typeof persisted.page === 'number' && Number.isFinite(persisted.page)) {
+          setPage(Math.max(1, Math.round(persisted.page)));
+        }
+        const legacyPageSize =
+          typeof persisted.pageSize === 'number' && Number.isFinite(persisted.pageSize)
+            ? clampCardPageSize(persisted.pageSize)
+            : null;
+        const persistedCompactPageSize =
+          typeof persisted.compactPageSize === 'number' && Number.isFinite(persisted.compactPageSize)
+            ? clampCardPageSize(persisted.compactPageSize)
+            : (legacyPageSize ?? DEFAULT_COMPACT_PAGE_SIZE);
+        setCompactPageSize(persistedCompactPageSize);
+        if (isAuthFilesSortMode(persisted.sortMode)) {
+          setSortMode(persisted.sortMode);
+        }
       }
-      if (typeof persisted.problemOnly === 'boolean') {
-        setProblemOnly(persisted.problemOnly);
-      }
-      if (typeof persisted.disabledOnly === 'boolean') {
-        setDisabledOnly(persisted.disabledOnly);
-      }
-      const legacyCodexNonFreeFirst = (persisted as { codexNonFreeFirst?: unknown })
-        .codexNonFreeFirst;
-      const persistedCodexSubscriptionFirst =
-        typeof persisted.codexSubscriptionFirst === 'boolean'
-          ? persisted.codexSubscriptionFirst
-          : legacyCodexNonFreeFirst;
-      if (typeof persistedCodexSubscriptionFirst === 'boolean') {
-        setCodexSubscriptionFirst(persistedCodexSubscriptionFirst);
-      }
-      if (typeof persisted.search === 'string') {
-        setSearch(persisted.search);
-      }
-      if (typeof persisted.page === 'number' && Number.isFinite(persisted.page)) {
-        setPage(Math.max(1, Math.round(persisted.page)));
-      }
-      const legacyPageSize =
-        typeof persisted.pageSize === 'number' && Number.isFinite(persisted.pageSize)
-          ? clampCardPageSize(persisted.pageSize)
-          : null;
-      const persistedCompactPageSize =
-        typeof persisted.compactPageSize === 'number' && Number.isFinite(persisted.compactPageSize)
-          ? clampCardPageSize(persisted.compactPageSize)
-          : (legacyPageSize ?? DEFAULT_COMPACT_PAGE_SIZE);
-      setCompactPageSize(persistedCompactPageSize);
-      if (isAuthFilesSortMode(persisted.sortMode)) {
-        setSortMode(persisted.sortMode);
-      }
-    }
 
-    setUiStateHydrated(true);
+      setUiStateHydrated(true);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -278,7 +312,11 @@ export function AuthFilesPage() {
   ]);
 
   useEffect(() => {
-    setPageSizeInput(String(pageSize));
+    const timer = window.setTimeout(() => {
+      setPageSizeInput(String(pageSize));
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [pageSize]);
 
   const setCurrentPageSize = useCallback((next: number) => {
@@ -674,9 +712,13 @@ export function AuthFilesPage() {
 
   useEffect(() => {
     selectionCountRef.current = selectionCount;
-    if (selectionCount > 0) {
+    if (selectionCount <= 0) return;
+
+    const timer = window.setTimeout(() => {
       setBatchActionBarVisible(true);
-    }
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [selectionCount]);
 
   useLayoutEffect(() => {
@@ -944,7 +986,7 @@ export function AuthFilesPage() {
             </div>
 
             {loading ? (
-              <div className={styles.hint}>{t('common.loading')}</div>
+              <AuthFilesSkeletonGrid wide={!!quotaFilterType} />
             ) : pageItems.length === 0 ? (
               <EmptyState
                 title={t('auth_files.search_empty_title')}
