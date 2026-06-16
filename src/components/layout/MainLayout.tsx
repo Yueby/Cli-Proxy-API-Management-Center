@@ -18,8 +18,10 @@ import {
   IconSidebarDashboard,
   IconSidebarLogs,
   IconSidebarOauth,
+  IconSidebarPlugins,
   IconSidebarProviders,
   IconSidebarQuota,
+  IconSidebarStore,
   IconSidebarSystem,
 } from '@/components/ui/icons';
 import { INLINE_LOGO_JPEG } from '@/assets/logoInline';
@@ -41,6 +43,8 @@ const sidebarIcons: Record<string, ReactNode> = {
   authFiles: <IconSidebarAuthFiles size={18} />,
   oauth: <IconSidebarOauth size={18} />,
   quota: <IconSidebarQuota size={18} />,
+  plugins: <IconSidebarPlugins size={18} />,
+  pluginStore: <IconSidebarStore size={18} />,
   config: <IconSidebarConfig size={18} />,
   logs: <IconSidebarLogs size={18} />,
   system: <IconSidebarSystem size={18} />,
@@ -212,6 +216,7 @@ export function MainLayout() {
   const location = useLocation();
 
   const logout = useAuthStore((state) => state.logout);
+  const supportsPlugin = useAuthStore((state) => state.supportsPlugin);
 
   const fetchConfig = useConfigStore((state) => state.fetchConfig);
   const clearCache = useConfigStore((state) => state.clearCache);
@@ -436,6 +441,22 @@ export function MainLayout() {
           metaKey: 'nav_meta.config_management',
           icon: sidebarIcons.config,
         },
+        ...(supportsPlugin
+          ? [
+              {
+                path: '/plugins',
+                labelKey: 'nav.plugins',
+                metaKey: 'nav_meta.plugins',
+                icon: sidebarIcons.plugins,
+              },
+              {
+                path: '/plugin-store',
+                labelKey: 'nav.plugin_store',
+                metaKey: 'nav_meta.plugin_store',
+                icon: sidebarIcons.pluginStore,
+              },
+            ]
+          : []),
         {
           path: '/system',
           labelKey: 'nav.system_info',
