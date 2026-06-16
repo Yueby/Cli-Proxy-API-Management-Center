@@ -55,7 +55,8 @@
     "invalid_provider_index": "Неверный индекс провайдера.",
     "unsaved_changes_title": "Несохранённые изменения",
     "unsaved_changes_message": "У вас есть несохранённые изменения. Если вы уйдёте, они будут потеряны. Выйти?",
-    "enabled": "Включено"
+    "enabled": "Включено",
+    "error_details": "Сведения об ошибке"
   },
   "title": {
     "main": "Центр управления CLI Proxy API",
@@ -96,7 +97,9 @@
     "error_not_found": "Management API не найден, проверьте, что адрес указывает на backend CLIProxyAPI",
     "error_server": "Backend не смог обработать запрос управления, проверьте журналы сервера",
     "error_cors": "Блокировка CORS, проверьте конфигурацию сервера",
-    "error_ssl": "Ошибка проверки SSL/TLS сертификата"
+    "error_ssl": "Ошибка проверки SSL/TLS сертификата",
+    "show_key": "Показать ключ",
+    "hide_key": "Скрыть ключ"
   },
   "header": {
     "check_connection": "Проверить подключение",
@@ -385,7 +388,18 @@
     "quota_refresh_hint": "Обновить квоту только для этих учётных данных",
     "quota_refresh_success": "Квота для \"{{name}}\" обновлена",
     "quota_refresh_failed": "Не удалось обновить квоту для \"{{name}}\": {{message}}",
-    "compact_mode_label": "Компактный режим"
+    "compact_mode_label": "Компактный режим",
+    "delete_title": "Удалить файл",
+    "delete_all_title": "Удалить все файлы",
+    "headers_label": "Пользовательские заголовки",
+    "headers_placeholder": "X-Header: value",
+    "headers_hint": "Один заголовок в строке, формат Key: Value",
+    "oauth_settings_button": "Настройки OAuth",
+    "oauth_settings_title": "Настройки OAuth",
+    "pagination_jump": "Перейти на страницу",
+    "pagination_total_items": "{{count}} элементов",
+    "status_detail": "Сведения о статусе",
+    "status_detail_desc": "Подробное предупреждение или сообщение об ошибке:"
   },
   "antigravity_quota": {
     "title": "Квота Antigravity",
@@ -457,7 +471,14 @@
     "code_review_secondary_window": "Недельный лимит code review",
     "code_review_team_secondary_window": "Месячный лимит code review",
     "additional_team_secondary_window": "{{name}}: месячный лимит",
-    "expires_label": "Истекает"
+    "expires_label": "Истекает",
+    "reset_credits_label": "Сбросов доступно",
+    "reset_button": "Сбросить квоту",
+    "reset_confirm_title": "Сбросить квоту Codex?",
+    "reset_confirm_message": "Будет использована одна доступная попытка сброса квоты. Продолжить?",
+    "reset_confirm_button": "Сбросить",
+    "reset_success": "Квота сброшена",
+    "reset_failed": "Не удалось сбросить квоту"
   },
   "quota_time": {
     "in_days_hours": "через {{days}} дн. {{hours}} ч.",
@@ -577,7 +598,8 @@
     "scope_provider": "Область: {{provider}}",
     "upgrade_required": "Текущая версия CPA не поддерживает отключение OAuth-моделей. Пожалуйста, обновите систему.",
     "upgrade_required_title": "Пожалуйста, обновите CLI Proxy API",
-    "upgrade_required_desc": "Текущая версия сервера не поддерживает получение отключения OAuth-моделей. Обновите CPA (CLI Proxy API) до последней версии и повторите попытку."
+    "upgrade_required_desc": "Текущая версия сервера не поддерживает получение отключения OAuth-моделей. Обновите CPA (CLI Proxy API) до последней версии и повторите попытку.",
+    "delete_title": "Удалить OAuth-исключение"
   },
   "oauth_model_alias": {
     "title": "Псевдонимы моделей OAuth",
@@ -640,7 +662,8 @@
     "upgrade_required": "Эта функция требует более новой версии CLI Proxy API (CPA). Обновите систему.",
     "upgrade_required_title": "Пожалуйста, обновите CLI Proxy API",
     "upgrade_required_desc": "Текущая версия сервера не поддерживает API псевдонимов моделей OAuth. Обновите CLI Proxy API (CPA) до последней версии.",
-    "duplicate_alias": "Каждый псевдоним этого провайдера должен быть уникальным."
+    "duplicate_alias": "Каждый псевдоним этого провайдера должен быть уникальным.",
+    "delete_title": "Удалить алиас модели"
   },
   "auth_login": {
     "codex_oauth_title": "Codex OAuth",
@@ -835,7 +858,8 @@
     "error_log_view_title": "Подробности журнала ошибок запроса",
     "error_log_open_failed": "Не удалось открыть журнал ошибок",
     "error_log_empty_content": "Этот журнал ошибок пуст",
-    "error_log_copy_success": "Содержимое журнала ошибок скопировано"
+    "error_log_copy_success": "Содержимое журнала ошибок скопировано",
+    "clear_confirm_title": "Очистить журналы"
   },
   "config_management": {
     "title": "Панель конфигурации",
@@ -940,13 +964,17 @@
           "antigravity_signature_cache_desc": "Предпочитать и проверять кэшированные подписи thinking-блоков",
           "antigravity_signature_strict": "Строгая проверка bypass-подписи",
           "antigravity_signature_strict_desc": "Применяется только при отключённом кэше подписей; проверяет полное дерево Claude protobuf",
+          "plugins": "Настройки плагинов",
+          "plugins_desc": "Управление системой плагинов и источниками магазина плагинов",
           "plugins_enabled": "Включить систему плагинов",
           "plugins_enabled_desc": "Включает загрузку стандартных dynamic-library плагинов; отдельные экземпляры управляются на странице плагинов",
           "plugin_store_sources": "Сторонние источники плагинов",
           "plugin_store_sources_desc": "Добавляет registry-источники магазина плагинов; встроенный официальный источник всегда сохраняется",
           "plugin_store_sources_label": "URL registry источника плагинов (plugins.store-sources)",
           "plugin_store_sources_placeholder": "https://example.com/cliproxy-plugins/registry.json",
-          "plugin_store_sources_hint": "Один URL registry.json в строке. Пустые строки отфильтровываются при сохранении"
+          "plugin_store_sources_hint": "Один URL registry.json в строке. Пустые строки отфильтровываются при сохранении",
+          "codex_identity_confuse": "Codex identity-confuse",
+          "codex_identity_confuse_desc": "При fill-first routing или session affinity переопределяет Codex prompt_cache_key и installation identity под выбранную auth-запись"
         },
         "headers": {
           "title": "Заголовки по умолчанию",
@@ -1006,7 +1034,8 @@
           "switch_project_desc": "Автоматически переходить на другой проект при превышении квоты",
           "switch_preview_model": "Переключить на preview-модель",
           "switch_preview_model_desc": "Переключаться на preview-версию модели при превышении квоты",
-          "antigravity_credits": "Использовать Antigravity Credits"
+          "antigravity_credits": "Использовать Antigravity Credits",
+          "antigravity_credits_desc": "Разрешить продолжать запросы с Antigravity Credits при превышении квоты"
         },
         "streaming": {
           "title": "Настройки стриминга",
@@ -1112,7 +1141,8 @@
         "cancel": "Отменить",
         "update": "Обновить",
         "add": "Добавить"
-      }
+      },
+      "validation_blocked_short": "Требуется исправление"
     }
   },
   "quota_management": {
@@ -1121,7 +1151,11 @@
     "refresh_files": "Обновить файлы авторизации",
     "refresh_files_and_quota": "Обновить файлы и квоты",
     "refresh_all_credentials": "Обновить все учётные данные",
-    "card_idle_hint": "Используйте кнопку «Обновить все учётные данные» сверху, чтобы загрузить актуальные данные по квотам."
+    "card_idle_hint": "Используйте кнопку «Обновить все учётные данные» сверху, чтобы загрузить актуальные данные по квотам.",
+    "quota_error_detail_desc": "Сведения об ошибке загрузки квоты:",
+    "search_placeholder": "Поиск учётных данных квоты...",
+    "search_no_results": "Учётные данные квоты не найдены",
+    "search_no_results_desc": "Нет учётных данных квоты по запросу \"{{query}}\""
   },
   "system_info": {
     "title": "Информация о центре управления",
@@ -1230,7 +1264,9 @@
     "claude_api_key": "API-ключ Claude",
     "commercial_mode_restart_required": "Режим коммерческого использования изменён. Перезапустите сервис, чтобы применить изменения",
     "copy_failed": "Не удалось скопировать",
-    "link_copied": "Ссылка скопирована в буфер обмена"
+    "link_copied": "Ссылка скопирована в буфер обмена",
+    "load_failed": "Не удалось загрузить данные",
+    "save_failed": "Не удалось сохранить"
   },
   "language": {
     "switch": "Язык",
@@ -1250,7 +1286,9 @@
   },
   "sidebar": {
     "toggle_expand": "Развернуть боковую панель",
-    "toggle_collapse": "Свернуть боковую панель"
+    "toggle_collapse": "Свернуть боковую панель",
+    "expand": "Развернуть боковую панель",
+    "collapse": "Свернуть боковую панель"
   },
   "footer": {
     "api_version": "Версия CLI Proxy API",
@@ -1489,7 +1527,10 @@
     "test_send": "Тест",
     "test_this_model": "Тестировать модель",
     "models_button": "Модели",
-    "test_no_api_key": "Клиентский API-ключ не найден. Сначала создайте его в API Keys"
+    "test_no_api_key": "Клиентский API-ключ не найден. Сначала создайте его в API Keys",
+    "excluded_models_count": "Исключённых моделей: {{count}}",
+    "export_configs": "Экспорт конфигураций",
+    "import_configs": "Импорт конфигураций"
   },
   "plugin_management": {
     "title": "Управление плагинами",
@@ -1619,5 +1660,13 @@
     "gate_step3_prompt": "Для подтверждения введите «{{token}}» в поле ниже",
     "gate_step3_action": "Установить этот плагин",
     "gate_step3_hint": "Введите точный идентификатор, показанный выше, чтобы включить установку."
+  },
+  "plugin_resource": {
+    "load_failed": "Не удалось загрузить ресурс плагина",
+    "unavailable": "Ресурс плагина недоступен",
+    "not_found": "Ресурс плагина не найден",
+    "not_found_desc": "Проверьте, что плагин установлен и пункт меню существует",
+    "empty_src": "Источник ресурса пуст",
+    "empty_src_desc": "Этот пункт меню плагина не указал URL или HTML-ресурс"
   }
 }

@@ -55,7 +55,8 @@
     "invalid_provider_index": "Invalid provider index.",
     "unsaved_changes_title": "Unsaved changes",
     "unsaved_changes_message": "You have unsaved changes. Leaving now will discard them. Do you want to leave?",
-    "enabled": "Enabled"
+    "enabled": "Enabled",
+    "error_details": "Error details"
   },
   "title": {
     "main": "CLI Proxy API Management Center",
@@ -96,7 +97,9 @@
     "error_not_found": "Management API not found, confirm the server address points to the CLIProxyAPI backend",
     "error_server": "Backend failed while handling the management request, check the server logs",
     "error_cors": "Cross-origin request blocked, please check server configuration",
-    "error_ssl": "SSL/TLS certificate verification failed"
+    "error_ssl": "SSL/TLS certificate verification failed",
+    "show_key": "Show key",
+    "hide_key": "Hide key"
   },
   "header": {
     "check_connection": "Check Connection",
@@ -391,7 +394,15 @@
     "quota_refresh_failed": "Failed to refresh quota for \"{{name}}\": {{message}}",
     "compact_mode_label": "Compact mode",
     "quota_refresh_single": "Refresh quota",
-    "quota_refresh_hint": "Refresh quota only for this credential"
+    "quota_refresh_hint": "Refresh quota only for this credential",
+    "delete_title": "Delete file",
+    "delete_all_title": "Delete all files",
+    "oauth_settings_button": "OAuth settings",
+    "oauth_settings_title": "OAuth settings",
+    "pagination_jump": "Go to page",
+    "pagination_total_items": "{{count}} items",
+    "status_detail": "Status Detail",
+    "status_detail_desc": "Detailed warning or error message:"
   },
   "antigravity_quota": {
     "title": "Antigravity Quota",
@@ -590,7 +601,8 @@
     "scope_provider": "Scope: {{provider}}",
     "upgrade_required": "Current CPA version does not support OAuth model disablement. Please upgrade.",
     "upgrade_required_title": "Please upgrade CLI Proxy API",
-    "upgrade_required_desc": "The current server version does not support fetching OAuth model disablement. Please upgrade to the latest CPA (CLI Proxy API) version and try again."
+    "upgrade_required_desc": "The current server version does not support fetching OAuth model disablement. Please upgrade to the latest CPA (CLI Proxy API) version and try again.",
+    "delete_title": "Delete OAuth exclusion"
   },
   "oauth_model_alias": {
     "title": "OAuth Model Aliases",
@@ -653,7 +665,8 @@
     "upgrade_required": "This feature requires a newer CLI Proxy API (CPA) version. Please upgrade.",
     "upgrade_required_title": "Please upgrade CLI Proxy API",
     "upgrade_required_desc": "The current server does not support the OAuth model aliases API. Please upgrade to the latest CLI Proxy API (CPA) version.",
-    "duplicate_alias": "Each alias must be unique for this provider."
+    "duplicate_alias": "Each alias must be unique for this provider.",
+    "delete_title": "Delete model alias"
   },
   "auth_login": {
     "codex_oauth_title": "Codex OAuth",
@@ -848,7 +861,8 @@
     "error_log_view_title": "Error Request Log Details",
     "error_log_open_failed": "Failed to open error log",
     "error_log_empty_content": "This error log is empty",
-    "error_log_copy_success": "Error log content copied"
+    "error_log_copy_success": "Error log content copied",
+    "clear_confirm_title": "Clear Logs"
   },
   "config_management": {
     "title": "Config Panel",
@@ -953,13 +967,17 @@
           "antigravity_signature_cache_desc": "Prefer and validate cached thinking-block signatures",
           "antigravity_signature_strict": "Strict Bypass Signature Validation",
           "antigravity_signature_strict_desc": "Only applies when the signature cache is disabled; validates the full Claude protobuf tree",
+          "plugins": "Plugin Configuration",
+          "plugins_desc": "Control the plugin system and plugin store sources",
           "plugins_enabled": "Enable Plugin System",
           "plugins_enabled_desc": "Enable standard dynamic-library plugin loading; individual plugin instances are still managed on the Plugins page",
           "plugin_store_sources": "Third-party Plugin Sources",
           "plugin_store_sources_desc": "Append plugin-store registry sources; the built-in official source is always kept",
           "plugin_store_sources_label": "Plugin source registry URL (plugins.store-sources)",
           "plugin_store_sources_placeholder": "https://example.com/cliproxy-plugins/registry.json",
-          "plugin_store_sources_hint": "One registry.json URL per row. Empty rows are filtered on save"
+          "plugin_store_sources_hint": "One registry.json URL per row. Empty rows are filtered on save",
+          "codex_identity_confuse": "Codex Identity Confuse",
+          "codex_identity_confuse_desc": "When fill-first routing or session affinity is used, remap Codex prompt_cache_key and installation identity for the selected auth"
         },
         "headers": {
           "title": "Header Defaults",
@@ -1019,7 +1037,8 @@
           "switch_project_desc": "Automatically switch to another project when quota is exceeded",
           "switch_preview_model": "Switch to Preview Model",
           "switch_preview_model_desc": "Switch to preview model version when quota is exceeded",
-          "antigravity_credits": "Use Antigravity Credits"
+          "antigravity_credits": "Use Antigravity Credits",
+          "antigravity_credits_desc": "Allow requests to continue with Antigravity Credits when quota is exceeded"
         },
         "streaming": {
           "title": "Streaming Configuration",
@@ -1125,7 +1144,8 @@
         "cancel": "Cancel",
         "update": "Update",
         "add": "Add"
-      }
+      },
+      "validation_blocked_short": "Fix required"
     }
   },
   "quota_management": {
@@ -1134,7 +1154,11 @@
     "refresh_files": "Refresh auth files",
     "refresh_files_and_quota": "Refresh files & quota",
     "refresh_all_credentials": "Refresh all credentials",
-    "card_idle_hint": "Use the top \"Refresh all credentials\" button to fetch the latest quota data."
+    "card_idle_hint": "Use the top \"Refresh all credentials\" button to fetch the latest quota data.",
+    "quota_error_detail_desc": "Quota load error details:",
+    "search_placeholder": "Search quota credentials...",
+    "search_no_results": "No quota credentials found",
+    "search_no_results_desc": "No quota credentials match \"{{query}}\""
   },
   "system_info": {
     "title": "Management Center Info",
@@ -1243,7 +1267,9 @@
     "claude_api_key": "Claude API key",
     "commercial_mode_restart_required": "Commercial mode setting changed. Please restart the service for it to take effect",
     "copy_failed": "Copy failed",
-    "link_copied": "Link copied to clipboard"
+    "link_copied": "Link copied to clipboard",
+    "load_failed": "Failed to load data",
+    "save_failed": "Failed to save"
   },
   "language": {
     "switch": "Language",
@@ -1263,7 +1289,9 @@
   },
   "sidebar": {
     "toggle_expand": "Expand sidebar",
-    "toggle_collapse": "Collapse sidebar"
+    "toggle_collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
+    "collapse": "Collapse sidebar"
   },
   "footer": {
     "api_version": "CLI Proxy API Version",
@@ -1502,7 +1530,10 @@
     "test_send": "Test",
     "test_this_model": "Test this model",
     "models_button": "Models",
-    "test_no_api_key": "No client API Key found. Please create one in API Keys first"
+    "test_no_api_key": "No client API Key found. Please create one in API Keys first",
+    "excluded_models_count": "{{count}} excluded models",
+    "export_configs": "Export configs",
+    "import_configs": "Import configs"
   },
   "plugin_management": {
     "title": "Plugin Management",
