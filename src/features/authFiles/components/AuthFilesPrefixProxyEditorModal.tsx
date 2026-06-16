@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Input } from '@/components/ui/Input';
+import { SkeletonTextBlock } from '@/components/common/LoadingSkeleton';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import type {
   PrefixProxyEditorField,
@@ -84,9 +84,12 @@ export function AuthFilesPrefixProxyEditorModal(props: AuthFilesPrefixProxyEdito
       {editor && (
         <div className={styles.prefixProxyEditor}>
           {editor.loading ? (
-            <div className={styles.prefixProxyLoading}>
-              <LoadingSpinner size={14} />
-              <span>{t('auth_files.prefix_proxy_loading')}</span>
+            <div
+              className={styles.prefixProxyLoading}
+              aria-busy="true"
+              aria-label={t('auth_files.prefix_proxy_loading')}
+            >
+              <SkeletonTextBlock lines={6} />
             </div>
           ) : (
             <>

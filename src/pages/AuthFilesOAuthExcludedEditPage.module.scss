@@ -149,12 +149,13 @@
 }
 
 .loadingModels {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: $spacing-sm;
-  padding: $spacing-xl 0;
+  padding: $spacing-sm $spacing-lg $spacing-lg;
   color: var(--text-secondary);
+
+  @include mobile {
+    padding-left: $spacing-md;
+    padding-right: $spacing-md;
+  }
 }
 
 .modelList {

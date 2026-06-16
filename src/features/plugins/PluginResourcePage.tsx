@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { SkeletonTextBlock } from '@/components/common/LoadingSkeleton';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { pluginsApi } from '@/services/api';
 import { useAuthStore } from '@/stores';
@@ -76,7 +77,11 @@ export function PluginResourcePage() {
   useHeaderRefresh(loadResource, connected);
 
   useEffect(() => {
-    void loadResource();
+    const timer = window.setTimeout(() => {
+      void loadResource();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [loadResource]);
 
   useEffect(() => {
@@ -97,8 +102,10 @@ export function PluginResourcePage() {
   return (
     <div className={styles.page}>
       {loading ? (
-        <div className={styles.stateShell}>
-          <div className={styles.statusPanel}>{t('common.loading')}</div>
+        <div className={styles.stateShell} aria-busy="true" aria-label={t('common.loading')}>
+          <div className={styles.skeletonPanel}>
+            <SkeletonTextBlock lines={8} />
+          </div>
         </div>
       ) : error ? (
         <div className={styles.stateShell}>

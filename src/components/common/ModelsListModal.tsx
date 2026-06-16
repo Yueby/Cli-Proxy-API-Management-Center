@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { IconChevronLeft, IconFlaskConical, IconSend } from '@/components/ui/icons';
+import { SkeletonRows } from './LoadingSkeleton';
 import { copyToClipboard } from '@/utils/clipboard';
 import { useNotificationStore, useAuthStore } from '@/stores';
 import { apiKeysApi } from '@/services/api/apiKeys';
@@ -289,9 +290,7 @@ export function ModelsListModal({
         // Standard model list view
         <>
           {loading ? (
-            <div className={sharedStyles.hint}>
-              {t('auth_files.models_loading', { defaultValue: '正在加载模型列表...' })}
-            </div>
+            <SkeletonRows count={6} withAvatar={false} />
           ) : error === 'unsupported' ? (
             <EmptyState
               title={t('auth_files.models_unsupported', { defaultValue: '当前版本不支持此功能' })}

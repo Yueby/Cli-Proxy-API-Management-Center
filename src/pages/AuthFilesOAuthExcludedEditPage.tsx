@@ -3,12 +3,12 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { SelectionCheckbox } from '@/components/ui/SelectionCheckbox';
 import { AutocompleteInput } from '@/components/ui/AutocompleteInput';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { IconInfo, IconSave } from '@/components/ui/icons';
 import { SecondaryScreenShell } from '@/components/common/SecondaryScreenShell';
+import { SkeletonRows } from '@/components/common/LoadingSkeleton';
 import layoutStyles from './AuthFilesEditLayout.module.scss';
 import { useEdgeSwipeBack } from '@/hooks/useEdgeSwipeBack';
 import { useAuthStore, useNotificationStore } from '@/stores';
@@ -60,7 +60,11 @@ export function AuthFilesOAuthExcludedEditPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    setProvider(providerFromParams);
+    const timer = window.setTimeout(() => {
+      setProvider(providerFromParams);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [providerFromParams]);
 
   const providerOptions = useMemo(() => {
@@ -194,55 +198,63 @@ export function AuthFilesOAuthExcludedEditPage() {
   }, []);
 
   useEffect(() => {
-    if (!resolvedProviderKey) {
-      setSelectedModels(new Set());
-      return;
-    }
-    const existing = excluded[resolvedProviderKey] ?? [];
-    setSelectedModels(new Set(existing));
+    const timer = window.setTimeout(() => {
+      if (!resolvedProviderKey) {
+        setSelectedModels(new Set());
+        return;
+      }
+      const existing = excluded[resolvedProviderKey] ?? [];
+      setSelectedModels(new Set(existing));
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [excluded, resolvedProviderKey]);
 
   useEffect(() => {
-    if (!resolvedProviderKey || excludedUnsupported) {
-      setModelsList([]);
-      setModelsError(null);
-      setModelsLoading(false);
-      return;
-    }
-
     let cancelled = false;
-    setModelsLoading(true);
-    setModelsError(null);
 
-    authFilesApi
-      .getModelDefinitions(resolvedProviderKey)
-      .then((models) => {
-        if (cancelled) return;
-        setModelsList(models);
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return;
-        const status =
-          typeof err === 'object' && err !== null && 'status' in err
-            ? (err as { status?: unknown }).status
-            : undefined;
-
-        if (status === 404) {
-          setModelsList([]);
-          setModelsError('unsupported');
-          return;
-        }
-
-        const errorMessage = err instanceof Error ? err.message : '';
-        showNotification(`${t('notification.load_failed')}: ${errorMessage}`, 'error');
-      })
-      .finally(() => {
-        if (cancelled) return;
+    const timer = window.setTimeout(() => {
+      if (!resolvedProviderKey || excludedUnsupported) {
+        setModelsList([]);
+        setModelsError(null);
         setModelsLoading(false);
-      });
+        return;
+      }
+
+      setModelsLoading(true);
+      setModelsError(null);
+
+      authFilesApi
+        .getModelDefinitions(resolvedProviderKey)
+        .then((models) => {
+          if (cancelled) return;
+          setModelsList(models);
+        })
+        .catch((err: unknown) => {
+          if (cancelled) return;
+          const status =
+            typeof err === 'object' && err !== null && 'status' in err
+              ? (err as { status?: unknown }).status
+              : undefined;
+
+          if (status === 404) {
+            setModelsList([]);
+            setModelsError('unsupported');
+            return;
+          }
+
+          const errorMessage = err instanceof Error ? err.message : '';
+          showNotification(`${t('notification.load_failed')}: ${errorMessage}`, 'error');
+        })
+        .finally(() => {
+          if (cancelled) return;
+          setModelsLoading(false);
+        });
+    }, 0);
 
     return () => {
       cancelled = true;
+      window.clearTimeout(timer);
     };
   }, [excludedUnsupported, resolvedProviderKey, showNotification, t]);
 
@@ -389,10 +401,7 @@ export function AuthFilesOAuthExcludedEditPage() {
               {resolvedProviderKey && (
                 <div className={styles.modelsHint}>
                   {modelsLoading ? (
-                    <>
-                      <LoadingSpinner size={14} />
-                      <span>{t('oauth_excluded.models_loading')}</span>
-                    </>
+                    <span>{t('oauth_excluded.models_loading')}</span>
                   ) : modelsError === 'unsupported' ? (
                     <span>{t('oauth_excluded.models_unsupported')}</span>
                   ) : modelsList.length > 0 ? (
@@ -406,8 +415,7 @@ export function AuthFilesOAuthExcludedEditPage() {
 
             {modelsLoading ? (
               <div className={styles.loadingModels}>
-                <LoadingSpinner size={16} />
-                <span>{t('common.loading')}</span>
+                <SkeletonRows count={6} withAvatar={false} withActions={false} />
               </div>
             ) : modelsList.length > 0 ? (
               <div className={styles.modelList}>

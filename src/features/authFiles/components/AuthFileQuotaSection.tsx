@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { SkeletonTextBlock } from '@/components/common/LoadingSkeleton';
 import { useQuotaStore } from '@/stores';
 import type { AuthFileItem } from '@/types';
 import { resolveQuotaErrorMessage, type QuotaProviderType } from '@/features/authFiles/constants';
@@ -63,9 +63,12 @@ export function AuthFileQuotaSection(props: AuthFileQuotaSectionProps) {
           {config.renderQuotaItems(quota as never, t, { styles, QuotaProgressBar }) as ReactNode}
         </div>
       ) : isLoading ? (
-        <div className={styles.quotaMessage}>
-          <LoadingSpinner size={14} />
-          <span>{t(`${config.i18nPrefix}.loading`)}</span>
+        <div
+          className={styles.quotaMessage}
+          aria-busy="true"
+          aria-label={t(`${config.i18nPrefix}.loading`)}
+        >
+          <SkeletonTextBlock lines={2} />
         </div>
       ) : (
         <div className={styles.quotaError} title={quotaErrorMessage}>

@@ -396,17 +396,10 @@ export function ProvidersWorkbenchPage() {
     return (
       <div className={styles.page}>
         <PageHeader title={t('providersPage.header.title')} />
-        <div
-          style={{
-            padding: 32,
-            textAlign: 'center',
-            color: 'var(--text-secondary)',
-            background: 'var(--bg-secondary)',
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--border-color)',
-          }}
-        >
-          {t('common.loading')}
+        <Skeleton height={120} />
+        <div className={styles.layout}>
+          <Skeleton height={420} />
+          <Skeleton height={420} />
         </div>
       </div>
     );

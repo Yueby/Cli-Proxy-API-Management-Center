@@ -345,6 +345,15 @@
   }
 }
 
+.logSkeleton {
+  flex: 1 1 auto;
+  min-height: 280px;
+  padding: $spacing-md;
+  border: 1px solid var(--border-color);
+  border-radius: $radius-md;
+  background: var(--bg-primary);
+}
+
 .logPanel {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);

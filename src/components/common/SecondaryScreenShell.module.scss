@@ -53,10 +53,9 @@
 
 .loadingState {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: $spacing-sm;
-  padding: $spacing-2xl 0;
+  flex-direction: column;
+  gap: $spacing-md;
+  padding: $spacing-lg;
   color: var(--text-secondary);
 }
 

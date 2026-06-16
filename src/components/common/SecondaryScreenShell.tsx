@@ -1,8 +1,8 @@
 import { forwardRef, useRef, type ReactNode } from 'react';
 import { Button } from '@/components/ui/Button';
 import { FloatingDock } from '@/components/ui/FloatingDock';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { IconChevronLeft } from '@/components/ui/icons';
+import { SkeletonRows, SkeletonTextBlock } from './LoadingSkeleton';
 import { usePageTransitionLayer } from './PageTransitionLayer';
 import styles from './SecondaryScreenShell.module.scss';
 
@@ -83,9 +83,9 @@ export const SecondaryScreenShell = forwardRef<HTMLDivElement, SecondaryScreenSh
           </div>
 
           {isLoading ? (
-            <div className={styles.loadingState}>
-              <LoadingSpinner size={16} />
-              <span>{loadingLabel}</span>
+            <div className={styles.loadingState} aria-busy="true" aria-label={String(loadingLabel)}>
+              <SkeletonTextBlock lines={3} />
+              <SkeletonRows count={4} />
             </div>
           ) : (
             <div className={contentClasses}>{children}</div>

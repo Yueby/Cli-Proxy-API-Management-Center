@@ -39,6 +39,7 @@ import iconMinimax from '@/assets/icons/minimax.svg';
 import iconMimoLight from '@/assets/icons/mimo-light.svg';
 import iconMimoDark from '@/assets/icons/mimo-dark.svg';
 import { PageHeader } from '@/components/common/PageHeader';
+import { SkeletonRows } from '@/components/common/LoadingSkeleton';
 import styles from './SystemPage.module.scss';
 
 const MODEL_CATEGORY_ICONS: Record<string, string | { light: string; dark: string }> = {
@@ -333,9 +334,13 @@ export function SystemPage() {
   }, [fetchConfig]);
 
   useEffect(() => {
-    if (requestLogModalOpen && !requestLogTouched) {
+    if (!requestLogModalOpen || requestLogTouched) return;
+
+    const timer = window.setTimeout(() => {
       setRequestLogDraft(requestLogEnabled);
-    }
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [requestLogModalOpen, requestLogTouched, requestLogEnabled]);
 
   useEffect(() => {
@@ -347,7 +352,11 @@ export function SystemPage() {
   }, []);
 
   useEffect(() => {
-    fetchModels();
+    const timer = window.setTimeout(() => {
+      fetchModels();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.connectionStatus, auth.apiBase]);
 
@@ -485,7 +494,7 @@ export function SystemPage() {
           )}
           {modelsError && <div className="error-box">{modelsError}</div>}
           {modelsLoading ? (
-            <div className="hint">{t('common.loading')}</div>
+            <SkeletonRows count={5} />
           ) : models.length === 0 ? (
             <div className="hint">{t('system_info.models_empty')}</div>
           ) : (

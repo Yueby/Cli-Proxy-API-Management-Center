@@ -35,6 +35,7 @@ import { useLogFilters } from './hooks/useLogFilters';
 import { isNearBottom, useLogScroller } from './hooks/useLogScroller';
 import { PageHeader } from '@/components/common/PageHeader';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { SkeletonRows, SkeletonTextBlock } from '@/components/common/LoadingSkeleton';
 import styles from './LogsPage.module.scss';
 
 interface ErrorLogItem {
@@ -873,7 +874,9 @@ export function LogsPage() {
             </div>
 
             {loading ? (
-              <div className="hint">{t('logs.loading')}</div>
+              <div className={styles.logSkeleton} aria-busy="true" aria-label={t('logs.loading')}>
+                <SkeletonTextBlock lines={12} />
+              </div>
             ) : logState.buffer.length > 0 && filteredLines.length > 0 ? (
               <div
                 ref={logViewerRef}
@@ -1059,7 +1062,7 @@ export function LogsPage() {
 
               <div className={styles.errorPanel}>
                 {loadingErrors ? (
-                  <div className="hint">{t('common.loading')}</div>
+                  <SkeletonRows count={4} />
                 ) : errorLogs.length === 0 ? (
                   <div className="hint">{t('logs.error_logs_empty')}</div>
                 ) : (
