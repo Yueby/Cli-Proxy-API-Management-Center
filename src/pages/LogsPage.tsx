@@ -169,7 +169,9 @@ export function LogsPage() {
   const [requestLogId, setRequestLogId] = useState<string | null>(null);
   const [requestLogDownloading, setRequestLogDownloading] = useState(false);
 
-  const logScrollerRef = useRef<ReturnType<typeof useLogScroller> | null>(null);
+  const logScrollerRef = useRef<
+    Pick<ReturnType<typeof useLogScroller>, 'logViewerRef' | 'requestScrollToBottom'> | null
+  >(null);
   const requestLogHomeIpByIdRef = useRef<Record<string, string>>({});
   const longPressRef = useRef<{
     timer: number | null;
@@ -407,12 +409,14 @@ export function LogsPage() {
   };
 
   useEffect(() => {
-    if (connectionStatus === 'connected') {
-      resetLogPosition();
-      requestLogHomeIpByIdRef.current = {};
+    if (connectionStatus !== 'connected') return;
+    resetLogPosition();
+    requestLogHomeIpByIdRef.current = {};
+    const id = window.setTimeout(() => {
       setFileLoggingRequired(false);
-      loadLogs(false);
-    }
+      void loadLogs(false);
+    }, 0);
+    return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectionStatus, loggingToFileEnabled]);
 
@@ -434,7 +438,10 @@ export function LogsPage() {
   useEffect(() => {
     if (activeTab !== 'errors') return;
     if (connectionStatus !== 'connected') return;
-    void loadErrorLogs();
+    const id = window.setTimeout(() => {
+      void loadErrorLogs();
+    }, 0);
+    return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, connectionStatus, requestLogEnabled]);
 
@@ -522,7 +529,7 @@ export function LogsPage() {
 
   const rawVisibleText = useMemo(() => filteredLines.join('\n'), [filteredLines]);
 
-  const scroller = useLogScroller({
+  const { logViewerRef, canLoadMore, handleLogScroll, requestScrollToBottom } = useLogScroller({
     logState,
     setLogState,
     loading,
@@ -532,7 +539,9 @@ export function LogsPage() {
     showRawLogs,
   });
 
-  logScrollerRef.current = scroller;
+  useEffect(() => {
+    logScrollerRef.current = { logViewerRef, requestScrollToBottom };
+  }, [logViewerRef, requestScrollToBottom]);
 
   const copyLogLine = async (raw: string) => {
     const ok = await copyToClipboard(raw);
@@ -867,11 +876,11 @@ export function LogsPage() {
               <div className="hint">{t('logs.loading')}</div>
             ) : logState.buffer.length > 0 && filteredLines.length > 0 ? (
               <div
-                ref={scroller.logViewerRef}
+                ref={logViewerRef}
                 className={styles.logPanel}
-                onScroll={scroller.handleLogScroll}
+                onScroll={handleLogScroll}
               >
-                {scroller.canLoadMore && (
+                {canLoadMore && (
                   <div className={styles.loadMoreBanner}>
                     <span>{t('logs.load_more_hint')}</span>
                     <div className={styles.loadMoreStats}>
