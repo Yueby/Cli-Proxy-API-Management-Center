@@ -106,6 +106,9 @@ export type VisualConfigValues = {
   enableGeminiCliEndpoint: boolean;
   antigravitySignatureCacheEnabled: boolean;
   antigravitySignatureBypassStrict: boolean;
+  pluginsEnabled: boolean;
+  pluginStoreSources: string[];
+  codexIdentityConfuse: boolean;
   claudeHeaderUserAgent: string;
   claudeHeaderPackageVersion: string;
   claudeHeaderRuntimeVersion: string;
@@ -167,6 +170,9 @@ export const DEFAULT_VISUAL_VALUES: VisualConfigValues = {
   enableGeminiCliEndpoint: false,
   antigravitySignatureCacheEnabled: true,
   antigravitySignatureBypassStrict: false,
+  pluginsEnabled: false,
+  pluginStoreSources: [],
+  codexIdentityConfuse: false,
   claudeHeaderUserAgent: '',
   claudeHeaderPackageVersion: '',
   claudeHeaderRuntimeVersion: '',

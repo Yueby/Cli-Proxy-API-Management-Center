@@ -745,6 +745,52 @@ export function VisualConfigEditor({
                   }
                 />
               </SectionGrid>
+
+              <SectionSubsection
+                title={t('config_management.visual.sections.system.plugins')}
+                description={t('config_management.visual.sections.system.plugins_desc')}
+              >
+                <SectionGrid>
+                  <ToggleRow
+                    title={t('config_management.visual.sections.system.plugins_enabled')}
+                    description={t('config_management.visual.sections.system.plugins_enabled_desc')}
+                    checked={values.pluginsEnabled}
+                    disabled={disabled}
+                    onChange={(pluginsEnabled) => onChange({ pluginsEnabled })}
+                  />
+                  <ToggleRow
+                    title={t('config_management.visual.sections.system.codex_identity_confuse')}
+                    description={t(
+                      'config_management.visual.sections.system.codex_identity_confuse_desc'
+                    )}
+                    checked={values.codexIdentityConfuse}
+                    disabled={disabled}
+                    onChange={(codexIdentityConfuse) => onChange({ codexIdentityConfuse })}
+                  />
+                </SectionGrid>
+                <FieldShell
+                  label={t('config_management.visual.sections.system.plugin_store_sources_label')}
+                  hint={t('config_management.visual.sections.system.plugin_store_sources_hint')}
+                >
+                  <textarea
+                    className="textarea"
+                    rows={3}
+                    value={values.pluginStoreSources.join('\n')}
+                    onChange={(e) =>
+                      onChange({
+                        pluginStoreSources: e.target.value
+                          .split('\n')
+                          .map((item) => item.trim())
+                          .filter(Boolean),
+                      })
+                    }
+                    placeholder={t(
+                      'config_management.visual.sections.system.plugin_store_sources_placeholder'
+                    )}
+                    disabled={disabled}
+                  />
+                </FieldShell>
+              </SectionSubsection>
             </SectionStack>
           </ConfigSection>
 

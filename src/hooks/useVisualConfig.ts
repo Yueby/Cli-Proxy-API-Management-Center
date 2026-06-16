@@ -736,6 +736,8 @@ function getNextDirtyFields(
       'enableGeminiCliEndpoint',
       'antigravitySignatureCacheEnabled',
       'antigravitySignatureBypassStrict',
+      'pluginsEnabled',
+      'codexIdentityConfuse',
       'claudeHeaderUserAgent',
       'claudeHeaderPackageVersion',
       'claudeHeaderRuntimeVersion',
@@ -857,6 +859,12 @@ function getNextDirtyFields(
     updateDirty(
       'routingSessionAffinityTTL',
       nextValues.routingSessionAffinityTTL === baselineValues.routingSessionAffinityTTL
+    );
+  }
+  if (Object.prototype.hasOwnProperty.call(patch, 'pluginStoreSources')) {
+    updateDirty(
+      'pluginStoreSources',
+      areStringArraysEqual(nextValues.pluginStoreSources, baselineValues.pluginStoreSources)
     );
   }
   if (Object.prototype.hasOwnProperty.call(patch, 'payloadDefaultRules')) {
@@ -996,6 +1004,8 @@ export function useVisualConfig() {
       const routing = asRecord(parsed.routing);
       const payload = asRecord(parsed.payload);
       const streaming = asRecord(parsed.streaming);
+      const plugins = asRecord(parsed.plugins);
+      const codex = asRecord(parsed.codex);
       const claudeHeaderDefaults = asRecord(parsed['claude-header-defaults']);
       const codexHeaderDefaults = asRecord(parsed['codex-header-defaults']);
 
@@ -1049,6 +1059,9 @@ export function useVisualConfig() {
           parsed['antigravity-signature-cache-enabled'] ?? true
         ),
         antigravitySignatureBypassStrict: Boolean(parsed['antigravity-signature-bypass-strict']),
+        pluginsEnabled: Boolean(plugins?.enabled),
+        pluginStoreSources: parseStringList(plugins?.['store-sources']),
+        codexIdentityConfuse: Boolean(codex?.['identity-confuse']),
 
         claudeHeaderUserAgent:
           typeof claudeHeaderDefaults?.['user-agent'] === 'string'
@@ -1306,6 +1319,63 @@ export function useVisualConfig() {
             ['antigravity-signature-bypass-strict'],
             values.antigravitySignatureBypassStrict
           );
+        }
+
+        if (
+          docHas(doc, ['plugins']) ||
+          values.pluginsEnabled ||
+          values.pluginStoreSources.length > 0 ||
+          shouldWriteManagedField(doc, ['plugins', 'enabled'], dirtyFields, 'pluginsEnabled') ||
+          shouldWriteManagedField(
+            doc,
+            ['plugins', 'store-sources'],
+            dirtyFields,
+            'pluginStoreSources'
+          )
+        ) {
+          ensureMapInDoc(doc, ['plugins']);
+          if (shouldWriteManagedField(doc, ['plugins', 'enabled'], dirtyFields, 'pluginsEnabled')) {
+            doc.setIn(['plugins', 'enabled'], values.pluginsEnabled);
+          }
+          if (
+            shouldWriteManagedField(
+              doc,
+              ['plugins', 'store-sources'],
+              dirtyFields,
+              'pluginStoreSources'
+            )
+          ) {
+            if (values.pluginStoreSources.length > 0) {
+              doc.setIn(['plugins', 'store-sources'], values.pluginStoreSources);
+            } else if (docHas(doc, ['plugins', 'store-sources'])) {
+              doc.deleteIn(['plugins', 'store-sources']);
+            }
+          }
+          deleteIfMapEmpty(doc, ['plugins']);
+        }
+
+        if (
+          docHas(doc, ['codex']) ||
+          values.codexIdentityConfuse ||
+          shouldWriteManagedField(
+            doc,
+            ['codex', 'identity-confuse'],
+            dirtyFields,
+            'codexIdentityConfuse'
+          )
+        ) {
+          ensureMapInDoc(doc, ['codex']);
+          if (
+            shouldWriteManagedField(
+              doc,
+              ['codex', 'identity-confuse'],
+              dirtyFields,
+              'codexIdentityConfuse'
+            )
+          ) {
+            doc.setIn(['codex', 'identity-confuse'], values.codexIdentityConfuse);
+          }
+          deleteIfMapEmpty(doc, ['codex']);
         }
 
         const writeClaudeHeaderUserAgent = shouldWriteManagedField(
