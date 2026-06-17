@@ -269,7 +269,8 @@ export function AuthFilesPage() {
             ? clampCardPageSize(persisted.pageSize)
             : null;
         const persistedCompactPageSize =
-          typeof persisted.compactPageSize === 'number' && Number.isFinite(persisted.compactPageSize)
+          typeof persisted.compactPageSize === 'number' &&
+          Number.isFinite(persisted.compactPageSize)
             ? clampCardPageSize(persisted.compactPageSize)
             : (legacyPageSize ?? DEFAULT_COMPACT_PAGE_SIZE);
         setCompactPageSize(persistedCompactPageSize);
@@ -364,9 +365,8 @@ export function AuthFilesPage() {
       if (!isAuthFilesSortMode(value) || value === sortMode) return;
       setSortMode(value);
       setPage(1);
-      void loadFiles().catch(() => {});
     },
-    [loadFiles, sortMode]
+    [sortMode]
   );
 
   const refreshQuotaForFile = useCallback(

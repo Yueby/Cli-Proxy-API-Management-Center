@@ -1243,8 +1243,6 @@
     "openai_provider_added": "OpenAI提供商添加成功",
     "openai_provider_updated": "OpenAI提供商更新成功",
     "openai_provider_deleted": "OpenAI提供商删除成功",
-    "ampcode_updated": "Ampcode 配置已更新",
-    "ampcode_upstream_api_key_cleared": "Ampcode upstream API key 覆盖已清除",
     "openai_model_name_required": "请填写模型名称",
     "openai_test_url_required": "请先填写有效的 Base URL 以进行测试",
     "openai_test_key_required": "请至少填写一个 API 密钥以进行测试",
@@ -1323,17 +1321,14 @@
     },
     "categories": {
       "title": "提供商",
-      "activeCount": "{{active}}/{{total}} 活跃",
-      "ampcodeActive": "已连接",
-      "ampcodeInactive": "未配置"
+      "activeCount": "{{active}}/{{total}} 活跃"
     },
     "providerNames": {
       "gemini": "Gemini",
       "codex": "Codex",
       "claude": "Claude",
       "vertex": "Vertex",
-      "openaiCompatibility": "OpenAI 兼容",
-      "ampcode": "Amp CLI"
+      "openaiCompatibility": "OpenAI 兼容"
     },
     "table": {
       "key": "密钥",
@@ -1433,25 +1428,9 @@
       "experimentalCchSigning": "实验性 CCH 签名",
       "experimentalCchSigningHint": "对 cloaked Claude /v1/messages 最终请求体启用 CCH 签名"
     },
-    "ampcode": {
-      "upstreamUrl": "上游 URL",
-      "upstreamApiKey": "上游 API 密钥(兜底)",
-      "upstreamApiKeyHint": "未匹配密钥映射时使用",
-      "keyMappingsSection": "上游密钥映射",
-      "mappingRow": "映射 #{{index}}",
-      "clientKeys": "客户端密钥",
-      "clientKeysHint": "每行一个,匹配后转发到上述上游密钥",
-      "addMapping": "添加密钥映射",
-      "modelMappingsSection": "模型映射",
-      "addModelMapping": "添加模型映射",
-      "forceModelMappings": "强制模型映射",
-      "forceModelMappingsHint": "启用后,所有请求必须命中模型映射规则"
-    },
     "delete": {
       "title": "删除资源",
-      "confirm": "确定要删除 {{name}} 吗?此操作不可撤销。",
-      "ampcodeTitle": "清空 Amp CLI 配置",
-      "ampcodeConfirm": "确定要清空 Amp CLI 配置吗?上游 URL、API 密钥与模型映射都会被移除。"
+      "confirm": "确定要删除 {{name}} 吗?此操作不可撤销。"
     },
     "toast": {
       "created": "创建成功",
@@ -1517,10 +1496,6 @@
     "description": "管理 Gemini、Codex、Claude、Vertex 及 OpenAI 兼容提供方的 API 密钥与配置。",
     "config_toggle_label": "启用",
     "openai_test_model": "测试模型",
-    "ampcode_upstream_url_label": "上游 URL",
-    "ampcode_force_model_mappings_label": "强制模型映射",
-    "ampcode_model_mappings_count": "模型映射",
-    "ampcode_upstream_api_keys_count": "上游 API 密钥",
     "test_title": "测试模型",
     "test_back": "返回列表",
     "test_empty_hint": "发送首条消息开始模型测试",

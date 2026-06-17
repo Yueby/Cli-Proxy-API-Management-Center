@@ -8,7 +8,6 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuthStore, useNotificationStore } from '@/stores';
 import { useProviderRecentRequests } from '@/components/providers/hooks/useProviderRecentRequests';
 import { getOpenAIProviderRecentWindowStats } from '@/components/providers/utils';
-import ampcodeLogo from '@/assets/icons/amp.svg';
 import claudeLogo from '@/assets/icons/claude.svg';
 import codexLogo from '@/assets/icons/codex.svg';
 import geminiLogo from '@/assets/icons/gemini.svg';
@@ -16,7 +15,6 @@ import openaiLogo from '@/assets/icons/openai-light.svg';
 import vertexLogo from '@/assets/icons/vertex.svg';
 import { CategoryList, type CategoryItem } from '@/components/common/CategoryList';
 import type {
-  AmpcodeConfig,
   GeminiKeyConfig,
   OpenAIProviderConfig,
   ProviderKeyConfig,
@@ -39,7 +37,6 @@ const PROVIDER_LOGOS: Record<ProviderBrand, string> = {
   codex: codexLogo,
   vertex: vertexLogo,
   openaiCompatibility: openaiLogo,
-  ampcode: ampcodeLogo,
 };
 const PROVIDER_TAB_IDS: ProviderBrand[] = [
   'openaiCompatibility',
@@ -47,7 +44,6 @@ const PROVIDER_TAB_IDS: ProviderBrand[] = [
   'codex',
   'claude',
   'vertex',
-  'ampcode',
 ];
 
 interface SheetState {
@@ -149,8 +145,7 @@ export function ProvidersWorkbenchPage() {
   const categoryItems = useMemo<CategoryItem[]>(() => {
     return groups.map((group) => {
       const realResources = group.resources.filter((r) => !r.flags.isPlaceholder);
-      const total = realResources.length || (group.id === 'ampcode' ? 1 : 0);
-      const count = group.id === 'ampcode' ? (group.resources[0]?.disabled ? 0 : 1) : total;
+      const count = realResources.length;
       return {
         id: group.id,
         label: t(`providersPage.providerNames.${group.id}`),
@@ -260,18 +255,7 @@ export function ProvidersWorkbenchPage() {
   });
 
   const showModels = useCallback((resource: ProviderResource) => {
-    if (resource.brand === 'ampcode') {
-      const cfg = resource.raw as AmpcodeConfig;
-      const mappings = (cfg.modelMappings || []).map((m: any) => ({
-        id: m.from,
-        display_name: m.to,
-      }));
-      setModelsModal({
-        open: true,
-        providerName: 'Ampcode',
-        models: mappings,
-      });
-    } else if (resource.brand === 'openaiCompatibility') {
+    if (resource.brand === 'openaiCompatibility') {
       const cfg = resource.raw as OpenAIProviderConfig;
       const models = (cfg.models || []).map((m: any) => ({
         id: m.name,
@@ -297,14 +281,8 @@ export function ProvidersWorkbenchPage() {
   }, []);
 
   const openCreate = useCallback(() => {
-    const brand = activeBrand;
-    if (brand === 'ampcode') {
-      const r = groups.find((g) => g.id === 'ampcode')?.resources[0] ?? null;
-      setSheetState({ open: true, brand: 'ampcode', mode: 'edit', resource: r });
-    } else {
-      setSheetState({ open: true, brand, mode: 'create', resource: null });
-    }
-  }, [activeBrand, groups]);
+    setSheetState({ open: true, brand: activeBrand, mode: 'create', resource: null });
+  }, [activeBrand]);
 
   const openView = useCallback((resource: ProviderResource) => {
     setSheetState({
@@ -329,17 +307,12 @@ export function ProvidersWorkbenchPage() {
   }, []);
   const handleDelete = useCallback(
     (resource: ProviderResource) => {
-      const isAmpcode = resource.brand === 'ampcode';
       const name = resource.name ?? resource.apiKeyPreview ?? resource.identifier ?? '';
       showConfirmation({
-        title: isAmpcode ? t('providersPage.delete.ampcodeTitle') : t('providersPage.delete.title'),
-        message: isAmpcode
-          ? t('providersPage.delete.ampcodeConfirm')
-          : t('providersPage.delete.confirm', { name }),
+        title: t('providersPage.delete.title'),
+        message: t('providersPage.delete.confirm', { name }),
         variant: 'danger',
-        confirmText: isAmpcode
-          ? t('providersPage.actions.clear')
-          : t('providersPage.actions.delete'),
+        confirmText: t('providersPage.actions.delete'),
         onConfirm: async () => {
           try {
             await workbench.deleteProvider(resource);
@@ -405,8 +378,6 @@ export function ProvidersWorkbenchPage() {
     );
   }
 
-  const ampcodeBrandActive = activeBrand === 'ampcode';
-
   return (
     <div className={styles.page}>
       <PageHeader title={t('providersPage.header.title')} />
@@ -444,12 +415,8 @@ export function ProvidersWorkbenchPage() {
           <div className={styles.headerActions}>
             <ProviderHeaderCard
               isFetching={workbench.isFetching}
-              isNewDisabled={disableMutations && !ampcodeBrandActive}
-              newLabel={
-                ampcodeBrandActive
-                  ? t('providersPage.actions.edit')
-                  : t('providersPage.actions.new')
-              }
+              isNewDisabled={disableMutations}
+              newLabel={t('providersPage.actions.new')}
               onRefresh={() => void handleRefresh()}
               onNew={openCreate}
             />

@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import iconAmp from '@/assets/icons/amp.svg';
 import iconClaude from '@/assets/icons/claude.svg';
 import iconCodex from '@/assets/icons/codex.svg';
 import iconGemini from '@/assets/icons/gemini.svg';
@@ -22,7 +21,6 @@ import {
 } from '@/components/providers/utils';
 import { IconEye, IconKey, IconPencil, IconSignal, IconTrash2 } from '@/components/ui/icons';
 import type {
-  AmpcodeConfig,
   ApiKeyEntry,
   GeminiKeyConfig,
   OpenAIProviderConfig,
@@ -54,7 +52,6 @@ const PROVIDER_ICONS: Record<ProviderBrand, ProviderIconAsset> = {
   claude: iconClaude,
   vertex: iconVertex,
   openaiCompatibility: { light: iconOpenAILight, dark: iconOpenAIDark },
-  ampcode: iconAmp,
 };
 
 const PROVIDER_FALLBACKS: Record<ProviderBrand, string> = {
@@ -63,7 +60,6 @@ const PROVIDER_FALLBACKS: Record<ProviderBrand, string> = {
   claude: 'C',
   vertex: 'V',
   openaiCompatibility: 'O',
-  ampcode: 'A',
 };
 
 const PROVIDER_LABELS: Record<ProviderBrand, string> = {
@@ -72,7 +68,6 @@ const PROVIDER_LABELS: Record<ProviderBrand, string> = {
   claude: 'Claude',
   vertex: 'Vertex',
   openaiCompatibility: 'OpenAI',
-  ampcode: 'Ampcode',
 };
 
 const getProviderIcon = (brand: ProviderBrand, resolvedTheme: ResolvedTheme): string => {
@@ -91,13 +86,12 @@ const EMPTY_STATUS_BAR: StatusBarData = {
 const providerKeyConfig = (resource: ProviderResource) => resource.raw as ProviderKeyConfig;
 const geminiConfig = (resource: ProviderResource) => resource.raw as GeminiKeyConfig;
 const openAIConfig = (resource: ProviderResource) => resource.raw as OpenAIProviderConfig;
-const ampcodeConfig = (resource: ProviderResource) => resource.raw as AmpcodeConfig;
 
 const getStatusData = (
   resource: ProviderResource,
   usageByProvider?: ProviderRecentUsageMap
 ): StatusBarData => {
-  if (!usageByProvider || resource.brand === 'ampcode') return EMPTY_STATUS_BAR;
+  if (!usageByProvider) return EMPTY_STATUS_BAR;
   if (resource.brand === 'openaiCompatibility') {
     return getOpenAIProviderRecentStatusData(openAIConfig(resource), usageByProvider);
   }
@@ -113,7 +107,7 @@ const getStats = (
   resource: ProviderResource,
   usageByProvider?: ProviderRecentUsageMap
 ): { success: number; failure: number } => {
-  if (!usageByProvider || resource.brand === 'ampcode') return { success: 0, failure: 0 };
+  if (!usageByProvider) return { success: 0, failure: 0 };
   if (resource.brand === 'openaiCompatibility') {
     return getOpenAIProviderTotalStats(openAIConfig(resource), usageByProvider);
   }
@@ -368,68 +362,9 @@ export function ProviderResourceCards({
     );
   };
 
-  const renderAmpcodeCard = (resource: ProviderResource) => {
-    const config = ampcodeConfig(resource);
-
-    return (
-      <ItemCard
-        key={resource.id}
-        disabled={resource.disabled}
-        compact
-        avatar={{
-          icon: getProviderIcon('ampcode', resolvedTheme),
-          fallback: PROVIDER_FALLBACKS.ampcode,
-          bgColor: 'transparent',
-        }}
-        title="Amp CLI"
-        subtitle={config.upstreamUrl}
-        headerExtra={renderHeaderExtra(
-          config.upstreamApiKey
-            ? [{ apiKey: config.upstreamApiKey, proxyUrl: undefined, authIndex: undefined }]
-            : [],
-          PROVIDER_LABELS.ampcode,
-          config.upstreamUrl ?? ''
-        )}
-        content={
-          <>
-            <FieldRow
-              label={t('ai_providers.ampcode_upstream_url_label', { defaultValue: 'Upstream URL' })}
-              value={config.upstreamUrl}
-            />
-            <FieldRow
-              label={t('ai_providers.ampcode_force_model_mappings_label', {
-                defaultValue: 'Force Model Mappings',
-              })}
-              value={config.forceModelMappings ? t('common.enabled') : undefined}
-            />
-            <FieldRow
-              label={t('ai_providers.ampcode_model_mappings_count', {
-                defaultValue: 'Model Mappings',
-              })}
-              value={config.modelMappings?.length || 0}
-            />
-            <FieldRow
-              label={t('ai_providers.ampcode_upstream_api_keys_count', {
-                defaultValue: 'Upstream API Keys',
-              })}
-              value={config.upstreamApiKeys?.length || 0}
-            />
-          </>
-        }
-        actions={renderActions(resource)}
-      />
-    );
-  };
-
   const renderActions = (resource: ProviderResource) => {
-    const isAmpcode = resource.brand === 'ampcode';
     let modelsTooltipItems: { id: string; displayName?: string }[] = [];
-    if (resource.brand === 'ampcode') {
-      const cfg = ampcodeConfig(resource);
-      modelsTooltipItems = (cfg.modelMappings || [])
-        .filter((model) => model.from?.trim())
-        .map((model) => ({ id: model.from, displayName: model.to }));
-    } else if (resource.brand === 'openaiCompatibility') {
+    if (resource.brand === 'openaiCompatibility') {
       const cfg = openAIConfig(resource);
       modelsTooltipItems = (cfg.models || [])
         .filter((model) => model.name?.trim())
@@ -485,16 +420,16 @@ export function ProviderResourceCards({
               variant="danger"
               size="sm"
               onClick={() => onDelete(resource)}
-              disabled={disableMutations || (isAmpcode && resource.flags.isPlaceholder)}
-              title={isAmpcode ? t('providersPage.actions.clear') : t('common.delete')}
-              aria-label={isAmpcode ? t('providersPage.actions.clear') : t('common.delete')}
+              disabled={disableMutations}
+              title={t('common.delete')}
+              aria-label={t('common.delete')}
               className={ItemCard.styles.iconButton}
             >
               <IconTrash2 size={15} />
             </Button>
           </ItemCard.UtilityActions>
         </ItemCard.ActionsMain>
-        {!isAmpcode && onToggleDisabled ? (
+        {onToggleDisabled ? (
           <ItemCard.ToggleArea>
             <ToggleSwitch
               checked={!resource.disabled}
@@ -511,7 +446,6 @@ export function ProviderResourceCards({
     <ItemCard.Grid>
       {resources.map((resource) => {
         if (resource.brand === 'openaiCompatibility') return renderOpenAICard(resource);
-        if (resource.brand === 'ampcode') return renderAmpcodeCard(resource);
         return renderCommonCard(resource);
       })}
     </ItemCard.Grid>

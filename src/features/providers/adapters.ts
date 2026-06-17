@@ -1,5 +1,4 @@
 import type {
-  AmpcodeConfig,
   GeminiKeyConfig,
   OpenAIProviderConfig,
   ProviderKeyConfig,
@@ -117,37 +116,5 @@ export function openaiToResource(
     flags: {},
     selector: { brand: 'openaiCompatibility', name, index },
     raw: config,
-  };
-}
-
-export function ampcodeToResource(config?: AmpcodeConfig | null): ProviderResource {
-  const safe: AmpcodeConfig = config ?? {};
-  const upstreamApiKey = safe.upstreamApiKey ?? '';
-  const upstreamUrl = (safe.upstreamUrl ?? '').trim();
-  const hasUpstream = upstreamUrl.length > 0;
-  const upstreamKeyMappingsCount = safe.upstreamApiKeys?.length ?? 0;
-  return {
-    id: 'ampcode:singleton',
-    brand: 'ampcode',
-    originalIndex: 0,
-    name: null,
-    identifier: 'Amp CLI',
-    apiKeyPreview: upstreamApiKey ? maskApiKey(upstreamApiKey) : null,
-    apiKey: upstreamApiKey || null,
-    authIndex: null,
-    baseUrl: upstreamUrl || null,
-    proxyUrl: null,
-    prefix: null,
-    modelCount: safe.modelMappings?.length ?? 0,
-    headerCount: 0,
-    excludedModelCount: 0,
-    apiKeyEntryCount: upstreamKeyMappingsCount,
-    disabled: !hasUpstream,
-    flags: {
-      forceModelMappings: safe.forceModelMappings === true,
-      isPlaceholder: !hasUpstream && upstreamKeyMappingsCount === 0,
-    },
-    selector: { brand: 'ampcode' },
-    raw: safe,
   };
 }

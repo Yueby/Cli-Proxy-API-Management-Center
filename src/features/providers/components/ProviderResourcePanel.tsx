@@ -70,7 +70,7 @@ export function ProviderResourcePanel({
         </div>
       )}
 
-      {realResources.length === 0 && group.id !== 'ampcode' ? (
+      {realResources.length === 0 ? (
         <div className={styles.empty}>
           <div style={{ marginBottom: 12 }}>{t('providersPage.table.empty')}</div>
           <Button variant="secondary" size="sm" onClick={onCreate} disabled={disableMutations}>

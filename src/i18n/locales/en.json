@@ -1243,8 +1243,6 @@
     "openai_provider_added": "OpenAI provider added successfully",
     "openai_provider_updated": "OpenAI provider updated successfully",
     "openai_provider_deleted": "OpenAI provider deleted successfully",
-    "ampcode_updated": "Ampcode configuration updated",
-    "ampcode_upstream_api_key_cleared": "Ampcode upstream API key override cleared",
     "openai_model_name_required": "Model name is required",
     "openai_test_url_required": "Please provide a valid Base URL before testing",
     "openai_test_key_required": "Please add at least one API key before testing",
@@ -1323,17 +1321,14 @@
     },
     "categories": {
       "title": "Providers",
-      "activeCount": "{{active}}/{{total}} active",
-      "ampcodeActive": "Connected",
-      "ampcodeInactive": "Not configured"
+      "activeCount": "{{active}}/{{total}} active"
     },
     "providerNames": {
       "gemini": "Gemini",
       "codex": "Codex",
       "claude": "Claude",
       "vertex": "Vertex",
-      "openaiCompatibility": "OpenAI Compatible",
-      "ampcode": "Amp CLI"
+      "openaiCompatibility": "OpenAI Compatible"
     },
     "table": {
       "key": "Key",
@@ -1433,25 +1428,9 @@
       "experimentalCchSigning": "Experimental CCH signing",
       "experimentalCchSigningHint": "Sign the final cloaked Claude /v1/messages body with CCH"
     },
-    "ampcode": {
-      "upstreamUrl": "Upstream URL",
-      "upstreamApiKey": "Upstream API key (fallback)",
-      "upstreamApiKeyHint": "Used when no key mapping matches",
-      "keyMappingsSection": "Upstream key mappings",
-      "mappingRow": "Mapping #{{index}}",
-      "clientKeys": "Client keys",
-      "clientKeysHint": "One per line; matched keys forward to the upstream key above",
-      "addMapping": "Add key mapping",
-      "modelMappingsSection": "Model mappings",
-      "addModelMapping": "Add model mapping",
-      "forceModelMappings": "Force model mappings",
-      "forceModelMappingsHint": "Requests that don't match a mapping are rejected"
-    },
     "delete": {
       "title": "Delete resource",
-      "confirm": "Delete {{name}}? This action cannot be undone.",
-      "ampcodeTitle": "Clear Amp CLI configuration",
-      "ampcodeConfirm": "Clear all Amp CLI configuration? Upstream URL, keys and model mappings will be removed."
+      "confirm": "Delete {{name}}? This action cannot be undone."
     },
     "toast": {
       "created": "Created",
@@ -1517,10 +1496,6 @@
     "description": "Manage API keys and settings for Gemini, Codex, Claude, Vertex, and OpenAI-compatible providers.",
     "config_toggle_label": "Enabled",
     "openai_test_model": "Test Model",
-    "ampcode_upstream_url_label": "Upstream URL",
-    "ampcode_force_model_mappings_label": "Force Model Mappings",
-    "ampcode_model_mappings_count": "Model Mappings",
-    "ampcode_upstream_api_keys_count": "Upstream API Keys",
     "test_title": "Test Model",
     "test_back": "Back",
     "test_empty_hint": "Send your first message to start testing",
