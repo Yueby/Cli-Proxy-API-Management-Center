@@ -92,7 +92,6 @@ import {
   isXaiFile,
 } from '@/utils/quota';
 import { normalizeAuthIndex } from '@/utils/authIndex';
-import { formatDateTimeValue } from '@/utils/format';
 import type { QuotaRenderHelpers } from './QuotaCard';
 import styles from '@/pages/QuotaPage.module.scss';
 
@@ -1100,7 +1099,6 @@ const renderAntigravityItems = (
 };
 
 const PREMIUM_GEMINI_CLI_TIER_IDS = new Set(['g1-ultra-tier']);
-const PREMIUM_CODEX_PLAN_TYPES = new Set(['pro', 'prolite', 'pro-lite', 'pro_lite']);
 
 const renderCodexItems = (
   quota: CodexQuotaState,
@@ -1110,66 +1108,7 @@ const renderCodexItems = (
   const { styles: styleMap, QuotaProgressBar } = helpers;
   const { createElement: h, Fragment } = React;
   const windows = quota.windows ?? [];
-  const planType = quota.planType ?? null;
-  const subscriptionActiveUntil = quota.subscriptionActiveUntil ?? null;
-  const rateLimitResetCreditsAvailableCount = quota.rateLimitResetCreditsAvailableCount ?? null;
-
-  const getPlanLabel = (pt?: string | null): string | null => {
-    const normalized = normalizePlanType(pt);
-    if (!normalized) return null;
-    if (normalized === 'pro') return t('codex_quota.plan_pro');
-    if (PREMIUM_CODEX_PLAN_TYPES.has(normalized) && normalized !== 'pro') {
-      return t('codex_quota.plan_prolite');
-    }
-    if (normalized === 'plus') return t('codex_quota.plan_plus');
-    if (normalized === 'team') return t('codex_quota.plan_team');
-    if (normalized === 'free') return t('codex_quota.plan_free');
-    return pt || normalized;
-  };
-
-  const planLabel = getPlanLabel(planType);
-  const isPremiumPlan = PREMIUM_CODEX_PLAN_TYPES.has(normalizePlanType(planType) ?? '');
-  const expiryLabel = subscriptionActiveUntil ? formatDateTimeValue(subscriptionActiveUntil) : '';
   const nodes: ReactNode[] = [];
-
-  if (planLabel || expiryLabel || rateLimitResetCreditsAvailableCount !== null) {
-    const planValueClass = isPremiumPlan ? styleMap.premiumPlanValue : styleMap.codexPlanValue;
-    const planNodes: ReactNode[] = [];
-
-    const appendPlanItem = (
-      key: string,
-      label: string,
-      value: string,
-      valueClassName = styleMap.codexPlanValue
-    ) => {
-      planNodes.push(
-        h(
-          'span',
-          { key, className: styleMap.codexPlanItem },
-          h('span', { className: styleMap.codexPlanLabel }, label),
-          h('span', { className: valueClassName }, value)
-        )
-      );
-    };
-
-    if (planLabel) {
-      appendPlanItem('plan-type', t('codex_quota.plan_label'), planLabel, planValueClass);
-    }
-
-    if (expiryLabel) {
-      appendPlanItem('subscription-expiry', t('codex_quota.expires_label'), expiryLabel);
-    }
-
-    if (rateLimitResetCreditsAvailableCount !== null) {
-      appendPlanItem(
-        'reset-credits',
-        t('codex_quota.reset_credits_label'),
-        rateLimitResetCreditsAvailableCount.toString()
-      );
-    }
-
-    nodes.push(h('div', { key: 'plan', className: styleMap.codexPlan }, ...planNodes));
-  }
 
   if (windows.length === 0) {
     nodes.push(

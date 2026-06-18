@@ -493,6 +493,7 @@
     "additional_team_secondary_window": "{{name}} 月度限額",
     "expires_label": "續期時間",
     "reset_credits_label": "主動重置次數",
+    "reset_credits_badge": "主動重置 ×{{count}}",
     "reset_button": "重置配額",
     "reset_confirm_title": "重置 Codex 配額",
     "reset_confirm_message": "將消耗 1 次主動重置次數來重置「{{name}}」的 Codex 配額。是否繼續？",

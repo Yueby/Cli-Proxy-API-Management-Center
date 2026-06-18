@@ -490,6 +490,7 @@
     "additional_team_secondary_window": "{{name}}: месячный лимит",
     "expires_label": "Истекает",
     "reset_credits_label": "Сбросов доступно",
+    "reset_credits_badge": "Сбросы ×{{count}}",
     "reset_button": "Сбросить квоту",
     "reset_confirm_title": "Сбросить квоту Codex?",
     "reset_confirm_message": "Будет использована одна доступная попытка сброса квоты. Продолжить?",

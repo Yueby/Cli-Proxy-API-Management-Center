@@ -493,6 +493,7 @@
     "additional_team_secondary_window": "{{name}} monthly limit",
     "expires_label": "Renewal time",
     "reset_credits_label": "Manual resets",
+    "reset_credits_badge": "Resets ×{{count}}",
     "reset_button": "Reset quota",
     "reset_confirm_title": "Reset Codex quota",
     "reset_confirm_message": "This will consume 1 manual reset to reset the Codex quota for \"{{name}}\". Continue?",

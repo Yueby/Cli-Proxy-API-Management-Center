@@ -169,6 +169,12 @@ export function AuthFileCard(props: AuthFileCardProps) {
     if (codexQ && codexQ.status === 'success' && codexQ.planType) return codexQ.planType;
     return null;
   });
+  const codexResetCreditsAvailableCount = useQuotaStore((state) => {
+    const quota = state.codexQuota[file.name];
+    if (!quota || quota.status !== 'success') return null;
+    const count = quota.rateLimitResetCreditsAvailableCount ?? null;
+    return typeof count === 'number' && count > 0 ? count : null;
+  });
   const resolvedPlanLabel = codexPlan || quotaStorePlan || null;
   const codexSubscriptionBadge = resolveCodexSubscriptionBadge(file, t, i18n.resolvedLanguage);
   const cachedModels = getCachedModels(file.name);
@@ -259,6 +265,22 @@ export function AuthFileCard(props: AuthFileCardProps) {
                 variant: 'custom' as const,
                 style: codexSubscriptionBadge.style,
                 title: codexSubscriptionBadge.title,
+              },
+            ]
+          : []),
+        ...(codexResetCreditsAvailableCount !== null
+          ? [
+              {
+                label: t('codex_quota.reset_credits_badge', {
+                  count: codexResetCreditsAvailableCount,
+                }),
+                variant: 'custom' as const,
+                style: {
+                  backgroundColor: 'rgba(14, 165, 233, 0.12)',
+                  color: '#0284c7',
+                  border: '1px solid rgba(14, 165, 233, 0.28)',
+                },
+                title: t('codex_quota.reset_credits_label'),
               },
             ]
           : []),
