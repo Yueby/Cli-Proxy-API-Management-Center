@@ -101,8 +101,20 @@
   }
 
   @include mobile {
-    mask-image: linear-gradient(to right, transparent, black 12px, black calc(100% - 12px), transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 12px, black calc(100% - 12px), transparent);
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 12px,
+      black calc(100% - 12px),
+      transparent
+    );
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 12px,
+      black calc(100% - 12px),
+      transparent
+    );
   }
 }
 

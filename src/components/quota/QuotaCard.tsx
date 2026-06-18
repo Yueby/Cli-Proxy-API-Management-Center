@@ -28,10 +28,9 @@ export interface QuotaProgressBarProps {
 export function QuotaProgressBar({
   percent,
   highThreshold,
-  mediumThreshold
+  mediumThreshold,
 }: QuotaProgressBarProps) {
-  const clamp = (value: number, min: number, max: number) =>
-    Math.min(max, Math.max(min, value));
+  const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
   const normalized = percent === null ? null : clamp(percent, 0, 100);
   const fillClass =
     normalized === null
@@ -82,7 +81,7 @@ export function QuotaCard<TState extends QuotaStatusState>({
   canRefresh = false,
   onRefresh,
   resetQuotaAction,
-  renderQuotaItems
+  renderQuotaItems,
 }: QuotaCardProps<TState>) {
   const { t } = useTranslation();
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -93,34 +92,70 @@ export function QuotaCard<TState extends QuotaStatusState>({
     quota?.errorStatus,
     quota?.error || t('common.unknown_error')
   );
-  const idleMessageKey = onRefresh ? `${i18nPrefix}.idle` : (cardIdleMessageKey ?? `${i18nPrefix}.idle`);
+  const idleMessageKey = onRefresh
+    ? `${i18nPrefix}.idle`
+    : (cardIdleMessageKey ?? `${i18nPrefix}.idle`);
 
   // Extract planType: prefer file metadata (always available), fallback to quota state
   const planTypeFromFile = resolveCodexPlanType(item);
-  const planTypeFromQuota = quota && 'planType' in quota ? (quota as Record<string, unknown>).planType as string | null | undefined : undefined;
+  const planTypeFromQuota =
+    quota && 'planType' in quota
+      ? ((quota as Record<string, unknown>).planType as string | null | undefined)
+      : undefined;
   // Also extract tierLabel for Gemini CLI
-  const tierLabel = quota && 'tierLabel' in quota ? (quota as Record<string, unknown>).tierLabel as string | null | undefined : undefined;
+  const tierLabel =
+    quota && 'tierLabel' in quota
+      ? ((quota as Record<string, unknown>).tierLabel as string | null | undefined)
+      : undefined;
   const planType = planTypeFromFile || planTypeFromQuota || tierLabel || null;
   const normalizedPlan = planType ? planType.trim().toLowerCase() : '';
   const isPro = normalizedPlan === 'pro';
-  const isProLite = normalizedPlan === 'prolite' || normalizedPlan === 'pro-lite' || normalizedPlan === 'pro_lite';
-  const isPlus = normalizedPlan === 'plus' || normalizedPlan === 'chatgpt-plus' || normalizedPlan === 'chatgptplus';
+  const isProLite =
+    normalizedPlan === 'prolite' || normalizedPlan === 'pro-lite' || normalizedPlan === 'pro_lite';
+  const isPlus =
+    normalizedPlan === 'plus' ||
+    normalizedPlan === 'chatgpt-plus' ||
+    normalizedPlan === 'chatgptplus';
   const isTeam = normalizedPlan === 'team' || normalizedPlan === 'enterprise';
   // Gemini CLI premium tiers
-  const tierId = quota && 'tierId' in quota ? (quota as Record<string, unknown>).tierId as string | null | undefined : undefined;
+  const tierId =
+    quota && 'tierId' in quota
+      ? ((quota as Record<string, unknown>).tierId as string | null | undefined)
+      : undefined;
   const isPremiumTier = tierId ? tierId === 'g1-ultra-tier' : false;
-  const isPremium = (defaultType === 'codex' && isPro) || (defaultType === 'gemini-cli' && isPremiumTier);
+  const isPremium =
+    (defaultType === 'codex' && isPro) || (defaultType === 'gemini-cli' && isPremiumTier);
   const planBadgeStyle = isPremium
     ? undefined
     : isPro
-      ? { backgroundColor: 'rgba(139, 92, 246, 0.12)', color: '#8b5cf6', border: '1px solid rgba(139, 92, 246, 0.3)' }
+      ? {
+          backgroundColor: 'rgba(139, 92, 246, 0.12)',
+          color: '#8b5cf6',
+          border: '1px solid rgba(139, 92, 246, 0.3)',
+        }
       : isProLite
-        ? { backgroundColor: 'rgba(217, 165, 22, 0.15)', color: '#e0aa14', border: '1px solid rgba(217, 165, 22, 0.3)' }
+        ? {
+            backgroundColor: 'rgba(217, 165, 22, 0.15)',
+            color: '#e0aa14',
+            border: '1px solid rgba(217, 165, 22, 0.3)',
+          }
         : isPlus
-          ? { backgroundColor: 'rgba(16, 163, 127, 0.12)', color: '#10a37f', border: '1px solid rgba(16, 163, 127, 0.3)' }
+          ? {
+              backgroundColor: 'rgba(16, 163, 127, 0.12)',
+              color: '#10a37f',
+              border: '1px solid rgba(16, 163, 127, 0.3)',
+            }
           : isTeam
-            ? { backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)' }
-            : { backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' };
+            ? {
+                backgroundColor: 'rgba(59, 130, 246, 0.12)',
+                color: '#3b82f6',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+              }
+            : {
+                backgroundColor: 'var(--bg-tertiary)',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border-color)',
+              };
 
   return (
     <div className={`${styles.fileCard} ${cardClassName}`}>
@@ -161,7 +196,7 @@ export function QuotaCard<TState extends QuotaStatusState>({
               title={t(`${i18nPrefix}.load_failed`, { message: quotaErrorMessage })}
             >
               {t(`${i18nPrefix}.load_failed`, {
-                message: quotaErrorMessage
+                message: quotaErrorMessage,
               })}
             </button>
 
@@ -178,25 +213,29 @@ export function QuotaCard<TState extends QuotaStatusState>({
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>
-                  {t('quota_management.quota_error_detail_desc', { defaultValue: 'Quota load error details:' })}
+                  {t('quota_management.quota_error_detail_desc', {
+                    defaultValue: 'Quota load error details:',
+                  })}
                 </p>
-                <pre style={{
-                  margin: 0,
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-all',
-                  background: 'var(--bg-secondary)',
-                  padding: '12px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color)',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '13px',
-                  lineHeight: '1.5',
-                  color: 'var(--text-primary)',
-                  maxHeight: '240px',
-                  overflowY: 'auto'
-                }}>
+                <pre
+                  style={{
+                    margin: 0,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-all',
+                    background: 'var(--bg-secondary)',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-color)',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '13px',
+                    lineHeight: '1.5',
+                    color: 'var(--text-primary)',
+                    maxHeight: '240px',
+                    overflowY: 'auto',
+                  }}
+                >
                   {t(`${i18nPrefix}.load_failed`, {
-                    message: quotaErrorMessage
+                    message: quotaErrorMessage,
                   })}
                 </pre>
               </div>
