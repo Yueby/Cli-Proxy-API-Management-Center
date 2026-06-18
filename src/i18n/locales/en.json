@@ -414,7 +414,24 @@
     "missing_auth_index": "Auth file missing auth_index",
     "empty_models": "No quota data available",
     "refresh_button": "Refresh Quota",
-    "fetch_all": "Fetch All"
+    "fetch_all": "Fetch All",
+    "missing_project_id": "Antigravity credential missing project_id. Re-login or refresh the credential to discover the project.",
+    "plan_label": "Plan",
+    "group_gemini_models": "Gemini models",
+    "group_claude_gpt_models": "Claude and GPT models",
+    "group_models_description": "Models in this group: {{models}}",
+    "weekly_limit": "Weekly limit",
+    "daily_limit": "Daily limit",
+    "five_hour_limit": "5-hour limit",
+    "monthly_limit": "Monthly limit",
+    "quota_available": "Quota available",
+    "remaining_percent": "{{percent}}% remaining",
+    "refreshes_in": "Refreshes in {{duration}}",
+    "refresh_available": "Refresh available",
+    "duration_day_hour": "{{days}}d {{hours}}h",
+    "duration_hour_minute": "{{hours}}h {{minutes}}m",
+    "duration_minute": "{{minutes}}m",
+    "duration_less_than_minute": "<1m"
   },
   "claude_quota": {
     "title": "Claude Quota",
@@ -543,7 +560,10 @@
     "monthly_credits": "Monthly credits",
     "pay_as_you_go_label": "Pay as you go",
     "pay_as_you_go_enabled": "Enabled, cap {{cap}}",
-    "pay_as_you_go_disabled": "Disabled"
+    "pay_as_you_go_disabled": "Disabled",
+    "plan_label": "Plan",
+    "plan_supergrok": "SuperGrok",
+    "plan_supergrok_heavy": "SuperGrok Heavy"
   },
   "vertex_import": {
     "title": "Vertex JSON Login",
@@ -1570,7 +1590,8 @@
     "invalid_json": "Enter valid JSON",
     "expected_array": "Enter a JSON array",
     "expected_object": "Enter a JSON object",
-    "invalid_enum": "Choose one of the declared enum values"
+    "invalid_enum": "Choose one of the declared enum values",
+    "runtime_pending": "Plugin change was saved, but the runtime state is still pending. Refresh later or check backend logs."
   },
   "plugin_store": {
     "title": "Plugin Store",
@@ -1637,7 +1658,9 @@
     "gate_step2_action": "I have read and understand these risks",
     "gate_step3_prompt": "To confirm, type \"{{token}}\" in the box below",
     "gate_step3_action": "Install this plugin",
-    "gate_step3_hint": "Enter the exact identifier shown above to enable installation."
+    "gate_step3_hint": "Enter the exact identifier shown above to enable installation.",
+    "status_pending": "Plugin files were updated, but the local status has not refreshed yet. Refresh later or check backend logs.",
+    "registration_pending": "Plugin files were updated, but registration is still pending. Refresh later or check backend logs."
   },
   "plugin_resource": {
     "title": "Plugin Page",
@@ -1648,5 +1671,19 @@
     "not_found_desc": "This plugin page is not declared by the current backend plugin list.",
     "empty_src": "Plugin page URL is empty",
     "empty_src_desc": "This plugin menu does not provide an embeddable page URL."
+  },
+  "antigravity_subscription": {
+    "subscription_label": "Subscription",
+    "plan_badge": "Plan {{plan}}",
+    "loading_short": "Plan...",
+    "error_badge": "Plan error",
+    "load_failed": "Subscription check failed: {{message}}",
+    "missing_auth_index": "Auth file missing auth_index",
+    "empty_data": "No subscription data available",
+    "plan_unknown": "Unknown",
+    "plan_free": "Free",
+    "plan_pro": "Pro",
+    "plan_ultra": "Ultra",
+    "plan_ultra_lite": "Ultra Lite"
   }
 }

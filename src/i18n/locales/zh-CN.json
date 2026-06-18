@@ -414,7 +414,24 @@
     "missing_auth_index": "认证文件缺少 auth_index",
     "empty_models": "暂无额度数据",
     "refresh_button": "刷新额度",
-    "fetch_all": "获取全部"
+    "fetch_all": "获取全部",
+    "missing_project_id": "Antigravity 凭证缺少 project_id。请重新登录或刷新凭证以发现项目。",
+    "plan_label": "套餐",
+    "group_gemini_models": "Gemini 模型",
+    "group_claude_gpt_models": "Claude 和 GPT 模型",
+    "group_models_description": "此分组包含：{{models}}",
+    "weekly_limit": "周限额",
+    "daily_limit": "日限额",
+    "five_hour_limit": "5 小时限额",
+    "monthly_limit": "月限额",
+    "quota_available": "额度可用",
+    "remaining_percent": "剩余 {{percent}}%",
+    "refreshes_in": "{{duration}} 后刷新",
+    "refresh_available": "可刷新",
+    "duration_day_hour": "{{days}} 天 {{hours}} 小时",
+    "duration_hour_minute": "{{hours}} 小时 {{minutes}} 分钟",
+    "duration_minute": "{{minutes}} 分钟",
+    "duration_less_than_minute": "小于 1 分钟"
   },
   "claude_quota": {
     "title": "Claude 额度",
@@ -543,7 +560,10 @@
     "monthly_credits": "月度积分",
     "pay_as_you_go_label": "按量付费",
     "pay_as_you_go_enabled": "已启用，封顶 {{cap}}",
-    "pay_as_you_go_disabled": "未启用"
+    "pay_as_you_go_disabled": "未启用",
+    "plan_label": "套餐",
+    "plan_supergrok": "SuperGrok",
+    "plan_supergrok_heavy": "SuperGrok Heavy"
   },
   "vertex_import": {
     "title": "Vertex JSON 登录",
@@ -1570,7 +1590,8 @@
     "invalid_json": "请输入有效 JSON",
     "expected_array": "请输入 JSON 数组",
     "expected_object": "请输入 JSON 对象",
-    "invalid_enum": "请选择声明的枚举值"
+    "invalid_enum": "请选择声明的枚举值",
+    "runtime_pending": "插件变更已保存，但运行时状态仍在更新中。请稍后刷新或检查后端日志。"
   },
   "plugin_store": {
     "title": "插件商店",
@@ -1637,7 +1658,9 @@
     "gate_step2_action": "我已阅读并理解上述风险",
     "gate_step3_prompt": "如需确认，请在下方输入框中键入 “{{token}}”",
     "gate_step3_action": "安装此插件",
-    "gate_step3_hint": "请输入上方显示的完整标识以启用安装。"
+    "gate_step3_hint": "请输入上方显示的完整标识以启用安装。",
+    "status_pending": "插件文件已更新，但本地状态尚未刷新。请稍后刷新或检查后端日志。",
+    "registration_pending": "插件文件已更新，但注册仍在进行中。请稍后刷新或检查后端日志。"
   },
   "plugin_resource": {
     "title": "插件页面",
@@ -1648,5 +1671,19 @@
     "not_found_desc": "该插件页面未在当前后端插件列表中声明。",
     "empty_src": "插件页面地址为空",
     "empty_src_desc": "该插件菜单未提供可嵌入的页面地址。"
+  },
+  "antigravity_subscription": {
+    "subscription_label": "订阅",
+    "plan_badge": "套餐 {{plan}}",
+    "loading_short": "套餐...",
+    "error_badge": "套餐错误",
+    "load_failed": "订阅状态获取失败：{{message}}",
+    "missing_auth_index": "认证文件缺少 auth_index",
+    "empty_data": "暂无订阅数据",
+    "plan_unknown": "未知",
+    "plan_free": "免费版",
+    "plan_pro": "Pro",
+    "plan_ultra": "Ultra",
+    "plan_ultra_lite": "Ultra Lite"
   }
 }

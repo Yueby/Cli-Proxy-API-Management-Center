@@ -414,7 +414,24 @@
     "missing_auth_index": "驗證檔案缺少 auth_index",
     "empty_models": "暫無配額資料",
     "refresh_button": "重新整理配額",
-    "fetch_all": "取得全部"
+    "fetch_all": "取得全部",
+    "missing_project_id": "Antigravity 憑證缺少 project_id。請重新登入或重新整理憑證以探索專案。",
+    "plan_label": "方案",
+    "group_gemini_models": "Gemini 模型",
+    "group_claude_gpt_models": "Claude 與 GPT 模型",
+    "group_models_description": "此分組包含：{{models}}",
+    "weekly_limit": "週限額",
+    "daily_limit": "日限額",
+    "five_hour_limit": "5 小時限額",
+    "monthly_limit": "月限額",
+    "quota_available": "配額可用",
+    "remaining_percent": "剩餘 {{percent}}%",
+    "refreshes_in": "{{duration}} 後重新整理",
+    "refresh_available": "可重新整理",
+    "duration_day_hour": "{{days}} 天 {{hours}} 小時",
+    "duration_hour_minute": "{{hours}} 小時 {{minutes}} 分鐘",
+    "duration_minute": "{{minutes}} 分鐘",
+    "duration_less_than_minute": "小於 1 分鐘"
   },
   "claude_quota": {
     "title": "Claude 配額",
@@ -543,7 +560,10 @@
     "monthly_credits": "月度點數",
     "pay_as_you_go_label": "按量付費",
     "pay_as_you_go_enabled": "已啟用，封頂 {{cap}}",
-    "pay_as_you_go_disabled": "未啟用"
+    "pay_as_you_go_disabled": "未啟用",
+    "plan_label": "方案",
+    "plan_supergrok": "SuperGrok",
+    "plan_supergrok_heavy": "SuperGrok Heavy"
   },
   "vertex_import": {
     "title": "Vertex JSON 登入",
@@ -1597,7 +1617,8 @@
     "invalid_json": "請輸入有效 JSON",
     "expected_array": "請輸入 JSON 陣列",
     "expected_object": "請輸入 JSON 物件",
-    "invalid_enum": "請選擇宣告的枚舉值"
+    "invalid_enum": "請選擇宣告的枚舉值",
+    "runtime_pending": "插件變更已儲存，但執行時狀態仍在更新中。請稍後重新整理或檢查後端日誌。"
   },
   "plugin_store": {
     "title": "插件商店",
@@ -1664,7 +1685,9 @@
     "gate_step2_action": "我已閱讀並理解上述風險",
     "gate_step3_prompt": "如需確認，請在下方輸入框中鍵入 “{{token}}”",
     "gate_step3_action": "安裝此插件",
-    "gate_step3_hint": "請輸入上方顯示的完整識別碼以啟用安裝。"
+    "gate_step3_hint": "請輸入上方顯示的完整識別碼以啟用安裝。",
+    "status_pending": "插件檔案已更新，但本機狀態尚未重新整理。請稍後重新整理或檢查後端日誌。",
+    "registration_pending": "插件檔案已更新，但註冊仍在進行中。請稍後重新整理或檢查後端日誌。"
   },
   "plugin_resource": {
     "title": "插件頁面",
@@ -1675,5 +1698,19 @@
     "not_found_desc": "目前後端插件清單未宣告此插件頁面。",
     "empty_src": "插件頁面位址為空",
     "empty_src_desc": "此插件選單未提供可嵌入的頁面位址。"
+  },
+  "antigravity_subscription": {
+    "subscription_label": "訂閱",
+    "plan_badge": "方案 {{plan}}",
+    "loading_short": "方案...",
+    "error_badge": "方案錯誤",
+    "load_failed": "訂閱狀態取得失敗：{{message}}",
+    "missing_auth_index": "驗證檔案缺少 auth_index",
+    "empty_data": "暫無訂閱資料",
+    "plan_unknown": "未知",
+    "plan_free": "免費版",
+    "plan_pro": "Pro",
+    "plan_ultra": "Ultra",
+    "plan_ultra_lite": "Ultra Lite"
   }
 }

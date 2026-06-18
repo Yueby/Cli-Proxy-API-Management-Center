@@ -411,7 +411,24 @@
     "missing_auth_index": "В файле авторизации отсутствует auth_index",
     "empty_models": "Данные по квоте отсутствуют",
     "refresh_button": "Обновить квоту",
-    "fetch_all": "Получить все"
+    "fetch_all": "Получить все",
+    "missing_project_id": "В учётных данных Antigravity отсутствует project_id. Войдите заново или обновите учётные данные, чтобы определить проект.",
+    "plan_label": "План",
+    "group_gemini_models": "Модели Gemini",
+    "group_claude_gpt_models": "Модели Claude и GPT",
+    "group_models_description": "Модели в этой группе: {{models}}",
+    "weekly_limit": "Недельный лимит",
+    "daily_limit": "Дневной лимит",
+    "five_hour_limit": "Лимит на 5 часов",
+    "monthly_limit": "Месячный лимит",
+    "quota_available": "Квота доступна",
+    "remaining_percent": "Осталось {{percent}}%",
+    "refreshes_in": "Обновится через {{duration}}",
+    "refresh_available": "Можно обновить",
+    "duration_day_hour": "{{days}} д {{hours}} ч",
+    "duration_hour_minute": "{{hours}} ч {{minutes}} мин",
+    "duration_minute": "{{minutes}} мин",
+    "duration_less_than_minute": "<1 мин"
   },
   "claude_quota": {
     "title": "Квота Claude",
@@ -540,7 +557,10 @@
     "monthly_credits": "Месячные кредиты",
     "pay_as_you_go_label": "Оплата по факту",
     "pay_as_you_go_enabled": "Включено, лимит {{cap}}",
-    "pay_as_you_go_disabled": "Отключено"
+    "pay_as_you_go_disabled": "Отключено",
+    "plan_label": "План",
+    "plan_supergrok": "SuperGrok",
+    "plan_supergrok_heavy": "SuperGrok Heavy"
   },
   "vertex_import": {
     "title": "Вход с Vertex JSON",
@@ -1567,7 +1587,8 @@
     "invalid_json": "Введите корректный JSON",
     "expected_array": "Введите JSON-массив",
     "expected_object": "Введите JSON-объект",
-    "invalid_enum": "Выберите одно из объявленных значений enum"
+    "invalid_enum": "Выберите одно из объявленных значений enum",
+    "runtime_pending": "Изменение плагина сохранено, но состояние runtime ещё обновляется. Обновите страницу позже или проверьте логи backend."
   },
   "plugin_store": {
     "title": "Магазин плагинов",
@@ -1634,7 +1655,9 @@
     "gate_step2_action": "Я прочитал и понимаю эти риски",
     "gate_step3_prompt": "Для подтверждения введите «{{token}}» в поле ниже",
     "gate_step3_action": "Установить этот плагин",
-    "gate_step3_hint": "Введите точный идентификатор, показанный выше, чтобы включить установку."
+    "gate_step3_hint": "Введите точный идентификатор, показанный выше, чтобы включить установку.",
+    "status_pending": "Файлы плагина обновлены, но локальный статус ещё не обновился. Обновите страницу позже или проверьте логи backend.",
+    "registration_pending": "Файлы плагина обновлены, но регистрация ещё выполняется. Обновите страницу позже или проверьте логи backend."
   },
   "plugin_resource": {
     "load_failed": "Не удалось загрузить ресурс плагина",
@@ -1643,5 +1666,19 @@
     "not_found_desc": "Проверьте, что плагин установлен и пункт меню существует",
     "empty_src": "Источник ресурса пуст",
     "empty_src_desc": "Этот пункт меню плагина не указал URL или HTML-ресурс"
+  },
+  "antigravity_subscription": {
+    "subscription_label": "Подписка",
+    "plan_badge": "План {{plan}}",
+    "loading_short": "План...",
+    "error_badge": "Ошибка плана",
+    "load_failed": "Не удалось проверить подписку: {{message}}",
+    "missing_auth_index": "В файле авторизации отсутствует auth_index",
+    "empty_data": "Данные подписки отсутствуют",
+    "plan_unknown": "Неизвестно",
+    "plan_free": "Free",
+    "plan_pro": "Pro",
+    "plan_ultra": "Ultra",
+    "plan_ultra_lite": "Ultra Lite"
   }
 }
