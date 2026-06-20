@@ -12,6 +12,10 @@ type QuotaState =
   | { status?: 'idle' | 'loading' | 'success' | 'error'; error?: string; errorStatus?: number }
   | undefined;
 
+const assertNever = (value: never): never => {
+  throw new Error(`Unsupported quota type: ${value}`);
+};
+
 export type AuthFileQuotaSectionProps = {
   file: AuthFileItem;
   quotaType: QuotaProviderType;
@@ -28,7 +32,7 @@ export function AuthFileQuotaSection(props: AuthFileQuotaSectionProps) {
     if (quotaType === 'codex') return state.codexQuota[file.name] as QuotaState;
     if (quotaType === 'kimi') return state.kimiQuota[file.name] as QuotaState;
     if (quotaType === 'xai') return state.xaiQuota[file.name] as QuotaState;
-    return state.geminiCliQuota[file.name] as QuotaState;
+    return assertNever(quotaType);
   });
 
   const config = getAuthFileQuotaConfig(quotaType);
@@ -45,10 +49,9 @@ export function AuthFileQuotaSection(props: AuthFileQuotaSectionProps) {
     if (quotaType === 'antigravity') return (quota as { groups?: unknown[] }).groups?.length ?? 0;
     if (quotaType === 'claude') return (quota as { windows?: unknown[] }).windows?.length ?? 0;
     if (quotaType === 'codex') return (quota as { windows?: unknown[] }).windows?.length ?? 0;
-    if (quotaType === 'gemini-cli') return (quota as { buckets?: unknown[] }).buckets?.length ?? 0;
     if (quotaType === 'kimi') return (quota as { rows?: unknown[] }).rows?.length ?? 0;
     if (quotaType === 'xai') return 1;
-    return 0;
+    return assertNever(quotaType);
   };
 
   if (quotaStatus === 'idle') return null;

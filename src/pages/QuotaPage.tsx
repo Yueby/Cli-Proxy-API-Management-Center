@@ -1,5 +1,5 @@
 /**
- * Quota management page - coordinates the three quota sections.
+ * Quota management page - coordinates quota sections.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -14,7 +14,6 @@ import {
   ANTIGRAVITY_CONFIG,
   CLAUDE_CONFIG,
   CODEX_CONFIG,
-  GEMINI_CLI_CONFIG,
   KIMI_CONFIG,
   XAI_CONFIG,
 } from '@/components/quota';
@@ -24,23 +23,15 @@ import styles from './QuotaPage.module.scss';
 import iconClaude from '@/assets/icons/claude.svg';
 import iconCodex from '@/assets/icons/codex.svg';
 import iconAntigravity from '@/assets/icons/antigravity.svg';
-import iconGemini from '@/assets/icons/gemini.svg';
 import iconKimiLight from '@/assets/icons/kimi-light.svg';
 import iconKimiDark from '@/assets/icons/kimi-dark.svg';
 import iconGrokLight from '@/assets/icons/grok.svg';
 import iconGrokDark from '@/assets/icons/grok-dark.svg';
 
-type QuotaProviderId = 'claude' | 'antigravity' | 'codex' | 'gemini-cli' | 'kimi' | 'xai';
+type QuotaProviderId = 'claude' | 'antigravity' | 'codex' | 'kimi' | 'xai';
 
 const QUOTA_TAB_STORAGE_KEY = 'quota-management.active-tab';
-const QUOTA_TAB_IDS: QuotaProviderId[] = [
-  'claude',
-  'antigravity',
-  'codex',
-  'gemini-cli',
-  'kimi',
-  'xai',
-];
+const QUOTA_TAB_IDS: QuotaProviderId[] = ['claude', 'antigravity', 'codex', 'kimi', 'xai'];
 
 export function QuotaPage() {
   const { t } = useTranslation();
@@ -120,7 +111,6 @@ export function QuotaPage() {
     { id: 'claude', config: CLAUDE_CONFIG, getIcon: () => iconClaude },
     { id: 'antigravity', config: ANTIGRAVITY_CONFIG, getIcon: () => iconAntigravity },
     { id: 'codex', config: CODEX_CONFIG, getIcon: () => iconCodex },
-    { id: 'gemini-cli', config: GEMINI_CLI_CONFIG, getIcon: () => iconGemini },
     {
       id: 'kimi',
       config: KIMI_CONFIG,
@@ -163,15 +153,6 @@ export function QuotaPage() {
         return (
           <QuotaSection
             config={CODEX_CONFIG}
-            files={files}
-            loading={loading}
-            disabled={disableControls}
-          />
-        );
-      case 'gemini-cli':
-        return (
-          <QuotaSection
-            config={GEMINI_CLI_CONFIG}
             files={files}
             loading={loading}
             disabled={disableControls}

@@ -440,7 +440,6 @@ export function AuthFilesPage() {
       'codex',
       'openaiCompatibility',
       'openai',
-      'gemini-cli',
       'gemini',
       'claude',
       'antigravity',

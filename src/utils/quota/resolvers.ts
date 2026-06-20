@@ -145,35 +145,6 @@ export function resolveCodexSubscriptionActiveUntil(file: AuthFileItem): string 
 
   return null;
 }
-
-export function extractGeminiCliProjectId(value: unknown): string | null {
-  if (typeof value !== 'string') return null;
-  const matches = Array.from(value.matchAll(/\(([^()]+)\)/g));
-  if (matches.length === 0) return null;
-  const candidate = matches[matches.length - 1]?.[1]?.trim();
-  return candidate ? candidate : null;
-}
-
-export function resolveGeminiCliProjectId(file: AuthFileItem): string | null {
-  const metadata =
-    file && typeof file.metadata === 'object' && file.metadata !== null
-      ? (file.metadata as Record<string, unknown>)
-      : null;
-  const attributes =
-    file && typeof file.attributes === 'object' && file.attributes !== null
-      ? (file.attributes as Record<string, unknown>)
-      : null;
-
-  const candidates = [file.account, file['account'], metadata?.account, attributes?.account];
-
-  for (const candidate of candidates) {
-    const projectId = extractGeminiCliProjectId(candidate);
-    if (projectId) return projectId;
-  }
-
-  return null;
-}
-
 export function resolveGoogleProjectId(file: AuthFileItem): string | null {
   const metadata =
     file && typeof file.metadata === 'object' && file.metadata !== null
@@ -200,7 +171,7 @@ export function resolveGoogleProjectId(file: AuthFileItem): string | null {
     if (projectId) return projectId;
   }
 
-  return resolveGeminiCliProjectId(file);
+  return null;
 }
 
 export function requiresGoogleProjectId(file: AuthFileItem): boolean {
@@ -208,5 +179,5 @@ export function requiresGoogleProjectId(file: AuthFileItem): boolean {
     .trim()
     .toLowerCase()
     .replace(/_/g, '-');
-  return provider === 'antigravity' || provider === 'gemini-cli' || provider === 'vertex';
+  return provider === 'antigravity' || provider === 'vertex';
 }

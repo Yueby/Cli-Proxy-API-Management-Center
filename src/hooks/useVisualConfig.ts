@@ -732,8 +732,8 @@ function getNextDirtyFields(
       'passthroughHeaders',
       'disableCooling',
       'disableImageGeneration',
+      'gptImage2BaseModel',
       'authAutoRefreshWorkers',
-      'enableGeminiCliEndpoint',
       'antigravitySignatureCacheEnabled',
       'antigravitySignatureBypassStrict',
       'pluginsEnabled',
@@ -1052,9 +1052,12 @@ export function useVisualConfig() {
         maxRetryInterval: String(parsed['max-retry-interval'] ?? ''),
         disableCooling: Boolean(parsed['disable-cooling']),
         disableImageGeneration: parseDisableImageGenerationMode(parsed['disable-image-generation']),
+        gptImage2BaseModel:
+          typeof parsed['gpt-image-2-base-model'] === 'string'
+            ? parsed['gpt-image-2-base-model']
+            : '',
         authAutoRefreshWorkers: String(parsed['auth-auto-refresh-workers'] ?? ''),
         wsAuth: Boolean(parsed['ws-auth']),
-        enableGeminiCliEndpoint: Boolean(parsed['enable-gemini-cli-endpoint']),
         antigravitySignatureCacheEnabled: Boolean(
           parsed['antigravity-signature-cache-enabled'] ?? true
         ),
@@ -1274,6 +1277,17 @@ export function useVisualConfig() {
           );
         }
         if (
+          values.gptImage2BaseModel.trim() ||
+          shouldWriteManagedField(
+            doc,
+            ['gpt-image-2-base-model'],
+            dirtyFields,
+            'gptImage2BaseModel'
+          )
+        ) {
+          setStringInDoc(doc, ['gpt-image-2-base-model'], values.gptImage2BaseModel);
+        }
+        if (
           shouldWriteManagedField(
             doc,
             ['auth-auto-refresh-workers'],
@@ -1284,16 +1298,6 @@ export function useVisualConfig() {
           setIntFromStringInDoc(doc, ['auth-auto-refresh-workers'], values.authAutoRefreshWorkers);
         }
         setBooleanInDoc(doc, ['ws-auth'], values.wsAuth);
-        if (
-          shouldWriteManagedField(
-            doc,
-            ['enable-gemini-cli-endpoint'],
-            dirtyFields,
-            'enableGeminiCliEndpoint'
-          )
-        ) {
-          doc.setIn(['enable-gemini-cli-endpoint'], values.enableGeminiCliEndpoint);
-        }
         if (
           shouldWriteManagedField(
             doc,

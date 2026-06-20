@@ -102,12 +102,7 @@ export function QuotaCard<TState extends QuotaStatusState>({
     quota && 'planType' in quota
       ? ((quota as Record<string, unknown>).planType as string | null | undefined)
       : undefined;
-  // Also extract tierLabel for Gemini CLI
-  const tierLabel =
-    quota && 'tierLabel' in quota
-      ? ((quota as Record<string, unknown>).tierLabel as string | null | undefined)
-      : undefined;
-  const planType = planTypeFromFile || planTypeFromQuota || tierLabel || null;
+  const planType = planTypeFromFile || planTypeFromQuota || null;
   const normalizedPlan = planType ? planType.trim().toLowerCase() : '';
   const isPro = normalizedPlan === 'pro';
   const isProLite =
@@ -117,14 +112,7 @@ export function QuotaCard<TState extends QuotaStatusState>({
     normalizedPlan === 'chatgpt-plus' ||
     normalizedPlan === 'chatgptplus';
   const isTeam = normalizedPlan === 'team' || normalizedPlan === 'enterprise';
-  // Gemini CLI premium tiers
-  const tierId =
-    quota && 'tierId' in quota
-      ? ((quota as Record<string, unknown>).tierId as string | null | undefined)
-      : undefined;
-  const isPremiumTier = tierId ? tierId === 'g1-ultra-tier' : false;
-  const isPremium =
-    (defaultType === 'codex' && isPro) || (defaultType === 'gemini-cli' && isPremiumTier);
+  const isPremium = defaultType === 'codex' && isPro;
   const planBadgeStyle = isPremium
     ? undefined
     : isPro

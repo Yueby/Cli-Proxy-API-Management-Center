@@ -119,13 +119,11 @@ export function AuthFileCard(props: AuthFileCardProps) {
         ? styles.claudeCard
         : quotaType === 'codex'
           ? styles.codexCard
-          : quotaType === 'gemini-cli'
-            ? styles.geminiCliCard
-            : quotaType === 'kimi'
-              ? styles.kimiCard
-              : quotaType === 'xai'
-                ? styles.xaiCard
-                : '';
+          : quotaType === 'kimi'
+            ? styles.kimiCard
+            : quotaType === 'xai'
+              ? styles.xaiCard
+              : '';
 
   const rawAuthIndex = file['auth_index'] ?? file.authIndex;
   const authIndexKey = normalizeRecentRequestAuthIndex(rawAuthIndex);
@@ -161,9 +159,6 @@ export function AuthFileCard(props: AuthFileCardProps) {
     // Claude planType
     const claudeQ = state.claudeQuota[file.name];
     if (claudeQ && claudeQ.status === 'success' && claudeQ.planType) return claudeQ.planType;
-    // Gemini CLI tierLabel
-    const geminiQ = state.geminiCliQuota[file.name];
-    if (geminiQ && geminiQ.status === 'success' && geminiQ.tierLabel) return geminiQ.tierLabel;
     // Codex planType (from API, may differ from file metadata)
     const codexQ = state.codexQuota[file.name];
     if (codexQ && codexQ.status === 'success' && codexQ.planType) return codexQ.planType;
@@ -179,17 +174,10 @@ export function AuthFileCard(props: AuthFileCardProps) {
   const codexSubscriptionBadge = resolveCodexSubscriptionBadge(file, t, i18n.resolvedLanguage);
   const cachedModels = getCachedModels(file.name);
 
-  // Gemini CLI premium tier detection
-  const geminiTierId = useQuotaStore((state) => {
-    const q = state.geminiCliQuota[file.name];
-    return q && q.status === 'success' ? (q.tierId ?? null) : null;
-  });
-
   const isPlanPremium = (plan: string) => {
     const normalized = plan.trim().toLowerCase();
     const isPro = normalized === 'pro';
-    const isPremiumTier = geminiTierId === 'g1-ultra-tier';
-    return (providerKey === 'codex' && isPro) || (providerKey === 'gemini-cli' && isPremiumTier);
+    return providerKey === 'codex' && isPro;
   };
 
   const getPlanBadgeStyle = (plan: string) => {

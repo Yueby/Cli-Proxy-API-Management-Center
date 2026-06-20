@@ -24,16 +24,16 @@ export type AuthFileModelItem = {
 };
 export type AuthFileIconAsset = string | { light: string; dark: string };
 
-export type QuotaProviderType = 'antigravity' | 'claude' | 'codex' | 'gemini-cli' | 'kimi' | 'xai';
+export type QuotaProviderType = 'antigravity' | 'claude' | 'codex' | 'kimi' | 'xai';
 
 export const QUOTA_PROVIDER_TYPES = new Set<QuotaProviderType>([
   'antigravity',
   'claude',
   'codex',
-  'gemini-cli',
   'kimi',
   'xai',
 ]);
+
 
 export const MIN_CARD_PAGE_SIZE = 3;
 export const MAX_CARD_PAGE_SIZE = 30;
@@ -57,10 +57,7 @@ export const TYPE_COLORS: Record<string, TypeColorSet> = {
     light: { bg: '#ecf1f7', text: '#2a4c7e', border: '1px solid #dae3ee' },
     dark: { bg: '#232a35', text: '#cbd6e2', border: '1px solid #3a4454' },
   },
-  'gemini-cli': {
-    light: { bg: '#ecf1f7', text: '#2a4c7e', border: '1px solid #dae3ee' },
-    dark: { bg: '#232a35', text: '#cbd6e2', border: '1px solid #3a4454' },
-  },
+  // AI Studio: 使用 Gemini 图标，中性灰标签
   aistudio: {
     light: { bg: '#eff1f3', text: '#3f454d', border: '1px solid #dee1e5' },
     dark: { bg: '#282b30', text: '#d1d4d9', border: '1px solid #3e4249' },
@@ -105,7 +102,6 @@ export const AUTH_FILE_ICONS: Record<string, AuthFileIconAsset> = {
   claude: iconClaude,
   codex: iconCodex,
   gemini: iconGemini,
-  'gemini-cli': iconGemini,
   xai: { light: iconGrok, dark: iconGrokDark },
   iflow: iconIflow,
   kimi: { light: iconKimiLight, dark: iconKimiDark },

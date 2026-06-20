@@ -24,7 +24,6 @@ type LocationState = { fromAuthFiles?: boolean } | null;
 type OAuthModelMappingFormEntry = OAuthModelAliasEntry & { id: string };
 
 const OAUTH_PROVIDER_PRESETS = [
-  'gemini-cli',
   'vertex',
   'aistudio',
   'antigravity',

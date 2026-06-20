@@ -95,6 +95,7 @@ export type VisualConfigValues = {
   maxRetryInterval: string;
   disableCooling: boolean;
   disableImageGeneration: DisableImageGenerationMode;
+  gptImage2BaseModel: string;
   authAutoRefreshWorkers: string;
   quotaSwitchProject: boolean;
   quotaSwitchPreviewModel: boolean;
@@ -103,7 +104,6 @@ export type VisualConfigValues = {
   routingSessionAffinity: boolean;
   routingSessionAffinityTTL: string;
   wsAuth: boolean;
-  enableGeminiCliEndpoint: boolean;
   antigravitySignatureCacheEnabled: boolean;
   antigravitySignatureBypassStrict: boolean;
   pluginsEnabled: boolean;
@@ -159,6 +159,7 @@ export const DEFAULT_VISUAL_VALUES: VisualConfigValues = {
   maxRetryInterval: '',
   disableCooling: false,
   disableImageGeneration: 'false',
+  gptImage2BaseModel: '',
   authAutoRefreshWorkers: '',
   quotaSwitchProject: true,
   quotaSwitchPreviewModel: true,
@@ -167,7 +168,6 @@ export const DEFAULT_VISUAL_VALUES: VisualConfigValues = {
   routingSessionAffinity: false,
   routingSessionAffinityTTL: '',
   wsAuth: false,
-  enableGeminiCliEndpoint: false,
   antigravitySignatureCacheEnabled: true,
   antigravitySignatureBypassStrict: false,
   pluginsEnabled: false,

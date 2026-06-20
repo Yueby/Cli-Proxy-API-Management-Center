@@ -894,6 +894,13 @@ export function VisualConfigEditor({
                   />
                 </FieldShell>
                 <Input
+                  label={t('config_management.visual.sections.network.gpt_image_2_base_model')}
+                  value={values.gptImage2BaseModel}
+                  onChange={(e) => onChange({ gptImage2BaseModel: e.target.value })}
+                  disabled={disabled}
+                  hint={t('config_management.visual.sections.network.gpt_image_2_base_model_hint')}
+                />
+                <Input
                   label={t('config_management.visual.sections.network.session_affinity_ttl')}
                   placeholder="1h"
                   value={values.routingSessionAffinityTTL}
@@ -940,15 +947,6 @@ export function VisualConfigEditor({
                   checked={values.wsAuth}
                   disabled={disabled}
                   onChange={(wsAuth) => onChange({ wsAuth })}
-                />
-                <ToggleRow
-                  title={t('config_management.visual.sections.network.enable_gemini_cli_endpoint')}
-                  description={t(
-                    'config_management.visual.sections.network.enable_gemini_cli_endpoint_desc'
-                  )}
-                  checked={values.enableGeminiCliEndpoint}
-                  disabled={disabled}
-                  onChange={(enableGeminiCliEndpoint) => onChange({ enableGeminiCliEndpoint })}
                 />
               </SectionGrid>
               <SectionSubsection
