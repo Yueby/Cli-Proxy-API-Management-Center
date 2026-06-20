@@ -185,8 +185,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
     const isPro = normalized === 'pro';
     const isAntigravityPremium = normalized === 'ultra' || normalized === 'ultra lite';
     return (
-      (providerKey === 'codex' && isPro) ||
-      (providerKey === 'antigravity' && isAntigravityPremium)
+      (providerKey === 'codex' && isPro) || (providerKey === 'antigravity' && isAntigravityPremium)
     );
   };
 
