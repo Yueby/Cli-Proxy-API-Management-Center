@@ -544,32 +544,41 @@ export function AuthFilesPage() {
   ]);
 
   const sorted = useMemo(() => {
-    const copy = [...filtered];
-    if (sortMode === 'default') {
-      copy.sort((a, b) => {
+    const compareDisabledLast = (a: AuthFileItem, b: AuthFileItem) =>
+      Number(a.disabled === true) - Number(b.disabled === true);
+    const compareByBaseSort = (a: AuthFileItem, b: AuthFileItem) => {
+      if (sortMode === 'default') {
         const providerA = normalizeProviderKey(String(a.provider ?? a.type ?? 'unknown'));
         const providerB = normalizeProviderKey(String(b.provider ?? b.type ?? 'unknown'));
         const providerCompare = providerA.localeCompare(providerB);
         if (providerCompare !== 0) return providerCompare;
         return a.name.localeCompare(b.name);
-      });
-    } else if (sortMode === 'az') {
-      copy.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortMode === 'priority') {
-      copy.sort((a, b) => {
+      }
+      if (sortMode === 'az') {
+        return a.name.localeCompare(b.name);
+      }
+      if (sortMode === 'priority') {
         const pa = parsePriorityValue(a.priority ?? a['priority']) ?? 0;
         const pb = parsePriorityValue(b.priority ?? b['priority']) ?? 0;
-        return pb - pa; // 高优先级排前面
-      });
-    }
+        const priorityCompare = pb - pa;
+        return priorityCompare !== 0 ? priorityCompare : a.name.localeCompare(b.name);
+      }
+      return 0;
+    };
+    const compareByCodexSubscription = (a: AuthFileItem, b: AuthFileItem) => {
+      if (!codexSubscriptionFirst || normalizedFilter !== 'codex') return 0;
+      return Number(hasActiveCodexSubscription(b)) - Number(hasActiveCodexSubscription(a));
+    };
 
-    if (codexSubscriptionFirst && normalizedFilter === 'codex') {
-      copy.sort(
-        (a, b) => Number(hasActiveCodexSubscription(b)) - Number(hasActiveCodexSubscription(a))
-      );
-    }
+    return [...filtered].sort((a, b) => {
+      const disabledCompare = compareDisabledLast(a, b);
+      if (disabledCompare !== 0) return disabledCompare;
 
-    return copy;
+      const subscriptionCompare = compareByCodexSubscription(a, b);
+      if (subscriptionCompare !== 0) return subscriptionCompare;
+
+      return compareByBaseSort(a, b);
+    });
   }, [codexSubscriptionFirst, filtered, normalizedFilter, sortMode]);
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
