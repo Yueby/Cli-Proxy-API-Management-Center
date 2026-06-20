@@ -122,7 +122,7 @@ function buildInitialForm(
       testModel: cfg.testModel ?? '',
       apiKeyEntries: cfg.apiKeyEntries?.length
         ? cfg.apiKeyEntries.map((entry) => ({
-            apiKey: '',
+            apiKey: entry.apiKey,
             existingApiKey: entry.apiKey,
             proxyUrl: entry.proxyUrl ?? '',
             authIndex: entry.authIndex,
@@ -135,11 +135,7 @@ function buildInitialForm(
   const disabled = hasDisableAllModelsRule(cfg.excludedModels);
   const excludedList = stripDisableAllRule(cfg.excludedModels);
   return {
-    // Keep the API key blank in edit mode. Pre-filling the real key makes this
-    // password field a browser-autofill target (the saved management key can
-    // overwrite it) and defeats the "leave empty = keep unchanged" contract; an
-    // empty field is preserved on save via buildProviderKeyConfig's existing fallback.
-    apiKey: '',
+    apiKey: cfg.apiKey ?? '',
     name: '',
     baseUrl: cfg.baseUrl ?? '',
     proxyUrl: cfg.proxyUrl ?? '',
@@ -178,13 +174,7 @@ function buildInitialForm(
 }
 
 function ConnectivityStatusIcon({ state }: { state: ConnectivityState }) {
-  if (state === 'loading') {
-    return (
-      <span className={`${styles.statusIcon} ${styles.statusIconLoading}`}>
-        <IconLoader2 size={14} />
-      </span>
-    );
-  }
+  if (state === 'loading') return null;
   if (state === 'success') {
     return (
       <span className={`${styles.statusIcon} ${styles.statusIconSuccess}`}>
@@ -221,8 +211,14 @@ export function BaseProviderForm({
     JSON.stringify(buildInitialForm(brand, resource, mode))
   );
   const [error, setError] = useState<string | null>(null);
-  const [showPasswords, setShowPasswords] = useState<Set<number>>(new Set());
-  const [showSingleApiKey, setShowSingleApiKey] = useState(false);
+  const [showPasswords, setShowPasswords] = useState<Set<number>>(() => {
+    if (mode !== 'edit' || brand !== 'openaiCompatibility') return new Set();
+    const entries = (resource?.raw as OpenAIProviderConfig | undefined)?.apiKeyEntries ?? [];
+    return new Set(entries.map((_, index) => index));
+  });
+  const [showSingleApiKey, setShowSingleApiKey] = useState(
+    mode === 'edit' && brand !== 'openaiCompatibility'
+  );
 
   const togglePasswordVisibility = (idx: number) => {
     setShowPasswords((prev) => {
@@ -754,11 +750,6 @@ export function BaseProviderForm({
                 disabled={mutating || connectivity.isTestingAny}
                 onClick={() => void connectivity.runOpenAIAllKeys()}
               >
-                {connectivity.isTestingAny ? (
-                  <span className={`${styles.statusIcon} ${styles.statusIconLoading}`}>
-                    <IconLoader2 size={14} />
-                  </span>
-                ) : null}
                 <span>{t('providersPage.connectivity.testAll')}</span>
               </button>
             </div>
