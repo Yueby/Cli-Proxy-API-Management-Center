@@ -698,7 +698,7 @@ const translateAntigravityQuotaDescription = (
   return value;
 };
 
-const getAntigravityPlanLabel = (
+export const getAntigravityPlanLabel = (
   subscription: AntigravityQuotaSubscription | null | undefined,
   t: TFunction
 ): string | null => {
@@ -723,28 +723,6 @@ const renderAntigravityItems = (
   const { createElement: h, Fragment } = React;
   const groups = quota.groups ?? [];
   const nodes: ReactNode[] = [];
-  const planLabel = getAntigravityPlanLabel(quota.subscription, t);
-  const normalizedPlan = quota.subscription?.plan?.toLowerCase() ?? '';
-  const isPremiumPlan = normalizedPlan === 'ultra' || normalizedPlan === 'ultra-lite';
-
-  if (planLabel) {
-    nodes.push(
-      h(
-        'div',
-        { key: 'plan', className: styleMap.codexPlan },
-        h(
-          'span',
-          { className: styleMap.codexPlanItem },
-          h('span', { className: styleMap.codexPlanLabel }, t('antigravity_quota.plan_label')),
-          h(
-            'span',
-            { className: isPremiumPlan ? styleMap.premiumPlanValue : styleMap.codexPlanValue },
-            planLabel
-          )
-        )
-      )
-    );
-  }
 
   if (groups.length === 0) {
     nodes.push(

@@ -15,6 +15,7 @@ import {
   IconZap,
 } from '@/components/ui/icons';
 import { useQuotaStore } from '@/stores';
+import { getAntigravityPlanLabel } from '@/components/quota';
 import type { AuthFileItem } from '@/types';
 import {
   requiresGoogleProjectId,
@@ -156,6 +157,11 @@ export function AuthFileCard(props: AuthFileCardProps) {
   // Resolve plan/tier badge from file metadata + quota store
   const codexPlan = resolveCodexPlanType(file);
   const quotaStorePlan = useQuotaStore((state) => {
+    // Antigravity subscription plan (from quota refresh)
+    const antigravityQ = state.antigravityQuota[file.name];
+    if (antigravityQ && antigravityQ.status === 'success' && antigravityQ.subscription) {
+      return getAntigravityPlanLabel(antigravityQ.subscription, t);
+    }
     // Claude planType
     const claudeQ = state.claudeQuota[file.name];
     if (claudeQ && claudeQ.status === 'success' && claudeQ.planType) return claudeQ.planType;
@@ -177,7 +183,11 @@ export function AuthFileCard(props: AuthFileCardProps) {
   const isPlanPremium = (plan: string) => {
     const normalized = plan.trim().toLowerCase();
     const isPro = normalized === 'pro';
-    return providerKey === 'codex' && isPro;
+    const isAntigravityPremium = normalized === 'ultra' || normalized === 'ultra lite';
+    return (
+      (providerKey === 'codex' && isPro) ||
+      (providerKey === 'antigravity' && isAntigravityPremium)
+    );
   };
 
   const getPlanBadgeStyle = (plan: string) => {
