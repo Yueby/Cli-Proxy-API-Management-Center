@@ -527,8 +527,7 @@
 
 .antigravityQuotaGroupHeader {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
   min-width: 0;
 }
 
@@ -536,12 +535,6 @@
   font-size: 13px;
   font-weight: 700;
   color: var(--text-primary);
-}
-
-.antigravityQuotaGroupDescription {
-  font-size: 12px;
-  line-height: 1.35;
-  color: var(--text-tertiary);
 }
 
 .quotaMessage {

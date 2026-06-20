@@ -62,6 +62,7 @@ import {
   formatCodexResetLabel,
   formatQuotaResetTime,
   formatKimiResetHint,
+  formatQuotaDurationToken,
   buildAntigravityQuotaGroups,
   buildKimiQuotaRows,
   createStatusError,
@@ -293,7 +294,7 @@ const buildCodexQuotaWindows = (payload: CodexUsagePayload, t: TFunction): Codex
   const WINDOW_META = {
     codeFiveHour: { id: 'five-hour', labelKey: 'codex_quota.primary_window' },
     codeWeekly: { id: 'weekly', labelKey: 'codex_quota.secondary_window' },
-    codeMonthly: { id: 'monthly', labelKey: 'codex_quota.team_secondary_window' },
+    codeMonthly: { id: 'monthly', labelKey: 'codex_quota.monthly_window' },
     codeReviewFiveHour: {
       id: 'code-review-five-hour',
       labelKey: 'codex_quota.code_review_primary_window',
@@ -324,7 +325,7 @@ const buildCodexQuotaWindows = (payload: CodexUsagePayload, t: TFunction): Codex
     allowed?: boolean
   ) => {
     if (!window) return;
-    const resetLabel = formatCodexResetLabel(window);
+    const resetLabel = formatCodexResetLabel(window, t);
     const usedPercentRaw = normalizeNumberValue(window.used_percent ?? window.usedPercent);
     const isLimitReached = Boolean(limitReached) || allowed === false;
     const usedPercent = usedPercentRaw ?? (isLimitReached && resetLabel !== '-' ? 100 : null);
@@ -484,7 +485,7 @@ const buildCodexQuotaWindows = (payload: CodexUsagePayload, t: TFunction): Codex
       const additionalSecondaryMeta = selectSecondaryWindowMeta(
         additionalSecondaryWindow,
         { id: 'weekly', labelKey: 'codex_quota.additional_secondary_window' },
-        { id: 'monthly', labelKey: 'codex_quota.additional_team_secondary_window' }
+        { id: 'monthly', labelKey: 'codex_quota.additional_monthly_window' }
       );
       addWindow(
         `${idPrefix}-${additionalSecondaryMeta.id}-${index}`,
@@ -773,10 +774,11 @@ const renderAntigravityItems = (
         h(
           'div',
           { className: styleMap.antigravityQuotaGroupHeader },
-          h('span', { className: styleMap.antigravityQuotaGroupTitle }, groupLabel),
-          groupDescription
-            ? h('span', { className: styleMap.antigravityQuotaGroupDescription }, groupDescription)
-            : null
+          h(
+            'span',
+            { className: styleMap.antigravityQuotaGroupTitle, title: groupDescription },
+            groupLabel
+          )
         ),
         ...group.buckets.map((bucket) => {
           const clamped = Math.max(0, Math.min(1, bucket.remainingFraction));
@@ -887,7 +889,7 @@ const buildClaudeQuotaWindows = (
     if (!window || typeof window !== 'object' || !('utilization' in window)) continue;
     const typedWindow = window as { utilization: number; resets_at: string };
     const usedPercent = normalizeNumberValue(typedWindow.utilization);
-    const resetLabel = formatQuotaResetTime(typedWindow.resets_at);
+    const resetLabel = formatQuotaResetTime(typedWindow.resets_at, t);
     windows.push({
       id,
       label: t(labelKey),
@@ -1241,8 +1243,17 @@ const renderKimiItems = (
           ? 0
           : null;
     const percentLabel = remaining === null ? '--' : `${remaining}%`;
+    const rowLabelParams = row.labelParams
+      ? {
+          ...row.labelParams,
+          duration:
+            typeof row.labelParams.duration === 'string'
+              ? formatQuotaDurationToken(t, row.labelParams.duration)
+              : row.labelParams.duration,
+        }
+      : undefined;
     const rowLabel = row.labelKey
-      ? t(row.labelKey, (row.labelParams ?? {}) as Record<string, string | number>)
+      ? t(row.labelKey, (rowLabelParams ?? {}) as Record<string, string | number>)
       : (row.label ?? '');
     const resetLabel = formatKimiResetHint(t, row.resetHint);
 
@@ -1394,7 +1405,7 @@ const renderXaiItems = (
   const remaining = clampedUsed === null ? null : Math.max(0, Math.min(100, 100 - clampedUsed));
   const percentLabel = remaining === null ? '--' : `${Math.round(remaining)}%`;
   const amountLabel = formatXaiRemainingAmount(billing);
-  const resetLabel = formatQuotaResetTime(billing.billingPeriodEnd);
+  const resetLabel = formatQuotaResetTime(billing.billingPeriodEnd, t);
   const onDemandCap = billing.onDemandCapCents ?? 0;
   const plan = resolveXaiPlan(billing.monthlyLimitCents);
   const payAsYouGoLabel =

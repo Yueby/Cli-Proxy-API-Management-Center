@@ -43,6 +43,49 @@ function formatRelativeTime(diffMs: number, t?: TFunction): string {
   return t('quota_time.less_than_minute');
 }
 
+type QuotaDurationUnit = 'day' | 'hour' | 'minute';
+
+const FALLBACK_DURATION_UNIT: Record<QuotaDurationUnit, { one: string; other: string }> = {
+  day: { one: 'day', other: 'days' },
+  hour: { one: 'hour', other: 'hours' },
+  minute: { one: 'minute', other: 'minutes' },
+};
+
+function formatQuotaDurationPart(t: TFunction, unit: QuotaDurationUnit, count: number): string {
+  const suffix = count === 1 ? 'one' : 'other';
+  const fallbackUnit = FALLBACK_DURATION_UNIT[unit][suffix];
+  return t(`quota_duration.${unit}_${suffix}`, {
+    value: count,
+    defaultValue: `${count} ${fallbackUnit}`,
+  });
+}
+
+export function formatQuotaDurationToken(t: TFunction, token?: string): string {
+  if (!token) return '';
+  const trimmed = token.trim();
+  if (!trimmed) return '';
+  if (/^<\s*1\s*m(?:in(?:ute)?s?)?$/i.test(trimmed)) {
+    return t('quota_duration.less_than_minute', { defaultValue: '< 1 minute' });
+  }
+
+  const parts: string[] = [];
+  const matches = trimmed.matchAll(/(\d+)\s*(d|day|days|h|hr|hour|hours|m|min|minute|minutes)\b/gi);
+  for (const match of matches) {
+    const count = Number(match[1]);
+    if (!Number.isFinite(count) || count <= 0) continue;
+    const unitToken = match[2].toLowerCase();
+    const unit: QuotaDurationUnit = unitToken.startsWith('d')
+      ? 'day'
+      : unitToken.startsWith('h')
+        ? 'hour'
+        : 'minute';
+    parts.push(formatQuotaDurationPart(t, unit, count));
+  }
+
+  if (parts.length === 0) return trimmed;
+  return parts.join(t('quota_duration.separator', { defaultValue: ' ' }));
+}
+
 export function formatQuotaResetTime(value?: string, t?: TFunction): string {
   if (!value) return '-';
   const date = new Date(value);
@@ -100,5 +143,5 @@ export function getStatusFromError(err: unknown): number | undefined {
 
 export function formatKimiResetHint(t: TFunction, hint?: string): string {
   if (!hint) return '';
-  return t('kimi_quota.reset_hint', { hint });
+  return t('kimi_quota.reset_hint', { hint: formatQuotaDurationToken(t, hint) });
 }
