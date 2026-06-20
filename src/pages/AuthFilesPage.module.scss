@@ -805,11 +805,6 @@
   padding-bottom: $spacing-xs;
 }
 
-.antigravityQuotaGroup + .antigravityQuotaGroup {
-  padding-top: $spacing-sm;
-  border-top: 1px solid color-mix(in srgb, var(--border-color) 65%, transparent);
-}
-
 .antigravityQuotaGroupHeader {
   display: flex;
   align-items: center;
@@ -821,7 +816,6 @@
   font-weight: 700;
   color: var(--text-primary);
 }
-
 
 .quotaMessage {
   grid-column: 1 / -1;
