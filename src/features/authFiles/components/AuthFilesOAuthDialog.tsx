@@ -68,20 +68,51 @@ function getErrorStatus(error: unknown): number | undefined {
   return typeof error.status === 'number' ? error.status : undefined;
 }
 
-const PROVIDERS: { id: OAuthProvider; titleKey: string; hintKey: string; urlLabelKey: string; icon: string | { light: string; dark: string } }[] = [
-  { id: 'codex', titleKey: 'auth_login.codex_oauth_title', hintKey: 'auth_login.codex_oauth_hint', urlLabelKey: 'auth_login.codex_oauth_url_label', icon: iconCodex },
-  { id: 'anthropic', titleKey: 'auth_login.anthropic_oauth_title', hintKey: 'auth_login.anthropic_oauth_hint', urlLabelKey: 'auth_login.anthropic_oauth_url_label', icon: iconClaude },
-  { id: 'antigravity', titleKey: 'auth_login.antigravity_oauth_title', hintKey: 'auth_login.antigravity_oauth_hint', urlLabelKey: 'auth_login.antigravity_oauth_url_label', icon: iconAntigravity },
-  { id: 'kimi', titleKey: 'auth_login.kimi_oauth_title', hintKey: 'auth_login.kimi_oauth_hint', urlLabelKey: 'auth_login.kimi_oauth_url_label', icon: { light: iconKimiLight, dark: iconKimiDark } },
-  { id: 'xai', titleKey: 'auth_login.xai_oauth_title', hintKey: 'auth_login.xai_oauth_hint', urlLabelKey: 'auth_login.xai_oauth_url_label', icon: { light: iconGrok, dark: iconGrokDark } }
+const PROVIDERS: {
+  id: OAuthProvider;
+  titleKey: string;
+  hintKey: string;
+  urlLabelKey: string;
+  icon: string | { light: string; dark: string };
+}[] = [
+  {
+    id: 'codex',
+    titleKey: 'auth_login.codex_oauth_title',
+    hintKey: 'auth_login.codex_oauth_hint',
+    urlLabelKey: 'auth_login.codex_oauth_url_label',
+    icon: iconCodex,
+  },
+  {
+    id: 'anthropic',
+    titleKey: 'auth_login.anthropic_oauth_title',
+    hintKey: 'auth_login.anthropic_oauth_hint',
+    urlLabelKey: 'auth_login.anthropic_oauth_url_label',
+    icon: iconClaude,
+  },
+  {
+    id: 'antigravity',
+    titleKey: 'auth_login.antigravity_oauth_title',
+    hintKey: 'auth_login.antigravity_oauth_hint',
+    urlLabelKey: 'auth_login.antigravity_oauth_url_label',
+    icon: iconAntigravity,
+  },
+  {
+    id: 'kimi',
+    titleKey: 'auth_login.kimi_oauth_title',
+    hintKey: 'auth_login.kimi_oauth_hint',
+    urlLabelKey: 'auth_login.kimi_oauth_url_label',
+    icon: { light: iconKimiLight, dark: iconKimiDark },
+  },
+  {
+    id: 'xai',
+    titleKey: 'auth_login.xai_oauth_title',
+    hintKey: 'auth_login.xai_oauth_hint',
+    urlLabelKey: 'auth_login.xai_oauth_url_label',
+    icon: { light: iconGrok, dark: iconGrokDark },
+  },
 ];
 
-const CALLBACK_SUPPORTED: OAuthProvider[] = [
-  'codex',
-  'anthropic',
-  'antigravity',
-  'xai'
-];
+const CALLBACK_SUPPORTED: OAuthProvider[] = ['codex', 'anthropic', 'antigravity', 'xai'];
 const XAI_CALLBACK_URL = 'http://127.0.0.1:56121/callback';
 const SUCCESS_RESET_DELAY_MS = 5000;
 const getProviderI18nPrefix = (provider: OAuthProvider) => provider.replace('-', '_');
@@ -163,15 +194,21 @@ const resolveCallbackUrl = (
   return buildXaiCallbackUrl(input, state);
 };
 
-export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthFilesOAuthDialogProps) {
+export function AuthFilesOAuthDialog({
+  open,
+  onClose,
+  onAuthFileCreated,
+}: AuthFilesOAuthDialogProps) {
   const { t } = useTranslation();
   const { showNotification } = useNotificationStore();
   const resolvedTheme = useThemeStore((state) => state.resolvedTheme);
-  const [states, setStates] = useState<Record<OAuthProvider, ProviderState>>({} as Record<OAuthProvider, ProviderState>);
+  const [states, setStates] = useState<Record<OAuthProvider, ProviderState>>(
+    {} as Record<OAuthProvider, ProviderState>
+  );
   const [vertexState, setVertexState] = useState<VertexImportState>({
     fileName: '',
     location: '',
-    loading: false
+    loading: false,
   });
   const pollingTimers = useRef<Partial<Record<OAuthProvider, number>>>({});
   const successResetTimers = useRef<Partial<Record<OAuthProvider, number>>>({});
@@ -200,7 +237,7 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
   const updateProviderState = (provider: OAuthProvider, next: Partial<ProviderState>) => {
     setStates((prev) => ({
       ...prev,
-      [provider]: { ...(prev[provider] ?? {}), ...next }
+      [provider]: { ...(prev[provider] ?? {}), ...next },
     }));
   };
 
@@ -229,7 +266,7 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
     clearProviderTimers(provider);
     setStates((prev) => ({
       ...prev,
-      [provider]: {}
+      [provider]: {},
     }));
   };
 
@@ -245,7 +282,7 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
       callbackUrl: '',
       callbackSubmitting: false,
       callbackStatus: undefined,
-      callbackError: undefined
+      callbackError: undefined,
     });
     successResetTimers.current[provider] = window.setTimeout(() => {
       resetProviderAttempt(provider);
@@ -274,7 +311,11 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
           delete pollingTimers.current[provider];
         }
       } catch (err: unknown) {
-        updateProviderState(provider, { status: 'error', error: getErrorMessage(err), polling: false });
+        updateProviderState(provider, {
+          status: 'error',
+          error: getErrorMessage(err),
+          polling: false,
+        });
         window.clearInterval(timer);
         delete pollingTimers.current[provider];
       }
@@ -292,7 +333,7 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
       error: undefined,
       callbackStatus: undefined,
       callbackError: undefined,
-      callbackUrl: ''
+      callbackUrl: '',
     });
     try {
       const res = await oauthApi.startAuth(provider);
@@ -303,12 +344,17 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
           state: undefined,
           status: 'error',
           error: message,
-          polling: false
+          polling: false,
         });
         showNotification(message, 'error');
         return;
       }
-      updateProviderState(provider, { url: res.url, state: res.state, status: 'waiting', polling: true });
+      updateProviderState(provider, {
+        url: res.url,
+        state: res.state,
+        status: 'waiting',
+        polling: true,
+      });
       startPolling(provider, res.state);
     } catch (err: unknown) {
       const message = getErrorMessage(err);
@@ -333,20 +379,29 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
     const callbackInput = (states[provider]?.callbackUrl || '').trim();
     if (!callbackInput) {
       showNotification(
-        t(provider === 'xai' ? 'auth_login.xai_callback_required' : 'auth_login.oauth_callback_required'),
+        t(
+          provider === 'xai'
+            ? 'auth_login.xai_callback_required'
+            : 'auth_login.oauth_callback_required'
+        ),
         'warning'
       );
       return;
     }
     const redirectUrl = resolveCallbackUrl(provider, callbackInput, states[provider]?.state);
     if (!redirectUrl) {
-      showNotification(t(provider === 'xai' ? 'auth_login.xai_callback_state_missing' : 'auth_login.missing_state'), 'warning');
+      showNotification(
+        t(
+          provider === 'xai' ? 'auth_login.xai_callback_state_missing' : 'auth_login.missing_state'
+        ),
+        'warning'
+      );
       return;
     }
     updateProviderState(provider, {
       callbackSubmitting: true,
       callbackStatus: undefined,
-      callbackError: undefined
+      callbackError: undefined,
     });
     try {
       await oauthApi.submitCallback(provider, redirectUrl);
@@ -362,13 +417,13 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
       const errorMessage =
         status === 404
           ? t('auth_login.oauth_callback_upgrade_hint', {
-              defaultValue: 'Please update CLI Proxy API or check the connection.'
+              defaultValue: 'Please update CLI Proxy API or check the connection.',
             })
           : message || undefined;
       updateProviderState(provider, {
         callbackSubmitting: false,
         callbackStatus: 'error',
-        callbackError: errorMessage
+        callbackError: errorMessage,
       });
       const notificationMessage = errorMessage
         ? `${t('auth_login.oauth_callback_error')} ${errorMessage}`
@@ -394,7 +449,7 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
       file,
       fileName: file.name,
       error: undefined,
-      result: undefined
+      result: undefined,
     }));
     event.target.value = '';
   };
@@ -417,7 +472,7 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
         projectId: res.project_id,
         email: res.email,
         location: res.location,
-        authFile: res['auth-file'] ?? res.auth_file
+        authFile: res['auth-file'] ?? res.auth_file,
       };
       setVertexState((prev) => ({ ...prev, loading: false, result }));
       showNotification(t('vertex_import.success'), 'success');
@@ -430,7 +485,7 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
       setVertexState((prev) => ({
         ...prev,
         loading: false,
-        error: message || t('notification.upload_failed')
+        error: message || t('notification.upload_failed'),
       }));
       const notification = message
         ? `${t('notification.upload_failed')}: ${message}`
@@ -450,7 +505,8 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
         <div className={styles.content}>
           {PROVIDERS.map((provider) => {
             const state = states[provider.id] || {};
-            const canSubmitCallback = CALLBACK_SUPPORTED.includes(provider.id) && Boolean(state.url);
+            const canSubmitCallback =
+              CALLBACK_SUPPORTED.includes(provider.id) && Boolean(state.url);
             const loginButtonLabel =
               state.status === 'success'
                 ? t('auth_login.login_another_account')
@@ -458,7 +514,7 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
             const statusBadgeClassName = [
               'status-badge',
               state.status === 'success' ? 'success' : '',
-              state.status === 'error' ? 'error' : ''
+              state.status === 'error' ? 'error' : '',
             ]
               .filter(Boolean)
               .join(' ');
@@ -476,7 +532,11 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
                     </span>
                   }
                   extra={
-                    <Button size="sm" onClick={() => startAuth(provider.id)} loading={state.polling}>
+                    <Button
+                      size="sm"
+                      onClick={() => startAuth(provider.id)}
+                      loading={state.polling}
+                    >
                       {loginButtonLabel}
                     </Button>
                   }
@@ -488,7 +548,13 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
                         <div className={styles.authUrlLabel}>{t(provider.urlLabelKey)}</div>
                         <div className={styles.authUrlValue}>{state.url}</div>
                         <div className={`segmented-button-group ${styles.authUrlActions}`}>
-                          <Button variant="secondary" size="sm" onClick={() => copyLink(state.url!)} title={t(getAuthKey(provider.id, 'copy_link'))} aria-label={t(getAuthKey(provider.id, 'copy_link'))}>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => copyLink(state.url!)}
+                            title={t(getAuthKey(provider.id, 'copy_link'))}
+                            aria-label={t(getAuthKey(provider.id, 'copy_link'))}
+                          >
                             <IconCopy size={16} />
                           </Button>
                           <Button
@@ -521,7 +587,7 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
                             updateProviderState(provider.id, {
                               callbackUrl: e.target.value,
                               callbackStatus: undefined,
-                              callbackError: undefined
+                              callbackError: undefined,
                             })
                           }
                           placeholder={t(
@@ -547,7 +613,8 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
                         )}
                         {state.callbackStatus === 'error' && (
                           <div className="status-badge error">
-                            {t('auth_login.oauth_callback_status_error')} {state.callbackError || ''}
+                            {t('auth_login.oauth_callback_status_error')}{' '}
+                            {state.callbackError || ''}
                           </div>
                         )}
                       </div>
@@ -590,7 +657,7 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
                 onChange={(e) =>
                   setVertexState((prev) => ({
                     ...prev,
-                    location: e.target.value
+                    location: e.target.value,
                   }))
                 }
                 placeholder={t('vertex_import.location_placeholder')}
@@ -618,30 +685,32 @@ export function AuthFilesOAuthDialog({ open, onClose, onAuthFileCreated }: AuthF
                   onChange={handleVertexFileChange}
                 />
               </div>
-              {vertexState.error && (
-                <div className="status-badge error">
-                  {vertexState.error}
-                </div>
-              )}
+              {vertexState.error && <div className="status-badge error">{vertexState.error}</div>}
               {vertexState.result && (
                 <div className={styles.connectionBox}>
                   <div className={styles.connectionLabel}>{t('vertex_import.result_title')}</div>
                   <div className={styles.keyValueList}>
                     {vertexState.result.projectId && (
                       <div className={styles.keyValueItem}>
-                        <span className={styles.keyValueKey}>{t('vertex_import.result_project')}</span>
+                        <span className={styles.keyValueKey}>
+                          {t('vertex_import.result_project')}
+                        </span>
                         <span className={styles.keyValueValue}>{vertexState.result.projectId}</span>
                       </div>
                     )}
                     {vertexState.result.email && (
                       <div className={styles.keyValueItem}>
-                        <span className={styles.keyValueKey}>{t('vertex_import.result_email')}</span>
+                        <span className={styles.keyValueKey}>
+                          {t('vertex_import.result_email')}
+                        </span>
                         <span className={styles.keyValueValue}>{vertexState.result.email}</span>
                       </div>
                     )}
                     {vertexState.result.location && (
                       <div className={styles.keyValueItem}>
-                        <span className={styles.keyValueKey}>{t('vertex_import.result_location')}</span>
+                        <span className={styles.keyValueKey}>
+                          {t('vertex_import.result_location')}
+                        </span>
                         <span className={styles.keyValueValue}>{vertexState.result.location}</span>
                       </div>
                     )}

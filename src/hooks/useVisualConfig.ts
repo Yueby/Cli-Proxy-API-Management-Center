@@ -1245,21 +1245,14 @@ export function useVisualConfig() {
         setStringInDoc(doc, ['proxy-url'], values.proxyUrl);
         setBooleanInDoc(doc, ['force-model-prefix'], values.forceModelPrefix);
         if (
-          shouldWriteManagedField(
-            doc,
-            ['passthrough-headers'],
-            dirtyFields,
-            'passthroughHeaders'
-          )
+          shouldWriteManagedField(doc, ['passthrough-headers'], dirtyFields, 'passthroughHeaders')
         ) {
           doc.setIn(['passthrough-headers'], values.passthroughHeaders);
         }
         setIntFromStringInDoc(doc, ['request-retry'], values.requestRetry);
         setIntFromStringInDoc(doc, ['max-retry-credentials'], values.maxRetryCredentials);
         setIntFromStringInDoc(doc, ['max-retry-interval'], values.maxRetryInterval);
-        if (
-          shouldWriteManagedField(doc, ['disable-cooling'], dirtyFields, 'disableCooling')
-        ) {
+        if (shouldWriteManagedField(doc, ['disable-cooling'], dirtyFields, 'disableCooling')) {
           doc.setIn(['disable-cooling'], values.disableCooling);
         }
         if (

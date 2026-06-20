@@ -86,7 +86,10 @@ function buildInitialForm(
           : undefined,
       experimentalCchSigning: brand === 'claude' ? false : undefined,
       testModel:
-        brand === 'openaiCompatibility' || brand === 'codex' || brand === 'claude' || brand === 'gemini'
+        brand === 'openaiCompatibility' ||
+        brand === 'codex' ||
+        brand === 'claude' ||
+        brand === 'gemini'
           ? ''
           : undefined,
       apiKeyEntries: brand === 'openaiCompatibility' ? [emptyApiKeyEntry()] : undefined,
@@ -166,9 +169,7 @@ function buildInitialForm(
           }
         : undefined,
     experimentalCchSigning:
-      brand === 'claude'
-        ? (cfg as ProviderKeyConfig).experimentalCchSigning === true
-        : undefined,
+      brand === 'claude' ? (cfg as ProviderKeyConfig).experimentalCchSigning === true : undefined,
     testModel: brand === 'codex' || brand === 'claude' || brand === 'gemini' ? '' : undefined,
   };
 }
@@ -382,7 +383,12 @@ export function BaseProviderForm({
     setForm((prev) => ({
       ...prev,
       cloak: {
-        ...(prev.cloak ?? { mode: '', strictMode: false, sensitiveWordsText: '', cacheUserId: false }),
+        ...(prev.cloak ?? {
+          mode: '',
+          strictMode: false,
+          sensitiveWordsText: '',
+          cacheUserId: false,
+        }),
         [key]: value,
       },
     }));
