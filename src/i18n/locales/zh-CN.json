@@ -54,7 +54,8 @@
     "model_alias_placeholder": "模型别名 (可选)",
     "invalid_provider_index": "无效的提供商索引。",
     "unsaved_changes_title": "未保存的更改",
-    "unsaved_changes_message": "你有未保存的更改，离开后将丢失这些更改。确定要离开吗？"
+    "unsaved_changes_message": "你有未保存的更改，离开后将丢失这些更改。确定要离开吗？",
+    "error_details": "错误详情"
   },
   "title": {
     "main": "CLI Proxy API Management Center",
@@ -95,7 +96,9 @@
     "error_not_found": "未找到 Management API，请确认服务地址指向 CLIProxyAPI 后端",
     "error_server": "后端处理管理接口时发生错误，请查看服务日志",
     "error_cors": "跨域请求被阻止，请检查服务器配置",
-    "error_ssl": "SSL/TLS 证书验证失败"
+    "error_ssl": "SSL/TLS 证书验证失败",
+    "hide_key": "隐藏密钥",
+    "show_key": "显示密钥"
   },
   "header": {
     "check_connection": "检查连接",
@@ -377,7 +380,25 @@
     "quota_refresh_failed": "刷新 \"{{name}}\" 的额度失败：{{message}}",
     "project_id_missing": "缺少 Project ID",
     "project_id_missing_title": "该 Google 系列认证文件缺少 Project ID，可能无法查询额度或调用相关接口。",
-    "codex_subscription_first": "订阅提前"
+    "codex_subscription_first": "订阅提前",
+    "delete_all_title": "删除全部文件",
+    "delete_title": "删除文件",
+    "oauth_settings_button": "OAuth 设置",
+    "oauth_settings_title": "OAuth 设置",
+    "pagination_jump": "跳转到页码",
+    "pagination_total_items": "共 {{count}} 项",
+    "quota_refresh_no_targets": "当前页没有可刷新额度的认证文件",
+    "quota_refresh_one": "刷新该凭证额度",
+    "quota_refresh_page": "刷新本页额度",
+    "quota_refresh_page_partial": "本页额度刷新完成：成功 {{success}} 个，失败 {{failed}} 个",
+    "quota_refresh_page_success": "已刷新当前页 {{count}} 个认证文件的额度",
+    "status_detail": "状态详情",
+    "status_detail_desc": "详细警告或错误信息：",
+    "subscription_expires_in_days": "剩余 {{count}} 天",
+    "subscription_expires_in_hours": "剩余 {{count}} 小时",
+    "subscription_expires_in_minutes": "剩余 {{count}} 分钟",
+    "subscription_expires_title": "{{plan}} 订阅到期时间：{{date}}",
+    "subscription_plan_unknown": "未知套餐"
   },
   "antigravity_subscription": {
     "subscription_label": "订阅",
@@ -599,7 +620,8 @@
     "scope_provider": "当前范围：{{provider}}",
     "upgrade_required": "当前 CPA 版本不支持 OAuth 模型禁用，请升级 CPA 版本",
     "upgrade_required_title": "需要升级 CPA 版本",
-    "upgrade_required_desc": "当前服务器版本不支持获取 OAuth 模型禁用功能，请升级到最新版本的 CPA（CLI Proxy API）后重试。"
+    "upgrade_required_desc": "当前服务器版本不支持获取 OAuth 模型禁用功能，请升级到最新版本的 CPA（CLI Proxy API）后重试。",
+    "delete_title": "删除 OAuth 排除项"
   },
   "oauth_model_alias": {
     "title": "OAuth 模型别名",
@@ -662,7 +684,8 @@
     "provider_required": "请先填写提供商名称",
     "upgrade_required": "当前 CPA 版本不支持模型别名功能，请升级 CPA 版本",
     "upgrade_required_title": "需要升级 CPA 版本",
-    "upgrade_required_desc": "当前服务器版本不支持 OAuth 模型别名功能，请升级到最新版本的 CPA（CLI Proxy API）后重试。"
+    "upgrade_required_desc": "当前服务器版本不支持 OAuth 模型别名功能，请升级到最新版本的 CPA（CLI Proxy API）后重试。",
+    "delete_title": "删除模型别名"
   },
   "auth_login": {
     "codex_oauth_title": "Codex OAuth",
@@ -842,7 +865,8 @@
     "lines": "行",
     "removed": "已过滤",
     "upgrade_required_title": "需要升级 CLI Proxy API",
-    "upgrade_required_desc": "当前服务器版本不支持日志查看功能，请升级到最新版本的 CLI Proxy API 以使用此功能。"
+    "upgrade_required_desc": "当前服务器版本不支持日志查看功能，请升级到最新版本的 CLI Proxy API 以使用此功能。",
+    "clear_confirm_title": "清空日志"
   },
   "config_management": {
     "title": "配置面板",
@@ -979,7 +1003,11 @@
           "antigravity_signature_cache": "启用 Antigravity 签名缓存",
           "antigravity_signature_cache_desc": "优先使用并校验缓存的 thinking block 签名",
           "antigravity_signature_strict": "严格校验旁路签名",
-          "antigravity_signature_strict_desc": "仅在关闭签名缓存时生效，按完整 Claude protobuf 树校验"
+          "antigravity_signature_strict_desc": "仅在关闭签名缓存时生效，按完整 Claude protobuf 树校验",
+          "codex_identity_confuse": "Codex 身份混淆",
+          "codex_identity_confuse_desc": "在 fill-first 或会话粘性路由下，为选中的认证重新映射 Codex prompt_cache_key 与安装身份",
+          "plugins": "插件配置",
+          "plugins_desc": "控制插件系统和插件商店来源"
         },
         "headers": {
           "title": "Header 默认值",
@@ -1037,7 +1065,8 @@
           "switch_project_desc": "配额耗尽时自动切换到其他项目",
           "switch_preview_model": "切换预览模型",
           "switch_preview_model_desc": "配额耗尽时切换到预览版本模型",
-          "antigravity_credits": "使用Antigravity Credits"
+          "antigravity_credits": "使用Antigravity Credits",
+          "antigravity_credits_desc": "额度超限时允许使用 Antigravity Credits 继续请求"
         },
         "streaming": {
           "title": "流式传输配置",
@@ -1143,7 +1172,8 @@
         "cancel": "取消",
         "update": "更新",
         "add": "添加"
-      }
+      },
+      "validation_blocked_short": "需要修复"
     }
   },
   "quota_management": {
@@ -1152,7 +1182,11 @@
     "refresh_files": "刷新认证文件",
     "refresh_files_and_quota": "刷新认证文件&额度",
     "refresh_all_credentials": "刷新全部凭证",
-    "card_idle_hint": "请使用顶部“刷新全部凭证”按钮获取最新额度。"
+    "card_idle_hint": "请使用顶部“刷新全部凭证”按钮获取最新额度。",
+    "quota_error_detail_desc": "额度加载错误详情：",
+    "search_no_results": "未找到额度凭证",
+    "search_no_results_desc": "没有匹配“{{query}}”的额度凭证",
+    "search_placeholder": "搜索额度凭证..."
   },
   "plugin_management": {
     "title": "插件管理",
@@ -1401,7 +1435,9 @@
     "claude_api_key": "Claude API密钥",
     "commercial_mode_restart_required": "商业模式开关已变更，请重启服务后生效",
     "copy_failed": "复制失败",
-    "link_copied": "已复制"
+    "link_copied": "已复制",
+    "load_failed": "加载失败",
+    "save_failed": "保存失败"
   },
   "language": {
     "switch": "语言",
@@ -1421,7 +1457,9 @@
   },
   "sidebar": {
     "toggle_expand": "展开侧边栏",
-    "toggle_collapse": "收起侧边栏"
+    "toggle_collapse": "收起侧边栏",
+    "collapse": "收起侧边栏",
+    "expand": "展开侧边栏"
   },
   "footer": {
     "api_version": "CLI Proxy API 版本",
@@ -1621,5 +1659,21 @@
     "modelCatalog": {
       "notLoaded": "未加载"
     }
+  },
+  "ai_providers": {
+    "excluded_models_count": "已排除 {{count}} 个模型",
+    "export_configs": "导出配置",
+    "import_configs": "导入配置",
+    "models_button": "模型",
+    "openai_test_model": "测试模型",
+    "test_back": "返回",
+    "test_empty_hint": "发送第一条消息开始测试模型",
+    "test_input_placeholder": "输入测试提示词，按 Enter 发送...",
+    "test_latency": "延迟",
+    "test_no_api_key": "未找到客户端 API Key，请先在 API Keys 中创建。",
+    "test_responding": "正在响应...",
+    "test_send": "测试",
+    "test_this_model": "测试此模型",
+    "test_title": "测试模型"
   }
 }

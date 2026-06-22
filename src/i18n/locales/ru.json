@@ -54,7 +54,8 @@
     "model_alias_placeholder": "Псевдоним модели (необязательно)",
     "invalid_provider_index": "Неверный индекс провайдера.",
     "unsaved_changes_title": "Несохранённые изменения",
-    "unsaved_changes_message": "У вас есть несохранённые изменения. Если вы уйдёте, они будут потеряны. Выйти?"
+    "unsaved_changes_message": "У вас есть несохранённые изменения. Если вы уйдёте, они будут потеряны. Выйти?",
+    "error_details": "Детали ошибки"
   },
   "title": {
     "main": "Центр управления CLI Proxy API",
@@ -95,7 +96,9 @@
     "error_not_found": "Management API не найден, проверьте, что адрес указывает на backend CLIProxyAPI",
     "error_server": "Backend не смог обработать запрос управления, проверьте журналы сервера",
     "error_cors": "Блокировка CORS, проверьте конфигурацию сервера",
-    "error_ssl": "Ошибка проверки SSL/TLS сертификата"
+    "error_ssl": "Ошибка проверки SSL/TLS сертификата",
+    "hide_key": "Скрыть ключ",
+    "show_key": "Показать ключ"
   },
   "header": {
     "check_connection": "Проверить подключение",
@@ -371,7 +374,28 @@
     "quota_refresh_failed": "Не удалось обновить квоту для \"{{name}}\": {{message}}",
     "project_id_missing": "Нет Project ID",
     "project_id_missing_title": "В этом Google-файле авторизации отсутствует Project ID, поэтому проверка квоты или связанные API-вызовы могут не работать.",
-    "codex_subscription_first": "Сначала подписки"
+    "codex_subscription_first": "Сначала подписки",
+    "delete_all_title": "Удалить все файлы",
+    "delete_title": "Удалить файл",
+    "oauth_settings_button": "Настройки OAuth",
+    "oauth_settings_title": "Настройки OAuth",
+    "pagination_jump": "Перейти к странице",
+    "pagination_total_items": "{{count}} элементов",
+    "quota_refresh_no_targets": "На этой странице нет файлов авторизации с обновляемой квотой",
+    "quota_refresh_one": "Обновить квоту этой учётной записи",
+    "quota_refresh_page": "Обновить квоты страницы",
+    "quota_refresh_page_partial": "Обновление квот страницы завершено: успешно {{success}}, ошибок {{failed}}",
+    "quota_refresh_page_success": "Обновлены квоты для {{count}} файлов авторизации на этой странице",
+    "status_detail": "Детали статуса",
+    "status_detail_desc": "Подробное предупреждение или сообщение об ошибке:",
+    "subscription_expires_in_days": "Осталось {{count}} дн.",
+    "subscription_expires_in_hours": "Осталось {{count}} ч.",
+    "subscription_expires_in_minutes": "Осталось {{count}} мин.",
+    "subscription_expires_title": "Подписка {{plan}} истекает: {{date}}",
+    "subscription_plan_unknown": "Неизвестный план",
+    "headers_label": "Пользовательские заголовки (headers)",
+    "headers_placeholder": "{\n  \"Header-Name\": \"value\"\n}",
+    "headers_hint": "Введите пользовательские HTTP-заголовки как JSON-объект, например {\"X-My-Header\": \"value\"}"
   },
   "antigravity_subscription": {
     "subscription_label": "Подписка",
@@ -593,7 +617,8 @@
     "scope_provider": "Область: {{provider}}",
     "upgrade_required": "Текущая версия CPA не поддерживает отключение OAuth-моделей. Пожалуйста, обновите систему.",
     "upgrade_required_title": "Пожалуйста, обновите CLI Proxy API",
-    "upgrade_required_desc": "Текущая версия сервера не поддерживает получение отключения OAuth-моделей. Обновите CPA (CLI Proxy API) до последней версии и повторите попытку."
+    "upgrade_required_desc": "Текущая версия сервера не поддерживает получение отключения OAuth-моделей. Обновите CPA (CLI Proxy API) до последней версии и повторите попытку.",
+    "delete_title": "Удалить исключение OAuth"
   },
   "oauth_model_alias": {
     "title": "Псевдонимы моделей OAuth",
@@ -656,7 +681,8 @@
     "provider_required": "Сначала укажите провайдера",
     "upgrade_required": "Эта функция требует более новой версии CLI Proxy API (CPA). Обновите систему.",
     "upgrade_required_title": "Пожалуйста, обновите CLI Proxy API",
-    "upgrade_required_desc": "Текущая версия сервера не поддерживает API псевдонимов моделей OAuth. Обновите CLI Proxy API (CPA) до последней версии."
+    "upgrade_required_desc": "Текущая версия сервера не поддерживает API псевдонимов моделей OAuth. Обновите CLI Proxy API (CPA) до последней версии.",
+    "delete_title": "Удалить алиас модели"
   },
   "auth_login": {
     "codex_oauth_title": "Codex OAuth",
@@ -836,7 +862,8 @@
     "lines": "строк",
     "removed": "Отфильтровано",
     "upgrade_required_title": "Обновите CLI Proxy API",
-    "upgrade_required_desc": "Текущая версия сервера не поддерживает просмотр журналов. Обновите CLI Proxy API до последней версии, чтобы использовать эту функцию."
+    "upgrade_required_desc": "Текущая версия сервера не поддерживает просмотр журналов. Обновите CLI Proxy API до последней версии, чтобы использовать эту функцию.",
+    "clear_confirm_title": "Очистить логи"
   },
   "config_management": {
     "title": "Панель конфигурации",
@@ -973,7 +1000,11 @@
           "antigravity_signature_cache": "Включить кэш подписей Antigravity",
           "antigravity_signature_cache_desc": "Предпочитать и проверять кэшированные подписи thinking-блоков",
           "antigravity_signature_strict": "Строгая проверка bypass-подписи",
-          "antigravity_signature_strict_desc": "Применяется только при отключённом кэше подписей; проверяет полное дерево Claude protobuf"
+          "antigravity_signature_strict_desc": "Применяется только при отключённом кэше подписей; проверяет полное дерево Claude protobuf",
+          "codex_identity_confuse": "Codex Identity Confuse",
+          "codex_identity_confuse_desc": "При fill-first routing или session affinity переопределяет Codex prompt_cache_key и installation identity для выбранной авторизации",
+          "plugins": "Конфигурация плагинов",
+          "plugins_desc": "Управление системой плагинов и источниками магазина плагинов"
         },
         "headers": {
           "title": "Заголовки по умолчанию",
@@ -1031,7 +1062,8 @@
           "switch_project_desc": "Автоматически переходить на другой проект при превышении квоты",
           "switch_preview_model": "Переключить на preview-модель",
           "switch_preview_model_desc": "Переключаться на preview-версию модели при превышении квоты",
-          "antigravity_credits": "Использовать Antigravity Credits"
+          "antigravity_credits": "Использовать Antigravity Credits",
+          "antigravity_credits_desc": "Разрешить продолжать запросы через Antigravity Credits при превышении квоты"
         },
         "streaming": {
           "title": "Настройки стриминга",
@@ -1137,7 +1169,8 @@
         "cancel": "Отменить",
         "update": "Обновить",
         "add": "Добавить"
-      }
+      },
+      "validation_blocked_short": "Требуются исправления"
     }
   },
   "quota_management": {
@@ -1146,7 +1179,11 @@
     "refresh_files": "Обновить файлы авторизации",
     "refresh_files_and_quota": "Обновить файлы и квоты",
     "refresh_all_credentials": "Обновить все учётные данные",
-    "card_idle_hint": "Используйте кнопку «Обновить все учётные данные» сверху, чтобы загрузить актуальные данные по квотам."
+    "card_idle_hint": "Используйте кнопку «Обновить все учётные данные» сверху, чтобы загрузить актуальные данные по квотам.",
+    "quota_error_detail_desc": "Детали ошибки загрузки квоты:",
+    "search_no_results": "Учётные данные квоты не найдены",
+    "search_no_results_desc": "Нет учётных данных квоты по запросу \"{{query}}\"",
+    "search_placeholder": "Поиск учётных данных квоты..."
   },
   "plugin_management": {
     "title": "Управление плагинами",
@@ -1385,7 +1422,9 @@
     "claude_api_key": "API-ключ Claude",
     "commercial_mode_restart_required": "Режим коммерческого использования изменён. Перезапустите сервис, чтобы применить изменения",
     "copy_failed": "Не удалось скопировать",
-    "link_copied": "Ссылка скопирована в буфер обмена"
+    "link_copied": "Ссылка скопирована в буфер обмена",
+    "load_failed": "Не удалось загрузить данные",
+    "save_failed": "Не удалось сохранить"
   },
   "language": {
     "switch": "Язык",
@@ -1405,7 +1444,9 @@
   },
   "sidebar": {
     "toggle_expand": "Развернуть боковую панель",
-    "toggle_collapse": "Свернуть боковую панель"
+    "toggle_collapse": "Свернуть боковую панель",
+    "collapse": "Свернуть боковую панель",
+    "expand": "Развернуть боковую панель"
   },
   "footer": {
     "api_version": "Версия CLI Proxy API",
@@ -1605,5 +1646,29 @@
     "modelCatalog": {
       "notLoaded": "Не загружено"
     }
+  },
+  "ai_providers": {
+    "excluded_models_count": "Исключено моделей: {{count}}",
+    "export_configs": "Экспорт конфигов",
+    "import_configs": "Импорт конфигов",
+    "models_button": "Модели",
+    "openai_test_model": "Тест модели",
+    "test_back": "Назад",
+    "test_empty_hint": "Отправьте первое сообщение, чтобы начать тест",
+    "test_input_placeholder": "Введите тестовый запрос, нажмите Enter для отправки...",
+    "test_latency": "Задержка",
+    "test_no_api_key": "Клиентский API Key не найден. Сначала создайте его в API Keys.",
+    "test_responding": "Ответ...",
+    "test_send": "Тест",
+    "test_this_model": "Тестировать эту модель",
+    "test_title": "Тест модели"
+  },
+  "plugin_resource": {
+    "empty_src": "URL страницы плагина пуст",
+    "empty_src_desc": "Это меню плагина не предоставляет URL встраиваемой страницы.",
+    "load_failed": "Не удалось загрузить страницу плагина",
+    "not_found": "Страница плагина не найдена",
+    "not_found_desc": "Эта страница плагина не объявлена текущим списком плагинов backend.",
+    "unavailable": "Страница плагина недоступна"
   }
 }
