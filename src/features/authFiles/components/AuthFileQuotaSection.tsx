@@ -48,7 +48,16 @@ export function AuthFileQuotaSection(props: AuthFileQuotaSectionProps) {
     if (!quota || quotaStatus !== 'success') return 0;
     if (quotaType === 'antigravity') return (quota as { groups?: unknown[] }).groups?.length ?? 0;
     if (quotaType === 'claude') return (quota as { windows?: unknown[] }).windows?.length ?? 0;
-    if (quotaType === 'codex') return (quota as { windows?: unknown[] }).windows?.length ?? 0;
+    if (quotaType === 'codex') {
+      const codexQuota = quota as {
+        windows?: unknown[];
+        rateLimitResetCredits?: unknown[];
+        rateLimitResetCreditsError?: string;
+      };
+      const resetCreditsCount = codexQuota.rateLimitResetCredits?.length ?? 0;
+      const resetCreditErrorCount = codexQuota.rateLimitResetCreditsError ? 1 : 0;
+      return (codexQuota.windows?.length ?? 0) + resetCreditsCount + resetCreditErrorCount;
+    }
     if (quotaType === 'kimi') return (quota as { rows?: unknown[] }).rows?.length ?? 0;
     if (quotaType === 'xai') return 1;
     return assertNever(quotaType);

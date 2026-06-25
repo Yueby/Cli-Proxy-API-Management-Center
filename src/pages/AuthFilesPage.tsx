@@ -544,8 +544,6 @@ export function AuthFilesPage() {
   ]);
 
   const sorted = useMemo(() => {
-    const compareDisabledLast = (a: AuthFileItem, b: AuthFileItem) =>
-      Number(a.disabled === true) - Number(b.disabled === true);
     const compareByBaseSort = (a: AuthFileItem, b: AuthFileItem) => {
       if (sortMode === 'default') {
         const providerA = normalizeProviderKey(String(a.provider ?? a.type ?? 'unknown'));
@@ -565,20 +563,35 @@ export function AuthFilesPage() {
       }
       return 0;
     };
-    const compareByCodexSubscription = (a: AuthFileItem, b: AuthFileItem) => {
-      if (!codexSubscriptionFirst || normalizedFilter !== 'codex') return 0;
-      return Number(hasActiveCodexSubscription(b)) - Number(hasActiveCodexSubscription(a));
+
+    const sortWithinSubscriptionGroups = (items: AuthFileItem[]) => {
+      if (!codexSubscriptionFirst || normalizedFilter !== 'codex') {
+        return [...items].sort(compareByBaseSort);
+      }
+
+      const subscribed: AuthFileItem[] = [];
+      const freeOrExpired: AuthFileItem[] = [];
+      items.forEach((item) => {
+        if (hasActiveCodexSubscription(item)) {
+          subscribed.push(item);
+        } else {
+          freeOrExpired.push(item);
+        }
+      });
+
+      return [
+        ...subscribed.sort(compareByBaseSort),
+        ...freeOrExpired.sort(compareByBaseSort),
+      ];
     };
 
-    return [...filtered].sort((a, b) => {
-      const disabledCompare = compareDisabledLast(a, b);
-      if (disabledCompare !== 0) return disabledCompare;
+    const enabledItems = filtered.filter((item) => item.disabled !== true);
+    const disabledItems = filtered.filter((item) => item.disabled === true);
 
-      const subscriptionCompare = compareByCodexSubscription(a, b);
-      if (subscriptionCompare !== 0) return subscriptionCompare;
-
-      return compareByBaseSort(a, b);
-    });
+    return [
+      ...sortWithinSubscriptionGroups(enabledItems),
+      ...sortWithinSubscriptionGroups(disabledItems),
+    ];
   }, [codexSubscriptionFirst, filtered, normalizedFilter, sortMode]);
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));

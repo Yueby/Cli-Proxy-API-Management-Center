@@ -5,6 +5,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  width: 100%;
   max-width: 100%;
   flex-wrap: nowrap;
   min-width: 0;
@@ -14,7 +15,7 @@
   display: flex;
   gap: 2px;
   flex: 1;
-  min-width: 120px;
+  min-width: 92px;
   position: relative;
 }
 
@@ -138,7 +139,7 @@
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
-  padding: 1px 6px;
+  padding: 2px 6px;
   border-radius: 4px;
   background: var(--bg-tertiary);
   color: var(--text-secondary);

@@ -57,30 +57,24 @@ export function resolveCodexPlanType(file: AuthFileItem): string | null {
     file && typeof file.attributes === 'object' && file.attributes !== null
       ? (file.attributes as Record<string, unknown>)
       : null;
-  const idToken =
-    file && typeof file.id_token === 'object' && file.id_token !== null
-      ? (file.id_token as Record<string, unknown>)
-      : null;
-  const metadataIdToken =
-    metadata && typeof metadata.id_token === 'object' && metadata.id_token !== null
-      ? (metadata.id_token as Record<string, unknown>)
-      : null;
+  const idToken = resolveCodexAuthInfo(file.id_token);
+  const metadataIdToken = resolveCodexAuthInfo(metadata?.id_token);
+  const attributesIdToken = resolveCodexAuthInfo(attributes?.id_token);
   const candidates = [
     file.plan_type,
     file.planType,
     file['plan_type'],
     file['planType'],
-    file.id_token,
     idToken?.plan_type,
     idToken?.planType,
     metadata?.plan_type,
     metadata?.planType,
-    metadata?.id_token,
     metadataIdToken?.plan_type,
     metadataIdToken?.planType,
     attributes?.plan_type,
     attributes?.planType,
-    attributes?.id_token,
+    attributesIdToken?.plan_type,
+    attributesIdToken?.planType,
   ];
 
   for (const candidate of candidates) {

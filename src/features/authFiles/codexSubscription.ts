@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { TFunction } from 'i18next';
 import type { AuthFileItem } from '@/types';
+import { resolveCodexPlanType, resolveCodexSubscriptionActiveUntil } from '@/utils/quota';
 
 const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;
@@ -13,23 +14,21 @@ export interface CodexSubscriptionBadge {
   style: CSSProperties;
 }
 
-type CodexIdTokenInfo = Record<string, unknown>;
-
-const normalizeString = (value: unknown): string | null => {
-  if (typeof value !== 'string') return null;
-  const trimmed = value.trim();
-  return trimmed || null;
-};
-
 const normalizeProvider = (file: AuthFileItem): string =>
-  String(file.type ?? file.provider ?? '')
+  String(file.provider ?? file.type ?? '')
     .trim()
     .toLowerCase();
 
-const resolveCodexIdToken = (file: AuthFileItem): CodexIdTokenInfo | null => {
-  const raw = file.id_token ?? file.idToken;
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
-  return raw as CodexIdTokenInfo;
+const resolveSubscriptionTimestamp = (value: string | number | null): number | null => {
+  if (value === null) return null;
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value) || value <= 0) return null;
+    return value < 10_000_000_000 ? value * 1000 : value;
+  }
+
+  const date = new Date(value);
+  const timestamp = date.getTime();
+  return Number.isNaN(timestamp) ? null : timestamp;
 };
 
 const formatSubscriptionDateTime = (date: Date, language?: string): string =>
@@ -75,22 +74,14 @@ const subscriptionBadgeStyle = (status: 'active' | 'soon'): CSSProperties => {
 export function hasActiveCodexSubscription(file: AuthFileItem): boolean {
   if (normalizeProvider(file) !== 'codex') return false;
 
-  const idToken = resolveCodexIdToken(file);
-  if (!idToken) return false;
-
-  const planType = normalizeString(idToken.plan_type ?? idToken.planType);
+  const planType = resolveCodexPlanType(file);
   const normalizedPlanType = planType?.toLowerCase();
   if (normalizedPlanType === 'free' || normalizedPlanType === 'free-tier') return false;
 
-  const expiresAtRaw = normalizeString(
-    idToken.chatgpt_subscription_active_until ?? idToken.chatgptSubscriptionActiveUntil
-  );
-  if (!expiresAtRaw) return false;
+  const expiresAtTimestamp = resolveSubscriptionTimestamp(resolveCodexSubscriptionActiveUntil(file));
+  if (expiresAtTimestamp === null) return false;
 
-  const expiresAt = new Date(expiresAtRaw);
-  if (Number.isNaN(expiresAt.getTime())) return false;
-
-  return expiresAt.getTime() > Date.now();
+  return expiresAtTimestamp > Date.now();
 }
 
 export function resolveCodexSubscriptionBadge(
@@ -100,22 +91,15 @@ export function resolveCodexSubscriptionBadge(
 ): CodexSubscriptionBadge | null {
   if (normalizeProvider(file) !== 'codex') return null;
 
-  const idToken = resolveCodexIdToken(file);
-  if (!idToken) return null;
-
-  const planType = normalizeString(idToken.plan_type ?? idToken.planType);
+  const planType = resolveCodexPlanType(file);
   const normalizedPlanType = planType?.toLowerCase();
   if (normalizedPlanType === 'free' || normalizedPlanType === 'free-tier') return null;
 
-  const expiresAtRaw = normalizeString(
-    idToken.chatgpt_subscription_active_until ?? idToken.chatgptSubscriptionActiveUntil
-  );
-  if (!expiresAtRaw) return null;
+  const expiresAtTimestamp = resolveSubscriptionTimestamp(resolveCodexSubscriptionActiveUntil(file));
+  if (expiresAtTimestamp === null) return null;
 
-  const expiresAt = new Date(expiresAtRaw);
-  if (Number.isNaN(expiresAt.getTime())) return null;
-
-  const diffMs = expiresAt.getTime() - Date.now();
+  const expiresAt = new Date(expiresAtTimestamp);
+  const diffMs = expiresAtTimestamp - Date.now();
   if (diffMs <= 0) return null;
 
   const expiringSoon = Math.ceil(diffMs / DAY_MS) <= EXPIRING_SOON_DAYS;

@@ -41,7 +41,7 @@ interface ProviderResourceTableProps {
   onToggleDisabled?: (resource: ProviderResource, disabled: boolean) => void;
 }
 
-const columnWidths = ['18%', '18%', '6%', '14%', '24%', '20%'];
+const columnWidths = ['180px', '220px', '72px', '138px', '174px', '176px'];
 
 const resolveStatusBarData = (
   resource: ProviderResource,
@@ -183,6 +183,7 @@ export function ProviderResourceTable({
 
   return (
     <Table
+      className={styles.providerTable}
       cols={columnWidths.map((w, i) => (
         <col key={i} style={{ width: w }} />
       ))}
@@ -194,7 +195,9 @@ export function ProviderResourceTable({
           <TableHead>{t('providersPage.table.prefix')}</TableHead>
           <TableHead>{t('providersPage.table.models')}</TableHead>
           <TableHead>{t('providersPage.table.status')}</TableHead>
-          <TableHead alignRight>{t('providersPage.table.actions')}</TableHead>
+          <TableHead alignRight className={styles.actionsHead}>
+            {t('providersPage.table.actions')}
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -229,15 +232,25 @@ export function ProviderResourceTable({
                           </div>
                         );
                       })()}
-                      <ProviderStatusBar
-                        statusData={resolveStatusBarData(resource, usageByProvider)}
-                        styles={statusBarStyles}
-                      />
+                      <div className={styles.statusBarWrap}>
+                        <ProviderStatusBar
+                          statusData={resolveStatusBarData(resource, usageByProvider)}
+                          styles={statusBarStyles}
+                        />
+                      </div>
                     </>
                   ) : null}
                 </div>
               </TableCell>
-              <TableCell alignRight>
+              <TableCell
+                alignRight
+                className={[
+                  styles.actionsCell,
+                  resource.id === selectedId ? styles.actionsCellSelected : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
                 <div className={styles.actions}>
                   {onToggleDisabled ? (
                     <span
@@ -268,7 +281,7 @@ export function ProviderResourceTable({
                       onView(resource);
                     }}
                   >
-                    <IconEye size={14} />
+                    <IconEye size={16} />
                   </button>
                   <button
                     type="button"
@@ -281,7 +294,7 @@ export function ProviderResourceTable({
                       onEdit(resource);
                     }}
                   >
-                    <IconPencil size={14} />
+                    <IconPencil size={16} />
                   </button>
                   <button
                     type="button"
@@ -294,7 +307,7 @@ export function ProviderResourceTable({
                       onDelete(resource);
                     }}
                   >
-                    <IconTrash2 size={14} />
+                    <IconTrash2 size={16} />
                   </button>
                 </div>
               </TableCell>

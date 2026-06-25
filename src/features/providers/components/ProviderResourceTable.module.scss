@@ -1,6 +1,15 @@
 @use '../../../styles/mixins' as *;
 @use '../../../styles/variables' as *;
 
+.providerTable {
+  min-width: 960px;
+  table-layout: fixed;
+
+  tbody tr:hover .actionsCell {
+    background: color-mix(in srgb, var(--accent-bg) 50%, transparent);
+  }
+}
+
 .primaryCell {
   display: flex;
   flex-direction: column;
@@ -18,7 +27,7 @@
 }
 
 .primarySub {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted-foreground);
   font-family: $font-mono;
   overflow: hidden;
@@ -29,7 +38,7 @@
 
 .baseUrl {
   font-family: $font-mono;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted-foreground);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -40,12 +49,12 @@
 .chip {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   background: var(--muted-bg);
   color: var(--muted-foreground);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .metricsCell {
@@ -59,11 +68,11 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   background: var(--muted-bg);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.4;
   white-space: nowrap;
 }
@@ -81,12 +90,12 @@
 .flagTag {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: var(--radius-md);
   border: 1px solid var(--primary-30);
   background: var(--primary-10);
   color: var(--primary-color);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1.4;
   white-space: nowrap;
@@ -96,10 +105,10 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: var(--radius-md);
   border: 1px solid;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -110,21 +119,23 @@
   gap: 6px;
   align-items: flex-start;
   min-width: 0;
+  max-width: 190px;
 }
 
 .stats {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
+  max-width: 100%;
 }
 
 .statPill {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
+  padding: 2px 7px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   line-height: 1.4;
   border: 1px solid transparent;
@@ -156,16 +167,46 @@
   color: var(--amber-text);
 }
 
+.statusBarWrap {
+  width: min(100%, 178px);
+  min-width: 0;
+}
+
+.actionsHead,
+.actionsCell {
+  position: sticky;
+  right: 0;
+  width: 176px;
+  min-width: 176px;
+  box-shadow: -12px 0 16px -18px rgba(15, 23, 42, 0.45);
+}
+
+.actionsHead {
+  z-index: 3;
+  background: var(--muted-bg);
+}
+
+.actionsCell {
+  z-index: 2;
+  background: var(--bg-primary);
+}
+
+.actionsCellSelected {
+  background: var(--primary-8);
+}
+
 .actions {
   display: flex;
+  gap: 4px;
   align-items: center;
   justify-content: flex-end;
+  min-width: 0;
 }
 
 .toggleWrap {
   display: inline-flex;
   align-items: center;
-  margin-right: 12px;
+  margin-right: 4px;
 }
 
 .iconBtn {
@@ -175,44 +216,26 @@
   width: 30px;
   height: 30px;
   padding: 0;
-  border: 1px solid var(--border-color);
-  border-radius: 0;
-  background: var(--bg-secondary);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: background-color $transition-fast, color $transition-fast, border-color $transition-fast;
-
-  &:first-of-type {
-    border-top-left-radius: var(--radius-md);
-    border-bottom-left-radius: var(--radius-md);
-  }
-
-  &:last-of-type {
-    border-top-right-radius: var(--radius-md);
-    border-bottom-right-radius: var(--radius-md);
-  }
-
-  &:not(:last-of-type) {
-    border-right: none;
-  }
+  transition: background-color $transition-fast, color $transition-fast;
 
   &:hover:not(:disabled) {
     background: var(--bg-tertiary);
     color: var(--text-primary);
-    border-color: var(--primary-color);
-    z-index: 1;
   }
 
   &:disabled {
-    opacity: 0.4;
+    opacity: 0.5;
     cursor: not-allowed;
   }
 
   &:focus-visible {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(139, 134, 128, 0.18);
-    z-index: 2;
+    outline: 2px solid var(--primary-color);
+    outline-offset: -1px;
   }
 }
 
@@ -222,6 +245,5 @@
   &:hover:not(:disabled) {
     background: var(--destructive-10);
     color: var(--destructive-color);
-    border-color: var(--destructive-color);
   }
 }

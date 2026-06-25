@@ -16,6 +16,16 @@
 .cardTitleIcon {
   width: 22px;
   height: 22px;
+  object-fit: contain;
+}
+
+.cardTitleIconFallback {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
 }
 
 .content {
