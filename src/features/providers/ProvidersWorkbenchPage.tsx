@@ -14,11 +14,7 @@ import geminiLogo from '@/assets/icons/gemini.svg';
 import openaiLogo from '@/assets/icons/openai-light.svg';
 import vertexLogo from '@/assets/icons/vertex.svg';
 import { CategoryList, type CategoryItem } from '@/components/common/CategoryList';
-import type {
-  GeminiKeyConfig,
-  OpenAIProviderConfig,
-  ProviderKeyConfig,
-} from '@/types';
+import type { GeminiKeyConfig, OpenAIProviderConfig, ProviderKeyConfig } from '@/types';
 import { ProviderHeaderCard } from './components/ProviderHeaderCard';
 import { ProviderResourcePanel } from './components/ProviderResourcePanel';
 import type { OpenAISortBy, SortDir } from './components/OpenAIBrandToolbar';

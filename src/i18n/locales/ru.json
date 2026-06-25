@@ -1652,16 +1652,7 @@
     "export_configs": "Экспорт конфигов",
     "import_configs": "Импорт конфигов",
     "models_button": "Модели",
-    "openai_test_model": "Тест модели",
-    "test_back": "Назад",
-    "test_empty_hint": "Отправьте первое сообщение, чтобы начать тест",
-    "test_input_placeholder": "Введите тестовый запрос, нажмите Enter для отправки...",
-    "test_latency": "Задержка",
-    "test_no_api_key": "Клиентский API Key не найден. Сначала создайте его в API Keys.",
-    "test_responding": "Ответ...",
-    "test_send": "Тест",
-    "test_this_model": "Тестировать эту модель",
-    "test_title": "Тест модели"
+    "openai_test_model": "Тест модели"
   },
   "plugin_resource": {
     "empty_src": "URL страницы плагина пуст",

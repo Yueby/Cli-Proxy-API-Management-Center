@@ -1692,15 +1692,6 @@
     "export_configs": "匯出設定",
     "import_configs": "匯入設定",
     "models_button": "模型",
-    "openai_test_model": "測試模型",
-    "test_back": "返回",
-    "test_empty_hint": "傳送第一則訊息開始測試模型",
-    "test_input_placeholder": "輸入測試提示詞，按 Enter 傳送...",
-    "test_latency": "延遲",
-    "test_no_api_key": "找不到用戶端 API Key，請先在 API Keys 中建立。",
-    "test_responding": "正在回應...",
-    "test_send": "測試",
-    "test_this_model": "測試此模型",
-    "test_title": "測試模型"
+    "openai_test_model": "測試模型"
   }
 }

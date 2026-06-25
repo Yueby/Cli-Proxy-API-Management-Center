@@ -1665,15 +1665,6 @@
     "export_configs": "Export configs",
     "import_configs": "Import configs",
     "models_button": "Models",
-    "openai_test_model": "Test Model",
-    "test_back": "Back",
-    "test_empty_hint": "Send your first message to start testing",
-    "test_input_placeholder": "Enter a test prompt, press Enter to send...",
-    "test_latency": "Latency",
-    "test_no_api_key": "No client API Key found. Please create one in API Keys first.",
-    "test_responding": "Responding...",
-    "test_send": "Test",
-    "test_this_model": "Test this model",
-    "test_title": "Test Model"
+    "openai_test_model": "Test Model"
   }
 }
