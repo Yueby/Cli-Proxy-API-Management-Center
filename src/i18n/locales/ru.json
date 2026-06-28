@@ -1650,6 +1650,7 @@
         "directionDesc": "По убыванию"
       },
       "filter": {
+        "label": "Фильтр моделей",
         "allModels": "Все модели",
         "selectedModels": "{{selected}}/{{total}} моделей",
         "selectAll": "Выбрать все",

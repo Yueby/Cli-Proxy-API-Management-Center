@@ -1663,6 +1663,7 @@
         "directionDesc": "降序"
       },
       "filter": {
+        "label": "模型筛选",
         "allModels": "全部模型",
         "selectedModels": "{{selected}}/{{total}} 个模型",
         "selectAll": "全选",

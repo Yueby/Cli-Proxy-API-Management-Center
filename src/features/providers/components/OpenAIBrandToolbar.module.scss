@@ -2,64 +2,111 @@
 @use '../../../styles/variables' as *;
 
 .root {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) minmax(200px, 1fr);
+  gap: $spacing-md;
+  align-items: flex-end;
+
+  @include tablet {
+    grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr);
+  }
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
 }
 
-.sortGroup {
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  position: relative;
+}
+
+.fieldLabel {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sortControl {
   display: flex;
   align-items: center;
   gap: 6px;
-}
+  min-width: 0;
 
-.label {
-  font-size: 11px;
-  color: var(--muted-foreground);
-  white-space: nowrap;
+  > :first-child {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 .dirBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-md);
+  width: 36px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: $radius-md;
   border: 1px solid var(--border-color);
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
   color: var(--text-secondary);
   cursor: pointer;
-  transition: background-color $transition-fast, color $transition-fast;
+  transition: background-color $transition-fast, color $transition-fast, border-color $transition-fast;
 
   &:hover {
+    border-color: var(--primary-color);
     background: var(--bg-tertiary);
     color: var(--text-primary);
   }
-}
 
-.filterGroup {
-  position: relative;
+  &:focus-visible {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.18);
+  }
 }
 
 .filterTrigger {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding: 0 10px;
-  border-radius: var(--radius-md);
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: $radius-md;
   border: 1px solid var(--border-color);
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
   color: var(--text-primary);
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color $transition-fast, border-color $transition-fast;
+  text-align: left;
+  box-sizing: border-box;
+  transition: border-color $transition-fast, background-color $transition-fast;
+
+  > span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
   &:hover:not(:disabled) {
     border-color: var(--primary-color);
-    color: var(--primary-color);
+    background: var(--bg-tertiary);
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.18);
   }
 
   &:disabled {
@@ -72,13 +119,13 @@
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
-  min-width: 220px;
-  max-width: 320px;
+  min-width: 240px;
+  max-width: 340px;
   z-index: $z-dropdown;
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border-radius: $radius-lg;
+  box-shadow: var(--shadow-lg);
   padding: 8px;
   display: flex;
   flex-direction: column;
@@ -93,13 +140,14 @@
 }
 
 .filterToolbarBtn {
-  padding: 2px 8px;
-  border-radius: var(--radius-md);
+  padding: 4px 10px;
+  border-radius: $radius-md;
   border: 1px solid var(--border-color);
   background: var(--bg-primary);
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
+  transition: border-color $transition-fast, color $transition-fast;
 
   &:hover:not(:disabled) {
     border-color: var(--primary-color);
@@ -115,15 +163,15 @@
 .filterEmpty {
   padding: 12px;
   text-align: center;
-  font-size: 12px;
-  color: var(--muted-foreground);
+  font-size: 13px;
+  color: var(--text-tertiary);
 }
 
 .filterList {
   list-style: none;
   margin: 0;
   padding: 0;
-  max-height: 220px;
+  max-height: 240px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -132,7 +180,7 @@
 
 .filterItem {
   padding: 4px 6px;
-  border-radius: var(--radius-sm);
+  border-radius: $radius-sm;
 
   &:hover {
     background: var(--bg-tertiary);

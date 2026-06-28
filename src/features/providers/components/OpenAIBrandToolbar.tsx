@@ -81,48 +81,51 @@ export function OpenAIBrandToolbar({
 
   return (
     <div className={styles.root}>
-      <div className={styles.sortGroup}>
-        <span className={styles.label}>{t('providersPage.toolbar.sortBy')}</span>
-        <Select
-          value={sortBy}
-          options={sortOptions}
-          onChange={(value) => onSortBy(value as OpenAISortBy)}
-          ariaLabel={t('providersPage.toolbar.sortBy')}
-          size="sm"
-        />
-        <button
-          type="button"
-          className={styles.dirBtn}
-          onClick={() => onSortDir(sortDir === 'asc' ? 'desc' : 'asc')}
-          aria-label={
-            sortDir === 'asc'
-              ? t('providersPage.toolbar.sort.directionAsc')
-              : t('providersPage.toolbar.sort.directionDesc')
-          }
-          title={
-            sortDir === 'asc'
-              ? t('providersPage.toolbar.sort.directionAsc')
-              : t('providersPage.toolbar.sort.directionDesc')
-          }
-        >
-          {sortDir === 'asc' ? (
-            <IconChevronUp size={14} />
-          ) : (
-            <IconChevronDown size={14} />
-          )}
-        </button>
+      <div className={styles.field}>
+        <label className={styles.fieldLabel}>{t('providersPage.toolbar.sortBy')}</label>
+        <div className={styles.sortControl}>
+          <Select
+            value={sortBy}
+            options={sortOptions}
+            onChange={(value) => onSortBy(value as OpenAISortBy)}
+            ariaLabel={t('providersPage.toolbar.sortBy')}
+            fullWidth
+          />
+          <button
+            type="button"
+            className={styles.dirBtn}
+            onClick={() => onSortDir(sortDir === 'asc' ? 'desc' : 'asc')}
+            aria-label={
+              sortDir === 'asc'
+                ? t('providersPage.toolbar.sort.directionAsc')
+                : t('providersPage.toolbar.sort.directionDesc')
+            }
+            title={
+              sortDir === 'asc'
+                ? t('providersPage.toolbar.sort.directionAsc')
+                : t('providersPage.toolbar.sort.directionDesc')
+            }
+          >
+            {sortDir === 'asc' ? (
+              <IconChevronUp size={16} />
+            ) : (
+              <IconChevronDown size={16} />
+            )}
+          </button>
+        </div>
       </div>
 
-      <div className={styles.filterGroup} ref={containerRef}>
+      <div className={styles.field} ref={containerRef}>
+        <label className={styles.fieldLabel}>{t('providersPage.toolbar.filter.label')}</label>
         <button
           type="button"
           className={styles.filterTrigger}
           onClick={() => setFilterOpen((v) => !v)}
           disabled={availableModels.length === 0}
         >
-          <IconSlidersHorizontal size={14} />
+          <IconSlidersHorizontal size={16} />
           <span>{filterLabel}</span>
-          <IconChevronDown size={12} />
+          <IconChevronDown size={14} />
         </button>
         {filterOpen ? (
           <div className={styles.filterPanel}>

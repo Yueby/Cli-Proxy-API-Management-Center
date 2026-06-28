@@ -1690,6 +1690,7 @@
         "directionDesc": "降序"
       },
       "filter": {
+        "label": "模型篩選",
         "allModels": "全部模型",
         "selectedModels": "{{selected}}/{{total}} 個模型",
         "selectAll": "全選",
