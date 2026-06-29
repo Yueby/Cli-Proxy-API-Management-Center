@@ -32,6 +32,7 @@ import type {
   PayloadFilterRule,
   PayloadParamValidationErrorCode,
   PayloadRule,
+  PluginStoreAuthRule,
   VisualConfigFieldPath,
   VisualConfigValidationErrorCode,
   VisualConfigValidationErrors,
@@ -41,6 +42,7 @@ import {
   ApiKeysCardEditor,
   PayloadFilterRulesEditor,
   PayloadRulesEditor,
+  PluginStoreAuthEditor,
 } from './VisualConfigEditorBlocks';
 import styles from './VisualConfigEditor.module.scss';
 
@@ -219,6 +221,10 @@ export function VisualConfigEditor({
 
   const handleApiKeysTextChange = useCallback(
     (apiKeysText: string) => onChange({ apiKeysText }),
+    [onChange]
+  );
+  const handlePluginStoreAuthChange = useCallback(
+    (pluginStoreAuth: PluginStoreAuthRule[]) => onChange({ pluginStoreAuth }),
     [onChange]
   );
   const handlePayloadDefaultRulesChange = useCallback(
@@ -788,6 +794,16 @@ export function VisualConfigEditor({
                       'config_management.visual.sections.system.plugin_store_sources_placeholder'
                     )}
                     disabled={disabled}
+                  />
+                </FieldShell>
+                <FieldShell
+                  label={t('config_management.visual.sections.system.plugin_store_auth')}
+                  hint={t('config_management.visual.sections.system.plugin_store_auth_hint')}
+                >
+                  <PluginStoreAuthEditor
+                    value={values.pluginStoreAuth}
+                    disabled={disabled}
+                    onChange={handlePluginStoreAuthChange}
                   />
                 </FieldShell>
               </SectionSubsection>

@@ -1,5 +1,7 @@
 export type PayloadParamValueType = 'string' | 'number' | 'boolean' | 'json';
 export type DisableImageGenerationMode = 'false' | 'true' | 'chat';
+export type PluginStoreAuthType = 'none' | 'bearer' | 'basic' | 'header' | 'github-token';
+export type PluginStoreAuthApplyTo = 'registry' | 'metadata' | 'artifact';
 export type PayloadParamValidationErrorCode =
   | 'payload_invalid_number'
   | 'payload_invalid_boolean'
@@ -67,6 +69,19 @@ export interface StreamingConfig {
   nonstreamKeepaliveInterval: string;
 }
 
+export type PluginStoreAuthRule = {
+  id: string;
+  match: string;
+  applyTo: PluginStoreAuthApplyTo[];
+  type: PluginStoreAuthType;
+  tokenEnv: string;
+  usernameEnv: string;
+  passwordEnv: string;
+  headerName: string;
+  headerValueEnv: string;
+  allowInsecure: boolean;
+};
+
 export type VisualConfigValues = {
   host: string;
   port: string;
@@ -108,6 +123,7 @@ export type VisualConfigValues = {
   antigravitySignatureBypassStrict: boolean;
   pluginsEnabled: boolean;
   pluginStoreSources: string[];
+  pluginStoreAuth: PluginStoreAuthRule[];
   codexIdentityConfuse: boolean;
   claudeHeaderUserAgent: string;
   claudeHeaderPackageVersion: string;
@@ -172,6 +188,7 @@ export const DEFAULT_VISUAL_VALUES: VisualConfigValues = {
   antigravitySignatureBypassStrict: false,
   pluginsEnabled: false,
   pluginStoreSources: [],
+  pluginStoreAuth: [],
   codexIdentityConfuse: false,
   claudeHeaderUserAgent: '',
   claudeHeaderPackageVersion: '',
