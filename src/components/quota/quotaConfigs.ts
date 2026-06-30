@@ -69,7 +69,6 @@ import {
   buildAntigravityQuotaGroups,
   buildKimiQuotaRows,
   createStatusError,
-  formatShanghaiDateTime,
   getStatusFromError,
   isAntigravityFile,
   isClaudeFile,
@@ -872,52 +871,7 @@ const renderCodexItems = (
   const { styles: styleMap, QuotaProgressBar } = helpers;
   const { createElement: h, Fragment } = React;
   const windows = quota.windows ?? [];
-  const resetCredits = quota.rateLimitResetCredits ?? [];
-  const resetCreditsError = quota.rateLimitResetCreditsError ?? '';
   const nodes: ReactNode[] = [];
-
-  if (resetCredits.length > 0) {
-    nodes.push(
-      h(
-        'div',
-        { key: 'reset-credit-expiries', className: styleMap.codexResetCredits },
-        h(
-          'div',
-          { className: styleMap.codexResetCreditsTitle },
-          t('codex_quota.reset_credits_expiry_label')
-        ),
-        ...resetCredits.map((credit, index) =>
-          h(
-            'div',
-            {
-              key: credit.id || `${credit.expiresAt}-${index}`,
-              className: styleMap.codexResetCreditRow,
-            },
-            h(
-              'span',
-              { className: styleMap.codexResetCreditLabel },
-              t('codex_quota.reset_credit_number', { index: index + 1 })
-            ),
-            h(
-              'span',
-              { className: styleMap.codexResetCreditTime },
-              formatShanghaiDateTime(credit.expiresAt) || credit.expiresAt
-            )
-          )
-        )
-      )
-    );
-  } else if (resetCreditsError) {
-    nodes.push(
-      h(
-        'div',
-        { key: 'reset-credit-expiry-error', className: styleMap.codexResetCreditsError },
-        t('codex_quota.reset_credits_expiry_failed', {
-          message: resetCreditsError,
-        })
-      )
-    );
-  }
 
   if (windows.length === 0) {
     nodes.push(

@@ -59,6 +59,7 @@ export interface ItemCardBadge {
   style?: CSSProperties;
   className?: string;
   title?: string;
+  tooltip?: ReactNode;
 }
 
 export interface ModelsTooltipItem {
@@ -310,6 +311,78 @@ function ModelsButton({
   );
 }
 
+function BadgeWithTooltip({ badge }: { badge: ItemCardBadge }) {
+  const [show, setShow] = useState(false);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!show) return;
+    const dismiss = () => setShow(false);
+    const handlePointerDown = (event: PointerEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setShow(false);
+      }
+    };
+    window.addEventListener('scroll', dismiss, true);
+    window.addEventListener('touchmove', dismiss, true);
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => {
+      window.removeEventListener('scroll', dismiss, true);
+      window.removeEventListener('touchmove', dismiss, true);
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [show]);
+
+  const handleEnter = () => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setPos({ top: rect.top, left: rect.left + rect.width / 2 });
+    }
+    setShow(true);
+  };
+
+  const badgeClass =
+    badge.variant === 'custom'
+      ? `${styles.typeBadge} ${badge.className || ''}`
+      : `${styles.stateBadge} ${
+          badge.variant === 'active'
+            ? styles.stateBadgeActive
+            : badge.variant === 'warning'
+              ? styles.stateBadgeWarning
+              : badge.variant === 'disabled'
+                ? styles.stateBadgeDisabled
+                : ''
+        }`;
+
+  return (
+    <>
+      <span
+        ref={ref}
+        className={badgeClass}
+        style={badge.style}
+        title={undefined}
+        onPointerEnter={(event) => {
+          if (event.pointerType === 'mouse') handleEnter();
+        }}
+        onPointerLeave={(event) => {
+          if (event.pointerType === 'mouse') setShow(false);
+        }}
+      >
+        {badge.label}
+      </span>
+      {show &&
+        badge.tooltip &&
+        createPortal(
+          <div className={keyBadgeStyles.tooltip} style={{ top: pos.top, left: pos.left }}>
+            {badge.tooltip}
+          </div>,
+          document.body
+        )}
+    </>
+  );
+}
+
 function ModelTooltip({
   models,
   loading,
@@ -430,7 +503,10 @@ export function ItemCard({
             {badges && badges.length > 0 && (
               <div className={styles.badgeRow}>
                 {badges.map((badge, i) => {
-                  if (badge.variant === 'custom') {
+                   if (badge.tooltip) {
+                     return <BadgeWithTooltip key={i} badge={badge} />;
+                   }
+                   if (badge.variant === 'custom') {
                     return (
                       <span
                         key={i}

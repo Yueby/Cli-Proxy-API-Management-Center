@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { useState, type ReactNode } from 'react';
+import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { SelectionCheckbox } from '@/components/ui/SelectionCheckbox';
@@ -11,12 +12,15 @@ import {
   IconInfo,
   IconSettings,
   IconSignal,
+  IconTimer,
   IconTrash2,
   IconZap,
 } from '@/components/ui/icons';
-import { useQuotaStore } from '@/stores';
-import { getAntigravityPlanLabel } from '@/components/quota';
+import { useNotificationStore, useQuotaStore } from '@/stores';
+import { getAntigravityPlanLabel, CODEX_CONFIG } from '@/components/quota';
+import { formatShanghaiDateTime } from '@/utils/quota/resetCredits';
 import type { AuthFileItem } from '@/types';
+import type { CodexRateLimitResetCredit } from '@/types/quota';
 import {
   requiresGoogleProjectId,
   resolveCodexPlanType,
@@ -45,9 +49,81 @@ import type { AuthFileStatusBarData } from '@/features/authFiles/hooks/useAuthFi
 import { AuthFileQuotaSection } from '@/features/authFiles/components/AuthFileQuotaSection';
 import { resolveAuthFileQuotaType } from '@/features/authFiles/quotaConfig';
 import { resolveCodexSubscriptionBadge } from '@/features/authFiles/codexSubscription';
+import keyBadgeStyles from '@/components/providers/OpenAISection/KeyCountBadge.module.scss';
 import styles from '@/pages/AuthFilesPage.module.scss';
 
 const HEALTHY_STATUS_MESSAGES = new Set(['ok', 'healthy', 'ready', 'success', 'available']);
+
+function ResetCreditsBadge({
+  count,
+  credits,
+  tooltipTitle,
+}: {
+  count: number;
+  credits: CodexRateLimitResetCredit[];
+  tooltipTitle: string;
+}) {
+  const [show, setShow] = useState(false);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!show) return;
+    const dismiss = () => setShow(false);
+    const handlePointerDown = (event: PointerEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) setShow(false);
+    };
+    window.addEventListener('scroll', dismiss, true);
+    window.addEventListener('touchmove', dismiss, true);
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => {
+      window.removeEventListener('scroll', dismiss, true);
+      window.removeEventListener('touchmove', dismiss, true);
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [show]);
+
+  const handleEnter = () => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setPos({ top: rect.top, left: rect.left + rect.width / 2 });
+    }
+    setShow(true);
+  };
+
+  return (
+    <>
+      <span
+        ref={ref}
+        className={`${keyBadgeStyles.badge} ${styles.resetCreditsBadge}`}
+        onPointerEnter={(e) => { if (e.pointerType === 'mouse') handleEnter(); }}
+        onPointerLeave={(e) => { if (e.pointerType === 'mouse') setShow(false); }}
+      >
+        <span className={keyBadgeStyles.badgeIcon}>
+          <IconTimer size={12} />
+        </span>
+        <span className={styles.resetCreditsBadgeCount}>{count}</span>
+      </span>
+      {show && credits.length > 0 &&
+        createPortal(
+          <div className={keyBadgeStyles.tooltip} style={{ top: pos.top, left: pos.left }}>
+            <div className={styles.resetCreditsTooltip}>
+              <div className={styles.resetCreditsTooltipTitle}>{tooltipTitle}</div>
+              {credits.map((credit, index) => (
+                <div key={credit.id || `${credit.expiresAt}-${index}`} className={styles.resetCreditsTooltipRow}>
+                  <span className={styles.resetCreditsTooltipIndex}>{index + 1}</span>
+                  <span className={styles.resetCreditsTooltipTime}>
+                    {formatShanghaiDateTime(credit.expiresAt) || credit.expiresAt}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>,
+          document.body
+        )}
+    </>
+  );
+}
 
 export type AuthFileCardProps = {
   file: AuthFileItem;
@@ -176,6 +252,52 @@ export function AuthFileCard(props: AuthFileCardProps) {
     const count = quota.rateLimitResetCreditsAvailableCount ?? null;
     return typeof count === 'number' && count > 0 ? count : null;
   });
+  const codexResetCredits = useQuotaStore((state) => {
+    const quota = state.codexQuota[file.name];
+    if (!quota || quota.status !== 'success') return null;
+    return (quota.rateLimitResetCredits ?? []) as CodexRateLimitResetCredit[];
+  });
+  const showNotification = useNotificationStore((state) => state.showNotification);
+  const showConfirmation = useNotificationStore((state) => state.showConfirmation);
+  const [resettingQuota, setResettingQuota] = useState(false);
+
+  const resetQuotaForFile = useCallback(() => {
+    if (disableControls) return;
+    if (isRuntimeOnlyAuthFile(file)) return;
+    if (file.disabled) return;
+    if (resettingQuota) return;
+
+    const config = CODEX_CONFIG as unknown as {
+      resetQuota?: (file: AuthFileItem, t: (key: string, opts?: Record<string, unknown>) => string) => Promise<unknown>;
+      buildSuccessState: (data: unknown) => unknown;
+    };
+    const resetQuota = config.resetQuota;
+    if (!resetQuota) return;
+
+    showConfirmation({
+      title: t('codex_quota.reset_confirm_title'),
+      message: t('codex_quota.reset_confirm_message', { name: file.name }),
+      confirmText: t('codex_quota.reset_confirm_button'),
+      variant: 'primary',
+      onConfirm: async () => {
+        setResettingQuota(true);
+        try {
+          const data = await resetQuota(file, t);
+          useQuotaStore.getState().setCodexQuota((prev) => ({
+            ...prev,
+            [file.name]: config.buildSuccessState(data) as never,
+          }));
+          showNotification(t('codex_quota.reset_success', { name: file.name }), 'success');
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : t('common.unknown_error');
+          showNotification(t('codex_quota.reset_failed', { name: file.name, message }), 'error');
+        } finally {
+          setResettingQuota(false);
+        }
+      },
+    });
+  }, [disableControls, file, resettingQuota, showConfirmation, showNotification, t]);
+
   const resolvedPlanLabel = codexPlan || quotaStorePlan || null;
   const codexSubscriptionBadge = resolveCodexSubscriptionBadge(file, t, i18n.resolvedLanguage);
   const cachedModels = getCachedModels(file.name);
@@ -265,19 +387,13 @@ export function AuthFileCard(props: AuthFileCardProps) {
               },
             ]
           : []),
-        ...(codexResetCreditsAvailableCount !== null
+        ...(resolvedPlanLabel
           ? [
               {
-                label: t('codex_quota.reset_credits_badge', {
-                  count: codexResetCreditsAvailableCount,
-                }),
+                label: resolvedPlanLabel,
                 variant: 'custom' as const,
-                style: {
-                  backgroundColor: 'rgba(14, 165, 233, 0.12)',
-                  color: '#0284c7',
-                  border: '1px solid rgba(14, 165, 233, 0.28)',
-                },
-                title: t('codex_quota.reset_credits_label'),
+                style: getPlanBadgeStyle(resolvedPlanLabel),
+                className: isPlanPremium(resolvedPlanLabel) ? styles.premiumPlanValue : '',
               },
             ]
           : []),
@@ -304,16 +420,14 @@ export function AuthFileCard(props: AuthFileCardProps) {
       headerExtra={(() => {
         const badges: ReactNode[] = [];
 
-        if (resolvedPlanLabel) {
-          const isPremium = isPlanPremium(resolvedPlanLabel);
+        if (codexResetCreditsAvailableCount !== null && codexResetCredits) {
           badges.push(
-            <span
-              key="plan"
-              className={`${ItemCard.styles.typeBadge} ${isPremium ? styles.premiumPlanValue : ''}`.trim()}
-              style={getPlanBadgeStyle(resolvedPlanLabel)}
-            >
-              {resolvedPlanLabel}
-            </span>
+            <ResetCreditsBadge
+              key="reset-credits"
+              count={codexResetCreditsAvailableCount}
+              credits={codexResetCredits}
+              tooltipTitle={t('codex_quota.reset_credits_expiry_label')}
+            />
           );
         }
 
@@ -426,7 +540,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
 
           {/* Quota */}
           {showQuota && cachedQuotaType && (
-            <AuthFileQuotaSection file={file} quotaType={cachedQuotaType} />
+            <AuthFileQuotaSection file={file} quotaType={cachedQuotaType} disableControls={disableControls} />
           )}
         </>
       }
@@ -464,6 +578,19 @@ export function AuthFileCard(props: AuthFileCardProps) {
                     disabled={disableControls || file.disabled}
                   >
                     <IconZap size={16} />
+                  </Button>
+                )}
+                {showQuota && cachedQuotaType === 'codex' && codexResetCreditsAvailableCount !== null && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={resetQuotaForFile}
+                    className={ItemCard.styles.iconButton}
+                    title={t('codex_quota.reset_button')}
+                    disabled={disableControls || file.disabled || resettingQuota}
+                    loading={resettingQuota}
+                  >
+                    {!resettingQuota && <IconTimer size={16} />}
                   </Button>
                 )}
                 <Button

@@ -877,6 +877,84 @@
   }
 }
 
+.quotaResetCreditButton:global(.btn.btn-sm) {
+  border-radius: 999px;
+  padding-inline: 12px;
+
+  > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+}
+
+.quotaCardActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-xs;
+  flex-wrap: wrap;
+  padding-top: $spacing-xs;
+}
+
+.resetCreditsBadge {
+  padding: 3px 8px;
+  border-radius: $radius-full;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.resetCreditsBadgeCount {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.resetCreditsTooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.resetCreditsTooltipTitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.resetCreditsTooltipRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.resetCreditsTooltipIndex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(14, 165, 233, 0.14);
+  color: #0284c7;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.resetCreditsTooltipTime {
+  font-family: $font-mono;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
 .codexPlan {
   grid-column: 1 / -1;
   display: flex;
