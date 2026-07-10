@@ -19,10 +19,6 @@ const baseSvgProps: SVGProps<SVGSVGElement> = {
   focusable: 'false',
 };
 
-const sidebarSvgProps: SVGProps<SVGSVGElement> = {
-  ...baseSvgProps,
-};
-
 export function IconSlidersHorizontal({ size = 20, ...props }: IconProps) {
   return (
     <svg {...baseSvgProps} width={size} height={size} {...props}>
@@ -507,7 +503,7 @@ export function IconLayoutDashboard({ size = 20, ...props }: IconProps) {
 
 export function IconSidebarDashboard({ size = 20, ...props }: IconProps) {
   return (
-    <svg {...sidebarSvgProps} width={size} height={size} {...props}>
+    <svg {...baseSvgProps} width={size} height={size} {...props}>
       <rect width="7" height="9" x="3" y="3" rx="1" />
       <rect width="7" height="5" x="14" y="3" rx="1" />
       <rect width="7" height="9" x="14" y="12" rx="1" />
@@ -518,7 +514,7 @@ export function IconSidebarDashboard({ size = 20, ...props }: IconProps) {
 
 export function IconSidebarConfig({ size = 20, ...props }: IconProps) {
   return (
-    <svg {...sidebarSvgProps} width={size} height={size} {...props}>
+    <svg {...baseSvgProps} width={size} height={size} {...props}>
       <line x1="21" x2="14" y1="4" y2="4" />
       <line x1="10" x2="3" y1="4" y2="4" />
       <line x1="21" x2="12" y1="12" y2="12" />
@@ -534,7 +530,7 @@ export function IconSidebarConfig({ size = 20, ...props }: IconProps) {
 
 export function IconSidebarPlugins({ size = 20, ...props }: IconProps) {
   return (
-    <svg {...sidebarSvgProps} width={size} height={size} {...props}>
+    <svg {...baseSvgProps} width={size} height={size} {...props}>
       <path d="M12 22v-5" />
       <path d="M9 8V2" />
       <path d="M15 8V2" />
@@ -545,7 +541,7 @@ export function IconSidebarPlugins({ size = 20, ...props }: IconProps) {
 
 export function IconSidebarStore({ size = 20, ...props }: IconProps) {
   return (
-    <svg {...sidebarSvgProps} width={size} height={size} {...props}>
+    <svg {...baseSvgProps} width={size} height={size} {...props}>
       <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7" />
       <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
       <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4" />
@@ -557,7 +553,7 @@ export function IconSidebarStore({ size = 20, ...props }: IconProps) {
 
 export function IconSidebarProviders({ size = 20, ...props }: IconProps) {
   return (
-    <svg {...sidebarSvgProps} width={size} height={size} {...props}>
+    <svg {...baseSvgProps} width={size} height={size} {...props}>
       <rect x="16" y="16" width="6" height="6" rx="1" />
       <rect x="2" y="16" width="6" height="6" rx="1" />
       <rect x="9" y="2" width="6" height="6" rx="1" />
@@ -569,7 +565,7 @@ export function IconSidebarProviders({ size = 20, ...props }: IconProps) {
 
 export function IconSidebarAuthFiles({ size = 20, ...props }: IconProps) {
   return (
-    <svg {...sidebarSvgProps} width={size} height={size} {...props}>
+    <svg {...baseSvgProps} width={size} height={size} {...props}>
       <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
       <path d="m9 12 2 2 4-4" />
     </svg>
@@ -578,7 +574,7 @@ export function IconSidebarAuthFiles({ size = 20, ...props }: IconProps) {
 
 export function IconSidebarOauth({ size = 20, ...props }: IconProps) {
   return (
-    <svg {...sidebarSvgProps} width={size} height={size} {...props}>
+    <svg {...baseSvgProps} width={size} height={size} {...props}>
       <path d="M2 21a8 8 0 0 1 13.292-6" />
       <circle cx="10" cy="8" r="5" />
       <path d="m16 19 2 2 4-4" />
@@ -588,7 +584,7 @@ export function IconSidebarOauth({ size = 20, ...props }: IconProps) {
 
 export function IconSidebarQuota({ size = 20, ...props }: IconProps) {
   return (
-    <svg {...sidebarSvgProps} width={size} height={size} {...props}>
+    <svg {...baseSvgProps} width={size} height={size} {...props}>
       <path d="m12 14 4-4" />
       <path d="M3.34 19a10 10 0 1 1 17.32 0" />
     </svg>
@@ -597,7 +593,7 @@ export function IconSidebarQuota({ size = 20, ...props }: IconProps) {
 
 export function IconSidebarLogs({ size = 20, ...props }: IconProps) {
   return (
-    <svg {...sidebarSvgProps} width={size} height={size} {...props}>
+    <svg {...baseSvgProps} width={size} height={size} {...props}>
       <path d="M15 12h-5" />
       <path d="M15 8h-5" />
       <path d="M19 17V5a2 2 0 0 0-2-2H4" />
@@ -608,7 +604,7 @@ export function IconSidebarLogs({ size = 20, ...props }: IconProps) {
 
 export function IconSidebarSystem({ size = 20, ...props }: IconProps) {
   return (
-    <svg {...sidebarSvgProps} width={size} height={size} {...props}>
+    <svg {...baseSvgProps} width={size} height={size} {...props}>
       <rect width="20" height="8" x="2" y="2" rx="2" />
       <rect width="20" height="8" x="2" y="14" rx="2" />
       <line x1="6" x2="6.01" y1="6" y2="6" />
