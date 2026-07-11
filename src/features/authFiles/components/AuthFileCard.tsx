@@ -213,7 +213,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
 
   const priorityValue = parsePriorityValue(file.priority ?? file['priority']);
   const stateLabel = isRuntimeOnly
-    ? t('auth_files.type_virtual') || '虚拟认证文件'
+    ? t('auth_files.type_virtual')
     : file.disabled
       ? t('auth_files.health_status_disabled')
       : hasStatusWarning
@@ -244,7 +244,14 @@ export function AuthFileCard(props: AuthFileCardProps) {
     // Codex planType (from API, may differ from file metadata)
     const codexQ = state.codexQuota[file.name];
     if (codexQ && codexQ.status === 'success' && codexQ.planType) return codexQ.planType;
+    // xAI planType (from billing quota refresh)
+    const xaiQ = state.xaiQuota[file.name];
+    if (xaiQ && xaiQ.status === 'success' && xaiQ.planType) return xaiQ.planType;
     return null;
+  });
+  const xaiPayAsYouGoDisabled = useQuotaStore((state) => {
+    const quota = state.xaiQuota[file.name];
+    return Boolean(quota && quota.status === 'success' && quota.payAsYouGoDisabled === true);
   });
   const codexResetCreditsAvailableCount = useQuotaStore((state) => {
     const quota = state.codexQuota[file.name];
@@ -299,6 +306,10 @@ export function AuthFileCard(props: AuthFileCardProps) {
   }, [disableControls, file, resettingQuota, showConfirmation, showNotification, t]);
 
   const resolvedPlanLabel = codexPlan || quotaStorePlan || null;
+  const xaiPremiumPlusTooltip =
+    providerKey === 'xai' && resolvedPlanLabel === 'Premium+'
+      ? t('xai_quota.plan_premium_plus_includes_supergrok')
+      : undefined;
   const codexSubscriptionBadge = resolveCodexSubscriptionBadge(file, t, i18n.resolvedLanguage);
   const cachedModels = getCachedModels(file.name);
 
@@ -306,8 +317,11 @@ export function AuthFileCard(props: AuthFileCardProps) {
     const normalized = plan.trim().toLowerCase();
     const isPro = normalized === 'pro';
     const isAntigravityPremium = normalized === 'ultra' || normalized === 'ultra lite';
+    const isXaiPremium = normalized === 'supergrok heavy';
     return (
-      (providerKey === 'codex' && isPro) || (providerKey === 'antigravity' && isAntigravityPremium)
+      (providerKey === 'codex' && isPro) ||
+      (providerKey === 'antigravity' && isAntigravityPremium) ||
+      (providerKey === 'xai' && isXaiPremium)
     );
   };
 
@@ -377,6 +391,31 @@ export function AuthFileCard(props: AuthFileCardProps) {
             ...(typeColor.border ? { border: typeColor.border } : {}),
           },
         },
+        ...(providerKey === 'xai' && resolvedPlanLabel
+          ? [
+              {
+                label: resolvedPlanLabel,
+                variant: 'custom' as const,
+                style: getPlanBadgeStyle(resolvedPlanLabel),
+                className: isPlanPremium(resolvedPlanLabel) ? styles.premiumPlanValue : '',
+                title: xaiPremiumPlusTooltip,
+              },
+            ]
+          : []),
+        ...(providerKey === 'xai' && xaiPayAsYouGoDisabled
+          ? [
+              {
+                label: t('xai_quota.pay_as_you_go_disabled'),
+                variant: 'custom' as const,
+                title: t('xai_quota.pay_as_you_go_disabled'),
+                style: {
+                  backgroundColor: 'rgba(148, 163, 184, 0.1)',
+                  color: 'var(--text-tertiary)',
+                  border: '1px solid var(--border-color)',
+                },
+              },
+            ]
+          : []),
         ...(codexSubscriptionBadge
           ? [
               {
@@ -387,7 +426,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
               },
             ]
           : []),
-        ...(resolvedPlanLabel
+        ...(resolvedPlanLabel && providerKey !== 'xai'
           ? [
               {
                 label: resolvedPlanLabel,
@@ -443,7 +482,10 @@ export function AuthFileCard(props: AuthFileCardProps) {
                 border: '1px solid rgba(16, 185, 129, 0.25)',
               }}
             >
-              <IconSignal size={12} /> P{priorityValue}
+              <IconSignal size={12} />
+              <span title={t('auth_files.priority_badge_title', { value: priorityValue })}>
+                P{priorityValue}
+              </span>
             </span>
           );
         }
@@ -552,7 +594,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
                 onClick={() => onShowModels(file)}
                 onMouseEnter={() => onPrefetchModels(file)}
                 disabled={disableControls}
-                title={t('auth_files.models_button', { defaultValue: '模型' })}
+                title={t('auth_files.models_button')}
                 tooltip={
                   <ItemCard.ModelTooltip
                     models={cachedModels?.map((model) => ({

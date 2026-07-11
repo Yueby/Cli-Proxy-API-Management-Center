@@ -887,7 +887,10 @@ const renderCodexItems = (
       const used = window.usedPercent;
       const clampedUsed = used === null ? null : Math.max(0, Math.min(100, used));
       const remaining = clampedUsed === null ? null : Math.max(0, Math.min(100, 100 - clampedUsed));
-      const percentLabel = remaining === null ? '--' : `${Math.round(remaining)}%`;
+      const percentLabel =
+        remaining === null
+          ? '--'
+          : t('codex_quota.remaining_percent', { percent: Math.round(remaining) });
       const windowLabel = window.labelKey
         ? t(window.labelKey, window.labelParams as Record<string, string | number>)
         : window.label;
@@ -1100,7 +1103,10 @@ const renderClaudeItems = (
       const used = window.usedPercent;
       const clampedUsed = used === null ? null : Math.max(0, Math.min(100, used));
       const remaining = clampedUsed === null ? null : Math.max(0, Math.min(100, 100 - clampedUsed));
-      const percentLabel = remaining === null ? '--' : `${Math.round(remaining)}%`;
+      const percentLabel =
+        remaining === null
+          ? '--'
+          : t('claude_quota.remaining_percent', { percent: Math.round(remaining) });
       const windowLabel = window.labelKey ? t(window.labelKey) : window.label;
 
       return h(
@@ -1283,7 +1289,8 @@ const renderKimiItems = (
         : used > 0
           ? 0
           : null;
-    const percentLabel = remaining === null ? '--' : `${remaining}%`;
+    const percentLabel =
+      remaining === null ? '--' : t('kimi_quota.remaining_percent', { percent: remaining });
     const rowLabelParams = row.labelParams
       ? {
           ...row.labelParams,
@@ -1444,24 +1451,35 @@ const formatXaiOnDemandAmount = (billing: XaiBillingSummary): string => {
   return `${remaining} / ${cap}`;
 };
 
-const formatXaiPercent = (value: number | null): string => {
-  if (value === null) return '--';
-  return `${Math.round(value)}%`;
-};
+const formatXaiPercent = (value: number | null, t: TFunction): string =>
+  value === null ? '--' : t('xai_quota.remaining_percent', { percent: Math.round(value) });
 
+const XAI_PREMIUM_LIMIT_CENTS = 4_000;
+const XAI_PREMIUM_PLUS_LIMIT_CENTS = 20_000;
 const XAI_SUPERGROK_LIMIT_CENTS = 15_000;
-const XAI_SUPERGROK_HEAVY_LIMIT_CENTS = 150_000;
+const XAI_SUPERGROK_HEAVY_LIMIT_CENTS = new Set([150_000]);
 
 const resolveXaiPlan = (
   monthlyLimitCents: number | null
-): { labelKey: string; premium: boolean } | null => {
-  if (monthlyLimitCents === XAI_SUPERGROK_LIMIT_CENTS) {
-    return { labelKey: 'plan_supergrok', premium: false };
+): { label: string; premium: boolean } | null => {
+  if (monthlyLimitCents === XAI_PREMIUM_LIMIT_CENTS) {
+    return { label: 'Premium', premium: false };
   }
-  if (monthlyLimitCents === XAI_SUPERGROK_HEAVY_LIMIT_CENTS) {
-    return { labelKey: 'plan_supergrok_heavy', premium: true };
+  if (monthlyLimitCents === XAI_PREMIUM_PLUS_LIMIT_CENTS) {
+    return { label: 'Premium+', premium: false };
+  }
+  if (monthlyLimitCents === XAI_SUPERGROK_LIMIT_CENTS) {
+    return { label: 'SuperGrok', premium: false };
+  }
+  if (monthlyLimitCents !== null && XAI_SUPERGROK_HEAVY_LIMIT_CENTS.has(monthlyLimitCents)) {
+    return { label: 'SuperGrok Heavy', premium: true };
   }
   return null;
+};
+
+const resolveXaiPlanBadgeLabel = (monthlyLimitCents: number | null): string | null => {
+  const plan = resolveXaiPlan(monthlyLimitCents);
+  return plan?.label ?? null;
 };
 
 const renderXaiItems = (
@@ -1480,7 +1498,7 @@ const renderXaiItems = (
   const clampedUsed =
     billing.usedPercent === null ? null : Math.max(0, Math.min(100, billing.usedPercent));
   const remaining = clampedUsed === null ? null : Math.max(0, Math.min(100, 100 - clampedUsed));
-  const percentLabel = formatXaiPercent(remaining);
+  const percentLabel = formatXaiPercent(remaining, t);
   const amountLabel = formatXaiRemainingAmount(billing);
   const resetLabel = formatQuotaResetTime(billing.billingPeriodEnd, t);
   const onDemandCap = billing.onDemandCapCents ?? 0;
@@ -1490,18 +1508,17 @@ const renderXaiItems = (
       : Math.max(0, Math.min(100, billing.onDemandUsedPercent));
   const onDemandRemaining =
     clampedOnDemandUsed === null ? null : Math.max(0, Math.min(100, 100 - clampedOnDemandUsed));
-  const onDemandPercentLabel = formatXaiPercent(onDemandRemaining);
+  const onDemandPercentLabel = formatXaiPercent(onDemandRemaining, t);
   const onDemandAmountLabel = formatXaiOnDemandAmount(billing);
-  const plan = resolveXaiPlan(billing.monthlyLimitCents);
   const weeklyUsed =
     billing.periodType === 'weekly' && billing.usagePercent !== null
       ? Math.max(0, Math.min(100, billing.usagePercent))
       : null;
   const weeklyRemaining = weeklyUsed === null ? null : Math.max(0, Math.min(100, 100 - weeklyUsed));
-  const weeklyResetLabel = formatQuotaResetTime(billing.periodEnd);
+  const weeklyResetLabel = formatQuotaResetTime(billing.periodEnd, t);
   const hasWeeklyData =
     billing.periodType === 'weekly' &&
-    (weeklyUsed !== null || Boolean(billing.periodEnd) || billing.productUsage.length > 0);
+    (weeklyUsed !== null || Boolean(billing.periodEnd));
   const hasMonthlyData =
     billing.monthlyLimitCents !== null ||
     billing.usedCents !== null ||
@@ -1510,18 +1527,6 @@ const renderXaiItems = (
   return h(
     Fragment,
     null,
-    plan
-      ? h(
-          'div',
-          { key: 'plan', className: styleMap.codexPlan },
-          h('span', { className: styleMap.codexPlanLabel }, t('xai_quota.plan_label')),
-          h(
-            'span',
-            { className: plan.premium ? styleMap.premiumPlanValue : styleMap.codexPlanValue },
-            t(`xai_quota.${plan.labelKey}`)
-          )
-        )
-      : null,
     hasWeeklyData
       ? h(
           'div',
@@ -1533,21 +1538,9 @@ const renderXaiItems = (
             h(
               'div',
               { className: styleMap.quotaMeta },
-              h(
-                'span',
-                { className: styleMap.quotaPercent },
-                t('xai_quota.used_percent', {
-                  percent: formatXaiPercent(weeklyUsed),
-                })
-              ),
+              h('span', { className: styleMap.quotaPercent }, formatXaiPercent(weeklyRemaining, t)),
               weeklyResetLabel !== '-'
-                ? h(
-                    'span',
-                    { className: styleMap.quotaReset },
-                    t('xai_quota.reset_at', {
-                      time: weeklyResetLabel,
-                    })
-                  )
+                ? h('span', { className: styleMap.quotaReset }, weeklyResetLabel)
                 : null
             )
           ),
@@ -1558,7 +1551,9 @@ const renderXaiItems = (
           })
         )
       : null,
-    ...billing.productUsage.map((item) => {
+    ...billing.productUsage
+      .filter((item) => item.product.trim() && item.usagePercent !== null)
+      .map((item) => {
       const used =
         item.usagePercent === null ? null : Math.max(0, Math.min(100, item.usagePercent));
       const remainingPercent = used === null ? null : Math.max(0, Math.min(100, 100 - used));
@@ -1579,9 +1574,7 @@ const renderXaiItems = (
             h(
               'span',
               { className: styleMap.quotaPercent },
-              t('xai_quota.used_percent', {
-                percent: formatXaiPercent(used),
-              })
+              formatXaiPercent(remainingPercent, t)
             )
           )
         ),
@@ -1613,12 +1606,7 @@ const renderXaiItems = (
             mediumThreshold: QUOTA_PROGRESS_MEDIUM_THRESHOLD,
           })
         )
-      : h(
-          'div',
-          { key: 'pay-as-you-go', className: styleMap.codexPlan },
-          h('span', { className: styleMap.codexPlanLabel }, t('xai_quota.pay_as_you_go_label')),
-          h('span', { className: styleMap.codexPlanValue }, t('xai_quota.pay_as_you_go_disabled'))
-        ),
+      : null,
     hasMonthlyData
       ? h(
           'div',
@@ -1677,7 +1665,14 @@ export const XAI_CONFIG: QuotaConfig<XaiQuotaState, XaiBillingSummary> = {
   storeSelector: (state) => state.xaiQuota,
   storeSetter: 'setXaiQuota',
   buildLoadingState: () => ({ status: 'loading', billing: null }),
-  buildSuccessState: (billing) => ({ status: 'success', billing }),
+  buildSuccessState: (billing) => {
+    return {
+      status: 'success' as const,
+      billing,
+      planType: resolveXaiPlanBadgeLabel(billing.monthlyLimitCents),
+      payAsYouGoDisabled: (billing.onDemandCapCents ?? 0) <= 0,
+    };
+  },
   buildErrorState: (message, status) => ({
     status: 'error',
     billing: null,

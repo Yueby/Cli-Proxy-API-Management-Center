@@ -313,6 +313,7 @@
     "type_empty": "Пусто",
     "type_unknown": "Другое",
     "type_virtual": "Виртуальный файл авторизации",
+    "priority_badge_title": "Приоритет: {{value}}",
     "models_button": "Модели",
     "models_title": "Поддерживаемые модели",
     "models_loading": "Загрузка списка моделей...",
@@ -363,6 +364,8 @@
     "disable_cooling_label": "Отключение охлаждения (disable_cooling)",
     "disable_cooling_placeholder": "например: true / false / 1 / 0",
     "disable_cooling_hint": "Поддерживает boolean, числа 0/не 0 и строки true/false/1/0; непарсируемые значения игнорируются.",
+    "using_api_label": "Использовать официальный API (using_api)",
+    "using_api_hint": "Если включено, используется официальный API xAI; если выключено — Grok CLI chat-proxy.",
     "note_label": "Заметка (note)",
     "note_placeholder": "Введите заметку, например: аккаунт Ивана",
     "note_hint": "Необязательно. Используется для описания назначения или владельца учётных данных; оставьте пустым, чтобы не записывать.",
@@ -461,7 +464,8 @@
     "seven_day_sonnet": "7 дней Sonnet",
     "seven_day_cowork": "7 дней Cowork",
     "iguana_necktie": "Iguana Necktie",
-    "extra_usage_label": "Дополнительное использование",
+    "extra_usage_label": "Дополнительное использование (использовано)",
+    "remaining_percent": "Осталось {{percent}}%",
     "plan_label": "План",
     "plan_unknown": "Неизвестно",
     "plan_free": "Free",
@@ -513,7 +517,8 @@
     "plan_team": "Team",
     "plan_free": "Free",
     "plan_pro": "Pro 20x",
-    "plan_prolite": "Pro 5x"
+    "plan_prolite": "Pro 5x",
+    "remaining_percent": "Осталось {{percent}}%"
   },
   "kimi_quota": {
     "title": "Квота Kimi",
@@ -529,7 +534,8 @@
     "weekly_limit": "7 дней",
     "limit_window": "{{duration}}",
     "limit_index": "Лимит #{{index}}",
-    "reset_hint": "сброс через {{hint}}"
+    "reset_hint": "сброс через {{hint}}",
+    "remaining_percent": "Осталось {{percent}}%"
   },
   "quota_time": {
     "in_days_hours": "через {{days}} дн. {{hours}} ч.",
@@ -561,16 +567,17 @@
     "refresh_button": "Обновить квоту",
     "fetch_all": "Получить все",
     "weekly_limit": "Недельный лимит",
-    "monthly_credits": "Месячные кредиты",
-    "used_percent": "Использовано {{percent}}",
+    "monthly_credits": "Включённый месячный кредит",
+    "remaining_percent": "Осталось {{percent}}%",
     "reset_at": "Сброс {{time}}",
     "product_usage": "Использование {{product}}",
     "plan_label": "План",
     "plan_supergrok": "SuperGrok",
     "plan_supergrok_heavy": "SuperGrok Heavy",
+    "plan_premium_plus_includes_supergrok": "Включает преимущества подписки SuperGrok",
     "pay_as_you_go_label": "Оплата по факту",
     "pay_as_you_go_enabled": "Включено, лимит {{cap}}",
-    "pay_as_you_go_disabled": "Отключено"
+    "pay_as_you_go_disabled": "Оплата по факту отключена"
   },
   "vertex_import": {
     "title": "Вход с Vertex JSON",
