@@ -20,7 +20,10 @@ export type VisualConfigFieldPath =
   | 'streaming.bootstrapRetries'
   | 'streaming.nonstreamKeepaliveInterval';
 
-export type VisualConfigValidationErrorCode = 'port_range' | 'non_negative_integer';
+export type VisualConfigValidationErrorCode =
+  | 'port_range'
+  | 'non_negative_integer'
+  | 'integer_range_1_3600';
 
 export type VisualConfigValidationErrors = Partial<
   Record<VisualConfigFieldPath, VisualConfigValidationErrorCode>
@@ -95,6 +98,9 @@ export type VisualConfigValues = {
   rmPanelRepo: string;
   authDir: string;
   apiKeysText: string;
+  pluginsEnabled: boolean;
+  pluginStoreSources: string[];
+  pluginStoreAuth: PluginStoreAuthRule[];
   debug: boolean;
   commercialMode: boolean;
   loggingToFile: boolean;
@@ -121,10 +127,6 @@ export type VisualConfigValues = {
   wsAuth: boolean;
   antigravitySignatureCacheEnabled: boolean;
   antigravitySignatureBypassStrict: boolean;
-  pluginsEnabled: boolean;
-  pluginStoreSources: string[];
-  pluginStoreAuth: PluginStoreAuthRule[];
-  codexIdentityConfuse: boolean;
   claudeHeaderUserAgent: string;
   claudeHeaderPackageVersion: string;
   claudeHeaderRuntimeVersion: string;
@@ -134,6 +136,7 @@ export type VisualConfigValues = {
   claudeHeaderStabilizeDeviceProfile: boolean;
   codexHeaderUserAgent: string;
   codexHeaderBetaFeatures: string;
+  codexIdentityConfuse: boolean;
   payloadDefaultRules: PayloadRule[];
   payloadDefaultRawRules: PayloadRule[];
   payloadOverrideRules: PayloadRule[];
@@ -160,6 +163,9 @@ export const DEFAULT_VISUAL_VALUES: VisualConfigValues = {
   rmPanelRepo: '',
   authDir: '',
   apiKeysText: '',
+  pluginsEnabled: false,
+  pluginStoreSources: [],
+  pluginStoreAuth: [],
   debug: false,
   commercialMode: false,
   loggingToFile: false,
@@ -186,10 +192,6 @@ export const DEFAULT_VISUAL_VALUES: VisualConfigValues = {
   wsAuth: false,
   antigravitySignatureCacheEnabled: true,
   antigravitySignatureBypassStrict: false,
-  pluginsEnabled: false,
-  pluginStoreSources: [],
-  pluginStoreAuth: [],
-  codexIdentityConfuse: false,
   claudeHeaderUserAgent: '',
   claudeHeaderPackageVersion: '',
   claudeHeaderRuntimeVersion: '',
@@ -199,6 +201,7 @@ export const DEFAULT_VISUAL_VALUES: VisualConfigValues = {
   claudeHeaderStabilizeDeviceProfile: false,
   codexHeaderUserAgent: '',
   codexHeaderBetaFeatures: '',
+  codexIdentityConfuse: false,
   payloadDefaultRules: [],
   payloadDefaultRawRules: [],
   payloadOverrideRules: [],

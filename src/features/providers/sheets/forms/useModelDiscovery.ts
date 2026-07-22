@@ -1,24 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { modelsApi } from '@/services/api';
 import { buildHeaderObject } from '@/utils/headers';
+import { getErrorMessage } from '@/utils/helpers';
 import type { ModelInfo } from '@/utils/models';
 import type { ApiKeyEntryInput, ProviderBrand } from '../../types';
 
 export const MODEL_DISCOVERY_BRANDS: ReadonlyArray<ProviderBrand> = [
   'gemini',
   'codex',
+  'xai',
   'claude',
+  'claudeApi',
   'openaiCompatibility',
 ];
 
 export const isModelDiscoveryBrand = (brand: ProviderBrand): boolean =>
   MODEL_DISCOVERY_BRANDS.includes(brand);
-
-const toErrorMessage = (err: unknown): string => {
-  if (err instanceof Error) return err.message;
-  if (typeof err === 'string') return err;
-  return '';
-};
 
 export interface UseModelDiscoveryArgs {
   brand: ProviderBrand;
@@ -65,7 +62,7 @@ export function useModelDiscovery(args: UseModelDiscoveryArgs): UseModelDiscover
           baseHeaders,
           resolvedAuthIndex
         );
-      } else if (brand === 'codex') {
+      } else if (brand === 'codex' || brand === 'xai') {
         const key = (apiKey ?? '').trim() || (fallbackApiKey ?? '').trim();
         next = await modelsApi.fetchV1ModelsViaApiCall(
           baseUrl,
@@ -73,7 +70,7 @@ export function useModelDiscovery(args: UseModelDiscoveryArgs): UseModelDiscover
           baseHeaders,
           resolvedAuthIndex
         );
-      } else if (brand === 'claude') {
+      } else if (brand === 'claude' || brand === 'claudeApi') {
         const key = (apiKey ?? '').trim() || (fallbackApiKey ?? '').trim();
         next = await modelsApi.fetchClaudeModelsViaApiCall(
           baseUrl,
@@ -111,7 +108,7 @@ export function useModelDiscovery(args: UseModelDiscoveryArgs): UseModelDiscover
       setHasFetched(true);
     } catch (err) {
       setModels([]);
-      setError(toErrorMessage(err) || 'Failed to fetch models');
+      setError(getErrorMessage(err) || 'Failed to fetch models');
       setHasFetched(true);
     } finally {
       setLoading(false);

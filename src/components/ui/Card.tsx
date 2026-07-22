@@ -15,7 +15,7 @@ export function Card({ title, extra, children, className }: PropsWithChildren<Ca
           {extra}
         </div>
       )}
-      <div className="card-body">{children}</div>
+      {children}
     </div>
   );
 }

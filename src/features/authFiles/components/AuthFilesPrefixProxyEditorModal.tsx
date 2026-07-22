@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Input } from '@/components/ui/Input';
-import { SkeletonTextBlock } from '@/components/common/LoadingSkeleton';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import type {
   PrefixProxyEditorField,
@@ -53,12 +53,10 @@ export function AuthFilesPrefixProxyEditorModal(props: AuthFilesPrefixProxyEdito
           : t('auth_files.prefix_proxy_button')
       }
       footer={
-        <div className="segmented-button-group">
-          {dirty && (
-            <Button variant="secondary" onClick={onClose} disabled={editor?.saving === true}>
-              {t('common.cancel')}
-            </Button>
-          )}
+        <>
+          <Button variant="secondary" onClick={onClose} disabled={editor?.saving === true}>
+            {dirty ? t('common.cancel') : t('common.close')}
+          </Button>
           <Button
             variant="secondary"
             onClick={() => {
@@ -82,18 +80,15 @@ export function AuthFilesPrefixProxyEditorModal(props: AuthFilesPrefixProxyEdito
           >
             {t('common.save')}
           </Button>
-        </div>
+        </>
       }
     >
       {editor && (
         <div className={styles.prefixProxyEditor}>
           {editor.loading ? (
-            <div
-              className={styles.prefixProxyLoading}
-              aria-busy="true"
-              aria-label={t('auth_files.prefix_proxy_loading')}
-            >
-              <SkeletonTextBlock lines={6} />
+            <div className={styles.prefixProxyLoading}>
+              <LoadingSpinner size={14} />
+              <span>{t('auth_files.prefix_proxy_loading')}</span>
             </div>
           ) : (
             <>

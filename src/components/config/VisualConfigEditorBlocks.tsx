@@ -3,16 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Select';
-import {
-  IconChevronDown,
-  IconChevronUp,
-  IconCopy,
-  IconPencil,
-  IconPlus,
-  IconRefreshCw,
-  IconTrash2,
-  IconX,
-} from '@/components/ui/icons';
 import { useNotificationStore } from '@/stores';
 import styles from './VisualConfigEditor.module.scss';
 import { copyToClipboard } from '@/utils/clipboard';
@@ -158,28 +148,14 @@ function buildProtocolOptions(
       label: t(option.labelKey, { defaultValue: option.defaultLabel }),
     })
   );
-
-  return appendCustomProtocolOptions(options, rules);
-}
-
-function appendCustomProtocolOptions(
-  options: Array<{ value: string; label: string }>,
-  rules: Array<{ models: PayloadModelEntry[] }>,
-  includeFromProtocol = false
-) {
   const seen = new Set<string>(options.map((option) => option.value));
 
   for (const rule of rules) {
     for (const model of rule.models) {
-      const protocols = includeFromProtocol
-        ? [model.protocol, model.fromProtocol]
-        : [model.protocol];
-
-      for (const protocol of protocols) {
-        if (!protocol || !protocol.trim() || seen.has(protocol)) continue;
-        seen.add(protocol);
-        options.push({ value: protocol, label: protocol });
-      }
+      const protocol = model.protocol;
+      if (!protocol || !protocol.trim() || seen.has(protocol)) continue;
+      seen.add(protocol);
+      options.push({ value: protocol, label: protocol });
     }
   }
 
@@ -305,14 +281,8 @@ export const ApiKeysCardEditor = memo(function ApiKeysCardEditor({
     <div className="form-group" style={{ marginBottom: 0 }}>
       <div className={styles.blockHeaderRow}>
         <label style={{ margin: 0 }}>{t('config_management.visual.api_keys.label')}</label>
-        <Button
-          size="sm"
-          onClick={openAddModal}
-          disabled={disabled}
-          title={t('config_management.visual.api_keys.add')}
-          aria-label={t('config_management.visual.api_keys.add')}
-        >
-          <IconPlus size={16} />
+        <Button size="sm" onClick={openAddModal} disabled={disabled}>
+          {t('config_management.visual.api_keys.add')}
         </Button>
       </div>
 
@@ -330,38 +300,30 @@ export const ApiKeysCardEditor = memo(function ApiKeysCardEditor({
                 <div className="item-subtitle">{maskApiKey(String(key || ''))}</div>
               </div>
               <div className="item-actions">
-                <div className="segmented-button-group">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleCopy(key)}
-                    disabled={disabled}
-                    title={t('common.copy')}
-                    aria-label={t('common.copy')}
-                  >
-                    <IconCopy size={15} />
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => openEditModal(renderApiKeyIds[index] ?? '')}
-                    disabled={disabled}
-                    title={t('config_management.visual.common.edit')}
-                    aria-label={t('config_management.visual.common.edit')}
-                  >
-                    <IconPencil size={15} />
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(renderApiKeyIds[index] ?? '')}
-                    disabled={disabled}
-                    title={t('config_management.visual.common.delete')}
-                    aria-label={t('config_management.visual.common.delete')}
-                  >
-                    <IconTrash2 size={15} />
-                  </Button>
-                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleCopy(key)}
+                  disabled={disabled}
+                >
+                  {t('common.copy')}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => openEditModal(renderApiKeyIds[index] ?? '')}
+                  disabled={disabled}
+                >
+                  {t('config_management.visual.common.edit')}
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => handleDelete(renderApiKeyIds[index] ?? '')}
+                  disabled={disabled}
+                >
+                  {t('config_management.visual.common.delete')}
+                </Button>
               </div>
             </div>
           ))}
@@ -379,7 +341,7 @@ export const ApiKeysCardEditor = memo(function ApiKeysCardEditor({
             : t('config_management.visual.api_keys.add_title')
         }
         footer={
-          <div className="segmented-button-group">
+          <>
             <Button variant="secondary" onClick={closeModal} disabled={disabled}>
               {t('config_management.visual.common.cancel')}
             </Button>
@@ -388,7 +350,7 @@ export const ApiKeysCardEditor = memo(function ApiKeysCardEditor({
                 ? t('config_management.visual.common.update')
                 : t('config_management.visual.common.add')}
             </Button>
-          </div>
+          </>
         }
       >
         <div className="form-group">
@@ -412,10 +374,8 @@ export const ApiKeysCardEditor = memo(function ApiKeysCardEditor({
               size="sm"
               onClick={handleGenerate}
               disabled={disabled}
-              title={t('config_management.visual.api_keys.generate')}
-              aria-label={t('config_management.visual.api_keys.generate')}
             >
-              <IconRefreshCw size={16} />
+              {t('config_management.visual.api_keys.generate')}
             </Button>
           </div>
           <div id={apiKeyHintId} className="hint">
@@ -432,7 +392,7 @@ export const ApiKeysCardEditor = memo(function ApiKeysCardEditor({
   );
 });
 
-const StringListEditor = memo(function StringListEditor({
+export const StringListEditor = memo(function StringListEditor({
   value,
   disabled,
   placeholder,
@@ -479,28 +439,14 @@ const StringListEditor = memo(function StringListEditor({
             onChange={(nextValue) => updateItem(index, nextValue)}
             disabled={disabled}
           />
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => removeItem(index)}
-            disabled={disabled}
-            title={t('config_management.visual.common.delete')}
-            aria-label={t('config_management.visual.common.delete')}
-          >
-            <IconX size={14} />
+          <Button variant="ghost" size="sm" onClick={() => removeItem(index)} disabled={disabled}>
+            {t('config_management.visual.common.delete')}
           </Button>
         </div>
       ))}
       <div className={styles.actionRow}>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={addItem}
-          disabled={disabled}
-          title={t('config_management.visual.common.add')}
-          aria-label={t('config_management.visual.common.add')}
-        >
-          <IconPlus size={14} />
+        <Button variant="secondary" size="sm" onClick={addItem} disabled={disabled}>
+          {t('config_management.visual.common.add')}
         </Button>
       </div>
     </div>
@@ -761,42 +707,29 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
   const rules = value;
   const protocolOptions = useMemo(() => buildProtocolOptions(t, rules), [rules, t]);
   const fromProtocolOptions = useMemo(
-    () =>
-      appendCustomProtocolOptions(
-        [
-          {
-            value: '',
-            label: t('config_management.visual.payload_rules.provider_default'),
-          },
-          {
-            value: 'openai',
-            label: t('config_management.visual.payload_rules.provider_openai'),
-          },
-          {
-            value: 'openai-response',
-            label: t('config_management.visual.payload_rules.provider_responses'),
-          },
-          {
-            value: 'gemini',
-            label: t('config_management.visual.payload_rules.provider_gemini'),
-          },
-          {
-            value: 'claude',
-            label: t('config_management.visual.payload_rules.provider_claude'),
-          },
-          {
-            value: 'codex',
-            label: t('config_management.visual.payload_rules.provider_codex'),
-          },
-          {
-            value: 'antigravity',
-            label: t('config_management.visual.payload_rules.provider_antigravity'),
-          },
-        ],
-        rules,
-        true
-      ),
-    [rules, t]
+    () => [
+      {
+        value: '',
+        label: t('config_management.visual.payload_rules.provider_default'),
+      },
+      {
+        value: 'openai',
+        label: t('config_management.visual.payload_rules.provider_openai'),
+      },
+      {
+        value: 'responses',
+        label: t('config_management.visual.payload_rules.provider_responses'),
+      },
+      {
+        value: 'gemini',
+        label: t('config_management.visual.payload_rules.provider_gemini'),
+      },
+      {
+        value: 'claude',
+        label: t('config_management.visual.payload_rules.provider_claude'),
+      },
+    ],
+    [t]
   );
   const payloadValueTypeOptions = useMemo(
     () =>
@@ -851,7 +784,8 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
   };
 
   const addHeader = (ruleIndex: number, modelIndex: number) => {
-    const model = rules[ruleIndex].models[modelIndex];
+    const rule = rules[ruleIndex];
+    const model = rule.models[modelIndex];
     updateModel(ruleIndex, modelIndex, {
       headers: [...(model.headers ?? []), { id: makeClientId(), name: '', value: '' }],
     });
@@ -982,7 +916,7 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
           options={booleanValueOptions}
           placeholder={t('config_management.visual.payload_rules.value_boolean')}
           disabled={disabled}
-          ariaLabel={t('config_management.visual.payload_rules.param_value')}
+          ariaLabel={t('config_management.visual.payload_rules.condition_value')}
           onChange={(nextValue) =>
             updateCondition(ruleIndex, modelIndex, key, conditionIndex, { value: nextValue })
           }
@@ -995,7 +929,7 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
         <textarea
           className={`input ${styles.payloadJsonInput}`}
           placeholder={getValuePlaceholder(condition.valueType)}
-          aria-label={t('config_management.visual.payload_rules.param_value')}
+          aria-label={t('config_management.visual.payload_rules.condition_value')}
           value={condition.value}
           onChange={(e) =>
             updateCondition(ruleIndex, modelIndex, key, conditionIndex, {
@@ -1010,7 +944,7 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
     return (
       <ExpandableInput
         placeholder={getValuePlaceholder(condition.valueType)}
-        ariaLabel={t('config_management.visual.payload_rules.param_value')}
+        ariaLabel={t('config_management.visual.payload_rules.condition_value')}
         value={condition.value}
         onChange={(nextValue) =>
           updateCondition(ruleIndex, modelIndex, key, conditionIndex, { value: nextValue })
@@ -1090,14 +1024,12 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
               {t('config_management.visual.payload_rules.rule')} {ruleIndex + 1}
             </div>
             <Button
-              variant="danger"
+              variant="ghost"
               size="sm"
               onClick={() => removeRule(ruleIndex)}
               disabled={disabled}
-              title={t('config_management.visual.common.delete')}
-              aria-label={t('config_management.visual.common.delete')}
             >
-              <IconTrash2 size={14} />
+              {t('config_management.visual.common.delete')}
             </Button>
           </div>
 
@@ -1166,35 +1098,26 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
                         />
                       </>
                     )}
-                    <div className="segmented-button-group">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        className={`${styles.payloadRowActionButton} ${styles.payloadAdvancedToggleButton} ${advancedExpanded ? styles.payloadAdvancedToggleButtonActive : ''}`}
-                        onClick={() => toggleModelAdvanced(model.id, hasAdvancedSettings)}
-                        disabled={disabled}
-                        title={advancedExpanded ? t('common.collapse') : t('common.expand')}
-                        aria-label={advancedExpanded ? t('common.collapse') : t('common.expand')}
-                        aria-expanded={advancedExpanded}
-                      >
-                        {advancedExpanded ? (
-                          <IconChevronUp size={14} />
-                        ) : (
-                          <IconChevronDown size={14} />
-                        )}
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        className={styles.payloadRowActionButton}
-                        onClick={() => removeModel(ruleIndex, modelIndex)}
-                        disabled={disabled}
-                        title={t('config_management.visual.common.delete')}
-                        aria-label={t('config_management.visual.common.delete')}
-                      >
-                        <IconX size={14} />
-                      </Button>
-                    </div>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className={styles.payloadRowActionButton}
+                      onClick={() => toggleModelAdvanced(model.id, hasAdvancedSettings)}
+                      disabled={disabled}
+                    >
+                      {advancedExpanded
+                        ? t('config_management.visual.payload_rules.hide_advanced')
+                        : t('config_management.visual.payload_rules.advanced')}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={styles.payloadRowActionButton}
+                      onClick={() => removeModel(ruleIndex, modelIndex)}
+                      disabled={disabled}
+                    >
+                      {t('config_management.visual.common.delete')}
+                    </Button>
                   </div>
 
                   {advancedExpanded ? (
@@ -1211,14 +1134,15 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
                             ariaLabel={t('config_management.visual.payload_rules.from_protocol')}
                             onChange={(nextValue) =>
                               updateModel(ruleIndex, modelIndex, {
-                                fromProtocol: nextValue || undefined,
+                                fromProtocol: (nextValue ||
+                                  undefined) as PayloadModelEntry['fromProtocol'],
                               })
                             }
                           />
                         </div>
                       </div>
 
-                      <div className={`${styles.blockStack} ${styles.payloadAdvancedSection}`}>
+                      <div className={styles.blockStack}>
                         <div className={styles.blockLabel}>
                           {t('config_management.visual.payload_rules.headers')}
                         </div>
@@ -1247,44 +1171,32 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
                               disabled={disabled}
                             />
                             <Button
-                              variant="secondary"
+                              variant="ghost"
                               size="sm"
                               className={styles.payloadRowActionButton}
                               onClick={() => removeHeader(ruleIndex, modelIndex, headerIndex)}
                               disabled={disabled}
-                              title={t('config_management.visual.common.delete')}
-                              aria-label={t('config_management.visual.common.delete')}
                             >
-                              <IconX size={14} />
+                              {t('config_management.visual.common.delete')}
                             </Button>
                           </div>
                         ))}
-                        <div className={`${styles.actionRow} ${styles.payloadAdvancedActionRow}`}>
+                        <div className={styles.actionRow}>
                           <Button
                             variant="secondary"
                             size="sm"
                             onClick={() => addHeader(ruleIndex, modelIndex)}
                             disabled={disabled}
-                            title={t('config_management.visual.payload_rules.add_header')}
-                            aria-label={t('config_management.visual.payload_rules.add_header')}
                           >
-                            <IconPlus size={14} />
-                            <span>{t('config_management.visual.payload_rules.add_header')}</span>
+                            {t('config_management.visual.payload_rules.add_header')}
                           </Button>
                         </div>
                       </div>
 
                       {(['match', 'notMatch'] as const).map((conditionKey) => (
-                        <div
-                          key={conditionKey}
-                          className={`${styles.blockStack} ${styles.payloadAdvancedSection}`}
-                        >
+                        <div key={conditionKey} className={styles.blockStack}>
                           <div className={styles.blockLabel}>
-                            {t(
-                              `config_management.visual.payload_rules.${
-                                conditionKey === 'match' ? 'match' : 'notMatch'
-                              }`
-                            )}
+                            {t(`config_management.visual.payload_rules.${conditionKey}`)}
                           </div>
                           {(model[conditionKey] ?? []).map((condition, conditionIndex) => {
                             const conditionError = getValidationMessage(
@@ -1348,7 +1260,7 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
                                     condition
                                   )}
                                   <Button
-                                    variant="secondary"
+                                    variant="ghost"
                                     size="sm"
                                     className={styles.payloadRowActionButton}
                                     onClick={() =>
@@ -1360,10 +1272,8 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
                                       )
                                     }
                                     disabled={disabled}
-                                    title={t('config_management.visual.common.delete')}
-                                    aria-label={t('config_management.visual.common.delete')}
                                   >
-                                    <IconX size={14} />
+                                    {t('config_management.visual.common.delete')}
                                   </Button>
                                 </div>
                                 {conditionError ? (
@@ -1374,26 +1284,21 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
                               </div>
                             );
                           })}
-                          <div className={`${styles.actionRow} ${styles.payloadAdvancedActionRow}`}>
+                          <div className={styles.actionRow}>
                             <Button
                               variant="secondary"
                               size="sm"
                               onClick={() => addCondition(ruleIndex, modelIndex, conditionKey)}
                               disabled={disabled}
-                              title={t('config_management.visual.payload_rules.add_condition')}
-                              aria-label={t('config_management.visual.payload_rules.add_condition')}
                             >
-                              <IconPlus size={14} />
-                              <span>
-                                {t('config_management.visual.payload_rules.add_condition')}
-                              </span>
+                              {t('config_management.visual.payload_rules.add_condition')}
                             </Button>
                           </div>
                         </div>
                       ))}
 
                       <div className={styles.payloadAdvancedGrid}>
-                        <div className={`${styles.blockStack} ${styles.payloadAdvancedSection}`}>
+                        <div className={styles.blockStack}>
                           <div className={styles.blockLabel}>
                             {t('config_management.visual.payload_rules.exist')}
                           </div>
@@ -1407,7 +1312,7 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
                             onChange={(exist) => updateModel(ruleIndex, modelIndex, { exist })}
                           />
                         </div>
-                        <div className={`${styles.blockStack} ${styles.payloadAdvancedSection}`}>
+                        <div className={styles.blockStack}>
                           <div className={styles.blockLabel}>
                             {t('config_management.visual.payload_rules.notExist')}
                           </div>
@@ -1435,10 +1340,8 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
                 size="sm"
                 onClick={() => addModel(ruleIndex)}
                 disabled={disabled}
-                title={t('config_management.visual.payload_rules.add_model')}
-                aria-label={t('config_management.visual.payload_rules.add_model')}
               >
-                <IconPlus size={14} />
+                {t('config_management.visual.payload_rules.add_model')}
               </Button>
             </div>
           </div>
@@ -1452,7 +1355,14 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
 
               return (
                 <div key={param.id} className={styles.payloadRuleParamGroup}>
-                  <div className={styles.payloadRuleParamRow}>
+                  <div
+                    className={[
+                      styles.payloadRuleParamRow,
+                      rawJsonValues ? styles.payloadRuleRawParamRow : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
                     <ExpandableInput
                       placeholder={t('config_management.visual.payload_rules.json_path')}
                       ariaLabel={t('config_management.visual.payload_rules.json_path')}
@@ -1483,15 +1393,13 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
                     )}
                     {renderParamValueEditor(ruleIndex, paramIndex, param)}
                     <Button
-                      variant="secondary"
+                      variant="ghost"
                       size="sm"
                       className={styles.payloadRowActionButton}
                       onClick={() => removeParam(ruleIndex, paramIndex)}
                       disabled={disabled}
-                      title={t('config_management.visual.common.delete')}
-                      aria-label={t('config_management.visual.common.delete')}
                     >
-                      <IconX size={14} />
+                      {t('config_management.visual.common.delete')}
                     </Button>
                   </div>
                   {paramError && (
@@ -1506,10 +1414,8 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
                 size="sm"
                 onClick={() => addParam(ruleIndex)}
                 disabled={disabled}
-                title={t('config_management.visual.payload_rules.add_param')}
-                aria-label={t('config_management.visual.payload_rules.add_param')}
               >
-                <IconPlus size={14} />
+                {t('config_management.visual.payload_rules.add_param')}
               </Button>
             </div>
           </div>
@@ -1523,15 +1429,8 @@ export const PayloadRulesEditor = memo(function PayloadRulesEditor({
       )}
 
       <div className={styles.actionRow}>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={addRule}
-          disabled={disabled}
-          title={t('config_management.visual.payload_rules.add_rule')}
-          aria-label={t('config_management.visual.payload_rules.add_rule')}
-        >
-          <IconPlus size={14} />
+        <Button variant="secondary" size="sm" onClick={addRule} disabled={disabled}>
+          {t('config_management.visual.payload_rules.add_rule')}
         </Button>
       </div>
     </div>
@@ -1588,14 +1487,12 @@ export const PayloadFilterRulesEditor = memo(function PayloadFilterRulesEditor({
               {t('config_management.visual.payload_rules.rule')} {ruleIndex + 1}
             </div>
             <Button
-              variant="danger"
+              variant="ghost"
               size="sm"
               onClick={() => removeRule(ruleIndex)}
               disabled={disabled}
-              title={t('config_management.visual.common.delete')}
-              aria-label={t('config_management.visual.common.delete')}
             >
-              <IconTrash2 size={14} />
+              {t('config_management.visual.common.delete')}
             </Button>
           </div>
 
@@ -1624,15 +1521,13 @@ export const PayloadFilterRulesEditor = memo(function PayloadFilterRulesEditor({
                   }
                 />
                 <Button
-                  variant="secondary"
+                  variant="ghost"
                   size="sm"
                   className={styles.payloadRowActionButton}
                   onClick={() => removeModel(ruleIndex, modelIndex)}
                   disabled={disabled}
-                  title={t('config_management.visual.common.delete')}
-                  aria-label={t('config_management.visual.common.delete')}
                 >
-                  <IconX size={14} />
+                  {t('config_management.visual.common.delete')}
                 </Button>
               </div>
             ))}
@@ -1642,10 +1537,8 @@ export const PayloadFilterRulesEditor = memo(function PayloadFilterRulesEditor({
                 size="sm"
                 onClick={() => addModel(ruleIndex)}
                 disabled={disabled}
-                title={t('config_management.visual.payload_rules.add_model')}
-                aria-label={t('config_management.visual.payload_rules.add_model')}
               >
-                <IconPlus size={14} />
+                {t('config_management.visual.payload_rules.add_model')}
               </Button>
             </div>
           </div>
@@ -1672,15 +1565,8 @@ export const PayloadFilterRulesEditor = memo(function PayloadFilterRulesEditor({
       )}
 
       <div className={styles.actionRow}>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={addRule}
-          disabled={disabled}
-          title={t('config_management.visual.payload_rules.add_rule')}
-          aria-label={t('config_management.visual.payload_rules.add_rule')}
-        >
-          <IconPlus size={14} />
+        <Button variant="secondary" size="sm" onClick={addRule} disabled={disabled}>
+          {t('config_management.visual.payload_rules.add_rule')}
         </Button>
       </div>
     </div>

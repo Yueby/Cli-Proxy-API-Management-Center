@@ -3,12 +3,12 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import { useState, type ReactElement, type ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import type { TFunction } from 'i18next';
-import type { AuthFileItem, ResolvedTheme } from '@/types';
-import { resolveCodexPlanType } from '@/utils/quota/resolvers';
-import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { IconRefreshCw } from '@/components/ui/icons';
+import type { AuthFileItem, ResolvedTheme, ThemeColors } from '@/types';
+import { TYPE_COLORS } from '@/utils/quota';
 import styles from '@/pages/QuotaPage.module.scss';
 
 type QuotaStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -62,7 +62,6 @@ interface QuotaCardProps<TState extends QuotaStatusState> {
   quota?: TState;
   resolvedTheme: ResolvedTheme;
   i18nPrefix: string;
-  cardIdleMessageKey?: string;
   cardClassName: string;
   defaultType: string;
   canRefresh?: boolean;
@@ -74,8 +73,8 @@ interface QuotaCardProps<TState extends QuotaStatusState> {
 export function QuotaCard<TState extends QuotaStatusState>({
   item,
   quota,
+  resolvedTheme,
   i18nPrefix,
-  cardIdleMessageKey,
   cardClassName,
   defaultType,
   canRefresh = false,
@@ -84,83 +83,47 @@ export function QuotaCard<TState extends QuotaStatusState>({
   renderQuotaItems,
 }: QuotaCardProps<TState>) {
   const { t } = useTranslation();
-  const [showErrorModal, setShowErrorModal] = useState(false);
+
+  const displayType = item.type || item.provider || defaultType;
+  const typeColorSet = TYPE_COLORS[displayType] || TYPE_COLORS.unknown;
+  const typeColor: ThemeColors =
+    resolvedTheme === 'dark' && typeColorSet.dark ? typeColorSet.dark : typeColorSet.light;
 
   const quotaStatus = quota?.status ?? 'idle';
+  const quotaLoading = quotaStatus === 'loading';
   const quotaErrorMessage = resolveQuotaErrorMessage(
     t,
     quota?.errorStatus,
     quota?.error || t('common.unknown_error')
   );
-  const idleMessageKey = onRefresh
-    ? `${i18nPrefix}.idle`
-    : (cardIdleMessageKey ?? `${i18nPrefix}.idle`);
+  const idleMessageKey = `${i18nPrefix}.idle`;
 
-  // Extract planType: prefer file metadata (always available), fallback to quota state
-  const planTypeFromFile = resolveCodexPlanType(item);
-  const planTypeFromQuota =
-    quota && 'planType' in quota
-      ? ((quota as Record<string, unknown>).planType as string | null | undefined)
-      : undefined;
-  const planType = planTypeFromFile || planTypeFromQuota || null;
-  const normalizedPlan = planType ? planType.trim().toLowerCase() : '';
-  const isPro = normalizedPlan === 'pro';
-  const isProLite =
-    normalizedPlan === 'prolite' || normalizedPlan === 'pro-lite' || normalizedPlan === 'pro_lite';
-  const isPlus =
-    normalizedPlan === 'plus' ||
-    normalizedPlan === 'chatgpt-plus' ||
-    normalizedPlan === 'chatgptplus';
-  const isTeam = normalizedPlan === 'team' || normalizedPlan === 'enterprise';
-  const isPremium = defaultType === 'codex' && isPro;
-  const planBadgeStyle = isPremium
-    ? undefined
-    : isPro
-      ? {
-          backgroundColor: 'rgba(139, 92, 246, 0.12)',
-          color: '#8b5cf6',
-          border: '1px solid rgba(139, 92, 246, 0.3)',
-        }
-      : isProLite
-        ? {
-            backgroundColor: 'rgba(217, 165, 22, 0.15)',
-            color: '#e0aa14',
-            border: '1px solid rgba(217, 165, 22, 0.3)',
-          }
-        : isPlus
-          ? {
-              backgroundColor: 'rgba(16, 163, 127, 0.12)',
-              color: '#10a37f',
-              border: '1px solid rgba(16, 163, 127, 0.3)',
-            }
-          : isTeam
-            ? {
-                backgroundColor: 'rgba(59, 130, 246, 0.12)',
-                color: '#3b82f6',
-                border: '1px solid rgba(59, 130, 246, 0.3)',
-              }
-            : {
-                backgroundColor: 'var(--bg-tertiary)',
-                color: 'var(--text-secondary)',
-                border: '1px solid var(--border-color)',
-              };
+  const getTypeLabel = (type: string): string => {
+    const key = `auth_files.filter_${type}`;
+    const translated = t(key);
+    if (translated !== key) return translated;
+    if (type.toLowerCase() === 'iflow') return 'iFlow';
+    return type.charAt(0).toUpperCase() + type.slice(1);
+  };
 
   return (
     <div className={`${styles.fileCard} ${cardClassName}`}>
       <div className={styles.cardHeader}>
-        {planType && (
-          <span
-            className={`${styles.typeBadge} ${isPremium ? styles.premiumPlanValue : ''}`.trim()}
-            style={planBadgeStyle}
-          >
-            {planType}
-          </span>
-        )}
+        <span
+          className={styles.typeBadge}
+          style={{
+            backgroundColor: typeColor.bg,
+            color: typeColor.text,
+            ...(typeColor.border ? { border: typeColor.border } : {}),
+          }}
+        >
+          {getTypeLabel(displayType)}
+        </span>
         <span className={styles.fileName}>{item.name}</span>
       </div>
 
       <div className={styles.quotaSection}>
-        {quotaStatus === 'loading' ? (
+        {quotaLoading ? (
           <div className={styles.quotaMessage}>{t(`${i18nPrefix}.loading`)}</div>
         ) : quotaStatus === 'idle' ? (
           onRefresh ? (
@@ -176,59 +139,11 @@ export function QuotaCard<TState extends QuotaStatusState>({
             <div className={styles.quotaMessage}>{t(idleMessageKey)}</div>
           )
         ) : quotaStatus === 'error' ? (
-          <>
-            <button
-              type="button"
-              className={styles.quotaError}
-              onClick={() => setShowErrorModal(true)}
-              title={t(`${i18nPrefix}.load_failed`, { message: quotaErrorMessage })}
-            >
-              {t(`${i18nPrefix}.load_failed`, {
-                message: quotaErrorMessage,
-              })}
-            </button>
-
-            <Modal
-              open={showErrorModal}
-              title={t('common.error_details', { defaultValue: 'Error Details' })}
-              onClose={() => setShowErrorModal(false)}
-              footer={
-                <Button variant="secondary" size="sm" onClick={() => setShowErrorModal(false)}>
-                  {t('common.close')}
-                </Button>
-              }
-              width={480}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>
-                  {t('quota_management.quota_error_detail_desc', {
-                    defaultValue: 'Quota load error details:',
-                  })}
-                </p>
-                <pre
-                  style={{
-                    margin: 0,
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-all',
-                    background: 'var(--bg-secondary)',
-                    padding: '12px',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '13px',
-                    lineHeight: '1.5',
-                    color: 'var(--text-primary)',
-                    maxHeight: '240px',
-                    overflowY: 'auto',
-                  }}
-                >
-                  {t(`${i18nPrefix}.load_failed`, {
-                    message: quotaErrorMessage,
-                  })}
-                </pre>
-              </div>
-            </Modal>
-          </>
+          <div className={styles.quotaError}>
+            {t(`${i18nPrefix}.load_failed`, {
+              message: quotaErrorMessage,
+            })}
+          </div>
         ) : quota ? (
           renderQuotaItems(quota, t, { styles, QuotaProgressBar })
         ) : (
@@ -236,7 +151,26 @@ export function QuotaCard<TState extends QuotaStatusState>({
         )}
       </div>
 
-      {resetQuotaAction ? <div className={styles.quotaCardActions}>{resetQuotaAction}</div> : null}
+      {(resetQuotaAction || (onRefresh && quotaStatus !== 'idle')) && (
+        <div className={styles.quotaCardActions}>
+          {resetQuotaAction}
+          {onRefresh && quotaStatus !== 'idle' && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className={styles.quotaRefreshButton}
+              onClick={onRefresh}
+              disabled={!canRefresh || quotaLoading}
+              loading={quotaLoading}
+              title={t('auth_files.quota_refresh_hint')}
+            >
+              {!quotaLoading && <IconRefreshCw size={14} />}
+              {t('auth_files.quota_refresh_single')}
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { IconDownload, IconPlus, IconUpload } from '@/components/ui/icons';
+import { IconDownload, IconPlus } from '@/components/ui/icons';
 import { downloadBlob } from '@/utils/download';
 import styles from '@/pages/AiProvidersPage.module.scss';
 
@@ -68,7 +68,7 @@ export function ProviderCard({
               title={t('ai_providers.export_configs')}
               aria-label={t('ai_providers.export_configs')}
             >
-              <IconUpload size={16} />
+              <IconDownload size={16} style={{ transform: 'rotate(180deg)' }} />
             </Button>
           )}
           {hasConfigs && onImport && (

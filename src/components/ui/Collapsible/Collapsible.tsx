@@ -15,7 +15,7 @@ export function Collapsible({
   label,
   hint,
   defaultOpen = false,
-  open: controlledOpen,
+  open,
   onToggle,
   flush,
   children,
@@ -23,21 +23,22 @@ export function Collapsible({
   ...rest
 }: PropsWithChildren<CollapsibleProps>) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
-  const isOpen = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen;
-
-  const handleToggle = (e: React.SyntheticEvent<HTMLDetailsElement>) => {
-    if (controlledOpen === undefined) {
-      setUncontrolledOpen(e.currentTarget.open);
-    }
-    if (onToggle) {
-      onToggle(e);
-    }
-  };
-
+  const resolvedOpen = open ?? uncontrolledOpen;
   const cls = [styles.root, className].filter(Boolean).join(' ');
   const contentCls = flush ? styles.contentFlush : styles.content;
+
   return (
-    <details className={cls} open={isOpen} onToggle={handleToggle} {...rest}>
+    <details
+      className={cls}
+      open={resolvedOpen}
+      onToggle={(event) => {
+        if (open === undefined) {
+          setUncontrolledOpen(event.currentTarget.open);
+        }
+        onToggle?.(event);
+      }}
+      {...rest}
+    >
       <summary className={styles.summary}>
         <span className={styles.summaryLabel}>
           <span>{label}</span>

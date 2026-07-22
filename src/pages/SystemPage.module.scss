@@ -1,16 +1,18 @@
-@use '../styles/variables' as *;
-
 .container {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
+}
+
+.pageTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 $spacing-xl 0;
 }
 
 .content {
   display: flex;
   flex-direction: column;
-  gap: $spacing-md;
+  gap: $spacing-xl;
 }
 
 .aboutCard {
@@ -169,7 +171,7 @@
 
     .value {
       color: var(--text-primary);
-      font-family: $font-mono;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
     }
   }
 }
@@ -186,7 +188,7 @@
   padding: $spacing-sm $spacing-md;
   background-color: var(--bg-secondary);
   border-radius: $radius-md;
-  font-family: $font-mono;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
   font-size: 13px;
 
   &:hover {
@@ -213,11 +215,6 @@
   flex-shrink: 0;
 }
 
-.groupIconMimo {
-  width: 32px;
-  height: 32px;
-}
-
 .modelTag {
   display: inline-flex;
   align-items: center;
@@ -226,7 +223,9 @@
   border-radius: $radius-full;
   border: 1px solid var(--border-color);
   background-color: var(--bg-secondary);
-  font-family: $font-mono;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
 }
 
 .modelName {
@@ -265,7 +264,7 @@
       font-size: 16px;
       font-weight: 600;
       color: var(--text-primary);
-      font-family: $font-mono;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
     }
   }
 }

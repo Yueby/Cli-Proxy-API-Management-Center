@@ -17,19 +17,6 @@
   }
 }
 
-@mixin desktop {
-  @media (min-width: #{$breakpoint-tablet + 1}) {
-    @content;
-  }
-}
-
-// Flexbox 居中
-@mixin flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 // 文本截断
 @mixin text-ellipsis {
   overflow: hidden;
@@ -47,7 +34,7 @@
 
 // 按钮重置
 @mixin button-reset {
-  border: 2px solid transparent;
+  border: none;
   background: none;
   padding: 0;
   margin: 0;
@@ -56,8 +43,8 @@
   color: inherit;
   outline: none;
 
-  &:focus-visible {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba($primary-color, 0.18);
+  &:focus {
+    outline: 2px solid $primary-color;
+    outline-offset: 2px;
   }
 }

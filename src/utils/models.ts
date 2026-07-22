@@ -3,6 +3,8 @@
  * 迁移自基线 utils/models.js
  */
 
+import { isRecord } from './helpers';
+
 export interface ModelInfo {
   name: string;
   alias?: string;
@@ -19,7 +21,6 @@ const MODEL_CATEGORIES = [
   { id: 'grok', label: 'Grok', patterns: [/grok/i] },
   { id: 'deepseek', label: 'DeepSeek', patterns: [/deepseek/i] },
   { id: 'minimax', label: 'MiniMax', patterns: [/minimax/i, /abab/i] },
-  { id: 'mimo', label: 'Mimo', patterns: [/mimo/i] }
 ];
 
 const matchCategory = (text: string) => {
@@ -30,9 +31,6 @@ const matchCategory = (text: string) => {
   }
   return null;
 };
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  value !== null && typeof value === 'object' && !Array.isArray(value);
 
 export function normalizeModelList(payload: unknown, { dedupe = false } = {}): ModelInfo[] {
   const toModel = (entry: unknown): ModelInfo | null => {
@@ -91,11 +89,14 @@ export interface ModelGroup {
   items: ModelInfo[];
 }
 
-export function classifyModels(models: ModelInfo[] = [], { otherLabel = 'Other' } = {}): ModelGroup[] {
+export function classifyModels(
+  models: ModelInfo[] = [],
+  { otherLabel = 'Other' } = {}
+): ModelGroup[] {
   const groups: ModelGroup[] = MODEL_CATEGORIES.map((category) => ({
     id: category.id,
     label: category.label,
-    items: []
+    items: [],
   }));
 
   const otherGroup: ModelGroup = { id: 'other', label: otherLabel, items: [] };

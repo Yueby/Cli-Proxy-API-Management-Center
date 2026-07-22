@@ -15,8 +15,6 @@ export type UseAuthFilesModelsResult = {
   modelsFileType: string;
   modelsError: ModelsError;
   showModels: (item: AuthFileItem) => Promise<void>;
-  prefetchModels: (item: AuthFileItem) => Promise<void>;
-  getCachedModels: (name: string) => AuthFileModelItem[] | undefined;
   closeModelsModal: () => void;
 };
 
@@ -30,36 +28,11 @@ export function useAuthFilesModels(): UseAuthFilesModelsResult {
   const [modelsFileName, setModelsFileName] = useState('');
   const [modelsFileType, setModelsFileType] = useState('');
   const [modelsError, setModelsError] = useState<ModelsError>(null);
-  const [, setModelsCacheVersion] = useState(0);
   const modelsCacheRef = useRef<Map<string, AuthFileModelItem[]>>(new Map());
 
   const closeModelsModal = useCallback(() => {
     setModelsModalOpen(false);
   }, []);
-
-  const getCachedModels = useCallback((name: string) => modelsCacheRef.current.get(name), []);
-
-  const loadModels = useCallback(async (item: AuthFileItem) => {
-    const cached = modelsCacheRef.current.get(item.name);
-    if (cached) return cached;
-
-    const models = await authFilesApi.getModelsForAuthFile(item.name);
-    modelsCacheRef.current.set(item.name, models);
-    setModelsCacheVersion((version) => version + 1);
-    return models;
-  }, []);
-
-  const prefetchModels = useCallback(
-    async (item: AuthFileItem) => {
-      if (modelsCacheRef.current.has(item.name)) return;
-      try {
-        await loadModels(item);
-      } catch {
-        // Hover prefetch is best-effort; click still reports actionable errors.
-      }
-    },
-    [loadModels]
-  );
 
   const showModels = useCallback(
     async (item: AuthFileItem) => {
@@ -78,7 +51,8 @@ export function useAuthFilesModels(): UseAuthFilesModelsResult {
 
       setModelsLoading(true);
       try {
-        const models = await loadModels(item);
+        const models = await authFilesApi.getModelsForAuthFile(item.name);
+        modelsCacheRef.current.set(item.name, models);
         setModelsList(models);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : '';
@@ -95,7 +69,7 @@ export function useAuthFilesModels(): UseAuthFilesModelsResult {
         setModelsLoading(false);
       }
     },
-    [loadModels, showNotification, t]
+    [showNotification, t]
   );
 
   return {
@@ -106,8 +80,6 @@ export function useAuthFilesModels(): UseAuthFilesModelsResult {
     modelsFileType,
     modelsError,
     showModels,
-    prefetchModels,
-    getCachedModels,
     closeModelsModal,
   };
 }

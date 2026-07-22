@@ -9,8 +9,7 @@ import {
 } from '@/utils/providerKeys';
 
 export type BuiltInOAuthProvider = 'codex' | 'anthropic' | 'antigravity' | 'kimi' | 'xai';
-
-export type OAuthProvider = string;
+export type OAuthProvider = BuiltInOAuthProvider | (string & {});
 
 export interface OAuthStartResponse {
   url: string;
@@ -39,20 +38,20 @@ export const oauthApi = {
       params.is_webui = true;
     }
     return apiClient.get<OAuthStartResponse>(`/${providerKey}-auth-url`, {
-      params: Object.keys(params).length ? params : undefined
+      params: Object.keys(params).length ? params : undefined,
     });
   },
 
   getAuthStatus: (state: string) =>
     apiClient.get<{ status: 'ok' | 'wait' | 'error'; error?: string }>(`/get-auth-status`, {
-      params: { state }
+      params: { state },
     }),
 
   submitCallback: (provider: string, redirectUrl: string) => {
     const providerKey = normalizeProviderForManagementPath(provider);
     return apiClient.post<OAuthCallbackResponse>('/oauth-callback', {
       provider: providerKey,
-      redirect_url: redirectUrl
+      redirect_url: redirectUrl,
     });
-  }
+  },
 };

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { SkeletonTextBlock } from '@/components/common/LoadingSkeleton';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { pluginsApi } from '@/services/api';
 import { useAuthStore } from '@/stores';
@@ -15,8 +14,7 @@ import {
 } from './pluginResources';
 import styles from './PluginResourcePage.module.scss';
 
-const hasStatus = (error: unknown, status: number) =>
-  isRecord(error) && error.status === status;
+const hasStatus = (error: unknown, status: number) => isRecord(error) && error.status === status;
 
 const safeDecodeURIComponent = (value = '') => {
   try {
@@ -42,14 +40,8 @@ export function PluginResourcePage() {
   const [error, setError] = useState('');
 
   const connected = connectionStatus === 'connected';
-  const pluginID = useMemo(
-    () => safeDecodeURIComponent(params.pluginId),
-    [params.pluginId]
-  );
-  const menuIndex = useMemo(
-    () => parseMenuIndex(params.menuIndex),
-    [params.menuIndex]
-  );
+  const pluginID = useMemo(() => safeDecodeURIComponent(params.pluginId), [params.pluginId]);
+  const menuIndex = useMemo(() => parseMenuIndex(params.menuIndex), [params.menuIndex]);
 
   const loadResource = useCallback(async () => {
     if (!connected) {
@@ -77,11 +69,7 @@ export function PluginResourcePage() {
   useHeaderRefresh(loadResource, connected);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void loadResource();
-    }, 0);
-
-    return () => window.clearTimeout(timer);
+    void loadResource();
   }, [loadResource]);
 
   useEffect(() => {
@@ -102,10 +90,8 @@ export function PluginResourcePage() {
   return (
     <div className={styles.page}>
       {loading ? (
-        <div className={styles.stateShell} aria-busy="true" aria-label={t('common.loading')}>
-          <div className={styles.skeletonPanel}>
-            <SkeletonTextBlock lines={8} />
-          </div>
+        <div className={styles.stateShell}>
+          <div className={styles.statusPanel}>{t('common.loading')}</div>
         </div>
       ) : error ? (
         <div className={styles.stateShell}>

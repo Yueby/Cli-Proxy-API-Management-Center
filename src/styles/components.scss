@@ -2,23 +2,18 @@
 @use './variables.scss' as *;
 
 .btn {
-  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: $spacing-sm;
   border: 1px solid transparent;
   border-radius: $radius-md;
-  height: 32px;
-  padding: 0 14px;
-  font-size: 14px;
+  padding: 10px 14px;
   font-weight: 600;
-  line-height: 1;
   cursor: pointer;
   transition: all $transition-fast;
   background-color: var(--bg-secondary);
   color: var(--text-primary);
-  white-space: nowrap;
 
   &.btn-primary {
     background-color: var(--primary-color);
@@ -29,11 +24,6 @@
       background-color: var(--primary-hover);
       border-color: var(--primary-hover);
     }
-
-    &:focus-visible {
-      border-color: var(--primary-contrast, #fff);
-      box-shadow: 0 0 0 3px rgba($primary-color, 0.38);
-    }
   }
 
   &.btn-secondary {
@@ -43,7 +33,7 @@
 
     &:hover {
       background-color: var(--bg-hover, var(--bg-tertiary));
-      border-color: var(--primary-color);
+      border-color: var(--border-hover);
     }
   }
 
@@ -66,11 +56,6 @@
     &:hover {
       background-color: color.adjust($error-color, $lightness: -5%);
     }
-
-    &:focus-visible {
-      border-color: #fff;
-      box-shadow: 0 0 0 3px rgba($error-color, 0.38);
-    }
   }
 
   &.btn-full {
@@ -78,20 +63,13 @@
   }
 
   &.btn-sm {
-    height: 32px;
-    padding: 0 10px;
-    font-size: 13px;
+    padding: 8px 10px;
+    font-size: 14px;
   }
 
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-  }
-
-  &:focus-visible {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba($primary-color, 0.18);
   }
 }
 
@@ -109,38 +87,20 @@
 .input,
 textarea {
   width: 100%;
-  height: 32px;
   border: 1px solid var(--border-color);
   border-radius: $radius-md;
-  padding: 0 12px;
-  font-size: 14px;
+  padding: 10px 12px;
   background-color: var(--bg-secondary);
   color: var(--text-primary);
-  box-sizing: border-box;
-  transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
-
-  &:hover:not(:focus):not(:disabled) {
-    border-color: var(--primary-color);
-    background-color: var(--bg-tertiary);
-  }
+  transition:
+    border-color $transition-fast,
+    box-shadow $transition-fast;
 
   &:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba($primary-color, 0.18);
   }
-
-  &::placeholder {
-    color: var(--text-tertiary);
-  }
-}
-
-textarea {
-  height: auto;
-  min-height: 80px;
-  padding: 10px 12px;
-  border-radius: $radius-md;
-  resize: vertical;
 }
 
 .form-group {
@@ -150,7 +110,6 @@ textarea {
   margin-bottom: $spacing-md;
 
   label {
-    font-size: 13px;
     font-weight: 600;
     color: var(--text-primary);
   }
@@ -166,8 +125,7 @@ textarea {
   border: 1px solid var(--border-color);
   border-radius: $radius-lg;
   box-shadow: var(--shadow);
-  padding: 0;
-  overflow: hidden;
+  padding: $spacing-lg;
 }
 
 .card-header {
@@ -176,11 +134,7 @@ textarea {
   justify-content: space-between;
   gap: $spacing-sm;
   flex-wrap: wrap;
-  padding: $spacing-md $spacing-lg;
-  position: sticky;
-  top: -1px;
-  z-index: 2;
-  background: var(--bg-primary);
+  margin-bottom: $spacing-md;
 
   > * {
     min-width: 0;
@@ -192,14 +146,6 @@ textarea {
     font-size: 18px;
     font-weight: 700;
     color: var(--text-primary);
-  }
-}
-
-.card-body {
-  padding: 0 $spacing-lg $spacing-lg;
-
-  &:first-child {
-    padding-top: $spacing-lg;
   }
 }
 
@@ -249,123 +195,82 @@ textarea {
   flex-direction: column;
   gap: $spacing-sm;
   z-index: $z-notification;
-  width: 360px;
-  max-width: calc(100vw - #{$spacing-lg * 2});
-
-  @media (max-width: $breakpoint-mobile) {
-    top: env(safe-area-inset-top, 16px);
-    right: 16px;
-    left: 16px;
-    max-width: none;
-    width: auto;
-  }
+  max-width: 360px;
 }
 
 @keyframes notification-enter {
   from {
     opacity: 0;
-    transform: translate3d(20px, -10px, 0) scale(0.95);
+    transform: translateX(100%);
   }
   to {
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: translateX(0);
   }
 }
 
 @keyframes notification-exit {
   from {
     opacity: 1;
-    transform: scale(1);
+    transform: translateX(0);
   }
   to {
     opacity: 0;
-    transform: scale(0.95);
+    transform: translateX(100%);
   }
 }
 
 .notification {
-  padding: 12px 14px;
-  border-radius: $radius-lg;
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  box-shadow: var(--shadow);
   border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--bg-primary) 85%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: var(--bg-primary);
   color: var(--text-primary);
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  position: relative;
-  overflow: hidden;
+  justify-content: space-between;
+  align-items: center;
+  gap: $spacing-sm;
 
   // Animation states
   &.entering {
-    animation: notification-enter 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1) forwards;
+    animation: notification-enter 0.3s ease-out forwards;
   }
 
   &.exiting {
-    animation: notification-exit 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
-  }
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 3px;
-    background-color: var(--border-color);
+    animation: notification-exit 0.3s ease-in forwards;
   }
 
   &.success {
-    border-color: rgba($success-color, 0.3);
-    &::before { background-color: $success-color; }
-    .notification-icon { color: $success-color; }
+    border-color: rgba($success-color, 0.4);
   }
   &.warning {
-    border-color: rgba($warning-color, 0.3);
-    &::before { background-color: $warning-color; }
-    .notification-icon { color: $warning-color; }
+    border-color: rgba($warning-color, 0.4);
   }
   &.error {
-    border-color: rgba($error-color, 0.3);
-    &::before { background-color: $error-color; }
-    .notification-icon { color: $error-color; }
-  }
-  &.info {
-    border-color: rgba($primary-color, 0.3);
-    &::before { background-color: $primary-color; }
-    .notification-icon { color: $primary-color; }
-  }
-
-  .notification-icon {
-    flex-shrink: 0;
-    margin-top: 1px;
+    border-color: rgba($error-color, 0.4);
   }
 
   .message {
     flex: 1;
-    font-size: 13px;
     font-weight: 500;
-    line-height: 1.4;
-    word-break: break-word;
   }
 
   .close-btn {
-    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 30px;
+    height: 30px;
     padding: 0;
     background: transparent;
     border: none;
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     border-radius: $radius-md;
     cursor: pointer;
-    transition: all 0.15s ease;
-    margin: -4px -4px -4px 0;
+    transition:
+      color 0.15s ease,
+      background-color 0.15s ease;
 
     svg {
       display: block;
@@ -375,71 +280,6 @@ textarea {
       color: var(--text-primary);
       background: var(--bg-secondary);
     }
-  }
-}
-
-[data-theme='dark'] .notification {
-  background: color-mix(in srgb, var(--bg-secondary) 85%, transparent);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2);
-
-  &.success { border-color: rgba($success-color, 0.4); }
-  &.warning { border-color: rgba($warning-color, 0.4); }
-  &.error { border-color: rgba($error-color, 0.4); }
-  &.info { border-color: rgba($primary-color, 0.4); }
-}
-
-.switch {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: $spacing-sm;
-  cursor: pointer;
-
-  input {
-    width: 0;
-    height: 0;
-    opacity: 0;
-    position: absolute;
-  }
-
-  .track {
-    width: 40px;
-    height: 22px;
-    background: var(--border-color);
-    border-radius: $radius-full;
-    position: relative;
-    transition: background $transition-fast;
-  }
-
-  .thumb {
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 16px;
-    height: 16px;
-    background: #fff;
-    border-radius: $radius-full;
-    box-shadow: $shadow-sm;
-    transition: transform $transition-fast;
-  }
-
-  input:checked + .track {
-    background: var(--primary-color);
-  }
-
-  input:checked + .track .thumb {
-    transform: translateX(18px);
-  }
-
-  .label {
-    color: var(--text-primary);
-    font-weight: 600;
-  }
-}
-
-.switch-label-left {
-  .label {
-    order: -1;
   }
 }
 
@@ -460,12 +300,6 @@ textarea {
   width: 16px;
   height: 16px;
   animation: spin 0.8s linear infinite;
-}
-
-.loading-spinner-overlay {
-  position: absolute;
-  inset: 0;
-  margin: auto;
 }
 
 @supports (color: color-mix(in srgb, currentColor 22%, transparent)) {
@@ -581,7 +415,10 @@ textarea {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.15s ease;
   z-index: 10;
 
   svg {
@@ -627,7 +464,7 @@ textarea {
 .modal-body {
   padding: $spacing-lg;
   overflow: auto;
-  max-height: 80vh;
+  max-height: 65vh;
 }
 
 .modal-footer {
@@ -678,8 +515,7 @@ textarea {
   }
 
   .modal-footer .btn {
-    flex: 1;
-    min-width: 0;
+    width: 100%;
   }
 }
 
@@ -713,14 +549,20 @@ textarea {
   .empty-icon {
     width: 42px;
     height: 42px;
+    flex: 0 0 42px;
     border-radius: $radius-full;
     border: 2px solid var(--border-color);
-    display: grid;
-    place-items: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
     color: var(--text-secondary);
 
     svg {
       display: block;
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
     }
   }
 
@@ -733,27 +575,18 @@ textarea {
     color: var(--text-secondary);
     margin-top: 4px;
   }
-}
 
-.header-input-list {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-sm;
-
-  .header-input-row {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr auto;
+  .empty-action .btn > span {
+    display: inline-flex;
     align-items: center;
-    gap: $spacing-sm;
+    justify-content: center;
+    gap: 8px;
+    line-height: 1;
   }
 
-  .header-separator {
-    color: var(--text-secondary);
-    text-align: center;
-  }
-
-  .align-start {
-    width: fit-content;
+  .empty-action .btn svg {
+    display: block;
+    flex-shrink: 0;
   }
 }
 
@@ -787,7 +620,9 @@ textarea {
 
   .item-subtitle {
     color: var(--text-secondary);
-    font-family: $font-mono;
+    font-family:
+      ui-monospace, SFMono-Regular, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+      'Courier New', monospace;
     word-break: break-all;
   }
 
@@ -800,7 +635,7 @@ textarea {
 .error-box {
   background: rgba($error-color, 0.1);
   border: 1px solid rgba($error-color, 0.4);
-  border-radius: $radius-lg;
+  border-radius: $radius-md;
   padding: $spacing-sm $spacing-md;
   color: $error-color;
 }
@@ -808,158 +643,9 @@ textarea {
 .stack {
   display: flex;
   flex-direction: column;
-  gap: $spacing-md;
-}
-
-.filters {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: $spacing-md;
-  margin-bottom: $spacing-md;
-
-  .filter-item {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-xs;
-  }
-}
-
-.table {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--border-color);
-  border-radius: $radius-md;
-  overflow: hidden;
-
-  .table-header,
-  .table-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: $spacing-sm;
-    padding: $spacing-sm $spacing-md;
-    align-items: center;
-  }
-
-  .table-header {
-    background: var(--bg-secondary);
-    font-weight: 700;
-    color: var(--text-primary);
-  }
-
-  .table-row {
-    border-top: 1px solid var(--border-color);
-  }
-
-  .cell {
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-    flex-wrap: wrap;
-  }
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  margin-top: $spacing-md;
-}
-
-.stat-card {
-  border: 1px solid var(--border-color);
-  border-radius: $radius-md;
-  padding: $spacing-md;
-  background: var(--bg-primary);
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-xs;
-
-  .stat-label {
-    color: var(--text-secondary);
-    font-size: 14px;
-  }
-
-  .stat-value {
-    font-weight: 800;
-    color: var(--text-primary);
-    font-size: 18px;
-  }
-}
-
-.log-viewer {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: $radius-md;
-  padding: $spacing-md;
-  max-height: 520px;
-  overflow: auto;
-  white-space: pre-wrap;
-  font-family: $font-mono;
-  color: var(--text-primary);
-}
-
-.log-viewer-lines {
-  .log-line {
-    display: block;
-    padding: 1px 0;
-  }
-
-  .log-line-warning {
-    color: var(--warning-text, #92400e);
-    background: var(--warning-bg, rgba(251, 191, 36, 0.18));
-    border-radius: $radius-sm;
-    padding: 2px 6px;
-  }
+  gap: $spacing-lg;
 }
 
 .hint {
   color: var(--text-secondary);
-}
-
-// ─── Segmented Button Group (Fused Block + Divider Lines) ───
-.segmented-button-group {
-  display: inline-flex;
-  align-items: center;
-  border-radius: $radius-md;
-  overflow: hidden;
-  border: 1px solid var(--border-color);
-  background: var(--bg-secondary);
-
-  > .btn,
-  > button.btn {
-    border: none !important;
-    border-radius: 0 !important;
-    margin: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    height: 32px;
-    width: auto !important;
-    padding: 0 14px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    transform: none !important;
-
-    &:hover:not(:disabled) {
-      background: var(--bg-tertiary) !important;
-      color: var(--text-primary);
-      transform: none !important;
-    }
-
-    &:not(:first-child) {
-      border-left: 1px solid var(--border-color) !important;
-    }
-
-    &:focus-visible {
-      z-index: 2;
-      box-shadow: inset 0 0 0 1.5px var(--primary-color) !important;
-    }
-
-    &.btn-danger {
-      color: var(--danger-color) !important;
-      &:hover:not(:disabled) {
-        background: rgba($error-color, 0.08) !important;
-      }
-    }
-  }
 }

@@ -7,7 +7,6 @@ export { QuotaCard } from './QuotaCard';
 export { useQuotaLoader } from './useQuotaLoader';
 export {
   ANTIGRAVITY_CONFIG,
-  getAntigravityPlanLabel,
   CLAUDE_CONFIG,
   CODEX_CONFIG,
   KIMI_CONFIG,

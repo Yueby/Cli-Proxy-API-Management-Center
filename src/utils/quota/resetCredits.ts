@@ -1,8 +1,13 @@
-import type { CodexRateLimitResetCredit } from '@/types';
+export interface CodexResetCredit {
+  id: string;
+  status: string;
+  grantedAt: string;
+  expiresAt: string;
+}
 
 export interface CodexResetCreditsSummary {
   availableCount: number | null;
-  credits: CodexRateLimitResetCredit[];
+  credits: CodexResetCredit[];
   invalidPayload: boolean;
 }
 
@@ -44,7 +49,7 @@ const normalizeNumberValue = (value: unknown): number | null => {
   return null;
 };
 
-const normalizeCredit = (value: unknown): CodexRateLimitResetCredit | null => {
+const normalizeCredit = (value: unknown): CodexResetCredit | null => {
   const record = asRecord(value);
   if (!record) return null;
   if (normalizeStringValue(record.reset_type ?? record.resetType) !== 'codex_rate_limits') {
@@ -89,7 +94,7 @@ export const normalizeCodexResetCreditsPayload = (payload: unknown): CodexResetC
   const credits = Array.isArray(record.credits)
     ? record.credits
         .map((item) => normalizeCredit(item))
-        .filter((item): item is CodexRateLimitResetCredit => Boolean(item))
+        .filter((item): item is CodexResetCredit => Boolean(item))
     : [];
 
   return {

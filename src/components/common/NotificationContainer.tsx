@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNotificationStore } from '@/stores';
-import { IconX, IconCheck, IconInfo } from '@/components/ui/icons';
+import { IconX } from '@/components/ui/icons';
 import type { Notification } from '@/types';
 
 interface AnimatedNotification extends Notification {
@@ -9,20 +9,6 @@ interface AnimatedNotification extends Notification {
 }
 
 const ANIMATION_DURATION = 300; // ms
-
-function getNotificationIcon(type: Notification['type']) {
-  switch (type) {
-    case 'success':
-      return <IconCheck size={18} className="notification-icon" />;
-    case 'error':
-      return <IconX size={18} className="notification-icon" />;
-    case 'warning':
-      return <IconInfo size={18} className="notification-icon" />;
-    case 'info':
-    default:
-      return <IconInfo size={18} className="notification-icon" />;
-  }
-}
 
 export function NotificationContainer() {
   const { t } = useTranslation();
@@ -37,7 +23,9 @@ export function NotificationContainer() {
 
     const newNotifications = notifications.filter((n) => !prevIds.has(n.id));
 
-    const removedIds = new Set(prevNotifications.filter((n) => !currentIds.has(n.id)).map((n) => n.id));
+    const removedIds = new Set(
+      prevNotifications.filter((n) => !currentIds.has(n.id)).map((n) => n.id)
+    );
 
     setAnimatedNotifications((prev) => {
       let updated = prev.map((n) => (removedIds.has(n.id) ? { ...n, isExiting: true } : n));
@@ -63,7 +51,9 @@ export function NotificationContainer() {
   }, [notifications]);
 
   const handleClose = (id: string) => {
-    setAnimatedNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isExiting: true } : n)));
+    setAnimatedNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, isExiting: true } : n))
+    );
 
     setTimeout(() => {
       removeNotification(id);
@@ -78,9 +68,7 @@ export function NotificationContainer() {
         <div
           key={notification.id}
           className={`notification ${notification.type} ${notification.isExiting ? 'exiting' : 'entering'}`}
-          role="alert"
         >
-          {getNotificationIcon(notification.type)}
           <div className="message">{notification.message}</div>
           <button
             type="button"
@@ -88,7 +76,7 @@ export function NotificationContainer() {
             onClick={() => handleClose(notification.id)}
             aria-label={t('common.close')}
           >
-            <IconX size={14} />
+            <IconX size={16} />
           </button>
         </div>
       ))}
