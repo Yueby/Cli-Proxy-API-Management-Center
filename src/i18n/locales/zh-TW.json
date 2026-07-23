@@ -1782,7 +1782,9 @@
       "openai": "OpenAI",
       "claude": "Claude",
       "codex": "Codex",
-      "gemini": "Gemini"
+      "gemini": "Gemini",
+      "anthropic": "Anthropic",
+      "codexResponses": "Codex Responses API"
     },
     "multiProtocol": {
       "description": "為此提供商設定一個或多個後端已支援的協定。",

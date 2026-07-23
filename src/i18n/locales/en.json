@@ -1755,7 +1755,9 @@
       "openai": "OpenAI",
       "claude": "Claude",
       "codex": "Codex",
-      "gemini": "Gemini"
+      "gemini": "Gemini",
+      "anthropic": "Anthropic",
+      "codexResponses": "Codex Responses API"
     },
     "multiProtocol": {
       "description": "Configure one or more supported protocols for this provider.",

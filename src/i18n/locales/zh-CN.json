@@ -1755,7 +1755,9 @@
       "openai": "OpenAI",
       "claude": "Claude",
       "codex": "Codex",
-      "gemini": "Gemini"
+      "gemini": "Gemini",
+      "anthropic": "Anthropic",
+      "codexResponses": "Codex Responses API"
     },
     "multiProtocol": {
       "description": "为此提供商配置一个或多个后端已支持的协议。",

@@ -1743,7 +1743,9 @@
       "openai": "OpenAI",
       "claude": "Claude",
       "codex": "Codex",
-      "gemini": "Gemini"
+      "gemini": "Gemini",
+      "anthropic": "Anthropic",
+      "codexResponses": "Codex Responses API"
     },
     "multiProtocol": {
       "description": "Настройте один или несколько поддерживаемых протоколов этого провайдера.",
