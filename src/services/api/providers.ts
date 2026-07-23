@@ -36,6 +36,7 @@ const PROVIDER_COMMON_KEY_FIELDS = [
 
 const GEMINI_KEY_FIELDS = PROVIDER_COMMON_KEY_FIELDS;
 const CODEX_KEY_FIELDS = [...PROVIDER_COMMON_KEY_FIELDS, 'websockets'] as const;
+const XAI_KEY_FIELDS = CODEX_KEY_FIELDS;
 const CLAUDE_KEY_FIELDS = [
   ...PROVIDER_COMMON_KEY_FIELDS,
   'cloak',
@@ -487,6 +488,35 @@ export const providersApi = {
 
   deleteCodexConfig: (apiKey: string, baseUrl?: string) =>
     apiClient.delete(`/codex-api-key${buildProviderDeleteQuery(apiKey, baseUrl)}`),
+
+  createXAIConfig: async (config: ProviderKeyConfig) => {
+    const rawConfig = await apiClient.get('/config');
+    const latestItems = getRawSectionList(rawConfig, 'xai-api-key');
+    return apiClient.put(
+      '/xai-api-key',
+      appendLatestProviderRecord(latestItems, serializeProviderKey(config), (raw, payload) =>
+        mergeProviderKeyPayload(raw, payload, XAI_KEY_FIELDS)
+      )
+    );
+  },
+
+  saveXAIConfigs: async (configs: ProviderKeyConfig[]) =>
+    apiClient.put(
+      '/xai-api-key',
+      await buildPreservedList(
+        'xai-api-key',
+        configs,
+        serializeProviderKey,
+        (raw, payload) => mergeProviderKeyPayload(raw, payload, XAI_KEY_FIELDS),
+        providerKeyIdentity
+      )
+    ),
+
+  updateXAIConfig: (index: number, value: ProviderKeyConfig) =>
+    apiClient.patch('/xai-api-key', { index, value: serializeProviderKey(value) }),
+
+  deleteXAIConfig: (apiKey: string, baseUrl?: string) =>
+    apiClient.delete(`/xai-api-key${buildProviderDeleteQuery(apiKey, baseUrl)}`),
 
   async getClaudeConfigs(): Promise<ProviderKeyConfig[]> {
     const data = await apiClient.get('/claude-api-key');

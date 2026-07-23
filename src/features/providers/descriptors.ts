@@ -22,6 +22,25 @@ export interface ProviderDescriptor {
 }
 
 export const PROVIDER_DESCRIPTORS: Record<ProviderBrand, ProviderDescriptor> = {
+  kimi: {
+    id: 'kimi',
+    supportsName: true,
+    supportsApiKey: true,
+    supportsDisabled: true,
+    supportsBaseUrl: true,
+    baseUrlRequired: true,
+    supportsProxyUrl: false,
+    supportsPrefix: true,
+    supportsModels: true,
+    supportsHeaders: true,
+    supportsExcludedModels: false,
+    supportsPriority: true,
+    supportsTestModel: true,
+    supportsWebsockets: false,
+    supportsCloak: false,
+    supportsApiKeyEntries: true,
+    sheetSize: 'lg',
+  },
   gemini: {
     id: 'gemini',
     supportsName: false,
@@ -43,6 +62,25 @@ export const PROVIDER_DESCRIPTORS: Record<ProviderBrand, ProviderDescriptor> = {
   },
   codex: {
     id: 'codex',
+    supportsName: false,
+    supportsApiKey: true,
+    supportsDisabled: true,
+    supportsBaseUrl: true,
+    baseUrlRequired: true,
+    supportsProxyUrl: true,
+    supportsPrefix: true,
+    supportsModels: true,
+    supportsHeaders: true,
+    supportsExcludedModels: true,
+    supportsPriority: true,
+    supportsTestModel: true,
+    supportsWebsockets: true,
+    supportsCloak: false,
+    supportsApiKeyEntries: false,
+    sheetSize: 'md',
+  },
+  xai: {
+    id: 'xai',
     supportsName: false,
     supportsApiKey: true,
     supportsDisabled: true,
@@ -120,16 +158,20 @@ export const PROVIDER_DESCRIPTORS: Record<ProviderBrand, ProviderDescriptor> = {
 };
 
 export const PROVIDER_BRAND_ORDER: ProviderBrand[] = [
+  'kimi',
   'gemini',
   'codex',
+  'xai',
   'claude',
   'vertex',
   'openaiCompatibility',
 ];
 
 export const PROVIDER_PATHS: Record<ProviderBrand, string> = {
+  kimi: '/ai-providers/kimi',
   gemini: '/ai-providers/gemini',
   codex: '/ai-providers/codex',
+  xai: '/ai-providers/xai',
   claude: '/ai-providers/claude',
   vertex: '/ai-providers/vertex',
   openaiCompatibility: '/ai-providers/openai',

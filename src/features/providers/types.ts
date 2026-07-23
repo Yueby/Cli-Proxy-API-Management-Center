@@ -5,6 +5,8 @@
 export type ProviderBrand =
   | 'gemini'
   | 'codex'
+  | 'xai'
+  | 'kimi'
   | 'claude'
   | 'vertex'
   | 'openaiCompatibility';
@@ -12,6 +14,8 @@ export type ProviderBrand =
 export type ProviderResourceSelector =
   | { brand: 'gemini'; apiKey: string; baseUrl?: string; index: number }
   | { brand: 'codex'; apiKey: string; baseUrl?: string; index: number }
+  | { brand: 'xai'; apiKey: string; baseUrl?: string; index: number }
+  | { brand: 'kimi'; name: string; index: number }
   | { brand: 'claude'; apiKey: string; baseUrl?: string; index: number }
   | { brand: 'vertex'; apiKey: string; baseUrl?: string; index: number }
   | { brand: 'openaiCompatibility'; name: string; index: number };
@@ -42,6 +46,7 @@ export interface ProviderResource {
   proxyUrl: string | null;
   prefix: string | null;
   modelCount: number;
+  models: string[];
   headerCount: number;
   excludedModelCount: number;
   /** 仅 OpenAI 有意义,其它 brand 该字段不展示但保留 */

@@ -13,6 +13,8 @@ import codexLogo from '@/assets/icons/codex.svg';
 import geminiLogo from '@/assets/icons/gemini.svg';
 import openaiLogo from '@/assets/icons/openai-light.svg';
 import vertexLogo from '@/assets/icons/vertex.svg';
+import xaiLogo from '@/assets/icons/grok.svg';
+import kimiLogo from '@/assets/icons/kimi-dark.svg';
 import { CategoryList, type CategoryItem } from '@/components/common/CategoryList';
 import type { GeminiKeyConfig, OpenAIProviderConfig, ProviderKeyConfig } from '@/types';
 import { ProviderHeaderCard } from './components/ProviderHeaderCard';
@@ -28,16 +30,20 @@ type SheetMode = 'detail' | 'create' | 'edit';
 
 const PROVIDER_TAB_STORAGE_KEY = 'ai-providers.active-tab';
 const PROVIDER_LOGOS: Record<ProviderBrand, string> = {
+  kimi: kimiLogo,
   gemini: geminiLogo,
   claude: claudeLogo,
   codex: codexLogo,
+  xai: xaiLogo,
   vertex: vertexLogo,
   openaiCompatibility: openaiLogo,
 };
 const PROVIDER_TAB_IDS: ProviderBrand[] = [
+  'kimi',
   'openaiCompatibility',
   'gemini',
   'codex',
+  'xai',
   'claude',
   'vertex',
 ];

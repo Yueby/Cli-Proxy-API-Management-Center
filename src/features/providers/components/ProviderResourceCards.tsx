@@ -7,6 +7,8 @@ import iconGemini from '@/assets/icons/gemini.svg';
 import iconOpenAIDark from '@/assets/icons/openai-dark.svg';
 import iconOpenAILight from '@/assets/icons/openai-light.svg';
 import iconVertex from '@/assets/icons/vertex.svg';
+import iconXAI from '@/assets/icons/grok.svg';
+import iconKimi from '@/assets/icons/kimi-dark.svg';
 import { Button } from '@/components/ui/Button';
 import { ItemCard } from '@/components/ui/ItemCard';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
@@ -47,24 +49,30 @@ interface ProviderResourceCardsProps {
 type ProviderIconAsset = string | { light: string; dark: string };
 
 const PROVIDER_ICONS: Record<ProviderBrand, ProviderIconAsset> = {
+  kimi: iconKimi,
   gemini: iconGemini,
   codex: iconCodex,
+  xai: iconXAI,
   claude: iconClaude,
   vertex: iconVertex,
   openaiCompatibility: { light: iconOpenAILight, dark: iconOpenAIDark },
 };
 
 const PROVIDER_FALLBACKS: Record<ProviderBrand, string> = {
+  kimi: 'K',
   gemini: 'G',
   codex: 'C',
+  xai: 'X',
   claude: 'C',
   vertex: 'V',
   openaiCompatibility: 'O',
 };
 
 const PROVIDER_LABELS: Record<ProviderBrand, string> = {
+  kimi: 'Kimi',
   gemini: 'Gemini',
   codex: 'Codex',
+  xai: 'xAI',
   claude: 'Claude',
   vertex: 'Vertex',
   openaiCompatibility: 'OpenAI',

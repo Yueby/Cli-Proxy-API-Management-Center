@@ -16,7 +16,9 @@ import {
   geminiToResource,
   openaiToResource,
   vertexToResource,
+  xaiToResource,
 } from './adapters';
+import { buildKimiRaw, KIMI_DISPLAY_NAME } from './kimi';
 import { PROVIDER_BRAND_ORDER, PROVIDER_PATHS } from './descriptors';
 import type {
   ProviderBrand,
@@ -98,7 +100,7 @@ const buildExcludedModels = (
 };
 
 const buildProviderKeyConfig = (
-  brand: 'gemini' | 'codex' | 'claude' | 'vertex',
+  brand: 'gemini' | 'codex' | 'xai' | 'claude' | 'vertex',
   input: ProviderEntryFormInput,
   existing?: ProviderKeyConfig | GeminiKeyConfig | null
 ): ProviderKeyConfig | GeminiKeyConfig => {
@@ -125,7 +127,7 @@ const buildProviderKeyConfig = (
     disableCooling: input.disableCooling === true,
     authIndex: existing?.authIndex,
   };
-  if (brand === 'codex' && input.websockets !== undefined) {
+  if ((brand === 'codex' || brand === 'xai') && input.websockets !== undefined) {
     next.websockets = input.websockets;
   }
   if (brand === 'claude' && input.cloak) {
@@ -257,11 +259,26 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
     const groups: ProviderGroup[] = PROVIDER_BRAND_ORDER.map((brand) => {
       let resources: ProviderResource[] = [];
       switch (brand) {
+        case 'kimi': {
+          const raw = buildKimiRaw(config);
+          resources = raw.openai.map(({ config: item, index }) => ({
+            ...openaiToResource(item, index),
+            id: `kimi:${index}:${item.name}`,
+            brand: 'kimi' as const,
+            name: KIMI_DISPLAY_NAME,
+            identifier: KIMI_DISPLAY_NAME,
+            selector: { brand: 'kimi' as const, name: item.name, index },
+          }));
+          break;
+        }
         case 'gemini':
           resources = (config.geminiApiKeys ?? []).map((c, i) => geminiToResource(c, i));
           break;
         case 'codex':
           resources = (config.codexApiKeys ?? []).map((c, i) => codexToResource(c, i));
+          break;
+        case 'xai':
+          resources = (config.xaiApiKeys ?? []).map((c, i) => xaiToResource(c, i));
           break;
         case 'claude':
           resources = (config.claudeApiKeys ?? []).map((c, i) => claudeToResource(c, i));
@@ -307,6 +324,15 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
     [clearCache, updateConfigValue]
   );
 
+  const persistXAIConfigs = useCallback(
+    async (next: ProviderKeyConfig[]) => {
+      await providersApi.saveXAIConfigs(next);
+      updateConfigValue('xai-api-key', next);
+      clearCache('xai-api-key');
+    },
+    [clearCache, updateConfigValue]
+  );
+
   const persistClaudeConfigs = useCallback(
     async (next: ProviderKeyConfig[]) => {
       await providersApi.saveClaudeConfigs(next);
@@ -346,6 +372,14 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           const next = [...(config?.codexApiKeys ?? [])];
           next.push(buildProviderKeyConfig('codex', input) as ProviderKeyConfig);
           await persistCodexConfigs(next);
+        } else if (brand === 'xai') {
+          const next = [...(config?.xaiApiKeys ?? [])];
+          next.push(buildProviderKeyConfig('xai', input) as ProviderKeyConfig);
+          await persistXAIConfigs(next);
+        } else if (brand === 'kimi') {
+          const next = [...(config?.openaiCompatibility ?? [])];
+          next.push({ ...buildOpenAIConfig(input), name: 'kimi' });
+          await persistOpenAIConfigs(next);
         } else if (brand === 'claude') {
           const next = [...(config?.claudeApiKeys ?? [])];
           next.push(buildProviderKeyConfig('claude', input) as ProviderKeyConfig);

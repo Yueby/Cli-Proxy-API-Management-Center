@@ -28,14 +28,14 @@ const truncateForId = (value: string | undefined | null): string => {
 };
 
 function providerKeyToResource(
-  brand: 'gemini' | 'codex' | 'claude' | 'vertex',
+  brand: 'gemini' | 'codex' | 'xai' | 'claude' | 'vertex',
   config: GeminiKeyConfig | ProviderKeyConfig,
   index: number
 ): ProviderResource {
   const apiKey = config.apiKey ?? '';
   const disabled = hasDisableAllModelsRule(config.excludedModels);
   const flags: ProviderResource['flags'] = {};
-  if (brand === 'codex') {
+  if (brand === 'codex' || brand === 'xai') {
     flags.websockets = (config as ProviderKeyConfig).websockets === true;
   }
   if (brand === 'claude') {
@@ -63,6 +63,7 @@ function providerKeyToResource(
     proxyUrl: config.proxyUrl ?? null,
     prefix: config.prefix ?? null,
     modelCount: config.models?.length ?? 0,
+    models: (config.models ?? []).map((model) => model.name),
     headerCount: countHeaders(config.headers),
     excludedModelCount: stripDisableAllModelsRule(config.excludedModels).length,
     apiKeyEntryCount: 0,
@@ -79,6 +80,10 @@ export function geminiToResource(config: GeminiKeyConfig, index: number): Provid
 
 export function codexToResource(config: ProviderKeyConfig, index: number): ProviderResource {
   return providerKeyToResource('codex', config, index);
+}
+
+export function xaiToResource(config: ProviderKeyConfig, index: number): ProviderResource {
+  return providerKeyToResource('xai', config, index);
 }
 
 export function claudeToResource(config: ProviderKeyConfig, index: number): ProviderResource {
@@ -109,6 +114,7 @@ export function openaiToResource(
     proxyUrl: null,
     prefix: config.prefix ?? null,
     modelCount: config.models?.length ?? 0,
+    models: (config.models ?? []).map((model) => model.name),
     headerCount: countHeaders(config.headers),
     excludedModelCount: 0,
     apiKeyEntryCount: config.apiKeyEntries?.length ?? 0,
