@@ -137,7 +137,9 @@ export function MultiProtocolProviderForm({
                     onChange={(event) => update(index, { protocol: event.target.value as MultiProtocolProviderProtocol })}
                   >
                     {definition.protocols.map((protocol) => (
-                      <option key={protocol} value={protocol} disabled={used.has(protocol)}>{protocol}</option>
+                      <option key={protocol} value={protocol} disabled={used.has(protocol)}>
+                        {t(`providersPage.protocols.${protocol}`)}
+                      </option>
                     ))}
                   </select>
                 </label>

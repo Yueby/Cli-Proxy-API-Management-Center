@@ -1578,7 +1578,13 @@
       "codex": "Codex",
       "claude": "Claude",
       "vertex": "Vertex",
-      "openaiCompatibility": "OpenAI Compatible"
+      "openaiCompatibility": "OpenAI Compatible",
+      "xai": "xAI",
+      "kimi": "Kimi",
+      "claudeApi": "ClaudeAPI",
+      "code0": "Code0",
+      "fennoAI": "FennoAI",
+      "qiniuCloud": "Qiniu Cloud"
     },
     "table": {
       "key": "Key",
@@ -1744,6 +1750,18 @@
     },
     "modelCatalog": {
       "notLoaded": "Not loaded"
+    },
+    "protocols": {
+      "openai": "OpenAI",
+      "claude": "Claude",
+      "codex": "Codex",
+      "gemini": "Gemini"
+    },
+    "multiProtocol": {
+      "description": "Configure one or more supported protocols for this provider.",
+      "protocol": "Protocol",
+      "endpoint": "Service endpoint",
+      "addProtocol": "Add protocol"
     }
   },
   "ai_providers": {

@@ -47,13 +47,13 @@ const PROVIDER_LOGOS: Record<ProviderBrand, string> = {
   qiniuCloud: qiniuCloudLogo,
 };
 const PROVIDER_TAB_IDS: ProviderBrand[] = [
-  'kimi',
   'openaiCompatibility',
   'gemini',
   'codex',
-  'xai',
   'claude',
   'vertex',
+  'xai',
+  'kimi',
   'claudeApi',
   'code0',
   'fennoAI',

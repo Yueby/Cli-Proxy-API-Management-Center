@@ -1566,7 +1566,13 @@
       "codex": "Codex",
       "claude": "Claude",
       "vertex": "Vertex",
-      "openaiCompatibility": "OpenAI-совместимый"
+      "openaiCompatibility": "OpenAI-совместимый",
+      "xai": "xAI",
+      "kimi": "Kimi",
+      "claudeApi": "ClaudeAPI",
+      "code0": "Code0",
+      "fennoAI": "FennoAI",
+      "qiniuCloud": "Qiniu Cloud"
     },
     "table": {
       "key": "Ключ",
@@ -1732,6 +1738,18 @@
     },
     "modelCatalog": {
       "notLoaded": "Не загружено"
+    },
+    "protocols": {
+      "openai": "OpenAI",
+      "claude": "Claude",
+      "codex": "Codex",
+      "gemini": "Gemini"
+    },
+    "multiProtocol": {
+      "description": "Настройте один или несколько поддерживаемых протоколов этого провайдера.",
+      "protocol": "Протокол",
+      "endpoint": "Адрес сервиса",
+      "addProtocol": "Добавить протокол"
     }
   },
   "ai_providers": {

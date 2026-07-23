@@ -1578,7 +1578,13 @@
       "codex": "Codex",
       "claude": "Claude",
       "vertex": "Vertex",
-      "openaiCompatibility": "OpenAI 兼容"
+      "openaiCompatibility": "OpenAI 兼容",
+      "xai": "xAI",
+      "kimi": "Kimi",
+      "claudeApi": "ClaudeAPI",
+      "code0": "Code0",
+      "fennoAI": "FennoAI",
+      "qiniuCloud": "七牛云"
     },
     "table": {
       "key": "密钥",
@@ -1744,6 +1750,18 @@
     },
     "modelCatalog": {
       "notLoaded": "未加载"
+    },
+    "protocols": {
+      "openai": "OpenAI",
+      "claude": "Claude",
+      "codex": "Codex",
+      "gemini": "Gemini"
+    },
+    "multiProtocol": {
+      "description": "为此提供商配置一个或多个后端已支持的协议。",
+      "protocol": "协议",
+      "endpoint": "服务端点",
+      "addProtocol": "添加协议"
     }
   },
   "ai_providers": {

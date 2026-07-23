@@ -121,7 +121,7 @@ export function Code0ProviderForm({ resource, mode, mutating, formId, onSubmit, 
           const endpoint = entry.protocol === 'openai' ? urls.openai : entry.protocol === 'claude' ? urls.anthropic : entry.protocol === 'codex' ? urls.codex : urls.gemini;
           return (
             <div key={entry.protocol} className={styles.entryCard}>
-              <div className={styles.sectionTitle}>{t(`providersPage.sponsor.protocols.${labelKey}`, { defaultValue: labelKey })}</div>
+              <div className={styles.sectionTitle}>{t(`providersPage.protocols.${labelKey}`)}</div>
               <div className={styles.labelHint}>{endpoint}</div>
               <div className={styles.field}>
                 <label className={styles.label}>{t('providersPage.form.apiKey')}</label>
