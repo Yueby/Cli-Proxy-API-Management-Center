@@ -13,9 +13,13 @@ export type ProviderBrand =
   | 'claudeApi'
   | 'vertex'
   | 'openaiCompatibility'
-  | 'code0';
+  | 'code0'
+  | 'fennoAI'
+  | 'qiniuCloud';
 
 export type SponsorProviderBrand = 'code0';
+export type MultiProtocolProviderBrand = 'fennoAI' | 'qiniuCloud';
+export type MultiProtocolProviderProtocol = 'openai' | 'codex' | 'claude' | 'gemini';
 
 export type ProviderResourceSelector =
   | { brand: 'gemini'; apiKey: string; baseUrl?: string; index: number }
@@ -28,6 +32,13 @@ export type ProviderResourceSelector =
   | { brand: 'openaiCompatibility'; name: string; index: number }
   | {
       brand: 'code0';
+      openaiIndices: number[];
+      claudeIndices: number[];
+      codexIndices: number[];
+      geminiIndices: number[];
+    }
+  | {
+      brand: MultiProtocolProviderBrand;
       openaiIndices: number[];
       claudeIndices: number[];
       codexIndices: number[];
@@ -102,6 +113,8 @@ export interface SponsorProviderRaw {
   gemini: Array<{ config: GeminiKeyConfig; index: number }>;
 }
 
+export type MultiProtocolProviderRaw = SponsorProviderRaw;
+
 /**
  * 通用 Sheet 表单值。
  * Gemini/Codex/Claude/Vertex/OpenAI 共用基础字段,各自启用 advanced 区。
@@ -119,6 +132,19 @@ export type SponsorProtocol = 'openai' | 'codex' | 'claude' | 'gemini';
 
 export interface SponsorKeyEntryInput {
   protocol: SponsorProtocol;
+  apiKey: string;
+  existingApiKey?: string;
+  baseUrl: string;
+  proxyUrl: string;
+  prefix: string;
+  disabled: boolean;
+  disableCooling?: boolean;
+  priority?: number;
+  models: ModelEntryInput[];
+}
+
+export interface MultiProtocolKeyEntryInput {
+  protocol: MultiProtocolProviderProtocol;
   apiKey: string;
   existingApiKey?: string;
   baseUrl: string;
@@ -170,4 +196,5 @@ export interface ProviderEntryFormInput {
   testModel?: string;
   apiKeyEntries?: ApiKeyEntryInput[];
   sponsorKeyEntries?: SponsorKeyEntryInput[];
+  multiProtocolKeyEntries?: MultiProtocolKeyEntryInput[];
 }

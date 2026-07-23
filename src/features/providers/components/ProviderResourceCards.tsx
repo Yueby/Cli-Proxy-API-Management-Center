@@ -11,6 +11,8 @@ import iconOpenAILight from '@/assets/icons/openai-light.svg';
 import iconVertex from '@/assets/icons/vertex.svg';
 import iconXAI from '@/assets/icons/grok.svg';
 import iconKimi from '@/assets/icons/kimi-dark.svg';
+import iconFennoAI from '@/assets/icons/fenno-ai.png';
+import iconQiniuCloud from '@/assets/icons/qiniu-cloud.png';
 import { Button } from '@/components/ui/Button';
 import { ItemCard } from '@/components/ui/ItemCard';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
@@ -60,6 +62,8 @@ const PROVIDER_ICONS: Record<ProviderBrand, ProviderIconAsset> = {
   vertex: iconVertex,
   openaiCompatibility: { light: iconOpenAILight, dark: iconOpenAIDark },
   code0: iconCode0,
+  fennoAI: iconFennoAI,
+  qiniuCloud: iconQiniuCloud,
 };
 
 const PROVIDER_FALLBACKS: Record<ProviderBrand, string> = {
@@ -72,6 +76,8 @@ const PROVIDER_FALLBACKS: Record<ProviderBrand, string> = {
   vertex: 'V',
   openaiCompatibility: 'O',
   code0: 'C',
+  fennoAI: 'F',
+  qiniuCloud: 'Q',
 };
 
 const PROVIDER_LABELS: Record<ProviderBrand, string> = {
@@ -84,6 +90,8 @@ const PROVIDER_LABELS: Record<ProviderBrand, string> = {
   vertex: 'Vertex',
   openaiCompatibility: 'OpenAI',
   code0: 'Code0',
+  fennoAI: 'FennoAI',
+  qiniuCloud: 'Qiniu Cloud',
 };
 
 const getProviderIcon = (brand: ProviderBrand, resolvedTheme: ResolvedTheme): string => {

@@ -13,6 +13,7 @@ import type {
 import type { UseProviderWorkbenchResult } from '../useProviderWorkbench';
 import { BaseProviderForm } from './forms/BaseProviderForm';
 import { Code0ProviderForm } from './forms/Code0ProviderForm';
+import { MultiProtocolProviderForm } from './forms/MultiProtocolProviderForm';
 import { ResourceDetailView } from './ResourceDetailView';
 import styles from './forms/sharedForm.module.scss';
 
@@ -153,6 +154,20 @@ export function ProviderSheet({
       return (
         <Code0ProviderForm
           key={formKey}
+          resource={state.resource}
+          mode={state.mode}
+          mutating={formMutating}
+          formId={formId}
+          onSubmit={state.mode === 'create' ? handleCreate : handleUpdate}
+          onDirtyChange={handleDirtyChange}
+        />
+      );
+    }
+    if (state.brand === 'fennoAI' || state.brand === 'qiniuCloud') {
+      return (
+        <MultiProtocolProviderForm
+          key={formKey}
+          brand={state.brand}
           resource={state.resource}
           mode={state.mode}
           mutating={formMutating}

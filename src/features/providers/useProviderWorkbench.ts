@@ -15,8 +15,10 @@ import {
   claudeToResource,
   code0ToResource,
   codexToResource,
+  fennoAIToResource,
   geminiToResource,
   openaiToResource,
+  qiniuCloudToResource,
   vertexToResource,
   xaiToResource,
 } from './adapters';
@@ -32,6 +34,9 @@ import {
   isCode0GeminiProvider,
   isCode0OpenAIProvider,
 } from './code0';
+import { buildFennoAIRaw, isFennoAIClaudeProvider, isFennoAICodexProvider } from './fennoAI';
+import { buildQiniuCloudRaw, isQiniuCloudClaudeProvider, isQiniuCloudCodexProvider, isQiniuCloudGeminiProvider, isQiniuCloudOpenAIProvider } from './qiniuCloud';
+import { applyMultiProtocolProviderMutation, removeMultiProtocolProviderConfigs, toggleMultiProtocolProviderConfigs, type MultiProtocolConfigLists } from './multiProtocolMutations';
 import type {
   ProviderBrand,
   ProviderEntryFormInput,
@@ -39,6 +44,7 @@ import type {
   ProviderResource,
   ProviderSnapshot,
   SponsorKeyEntryInput,
+  MultiProtocolProviderRaw,
 } from './types';
 
 const getErrorMessage = (err: unknown): string => {
@@ -340,13 +346,13 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
         }
         case 'gemini':
           resources = (config.geminiApiKeys ?? []).reduce<ProviderResource[]>((out, item, index) => {
-            if (!isCode0GeminiProvider(item)) out.push(geminiToResource(item, index));
+            if (!isCode0GeminiProvider(item) && !isQiniuCloudGeminiProvider(item)) out.push(geminiToResource(item, index));
             return out;
           }, []);
           break;
         case 'codex':
           resources = (config.codexApiKeys ?? []).reduce<ProviderResource[]>((out, item, index) => {
-            if (!isCode0CodexProvider(item)) out.push(codexToResource(item, index));
+            if (!isCode0CodexProvider(item) && !isFennoAICodexProvider(item) && !isQiniuCloudCodexProvider(item)) out.push(codexToResource(item, index));
             return out;
           }, []);
           break;
@@ -355,7 +361,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           break;
         case 'claude':
           resources = (config.claudeApiKeys ?? []).reduce<ProviderResource[]>((out, item, index) => {
-            if (!isClaudeApiProvider(item) && !isCode0ClaudeProvider(item)) {
+            if (!isClaudeApiProvider(item) && !isCode0ClaudeProvider(item) && !isFennoAIClaudeProvider(item) && !isQiniuCloudClaudeProvider(item)) {
               out.push(claudeToResource(item, index));
             }
             return out;
@@ -372,12 +378,22 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           break;
         case 'openaiCompatibility':
           resources = (config.openaiCompatibility ?? []).reduce<ProviderResource[]>((out, item, index) => {
-            if (!isCode0OpenAIProvider(item)) out.push(openaiToResource(item, index));
+            if (!isCode0OpenAIProvider(item) && !isQiniuCloudOpenAIProvider(item)) out.push(openaiToResource(item, index));
             return out;
           }, []);
           break;
         case 'code0': {
           const resource = code0ToResource(buildCode0Raw(config));
+          resources = resource ? [resource] : [];
+          break;
+        }
+        case 'fennoAI': {
+          const resource = fennoAIToResource(buildFennoAIRaw(config));
+          resources = resource ? [resource] : [];
+          break;
+        }
+        case 'qiniuCloud': {
+          const resource = qiniuCloudToResource(buildQiniuCloudRaw(config));
           resources = resource ? [resource] : [];
           break;
         }
@@ -497,6 +513,13 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
     [config, persistClaudeConfigs, persistCodexConfigs, persistGeminiKeys, persistOpenAIConfigs]
   );
 
+  const persistMultiProtocolLists = useCallback(async (next: MultiProtocolConfigLists) => {
+    await persistGeminiKeys(next.geminiApiKeys);
+    await persistCodexConfigs(next.codexApiKeys);
+    await persistClaudeConfigs(next.claudeApiKeys);
+    await persistOpenAIConfigs(next.openaiCompatibility);
+  }, [persistClaudeConfigs, persistCodexConfigs, persistGeminiKeys, persistOpenAIConfigs]);
+
   const createProvider = useCallback(
     async (brand: ProviderBrand, input: ProviderEntryFormInput) => {
       setMutating(true);
@@ -535,6 +558,8 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           await persistOpenAIConfigs(next);
         } else if (brand === 'code0') {
           await persistCode0(input);
+        } else if (brand === 'fennoAI' || brand === 'qiniuCloud') {
+          await persistMultiProtocolLists(applyMultiProtocolProviderMutation(brand, config, input));
         }
         refreshSnapshot();
       } finally {
@@ -548,6 +573,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
       persistGeminiKeys,
       persistOpenAIConfigs,
       persistCode0,
+      persistMultiProtocolLists,
       persistVertexConfigs,
       refreshSnapshot,
     ]
@@ -591,6 +617,8 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           await persistOpenAIConfigs(list);
         } else if (brand === 'code0') {
           await persistCode0(input);
+        } else if (brand === 'fennoAI' || brand === 'qiniuCloud') {
+          await persistMultiProtocolLists(applyMultiProtocolProviderMutation(brand, config, input));
         }
         refreshSnapshot();
       } finally {
@@ -604,6 +632,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
       persistGeminiKeys,
       persistOpenAIConfigs,
       persistCode0,
+      persistMultiProtocolLists,
       persistVertexConfigs,
       refreshSnapshot,
     ]
@@ -649,6 +678,8 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           await persistCodexConfigs(nextCodex);
           await persistClaudeConfigs(nextClaude);
           await persistOpenAIConfigs(nextOpenAI);
+        } else if (sel.brand === 'fennoAI' || sel.brand === 'qiniuCloud') {
+          await persistMultiProtocolLists(removeMultiProtocolProviderConfigs(config, resource.raw as MultiProtocolProviderRaw));
         }
         refreshSnapshot();
       } finally {
@@ -662,6 +693,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
       persistCodexConfigs,
       persistGeminiKeys,
       persistOpenAIConfigs,
+      persistMultiProtocolLists,
       refreshSnapshot,
       updateConfigValue,
     ]
@@ -719,6 +751,8 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           await persistCodexConfigs((config?.codexApiKeys ?? []).map((item, index) => raw.codex.some((rawItem) => rawItem.index === index) ? { ...item, excludedModels: disabled ? withDisableAllModelsRule(item.excludedModels) : withoutDisableAllModelsRule(item.excludedModels) } : item));
           await persistClaudeConfigs((config?.claudeApiKeys ?? []).map((item, index) => raw.claude.some((rawItem) => rawItem.index === index) ? { ...item, excludedModels: disabled ? withDisableAllModelsRule(item.excludedModels) : withoutDisableAllModelsRule(item.excludedModels) } : item));
           await persistOpenAIConfigs((config?.openaiCompatibility ?? []).map((item, index) => raw.openai.some((rawItem) => rawItem.index === index) ? { ...item, disabled } : item));
+        } else if (brand === 'fennoAI' || brand === 'qiniuCloud') {
+          await persistMultiProtocolLists(toggleMultiProtocolProviderConfigs(config, resource.raw as MultiProtocolProviderRaw, disabled));
         }
         refreshSnapshot();
       } finally {
@@ -731,6 +765,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
       persistClaudeConfigs,
       persistCodexConfigs,
       persistGeminiKeys,
+      persistMultiProtocolLists,
       persistVertexConfigs,
       refreshSnapshot,
       updateConfigValue,

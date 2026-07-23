@@ -193,6 +193,20 @@ export const PROVIDER_DESCRIPTORS: Record<ProviderBrand, ProviderDescriptor> = {
     supportsApiKeyEntries: false,
     sheetSize: 'md',
   },
+  fennoAI: {
+    id: 'fennoAI', supportsName: false, supportsApiKey: true, supportsDisabled: true,
+    supportsBaseUrl: false, baseUrlRequired: false, supportsProxyUrl: true,
+    supportsPrefix: true, supportsModels: true, supportsHeaders: false,
+    supportsExcludedModels: false, supportsPriority: true, supportsTestModel: false,
+    supportsWebsockets: false, supportsCloak: false, supportsApiKeyEntries: false, sheetSize: 'lg',
+  },
+  qiniuCloud: {
+    id: 'qiniuCloud', supportsName: false, supportsApiKey: true, supportsDisabled: true,
+    supportsBaseUrl: false, baseUrlRequired: false, supportsProxyUrl: true,
+    supportsPrefix: true, supportsModels: true, supportsHeaders: false,
+    supportsExcludedModels: false, supportsPriority: true, supportsTestModel: false,
+    supportsWebsockets: false, supportsCloak: false, supportsApiKeyEntries: false, sheetSize: 'lg',
+  },
 };
 
 export const PROVIDER_BRAND_ORDER: ProviderBrand[] = [
@@ -205,6 +219,8 @@ export const PROVIDER_BRAND_ORDER: ProviderBrand[] = [
   'vertex',
   'openaiCompatibility',
   'code0',
+  'fennoAI',
+  'qiniuCloud',
 ];
 
 export const PROVIDER_PATHS: Record<ProviderBrand, string> = {
@@ -217,4 +233,6 @@ export const PROVIDER_PATHS: Record<ProviderBrand, string> = {
   vertex: '/ai-providers/vertex',
   openaiCompatibility: '/ai-providers/openai',
   code0: '/ai-providers/code0',
+  fennoAI: '/ai-providers/fenno-ai',
+  qiniuCloud: '/ai-providers/qiniu-cloud',
 };
