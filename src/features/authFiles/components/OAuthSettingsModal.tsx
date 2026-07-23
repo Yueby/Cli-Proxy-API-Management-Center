@@ -7,8 +7,10 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { ModelMappingDiagram, type ModelMappingDiagramRef } from '@/components/modelAlias';
 import { IconChevronUp, IconPencil, IconPlus, IconTrash2 } from '@/components/ui/icons';
 import type { OAuthModelAliasEntry } from '@/types';
-import type { AuthFileModelItem, OAuthConfigLoadError } from '@/features/authFiles/constants';
+import type { AuthFileModelItem } from '@/features/authFiles/constants';
 import styles from '@/pages/AuthFilesPage.module.scss';
+
+type UnsupportedError = 'unsupported' | null;
 type ViewMode = 'diagram' | 'list';
 type SettingsTab = 'excluded' | 'alias';
 
@@ -18,7 +20,7 @@ export type OAuthSettingsModalProps = {
   disableControls: boolean;
 
   // Excluded state & handlers
-  excludedError: OAuthConfigLoadError;
+  excludedError: UnsupportedError;
   excluded: Record<string, string[]>;
   onAddExcluded: () => void;
   onEditExcluded: (provider: string) => void;
@@ -30,7 +32,7 @@ export type OAuthSettingsModalProps = {
   onAddAlias: () => void;
   onEditProvider: (provider?: string) => void;
   onDeleteProvider: (provider: string) => void;
-  modelAliasError: OAuthConfigLoadError;
+  modelAliasError: UnsupportedError;
   modelAlias: Record<string, OAuthModelAliasEntry[]>;
   allProviderModels: Record<string, AuthFileModelItem[]>;
   onUpdateAlias: (provider: string, sourceModel: string, newAlias: string) => Promise<void>;
@@ -84,14 +86,6 @@ export function OAuthSettingsModal(props: OAuthSettingsModalProps) {
       );
     }
 
-    if (excludedError === 'loading') {
-      return <EmptyState title={t('common.loading')} />;
-    }
-
-    if (excludedError === 'load') {
-      return <EmptyState title={t('notification.refresh_failed')} />;
-    }
-
     if (Object.keys(excluded).length === 0) {
       return <EmptyState title={t('oauth_excluded.list_empty_all')} />;
     }
@@ -142,14 +136,6 @@ export function OAuthSettingsModal(props: OAuthSettingsModalProps) {
           description={t('oauth_model_alias.upgrade_required_desc')}
         />
       );
-    }
-
-    if (modelAliasError === 'loading') {
-      return <EmptyState title={t('common.loading')} />;
-    }
-
-    if (modelAliasError === 'load') {
-      return <EmptyState title={t('notification.refresh_failed')} />;
     }
 
     if (viewMode === 'diagram') {

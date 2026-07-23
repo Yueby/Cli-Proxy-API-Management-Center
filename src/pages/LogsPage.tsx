@@ -30,7 +30,6 @@ import { useAuthStore, useConfigStore, useNotificationStore } from '@/stores';
 import { logsApi, type LogsQuery } from '@/services/api/logs';
 import { versionApi } from '@/services/api/version';
 import { copyToClipboard } from '@/utils/clipboard';
-import { getErrorMessage } from '@/utils/helpers';
 import { downloadBlob } from '@/utils/download';
 import { MANAGEMENT_API_PREFIX } from '@/utils/constants';
 import { formatUnixTimestamp } from '@/utils/format';
@@ -38,6 +37,9 @@ import { HTTP_METHODS, STATUS_GROUPS, resolveStatusGroup, type LogState } from '
 import { parseLogLine } from './hooks/logParsing';
 import { useLogFilters } from './hooks/useLogFilters';
 import { isNearBottom, useLogScroller } from './hooks/useLogScroller';
+import { PageHeader } from '@/components/common/PageHeader';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { SkeletonRows, SkeletonTextBlock } from '@/components/common/LoadingSkeleton';
 import styles from './LogsPage.module.scss';
 
 interface ErrorLogItem {
@@ -99,6 +101,16 @@ const mergeIncrementalLines = (currentLines: string[], incomingLines: string[]):
 
   const overlap = findLineOverlap(currentLines, incomingLines);
   return [...currentLines, ...incomingLines.slice(overlap)];
+};
+
+const getErrorMessage = (err: unknown): string => {
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'string') return err;
+  if (typeof err !== 'object' || err === null) return '';
+  if (!('message' in err)) return '';
+
+  const message = (err as { message?: unknown }).message;
+  return typeof message === 'string' ? message : '';
 };
 
 const getErrorPayloadText = (err: unknown): string => {
@@ -180,6 +192,10 @@ export function LogsPage() {
   const [requestLogDownloading, setRequestLogDownloading] = useState(false);
   const [fullscreenLogs, setFullscreenLogs] = useState(false);
 
+  const logScrollerRef = useRef<Pick<
+    ReturnType<typeof useLogScroller>,
+    'logViewerRef' | 'requestScrollToBottom'
+  > | null>(null);
   const requestLogHomeIpByIdRef = useRef<Record<string, string>>({});
   const errorLogViewRequestRef = useRef(0);
   const longPressRef = useRef<{
@@ -220,7 +236,7 @@ export function LogsPage() {
   const autoRefreshDisabled = disableControls || showFileLoggingRequired;
   const clearDisabled = disableControls || showFileLoggingRequired || isHomeRuntime;
 
-  async function loadLogs(incremental = false) {
+  const loadLogs = async (incremental = false) => {
     if (connectionStatus !== 'connected') {
       setLoading(false);
       return;
@@ -253,9 +269,11 @@ export function LogsPage() {
     setError('');
 
     try {
-      const stickToBottom = !incremental || isNearBottom(logViewerRef.current);
+      const scrollerInstance = logScrollerRef.current;
+      const stickToBottom =
+        !incremental || isNearBottom(scrollerInstance?.logViewerRef.current ?? null);
       if (stickToBottom) {
-        requestScrollToBottom();
+        scrollerInstance?.requestScrollToBottom();
       }
 
       const params = buildLogsQuery(incremental, logPositionRef.current);
@@ -263,7 +281,6 @@ export function LogsPage() {
       setFileLoggingRequired(false);
 
       updateLogPosition(data, incremental);
-
       if (data.requestLogHomeIpById) {
         requestLogHomeIpByIdRef.current = incremental
           ? { ...requestLogHomeIpByIdRef.current, ...data.requestLogHomeIpById }
@@ -325,7 +342,7 @@ export function LogsPage() {
         void loadLogs(false);
       }
     }
-  }
+  };
 
   useHeaderRefresh(() => loadLogs(false));
 
@@ -461,12 +478,14 @@ export function LogsPage() {
   };
 
   useEffect(() => {
-    if (connectionStatus === 'connected') {
-      resetLogPosition();
-      requestLogHomeIpByIdRef.current = {};
+    if (connectionStatus !== 'connected') return;
+    resetLogPosition();
+    requestLogHomeIpByIdRef.current = {};
+    const id = window.setTimeout(() => {
       setFileLoggingRequired(false);
-      loadLogs(false);
-    }
+      void loadLogs(false);
+    }, 0);
+    return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectionStatus, loggingToFileEnabled]);
 
@@ -488,7 +507,10 @@ export function LogsPage() {
   useEffect(() => {
     if (activeTab !== 'errors') return;
     if (connectionStatus !== 'connected') return;
-    void loadErrorLogs();
+    const id = window.setTimeout(() => {
+      void loadErrorLogs();
+    }, 0);
+    return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, connectionStatus, requestLogEnabled]);
 
@@ -576,7 +598,7 @@ export function LogsPage() {
 
   const rawVisibleText = useMemo(() => filteredLines.join('\n'), [filteredLines]);
 
-  const { canLoadMore, handleLogScroll, logViewerRef, requestScrollToBottom } = useLogScroller({
+  const { logViewerRef, canLoadMore, handleLogScroll, requestScrollToBottom } = useLogScroller({
     logState,
     setLogState,
     loading,
@@ -585,6 +607,10 @@ export function LogsPage() {
     hasStructuredFilters: filters.hasStructuredFilters,
     showRawLogs,
   });
+
+  useEffect(() => {
+    logScrollerRef.current = { logViewerRef, requestScrollToBottom };
+  }, [logViewerRef, requestScrollToBottom]);
 
   const copyLogLine = async (raw: string) => {
     const ok = await copyToClipboard(raw);
@@ -697,30 +723,20 @@ export function LogsPage() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>{t('logs.title')}</h1>
-        <div className={styles.runtimeNotice}>{t(`logs.runtime_${serverRuntimeKind}`)}</div>
-      </div>
+      <PageHeader title={t('logs.title')} />
 
-      <div className={styles.tabBar}>
-        <button
-          type="button"
-          className={`${styles.tabItem} ${activeTab === 'logs' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('logs')}
-        >
-          {t('logs.log_content')}
-        </button>
-        <button
-          type="button"
-          className={`${styles.tabItem} ${activeTab === 'errors' ? styles.tabActive : ''}`}
-          onClick={() => {
-            setFullscreenLogs(false);
-            setActiveTab('errors');
-          }}
-        >
-          {t('logs.error_logs_modal_title')}
-        </button>
-      </div>
+      <SegmentedControl
+        className={styles.tabControl}
+        options={[
+          { value: 'logs', label: t('logs.log_content') },
+          { value: 'errors', label: t('logs.error_logs_modal_title') },
+        ]}
+        value={activeTab}
+        onChange={(tab) => {
+          if (tab === 'errors') setFullscreenLogs(false);
+          setActiveTab(tab as TabType);
+        }}
+      />
 
       <div className={styles.content}>
         {activeTab === 'logs' && (
@@ -741,67 +757,63 @@ export function LogsPage() {
             {error && <div className="error-box">{error}</div>}
 
             <div className={styles.filters}>
-              {!fullscreenLogs && (
-                <>
-                  <div className={styles.searchWrapper}>
-                    <Input
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder={t('logs.search_placeholder')}
-                      className={styles.searchInput}
-                      rightElement={
-                        searchQuery ? (
-                          <button
-                            type="button"
-                            className={styles.searchClear}
-                            onClick={() => setSearchQuery('')}
-                            title="Clear"
-                            aria-label="Clear"
-                          >
-                            <IconX size={16} />
-                          </button>
-                        ) : (
-                          <IconSearch size={16} className={styles.searchIcon} />
-                        )
-                      }
-                    />
-                  </div>
+              <div className={styles.searchWrapper}>
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t('logs.search_placeholder')}
+                  className={styles.searchInput}
+                  rightElement={
+                    searchQuery ? (
+                      <button
+                        type="button"
+                        className={styles.searchClear}
+                        onClick={() => setSearchQuery('')}
+                        title="Clear"
+                        aria-label="Clear"
+                      >
+                        <IconX size={16} />
+                      </button>
+                    ) : (
+                      <IconSearch size={16} className={styles.searchIcon} />
+                    )
+                  }
+                />
+              </div>
 
-                  <div className={styles.filterPanelHeader}>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      className={styles.filterPanelToggle}
-                      onClick={() => setStructuredFiltersExpanded((prev) => !prev)}
-                      aria-expanded={structuredFiltersExpanded}
-                      aria-controls={structuredFiltersPanelId}
-                      title={
-                        structuredFiltersExpanded
-                          ? t('logs.filter_panel_collapse')
-                          : t('logs.filter_panel_expand')
-                      }
-                    >
-                      <span className={styles.filterPanelButtonContent}>
-                        <IconSlidersHorizontal size={16} />
-                        <span>{t('logs.filter_panel_title')}</span>
-                        {structuredFilterCount > 0 && (
-                          <span className={styles.filterPanelCount}>
-                            {t('logs.filter_panel_active_count', { count: structuredFilterCount })}
-                          </span>
-                        )}
-                        {structuredFiltersExpanded ? (
-                          <IconChevronUp size={16} />
-                        ) : (
-                          <IconChevronDown size={16} />
-                        )}
+              <div className={styles.filterPanelHeader}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className={styles.filterPanelToggle}
+                  onClick={() => setStructuredFiltersExpanded((prev) => !prev)}
+                  aria-expanded={structuredFiltersExpanded}
+                  aria-controls={structuredFiltersPanelId}
+                  title={
+                    structuredFiltersExpanded
+                      ? t('logs.filter_panel_collapse')
+                      : t('logs.filter_panel_expand')
+                  }
+                >
+                  <span className={styles.filterPanelButtonContent}>
+                    <IconSlidersHorizontal size={16} />
+                    <span>{t('logs.filter_panel_title')}</span>
+                    {structuredFilterCount > 0 && (
+                      <span className={styles.filterPanelCount}>
+                        {t('logs.filter_panel_active_count', { count: structuredFilterCount })}
                       </span>
-                    </Button>
-                  </div>
-                </>
-              )}
+                    )}
+                    {structuredFiltersExpanded ? (
+                      <IconChevronUp size={16} />
+                    ) : (
+                      <IconChevronDown size={16} />
+                    )}
+                  </span>
+                </Button>
+              </div>
 
-              {!fullscreenLogs && structuredFiltersExpanded && (
+              {structuredFiltersExpanded && (
                 <div id={structuredFiltersPanelId} className={styles.structuredFilters}>
                   <div className={styles.filterChipGroup}>
                     <span className={styles.filterChipLabel}>{t('logs.filter_method')}</span>
@@ -917,11 +929,10 @@ export function LogsPage() {
                   onClick={() => loadLogs(false)}
                   disabled={refreshDisabled}
                   className={styles.actionButton}
+                  title={t('logs.refresh_button')}
+                  aria-label={t('logs.refresh_button')}
                 >
-                  <span className={styles.buttonContent}>
-                    <IconRefreshCw size={16} />
-                    {t('logs.refresh_button')}
-                  </span>
+                  <IconRefreshCw size={16} />
                 </Button>
                 <ToggleSwitch
                   checked={autoRefresh}
@@ -939,12 +950,10 @@ export function LogsPage() {
                   size="sm"
                   onClick={downloadLogs}
                   disabled={logState.buffer.length === 0}
-                  className={styles.actionButton}
+                  title={t('logs.download_button')}
+                  aria-label={t('logs.download_button')}
                 >
-                  <span className={styles.buttonContent}>
-                    <IconDownload size={16} />
-                    {t('logs.download_button')}
-                  </span>
+                  <IconDownload size={16} />
                 </Button>
                 <Button
                   variant="danger"
@@ -952,11 +961,10 @@ export function LogsPage() {
                   onClick={clearLogs}
                   disabled={clearDisabled}
                   className={styles.actionButton}
+                  title={t('logs.clear_button')}
+                  aria-label={t('logs.clear_button')}
                 >
-                  <span className={styles.buttonContent}>
-                    <IconTrash2 size={16} />
-                    {t('logs.clear_button')}
-                  </span>
+                  <IconTrash2 size={16} />
                 </Button>
                 <Button
                   variant="secondary"
@@ -967,19 +975,19 @@ export function LogsPage() {
                   title={
                     fullscreenLogs ? t('logs.exit_fullscreen_button') : t('logs.fullscreen_button')
                   }
+                  aria-label={
+                    fullscreenLogs ? t('logs.exit_fullscreen_button') : t('logs.fullscreen_button')
+                  }
                 >
-                  <span className={styles.buttonContent}>
-                    {fullscreenLogs ? <IconMinimize2 size={16} /> : <IconMaximize2 size={16} />}
-                    {fullscreenLogs
-                      ? t('logs.exit_fullscreen_button')
-                      : t('logs.fullscreen_button')}
-                  </span>
+                  {fullscreenLogs ? <IconMinimize2 size={16} /> : <IconMaximize2 size={16} />}
                 </Button>
               </div>
             </div>
 
             {loading ? (
-              <div className="hint">{t('logs.loading')}</div>
+              <div className={styles.logSkeleton} aria-busy="true" aria-label={t('logs.loading')}>
+                <SkeletonTextBlock lines={12} />
+              </div>
             ) : logState.buffer.length > 0 && filteredLines.length > 0 ? (
               <div
                 ref={logViewerRef}
@@ -1141,8 +1149,10 @@ export function LogsPage() {
                 onClick={loadErrorLogs}
                 loading={loadingErrors}
                 disabled={disableControls}
+                title={t('common.refresh')}
+                aria-label={t('common.refresh')}
               >
-                {t('common.refresh')}
+                <IconRefreshCw size={16} />
               </Button>
             }
           >
@@ -1165,7 +1175,7 @@ export function LogsPage() {
 
               <div className={styles.errorPanel}>
                 {loadingErrors ? (
-                  <div className="hint">{t('common.loading')}</div>
+                  <SkeletonRows count={4} />
                 ) : errorLogs.length === 0 ? (
                   <div className="hint">{t('logs.error_logs_empty')}</div>
                 ) : (
@@ -1188,10 +1198,8 @@ export function LogsPage() {
                             }}
                             disabled={disableControls}
                           >
-                            <span className={styles.buttonContent}>
-                              <IconEye size={16} />
-                              {t('logs.error_logs_open')}
-                            </span>
+                            <IconEye size={16} />
+                            {t('logs.error_logs_open')}
                           </Button>
                           <Button
                             variant="secondary"
@@ -1218,7 +1226,7 @@ export function LogsPage() {
         title={selectedErrorLog?.name ?? t('logs.error_log_view_title')}
         width={960}
         footer={
-          <>
+          <div className="segmented-button-group">
             <Button variant="secondary" onClick={closeErrorLogViewer}>
               {t('common.close')}
             </Button>
@@ -1241,11 +1249,11 @@ export function LogsPage() {
             >
               {t('logs.error_logs_download')}
             </Button>
-          </>
+          </div>
         }
       >
         <div className={styles.errorLogViewer}>
-          {selectedErrorLog && (
+          {selectedErrorLog ? (
             <div className={styles.errorLogViewerMeta}>
               <span>
                 {t('logs.error_logs_size')}:{' '}
@@ -1256,10 +1264,10 @@ export function LogsPage() {
                 {selectedErrorLog.modified ? formatUnixTimestamp(selectedErrorLog.modified) : '-'}
               </span>
             </div>
-          )}
-          {selectedErrorLogError && <div className="error-box">{selectedErrorLogError}</div>}
+          ) : null}
+          {selectedErrorLogError ? <div className="error-box">{selectedErrorLogError}</div> : null}
           {selectedErrorLogLoading ? (
-            <div className="hint">{t('common.loading')}</div>
+            <SkeletonTextBlock lines={8} />
           ) : selectedErrorLogText ? (
             <pre className={styles.errorLogContent} spellCheck={false}>
               {selectedErrorLogText}
@@ -1275,7 +1283,7 @@ export function LogsPage() {
         onClose={closeRequestLogModal}
         title={t('logs.request_log_download_title')}
         footer={
-          <>
+          <div className="segmented-button-group">
             <Button
               variant="secondary"
               onClick={closeRequestLogModal}
@@ -1294,7 +1302,7 @@ export function LogsPage() {
             >
               {t('common.confirm')}
             </Button>
-          </>
+          </div>
         }
       >
         {requestLogId ? t('logs.request_log_download_confirm', { id: requestLogId }) : null}

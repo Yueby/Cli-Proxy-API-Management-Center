@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from './Button';
-import { IconChevronLeft } from './icons';
+import { IconChevronLeft, IconChevronRight } from './icons';
 import styles from './Pagination.module.scss';
 
 interface PaginationProps {
@@ -120,7 +120,7 @@ export function Pagination({
         title={t('auth_files.pagination_next')}
         aria-label={t('auth_files.pagination_next')}
       >
-        <IconChevronLeft size={16} style={{ transform: 'rotate(180deg)' }} />
+        <IconChevronRight size={16} />
       </Button>
 
       {totalPages > 5 && (

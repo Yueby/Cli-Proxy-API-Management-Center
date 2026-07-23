@@ -2,14 +2,15 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
-import type { OAuthConfigLoadError } from '@/features/authFiles/constants';
+import { IconPencil, IconPlus, IconTrash2 } from '@/components/ui/icons';
 import styles from '@/pages/AuthFilesPage.module.scss';
+
+type UnsupportedError = 'unsupported' | null;
 
 export type OAuthExcludedCardProps = {
   disableControls: boolean;
-  excludedError: OAuthConfigLoadError;
+  excludedError: UnsupportedError;
   excluded: Record<string, string[]>;
-  onRetry: () => void | Promise<void>;
   onAdd: () => void;
   onEdit: (provider: string) => void;
   onDelete: (provider: string) => void;
@@ -17,14 +18,14 @@ export type OAuthExcludedCardProps = {
 
 export function OAuthExcludedCard(props: OAuthExcludedCardProps) {
   const { t } = useTranslation();
-  const { disableControls, excludedError, excluded, onRetry, onAdd, onEdit, onDelete } = props;
+  const { disableControls, excludedError, excluded, onAdd, onEdit, onDelete } = props;
 
   return (
     <Card
       title={t('oauth_excluded.title')}
       extra={
-        <Button size="sm" onClick={onAdd} disabled={disableControls || excludedError !== null}>
-          {t('oauth_excluded.add')}
+        <Button size="sm" onClick={onAdd} disabled={disableControls || excludedError === 'unsupported'} title={t('oauth_excluded.add')} aria-label={t('oauth_excluded.add')}>
+          <IconPlus size={16} />
         </Button>
       }
     >
@@ -33,17 +34,6 @@ export function OAuthExcludedCard(props: OAuthExcludedCardProps) {
           title={t('oauth_excluded.upgrade_required_title')}
           description={t('oauth_excluded.upgrade_required_desc')}
         />
-      ) : excludedError === 'load' ? (
-        <EmptyState
-          title={t('notification.refresh_failed')}
-          action={
-            <Button variant="secondary" size="sm" onClick={() => void onRetry()}>
-              {t('common.refresh')}
-            </Button>
-          }
-        />
-      ) : excludedError === 'loading' ? (
-        <EmptyState title={t('common.loading')} />
       ) : Object.keys(excluded).length === 0 ? (
         <EmptyState title={t('oauth_excluded.list_empty_all')} />
       ) : (
@@ -59,11 +49,11 @@ export function OAuthExcludedCard(props: OAuthExcludedCardProps) {
                 </div>
               </div>
               <div className={styles.excludedActions}>
-                <Button variant="secondary" size="sm" onClick={() => onEdit(provider)}>
-                  {t('common.edit')}
+                <Button variant="secondary" size="sm" onClick={() => onEdit(provider)} title={t('common.edit')} aria-label={t('common.edit')}>
+                  <IconPencil size={15} />
                 </Button>
-                <Button variant="danger" size="sm" onClick={() => onDelete(provider)}>
-                  {t('oauth_excluded.delete')}
+                <Button variant="danger" size="sm" onClick={() => onDelete(provider)} title={t('oauth_excluded.delete')} aria-label={t('oauth_excluded.delete')}>
+                  <IconTrash2 size={15} />
                 </Button>
               </div>
             </div>
@@ -73,3 +63,4 @@ export function OAuthExcludedCard(props: OAuthExcludedCardProps) {
     </Card>
   );
 }
+

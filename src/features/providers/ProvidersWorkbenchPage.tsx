@@ -1,36 +1,46 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PageHeader } from '@/components/common/PageHeader';
 import { usePageTransitionLayer } from '@/components/common/PageTransitionLayer';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
+import { useHorizontalWheelScroll } from '@/hooks/useHorizontalWheelScroll';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { ModelsListModal, type SharedModelItem } from '@/components/common/ModelsListModal';
 import { useAuthStore, useNotificationStore } from '@/stores';
 import { useProviderRecentRequests } from '@/components/providers/hooks/useProviderRecentRequests';
-import {
-  getOpenAIProviderRecentWindowStats,
-  getProviderRecentWindowStats,
-  type ProviderRecentUsageMap,
-} from '@/components/providers/utils';
+import { getOpenAIProviderRecentWindowStats } from '@/components/providers/utils';
+import claudeLogo from '@/assets/icons/claude.svg';
+import codexLogo from '@/assets/icons/codex.svg';
+import geminiLogo from '@/assets/icons/gemini.svg';
+import openaiLogo from '@/assets/icons/openai-light.svg';
+import vertexLogo from '@/assets/icons/vertex.svg';
+import { CategoryList, type CategoryItem } from '@/components/common/CategoryList';
 import type { GeminiKeyConfig, OpenAIProviderConfig, ProviderKeyConfig } from '@/types';
 import { ProviderHeaderCard } from './components/ProviderHeaderCard';
-import { ProviderCategoryList } from './components/ProviderCategoryList';
 import { ProviderResourcePanel } from './components/ProviderResourcePanel';
-import type { ProviderPanelControls } from './components/ProviderResourcePanel';
+import type { OpenAISortBy, SortDir } from './components/OpenAIBrandToolbar';
 import { ProviderSheet, type ProviderSheetHandle } from './sheets/ProviderSheet';
-import { isMultiProtocolSponsorBrand } from './sponsorDefinitions';
-import { isSponsorPartialMutationError } from './sponsorMutationRecovery';
 import { useProviderWorkbench } from './useProviderWorkbench';
-import {
-  getProviderFilterState,
-  readProvidersWorkbenchUiState,
-  writeProvidersWorkbenchUiState,
-  type ProviderFilterState,
-  type ProvidersWorkbenchUiState,
-} from './uiState';
-import type { ProviderBrand, ProviderResource, ProviderSortBy, SortDir } from './types';
+import { ModelsListModal, type SharedModelItem } from '@/components/common/ModelsListModal';
+import type { ProviderBrand, ProviderResource } from './types';
 import styles from './ProvidersWorkbenchPage.module.scss';
 
 type SheetMode = 'detail' | 'create' | 'edit';
+
+const PROVIDER_TAB_STORAGE_KEY = 'ai-providers.active-tab';
+const PROVIDER_LOGOS: Record<ProviderBrand, string> = {
+  gemini: geminiLogo,
+  claude: claudeLogo,
+  codex: codexLogo,
+  vertex: vertexLogo,
+  openaiCompatibility: openaiLogo,
+};
+const PROVIDER_TAB_IDS: ProviderBrand[] = [
+  'openaiCompatibility',
+  'gemini',
+  'codex',
+  'claude',
+  'vertex',
+];
 
 interface SheetState {
   open: boolean;
@@ -38,20 +48,6 @@ interface SheetState {
   mode: SheetMode;
   resource: ProviderResource | null;
 }
-
-
-const formatDateTime = (iso: string, locale?: string) => {
-  try {
-    const date = new Date(iso);
-    if (Number.isNaN(date.getTime())) return iso;
-    return new Intl.DateTimeFormat(locale, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(date);
-  } catch {
-    return iso;
-  }
-};
 
 const matchesFilter = (r: ProviderResource, normalized: string): boolean => {
   if (!normalized) return true;
@@ -70,31 +66,8 @@ const matchesFilter = (r: ProviderResource, normalized: string): boolean => {
   return haystack.some((v) => v.includes(normalized));
 };
 
-const getResourceSortName = (resource: ProviderResource): string =>
-  (resource.name ?? resource.identifier ?? resource.apiKeyPreview ?? '').toLowerCase();
-
-const getResourceRecentSuccess = (
-  resource: ProviderResource,
-  usageByProvider: ProviderRecentUsageMap
-): number => {
-  if (isMultiProtocolSponsorBrand(resource.brand)) {
-    return 0;
-  }
-  if (resource.brand === 'openaiCompatibility') {
-    return getOpenAIProviderRecentWindowStats(resource.raw as OpenAIProviderConfig, usageByProvider)
-      .success;
-  }
-  const usageProvider = resource.brand === 'claudeApi' ? 'claude' : resource.brand;
-  return getProviderRecentWindowStats(
-    usageByProvider,
-    usageProvider,
-    resource.apiKey ?? undefined,
-    resource.baseUrl ?? undefined
-  ).success;
-};
-
 export function ProvidersWorkbenchPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const connectionStatus = useAuthStore((s) => s.connectionStatus);
   const { showNotification, showConfirmation } = useNotificationStore();
 
@@ -102,7 +75,21 @@ export function ProvidersWorkbenchPage() {
   const isCurrentLayer = pageTransitionLayer ? pageTransitionLayer.status === 'current' : true;
 
   const workbench = useProviderWorkbench();
-  const [uiState, setUiState] = useState<ProvidersWorkbenchUiState>(readProvidersWorkbenchUiState);
+  const [activeBrand, setActiveBrand] = useState<ProviderBrand>(() => {
+    try {
+      const saved = localStorage.getItem(PROVIDER_TAB_STORAGE_KEY);
+      if (saved && PROVIDER_TAB_IDS.includes(saved as ProviderBrand)) {
+        return saved as ProviderBrand;
+      }
+    } catch {
+      // localStorage can be unavailable in hardened/privacy contexts.
+    }
+    return 'openaiCompatibility';
+  });
+  const [filter, setFilter] = useState('');
+  const [openaiSortBy, setOpenaiSortBy] = useState<OpenAISortBy>('name');
+  const [openaiSortDir, setOpenaiSortDir] = useState<SortDir>('asc');
+  const [openaiSelectedModels, setOpenaiSelectedModels] = useState<Set<string>>(() => new Set());
   const [sheetState, setSheetState] = useState<SheetState>({
     open: false,
     brand: 'gemini',
@@ -110,11 +97,23 @@ export function ProvidersWorkbenchPage() {
     resource: null,
   });
   const sheetRef = useRef<ProviderSheetHandle>(null);
-  const [modelsModal, setModelsModal] = useState<{
-    open: boolean;
-    providerName: string;
-    models: SharedModelItem[];
-  }>({ open: false, providerName: '', models: [] });
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  useHorizontalWheelScroll(tabsContainerRef);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PROVIDER_TAB_STORAGE_KEY, activeBrand);
+    } catch {
+      // Persistence is a convenience; tab switching should keep working without it.
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      const activeEl = tabsContainerRef.current?.querySelector(`[data-tab-id="${activeBrand}"]`);
+      activeEl?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [activeBrand]);
 
   const connected = connectionStatus === 'connected';
   const { usageByProvider, refreshRecentRequests } = useProviderRecentRequests({
@@ -127,63 +126,34 @@ export function ProvidersWorkbenchPage() {
 
   useHeaderRefresh(handleRefresh, isCurrentLayer);
 
-  const disableMutations =
-    connectionStatus !== 'connected' ||
-    workbench.mutating ||
-    workbench.isFetching ||
-    workbench.isError;
+  const disableMutations = connectionStatus !== 'connected' || workbench.mutating;
 
-  const persistUiState = useCallback(
-    (updater: (prev: ProvidersWorkbenchUiState) => ProvidersWorkbenchUiState) => {
-      setUiState((prev) => {
-        const next = updater(prev);
-        writeProvidersWorkbenchUiState(next);
-        return next;
-      });
-    },
-    []
-  );
+  const groups = useMemo(() => {
+    const rawGroups = workbench.snapshot?.groups ?? [];
+    const orderMap = new Map(PROVIDER_TAB_IDS.map((t, idx) => [t, idx]));
+    return [...rawGroups].sort((a, b) => {
+      const oa = orderMap.has(a.id) ? orderMap.get(a.id)! : 999;
+      const ob = orderMap.has(b.id) ? orderMap.get(b.id)! : 999;
+      return oa - ob;
+    });
+  }, [workbench.snapshot]);
 
-  const setActiveBrand = useCallback(
-    (brand: ProviderBrand) => {
-      persistUiState((prev) =>
-        prev.activeBrand === brand ? prev : { ...prev, activeBrand: brand }
-      );
-    },
-    [persistUiState]
-  );
+  const categoryItems = useMemo<CategoryItem[]>(() => {
+    return groups.map((group) => {
+      const realResources = group.resources.filter((r) => !r.flags.isPlaceholder);
+      const count = realResources.length;
+      return {
+        id: group.id,
+        label: t(`providersPage.providerNames.${group.id}`),
+        icon: PROVIDER_LOGOS[group.id],
+        count,
+        hasIssue: !!group.issue,
+        invertOnDark: group.id === 'openaiCompatibility',
+      };
+    });
+  }, [groups, t]);
 
-  const allGroups = useMemo(() => workbench.snapshot?.groups ?? [], [workbench.snapshot]);
-  const groups = allGroups;
-  const firstVisibleBrand = groups[0]?.id ?? 'gemini';
-  const activeBrand =
-    (groups.some((group) => group.id === uiState.activeBrand)
-      ? uiState.activeBrand
-      : firstVisibleBrand);
-  const activeFilterState = getProviderFilterState(uiState, activeBrand);
-  const filter = activeFilterState.filter;
-  const providerSortBy = activeFilterState.sortBy;
-  const providerSortDir = activeFilterState.sortDir;
   const activeGroup = groups.find((g) => g.id === activeBrand) ?? groups[0] ?? null;
-
-  const updateActiveFilterState = useCallback(
-    (patch: Partial<ProviderFilterState>) => {
-      persistUiState((prev) => {
-        const current = getProviderFilterState(prev, activeBrand);
-        return {
-          ...prev,
-          filtersByBrand: {
-            ...prev.filtersByBrand,
-            [activeBrand]: {
-              ...current,
-              ...patch,
-            },
-          },
-        };
-      });
-    },
-    [activeBrand, persistUiState]
-  );
 
   const filteredResources = useMemo(() => {
     if (!activeGroup) return [];
@@ -191,104 +161,124 @@ export function ProvidersWorkbenchPage() {
     return activeGroup.resources.filter((r) => matchesFilter(r, normalized));
   }, [activeGroup, filter]);
 
-  const availableModels = useMemo(() => {
-    if (!activeGroup) return [];
+  const isOpenAI = activeGroup?.id === 'openaiCompatibility';
+  const availableOpenaiModels = useMemo(() => {
+    if (!isOpenAI || !activeGroup) return [];
     const seen = new Set<string>();
     activeGroup.resources.forEach((r) => {
-      r.models.forEach((name) => seen.add(name));
+      const cfg = r.raw as OpenAIProviderConfig;
+      cfg.models?.forEach((m) => {
+        const name = (m.name ?? '').trim();
+        if (name) seen.add(name);
+      });
     });
     return Array.from(seen).sort();
-  }, [activeGroup]);
-
-  const selectedModels = useMemo(() => {
-    if (availableModels.length === 0) return new Set<string>();
-    const availableModelSet = new Set(availableModels);
-    return new Set(activeFilterState.selectedModels.filter((name) => availableModelSet.has(name)));
-  }, [activeFilterState.selectedModels, availableModels]);
+  }, [activeGroup, isOpenAI]);
 
   const visibleResources = useMemo(() => {
+    if (!isOpenAI) return filteredResources;
+
     let arr = filteredResources;
-    if (selectedModels.size > 0) {
-      arr = arr.filter((r) => r.models.some((name) => selectedModels.has(name)));
+    if (openaiSelectedModels.size > 0) {
+      arr = arr.filter((r) => {
+        const cfg = r.raw as OpenAIProviderConfig;
+        return Boolean(cfg.models?.some((m) => openaiSelectedModels.has((m.name ?? '').trim())));
+      });
     }
 
     const sorted = [...arr].sort((a, b) => {
-      const sortDiff =
-        providerSortBy === 'name'
-          ? getResourceSortName(a).localeCompare(getResourceSortName(b))
-          : providerSortBy === 'priority'
-            ? a.priority - b.priority
-            : getResourceRecentSuccess(a, usageByProvider) -
-              getResourceRecentSuccess(b, usageByProvider);
-      const diff = sortDiff || a.originalIndex - b.originalIndex;
-      return providerSortDir === 'asc' ? diff : -diff;
+      let diff = 0;
+      if (openaiSortBy === 'name') {
+        const an = (a.name ?? a.identifier ?? '').toLowerCase();
+        const bn = (b.name ?? b.identifier ?? '').toLowerCase();
+        diff = an.localeCompare(bn);
+      } else if (openaiSortBy === 'priority') {
+        const ap = (a.raw as OpenAIProviderConfig).priority ?? Number.MAX_SAFE_INTEGER;
+        const bp = (b.raw as OpenAIProviderConfig).priority ?? Number.MAX_SAFE_INTEGER;
+        diff = ap - bp;
+        if (diff === 0) {
+          const an = (a.name ?? a.identifier ?? '').toLowerCase();
+          const bn = (b.name ?? b.identifier ?? '').toLowerCase();
+          diff = an.localeCompare(bn);
+        }
+      } else {
+        const aStats = getOpenAIProviderRecentWindowStats(
+          a.raw as OpenAIProviderConfig,
+          usageByProvider
+        );
+        const bStats = getOpenAIProviderRecentWindowStats(
+          b.raw as OpenAIProviderConfig,
+          usageByProvider
+        );
+        diff = aStats.success - bStats.success;
+      }
+      return openaiSortDir === 'asc' ? diff : -diff;
     });
+
+    sorted.sort((a, b) => Number(a.disabled) - Number(b.disabled));
 
     return sorted;
-  }, [filteredResources, providerSortBy, providerSortDir, selectedModels, usageByProvider]);
-
-  const toolbarControls = useMemo<ProviderPanelControls | undefined>(() => {
-    if (!activeGroup) return undefined;
-    return {
-      sortBy: providerSortBy,
-      sortDir: providerSortDir,
-      onSortBy: (value: ProviderSortBy) => updateActiveFilterState({ sortBy: value }),
-      onSortDir: (value: SortDir) => updateActiveFilterState({ sortDir: value }),
-      availableModels,
-      selectedModels,
-      onSelectedModelsChange: (next) =>
-        updateActiveFilterState({
-          selectedModels: Array.from(next).sort((a, b) => a.localeCompare(b)),
-        }),
-    };
   }, [
-    activeGroup,
-    availableModels,
-    providerSortBy,
-    providerSortDir,
-    selectedModels,
-    updateActiveFilterState,
+    filteredResources,
+    isOpenAI,
+    openaiSelectedModels,
+    openaiSortBy,
+    openaiSortDir,
+    usageByProvider,
   ]);
 
-  const totalResources = useMemo(
-    () => groups.reduce((sum, g) => sum + g.resources.length, 0),
-    [groups]
-  );
+  const openaiControls = useMemo(() => {
+    if (!isOpenAI) return undefined;
+    return {
+      sortBy: openaiSortBy,
+      sortDir: openaiSortDir,
+      onSortBy: setOpenaiSortBy,
+      onSortDir: setOpenaiSortDir,
+      availableModels: availableOpenaiModels,
+      selectedModels: openaiSelectedModels,
+      onSelectedModelsChange: setOpenaiSelectedModels,
+    };
+  }, [availableOpenaiModels, isOpenAI, openaiSelectedModels, openaiSortBy, openaiSortDir]);
 
-  const totalActive = useMemo(
-    () => groups.reduce((sum, g) => sum + g.resources.filter((r) => !r.disabled).length, 0),
-    [groups]
-  );
-
-  const providerFamilies = useMemo(
-    () => groups.filter((g) => g.resources.length > 0).length,
-    [groups]
-  );
-
-  const updatedAtLabel = workbench.snapshot
-    ? formatDateTime(workbench.snapshot.fetchedAt, i18n.language)
-    : t('providersPage.modelCatalog.notLoaded');
-
-  const errorBanner = workbench.errorMessage ? (
-    <div className="error-box">{workbench.errorMessage}</div>
-  ) : null;
-
-  const openCreate = useCallback(() => {
-    const brand = activeBrand;
-    setSheetState({ open: true, brand, mode: 'create', resource: null });
-  }, [activeBrand]);
+  const [modelsModal, setModelsModal] = useState<{
+    open: boolean;
+    providerName: string;
+    models: SharedModelItem[];
+  }>({
+    open: false,
+    providerName: '',
+    models: [],
+  });
 
   const showModels = useCallback((resource: ProviderResource) => {
-    const config = resource.raw as OpenAIProviderConfig | ProviderKeyConfig | GeminiKeyConfig;
-    setModelsModal({
-      open: true,
-      providerName: resource.name ?? resource.identifier,
-      models: (config.models ?? []).map((model) => ({
-        id: model.name,
-        display_name: model.alias,
-      })),
-    });
+    if (resource.brand === 'openaiCompatibility') {
+      const cfg = resource.raw as OpenAIProviderConfig;
+      const models = (cfg.models || []).map((m: any) => ({
+        id: m.name,
+        display_name: m.alias,
+      }));
+      setModelsModal({
+        open: true,
+        providerName: cfg.name || 'OpenAI',
+        models,
+      });
+    } else {
+      const cfg = resource.raw as ProviderKeyConfig | GeminiKeyConfig;
+      const models = (cfg.models || []).map((m: any) => ({
+        id: m.name,
+        display_name: m.alias,
+      }));
+      setModelsModal({
+        open: true,
+        providerName: resource.identifier,
+        models,
+      });
+    }
   }, []);
+
+  const openCreate = useCallback(() => {
+    setSheetState({ open: true, brand: activeBrand, mode: 'create', resource: null });
+  }, [activeBrand]);
 
   const openView = useCallback((resource: ProviderResource) => {
     setSheetState({
@@ -311,7 +301,6 @@ export function ProvidersWorkbenchPage() {
   const closeSheet = useCallback(() => {
     setSheetState((s) => ({ ...s, open: false }));
   }, []);
-
   const handleDelete = useCallback(
     (resource: ProviderResource) => {
       const name = resource.name ?? resource.apiKeyPreview ?? resource.identifier ?? '';
@@ -325,10 +314,6 @@ export function ProvidersWorkbenchPage() {
             await workbench.deleteProvider(resource);
             showNotification(t('providersPage.toast.deleted'), 'success');
           } catch (err) {
-            if (isSponsorPartialMutationError(err)) {
-              showNotification(t('providersPage.sponsor.partialMutationWarning'), 'warning');
-              return;
-            }
             const msg = err instanceof Error ? err.message : String(err);
             showNotification(`${t('notification.delete_failed')}: ${msg}`, 'error');
           }
@@ -347,10 +332,6 @@ export function ProvidersWorkbenchPage() {
           'success'
         );
       } catch (err) {
-        if (isSponsorPartialMutationError(err)) {
-          showNotification(t('providersPage.sponsor.partialMutationWarning'), 'warning');
-          return;
-        }
         const msg = err instanceof Error ? err.message : String(err);
         showNotification(`${t('providersPage.toast.toggleFailed')}: ${msg}`, 'error');
       }
@@ -368,7 +349,6 @@ export function ProvidersWorkbenchPage() {
     closeSheet();
   }, [closeSheet, showNotification, t]);
 
-  // 加载状态
   if (!workbench.snapshot && workbench.isPending) {
     return (
       <div className={styles.page}>
@@ -384,47 +364,34 @@ export function ProvidersWorkbenchPage() {
   if (!activeGroup) {
     return (
       <div className={styles.page}>
-        <ProviderHeaderCard
-
-          totalActive={0}
-          totalResources={0}
-          providerFamilies={0}
-          updatedAtLabel={updatedAtLabel}
-          isFetching={workbench.isFetching}
-          onRefresh={() => void handleRefresh()}
-          onNew={() => {}}
-          isNewDisabled
-
-        />
-        {errorBanner}
+        <PageHeader title={t('providersPage.header.title')} />
+        <Skeleton height={120} />
+        <div className={styles.layout}>
+          <Skeleton height={420} />
+          <Skeleton height={420} />
+        </div>
       </div>
     );
   }
 
   return (
     <div className={styles.page}>
-      <ProviderHeaderCard
-
-        totalActive={totalActive}
-        totalResources={totalResources}
-        providerFamilies={providerFamilies}
-        updatedAtLabel={updatedAtLabel}
-        isFetching={workbench.isFetching}
-        isNewDisabled={disableMutations}
-
-        newLabel={t('providersPage.actions.new')}
-
-        onRefresh={() => void handleRefresh()}
-        onNew={openCreate}
-      />
-
-      {errorBanner}
+      <PageHeader title={t('providersPage.header.title')} />
 
       <div className={styles.layout}>
-        <ProviderCategoryList
-            groups={groups}
-            activeBrand={activeGroup.id}
-            onSelect={(brand) => {
+        <div className={styles.toolbarRow}>
+          <CategoryList
+            listRef={tabsContainerRef}
+            items={categoryItems}
+            activeId={activeGroup.id}
+            buttonStyles={() =>
+              ({
+                '--filter-color': 'var(--text-primary)',
+                '--filter-surface': 'var(--bg-tertiary)',
+              }) as React.CSSProperties
+            }
+            onSelect={(brandId) => {
+              const brand = brandId as ProviderBrand;
               const isSwitching = sheetState.open && sheetState.brand !== brand;
               const proceed =
                 isSwitching && sheetRef.current
@@ -433,48 +400,62 @@ export function ProvidersWorkbenchPage() {
               void proceed.then((ok) => {
                 if (!ok) return;
                 setActiveBrand(brand);
+                setFilter('');
+                setOpenaiSelectedModels(new Set());
                 if (isSwitching) {
                   closeSheet();
                 }
               });
             }}
-        />
+          />
+          <div className={styles.headerActions}>
+            <ProviderHeaderCard
+              isFetching={workbench.isFetching}
+              isNewDisabled={disableMutations}
+              newLabel={t('providersPage.actions.new')}
+              onRefresh={() => void handleRefresh()}
+              onNew={openCreate}
+            />
+          </div>
+        </div>
+
         <ProviderResourcePanel
-            group={activeGroup}
-            filter={filter}
-            onFilterChange={(value) => updateActiveFilterState({ filter: value })}
-            filteredResources={visibleResources}
-            disableMutations={disableMutations}
-            usageByProvider={usageByProvider}
-            toolbarControls={toolbarControls}
-            onView={openView}
-            onEdit={openEdit}
-            onDelete={handleDelete}
-            onToggleDisabled={handleToggleDisabled}
-            onShowModels={showModels}
-            onCreate={openCreate}
+          group={activeGroup}
+          filteredResources={visibleResources}
+          disableMutations={disableMutations}
+          usageByProvider={usageByProvider}
+          openaiControls={openaiControls}
+          onView={openView}
+          onEdit={openEdit}
+          onDelete={handleDelete}
+          onToggleDisabled={handleToggleDisabled}
+          onShowModels={showModels}
+          onCreate={openCreate}
         />
       </div>
 
       <ProviderSheet
-          ref={sheetRef}
-          state={sheetState}
-          onClose={closeSheet}
-          onSwitchToEdit={() => {
-            setSheetState((s) => (s.resource ? { ...s, mode: 'edit' } : s));
-          }}
-          workbench={workbench}
-          onCreated={handleCreated}
-          onUpdated={handleUpdated}
-          mutationDisabled={disableMutations}
-          usageByProvider={usageByProvider}
+        ref={sheetRef}
+        state={sheetState}
+        onClose={closeSheet}
+        onSwitchToEdit={() => {
+          setSheetState((s) => (s.resource ? { ...s, mode: 'edit' } : s));
+        }}
+        workbench={workbench}
+        onCreated={handleCreated}
+        onUpdated={handleUpdated}
+        mutationDisabled={disableMutations}
+        usageByProvider={usageByProvider}
       />
 
       <ModelsListModal
         open={modelsModal.open}
-        title={`${t('auth_files.models_title', { defaultValue: '支持的模型' })} - ${modelsModal.providerName}`}
+        title={
+          t('auth_files.models_title', { defaultValue: '支持的模型' }) +
+          ` - ${modelsModal.providerName}`
+        }
         models={modelsModal.models}
-        onClose={() => setModelsModal((previous) => ({ ...previous, open: false }))}
+        onClose={() => setModelsModal((prev) => ({ ...prev, open: false }))}
       />
     </div>
   );

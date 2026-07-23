@@ -1,6 +1,10 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IconLoader2, IconRefreshCw, IconSearch } from '@/components/ui/icons';
+import {
+  IconLoader2,
+  IconRefreshCw,
+  IconSearch,
+} from '@/components/ui/icons';
 import { SelectionCheckbox } from '@/components/ui/SelectionCheckbox';
 import type { ModelInfo } from '@/utils/models';
 import styles from './sharedForm.module.scss';
@@ -35,7 +39,9 @@ export function ModelDiscoveryPanel({
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return models;
-    return models.filter((m) => `${m.name} ${m.alias ?? ''}`.toLowerCase().includes(q));
+    return models.filter((m) =>
+      `${m.name} ${m.alias ?? ''}`.toLowerCase().includes(q)
+    );
   }, [models, search]);
 
   const selectable = useMemo(
@@ -64,7 +70,9 @@ export function ModelDiscoveryPanel({
   };
 
   const handleApply = () => {
-    const picked = models.filter((m) => selected.has(m.name) && !existingNames.has(m.name));
+    const picked = models.filter(
+      (m) => selected.has(m.name) && !existingNames.has(m.name)
+    );
     if (!picked.length) return;
     onApply(picked);
     setSelected(new Set());
@@ -111,11 +119,15 @@ export function ModelDiscoveryPanel({
       </div>
 
       {loading && !models.length ? (
-        <div className={styles.discoveryEmpty}>{t('providersPage.discovery.loading')}</div>
+        <div className={styles.discoveryEmpty}>
+          {t('providersPage.discovery.loading')}
+        </div>
       ) : error ? (
         <div className={styles.connectivityError}>{error}</div>
       ) : hasFetched && !models.length ? (
-        <div className={styles.discoveryEmpty}>{t('providersPage.discovery.empty')}</div>
+        <div className={styles.discoveryEmpty}>
+          {t('providersPage.discovery.empty')}
+        </div>
       ) : models.length ? (
         <>
           <div className={styles.discoveryBatchRow}>
@@ -170,7 +182,9 @@ export function ModelDiscoveryPanel({
           </ul>
         </>
       ) : (
-        <div className={styles.discoveryEmpty}>{t('providersPage.discovery.notLoaded')}</div>
+        <div className={styles.discoveryEmpty}>
+          {t('providersPage.discovery.notLoaded')}
+        </div>
       )}
 
       <div className={styles.discoveryFooter}>

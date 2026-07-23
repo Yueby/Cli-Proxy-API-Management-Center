@@ -4,7 +4,14 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
-import { IconGithub, IconBookOpen, IconExternalLink, IconCode } from '@/components/ui/icons';
+import {
+  IconGithub,
+  IconBookOpen,
+  IconExternalLink,
+  IconCode,
+  IconRefreshCw,
+  IconCheck,
+} from '@/components/ui/icons';
 import {
   useAuthStore,
   useConfigStore,
@@ -13,8 +20,7 @@ import {
   useThemeStore,
 } from '@/stores';
 import { configApi, versionApi } from '@/services/api';
-import { useApiKeysForModels } from '@/hooks/useApiKeysForModels';
-import { formatDateTimeValue } from '@/utils/format';
+import { apiKeysApi } from '@/services/api/apiKeys';
 import { classifyModels } from '@/utils/models';
 import { STORAGE_KEY_AUTH } from '@/utils/constants';
 import { INLINE_LOGO_JPEG } from '@/assets/logoInline';
@@ -30,6 +36,10 @@ import iconGrok from '@/assets/icons/grok.svg';
 import iconGrokDark from '@/assets/icons/grok-dark.svg';
 import iconDeepseek from '@/assets/icons/deepseek.svg';
 import iconMinimax from '@/assets/icons/minimax.svg';
+import iconMimoLight from '@/assets/icons/mimo-light.svg';
+import iconMimoDark from '@/assets/icons/mimo-dark.svg';
+import { PageHeader } from '@/components/common/PageHeader';
+import { SkeletonRows } from '@/components/common/LoadingSkeleton';
 import styles from './SystemPage.module.scss';
 
 const MODEL_CATEGORY_ICONS: Record<string, string | { light: string; dark: string }> = {
@@ -37,11 +47,12 @@ const MODEL_CATEGORY_ICONS: Record<string, string | { light: string; dark: strin
   claude: iconClaude,
   gemini: iconGemini,
   qwen: iconQwen,
-  kimi: { light: iconKimiDark, dark: iconKimiLight },
+  kimi: { light: iconKimiLight, dark: iconKimiDark },
   glm: iconGlm,
   grok: { light: iconGrok, dark: iconGrokDark },
   deepseek: iconDeepseek,
   minimax: iconMinimax,
+  mimo: { light: iconMimoLight, dark: iconMimoDark },
 };
 
 const parseVersionSegments = (version?: string | null) => {
@@ -95,6 +106,7 @@ export function SystemPage() {
   const [requestLogSaving, setRequestLogSaving] = useState(false);
   const [checkingVersion, setCheckingVersion] = useState(false);
 
+  const apiKeysCache = useRef<string[]>([]);
   const versionTapCount = useRef(0);
   const versionTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -109,8 +121,9 @@ export function SystemPage() {
 
   const appVersion = __APP_VERSION__ || t('system_info.version_unknown');
   const apiVersion = auth.serverVersion || t('system_info.version_unknown');
-  const buildTime =
-    formatDateTimeValue(auth.serverBuildDate, i18n.language) || t('system_info.version_unknown');
+  const buildTime = auth.serverBuildDate
+    ? new Date(auth.serverBuildDate).toLocaleString(i18n.language)
+    : t('system_info.version_unknown');
 
   const getIconForCategory = (categoryId: string): string | null => {
     const iconEntry = MODEL_CATEGORY_ICONS[categoryId];
@@ -119,7 +132,54 @@ export function SystemPage() {
     return resolvedTheme === 'dark' ? iconEntry.dark : iconEntry.light;
   };
 
-  const resolveApiKeysForModels = useApiKeysForModels();
+  const normalizeApiKeyList = (input: unknown): string[] => {
+    if (!Array.isArray(input)) return [];
+    const seen = new Set<string>();
+    const keys: string[] = [];
+
+    input.forEach((item) => {
+      const record =
+        item !== null && typeof item === 'object' && !Array.isArray(item)
+          ? (item as Record<string, unknown>)
+          : null;
+      const value =
+        typeof item === 'string'
+          ? item
+          : record
+            ? (record['api-key'] ?? record['apiKey'] ?? record.key ?? record.Key)
+            : '';
+      const trimmed = String(value ?? '').trim();
+      if (!trimmed || seen.has(trimmed)) return;
+      seen.add(trimmed);
+      keys.push(trimmed);
+    });
+
+    return keys;
+  };
+
+  const resolveApiKeysForModels = useCallback(async () => {
+    if (apiKeysCache.current.length) {
+      return apiKeysCache.current;
+    }
+
+    const configKeys = normalizeApiKeyList(config?.apiKeys);
+    if (configKeys.length) {
+      apiKeysCache.current = configKeys;
+      return configKeys;
+    }
+
+    try {
+      const list = await apiKeysApi.list();
+      const normalized = normalizeApiKeyList(list);
+      if (normalized.length) {
+        apiKeysCache.current = normalized;
+      }
+      return normalized;
+    } catch (err) {
+      console.warn('Auto loading API keys for models failed:', err);
+      return [];
+    }
+  }, [config?.apiKeys]);
 
   const fetchModels = async ({ forceRefresh = false }: { forceRefresh?: boolean } = {}) => {
     if (auth.connectionStatus !== 'connected') {
@@ -135,9 +195,13 @@ export function SystemPage() {
       return;
     }
 
+    if (forceRefresh) {
+      apiKeysCache.current = [];
+    }
+
     setModelStatus({ type: 'muted', message: t('system_info.models_loading') });
     try {
-      const apiKeys = await resolveApiKeysForModels({ force: forceRefresh });
+      const apiKeys = await resolveApiKeysForModels();
       const primaryKey = apiKeys[0];
       const list = await fetchModelsFromStore(auth.apiBase, primaryKey, forceRefresh);
       const hasModels = list.length > 0;
@@ -270,9 +334,13 @@ export function SystemPage() {
   }, [fetchConfig]);
 
   useEffect(() => {
-    if (requestLogModalOpen && !requestLogTouched) {
+    if (!requestLogModalOpen || requestLogTouched) return;
+
+    const timer = window.setTimeout(() => {
       setRequestLogDraft(requestLogEnabled);
-    }
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [requestLogModalOpen, requestLogTouched, requestLogEnabled]);
 
   useEffect(() => {
@@ -284,13 +352,17 @@ export function SystemPage() {
   }, []);
 
   useEffect(() => {
-    fetchModels();
+    const timer = window.setTimeout(() => {
+      fetchModels();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.connectionStatus, auth.apiBase]);
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.pageTitle}>{t('system_info.title')}</h1>
+      <PageHeader title={t('system_info.title')} />
       <div className={styles.content}>
         <Card className={styles.aboutCard}>
           <div className={styles.aboutHeader}>
@@ -409,8 +481,10 @@ export function SystemPage() {
               size="sm"
               onClick={() => fetchModels({ forceRefresh: true })}
               loading={modelsLoading}
+              title={t('common.refresh')}
+              aria-label={t('common.refresh')}
             >
-              {t('common.refresh')}
+              <IconRefreshCw size={16} />
             </Button>
           }
         >
@@ -420,7 +494,7 @@ export function SystemPage() {
           )}
           {modelsError && <div className="error-box">{modelsError}</div>}
           {modelsLoading ? (
-            <div className="hint">{t('common.loading')}</div>
+            <SkeletonRows count={5} />
           ) : models.length === 0 ? (
             <div className="hint">{t('system_info.models_empty')}</div>
           ) : (
@@ -431,7 +505,13 @@ export function SystemPage() {
                   <div key={group.id} className="item-row">
                     <div className="item-meta">
                       <div className={styles.groupTitle}>
-                        {iconSrc && <img src={iconSrc} alt="" className={styles.groupIcon} />}
+                        {iconSrc && (
+                          <img
+                            src={iconSrc}
+                            alt=""
+                            className={`${styles.groupIcon} ${group.id === 'mimo' ? styles.groupIconMimo : ''}`}
+                          />
+                        )}
                         <span className="item-title">{group.label}</span>
                       </div>
                       <div className="item-subtitle">
@@ -472,7 +552,7 @@ export function SystemPage() {
         onClose={handleRequestLogClose}
         title={t('basic_settings.request_log_title')}
         footer={
-          <>
+          <div className="segmented-button-group">
             <Button variant="secondary" onClick={handleRequestLogClose} disabled={requestLogSaving}>
               {t('common.cancel')}
             </Button>
@@ -481,9 +561,9 @@ export function SystemPage() {
               loading={requestLogSaving}
               disabled={!canEditRequestLog || !requestLogDirty}
             >
-              {t('common.save')}
+              <IconCheck size={16} />
             </Button>
-          </>
+          </div>
         }
       >
         <div className="request-log-modal">

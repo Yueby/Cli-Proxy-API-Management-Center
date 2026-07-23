@@ -16,6 +16,7 @@ import type {
   PluginStoreInstallResult,
   PluginStorePlatform,
   PluginStoreResponse,
+  PluginStoreSource,
   PluginStoreSourceError,
 } from '@/types';
 
@@ -51,7 +52,7 @@ const normalizeConfigField = (value: unknown): PluginConfigField | null => {
 
 const normalizeConfigFields = (value: unknown): PluginConfigField[] =>
   Array.isArray(value)
-    ? (value.map((item) => normalizeConfigField(item)).filter(Boolean) as PluginConfigField[])
+    ? value.map((item) => normalizeConfigField(item)).filter(Boolean) as PluginConfigField[]
     : [];
 
 const normalizeMetadata = (value: unknown): PluginMetadata | null => {
@@ -91,7 +92,7 @@ const normalizeMenu = (value: unknown): PluginMenu | null => {
 
 const normalizeMenus = (value: unknown): PluginMenu[] =>
   Array.isArray(value)
-    ? (value.map((item) => normalizeMenu(item)).filter(Boolean) as PluginMenu[])
+    ? value.map((item) => normalizeMenu(item)).filter(Boolean) as PluginMenu[]
     : [];
 
 const normalizePluginEntry = (value: unknown): PluginListEntry | null => {
@@ -104,9 +105,7 @@ const normalizePluginEntry = (value: unknown): PluginListEntry | null => {
   const supportsOAuth = asBoolean(value.supports_oauth);
   const oauthProvider = normalizePluginOAuthProvider(value.oauth_provider);
   const legacyOAuthProvider =
-    supportsOAuth && !hasOwn(value, 'oauth_provider')
-      ? normalizePluginOAuthProvider(id)
-      : undefined;
+    supportsOAuth && !hasOwn(value, 'oauth_provider') ? normalizePluginOAuthProvider(id) : undefined;
 
   return {
     id,
@@ -118,7 +117,7 @@ const normalizePluginEntry = (value: unknown): PluginListEntry | null => {
     supportsOAuth,
     oauthProvider: oauthProvider ?? legacyOAuthProvider,
     logo: asString(value.logo || metadata?.logo).trim(),
-    configFields: configFields.length > 0 ? configFields : (metadata?.configFields ?? []),
+    configFields: configFields.length > 0 ? configFields : metadata?.configFields ?? [],
     menus: normalizeMenus(value.menus),
     metadata,
   };
@@ -127,9 +126,7 @@ const normalizePluginEntry = (value: unknown): PluginListEntry | null => {
 const normalizePluginList = (value: unknown): PluginListResponse => {
   const source = isRecord(value) ? value : {};
   const plugins = Array.isArray(source.plugins)
-    ? (source.plugins
-        .map((item) => normalizePluginEntry(item))
-        .filter(Boolean) as PluginListEntry[])
+    ? source.plugins.map((item) => normalizePluginEntry(item)).filter(Boolean) as PluginListEntry[]
     : [];
 
   return {
@@ -205,6 +202,18 @@ const normalizeStoreEntry = (value: unknown): PluginStoreEntry | null => {
   };
 };
 
+const normalizeStoreSource = (value: unknown): PluginStoreSource | null => {
+  if (!isRecord(value)) return null;
+  const id = asString(value.id).trim();
+  const url = asString(value.url).trim();
+  if (!id && !url) return null;
+  return {
+    id,
+    name: asString(value.name).trim(),
+    url,
+  };
+};
+
 const normalizeStoreSourceError = (value: unknown): PluginStoreSourceError | null => {
   if (!isRecord(value)) return null;
   const sourceId = asString(value.source_id).trim();
@@ -222,9 +231,10 @@ const normalizeStoreSourceError = (value: unknown): PluginStoreSourceError | nul
 const normalizeStoreList = (value: unknown): PluginStoreResponse => {
   const source = isRecord(value) ? value : {};
   const plugins = Array.isArray(source.plugins)
-    ? (source.plugins
-        .map((item) => normalizeStoreEntry(item))
-        .filter(Boolean) as PluginStoreEntry[])
+    ? source.plugins.map((item) => normalizeStoreEntry(item)).filter(Boolean) as PluginStoreEntry[]
+    : [];
+  const sources = Array.isArray(source.sources)
+    ? source.sources.map((item) => normalizeStoreSource(item)).filter(Boolean) as PluginStoreSource[]
     : [];
   const sourceErrors = Array.isArray(source.source_errors)
     ? (source.source_errors
@@ -235,6 +245,7 @@ const normalizeStoreList = (value: unknown): PluginStoreResponse => {
   return {
     pluginsEnabled: asBoolean(source.plugins_enabled),
     pluginsDir: asString(source.plugins_dir).trim() || 'plugins',
+    sources,
     sourceErrors,
     plugins,
   };
@@ -280,8 +291,11 @@ export const pluginsApi = {
     return normalizePluginConfig(data);
   },
 
-  patchConfig: (id: string, config: PluginConfigObject) =>
-    apiClient.patch(`/plugins/${encodeURIComponent(id)}/config`, config),
+  putConfig: (id: string, config: PluginConfigObject) =>
+    apiClient.put(`/plugins/${encodeURIComponent(id)}/config`, config),
+
+  patchConfig: (id: string, patch: PluginConfigObject) =>
+    apiClient.patch(`/plugins/${encodeURIComponent(id)}/config`, patch),
 };
 
 export const pluginStoreApi = {

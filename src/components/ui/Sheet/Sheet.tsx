@@ -60,6 +60,7 @@ export function Sheet({
   const descId = useId();
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [isEntering, setIsEntering] = useState(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
@@ -193,9 +194,19 @@ export function Sheet({
     return () => document.removeEventListener('keydown', handleKey);
   }, [closeDisabled, getFocusableElements, handleClose, open]);
 
+  useEffect(() => {
+    const timer = setTimeout(
+      () => {
+        setIsEntering(open);
+      },
+      open ? 25 : 0
+    );
+    return () => clearTimeout(timer);
+  }, [open]);
+
   if (!open && !isVisible) return null;
 
-  const stateClass = isClosing ? styles.exiting : styles.entering;
+  const stateClass = isClosing ? styles.exiting : isEntering ? styles.entering : '';
   const overlayCls = `${styles.overlay} ${stateClass}`.trim();
   const contentCls = [styles.content, SIZE_CLASS[size], stateClass, className]
     .filter(Boolean)

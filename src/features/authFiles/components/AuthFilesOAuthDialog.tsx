@@ -9,10 +9,9 @@ import { useAuthStore, useNotificationStore, useThemeStore } from '@/stores';
 import { oauthApi, pluginsApi, type BuiltInOAuthProvider, type OAuthProvider } from '@/services/api';
 import { vertexApi, type VertexImportResponse } from '@/services/api/vertex';
 import { copyToClipboard } from '@/utils/clipboard';
-import { IconCode, IconExternalLink, IconPlug } from '@/components/ui/icons';
+import { IconCopy, IconExternalLink, IconPlug } from '@/components/ui/icons';
 import { getPluginTitle, resolvePluginAssetURL } from '@/features/plugins/pluginResources';
 import type { PluginListEntry } from '@/types';
-import { supportsManualOAuthCallback } from '../oauthCallbackSupport';
 import styles from './AuthFilesOAuthDialog.module.scss';
 import iconCodex from '@/assets/icons/codex.svg';
 import iconClaude from '@/assets/icons/claude.svg';
@@ -134,6 +133,7 @@ const PROVIDERS: BuiltInOAuthProviderCard[] = [
 ];
 
 const BUILTIN_PROVIDER_IDS = new Set<string>(PROVIDERS.map((provider) => provider.id));
+const CALLBACK_SUPPORTED = new Set<string>(['codex', 'anthropic', 'antigravity', 'xai']);
 const XAI_CALLBACK_URL = 'http://127.0.0.1:56121/callback';
 const SUCCESS_RESET_DELAY_MS = 5000;
 const getProviderI18nPrefix = (provider: OAuthProvider) => provider.replace('-', '_');
@@ -632,7 +632,7 @@ export function AuthFilesOAuthDialog({
         <div className={styles.content}>
           {oauthProviders.map((provider) => {
             const state = states[provider.id] || {};
-            const canSubmitCallback = supportsManualOAuthCallback(provider, Boolean(state.url));
+            const canSubmitCallback = CALLBACK_SUPPORTED.has(provider.id) && Boolean(state.url);
             const loginButtonLabel =
               state.status === 'success'
                 ? t('auth_login.login_another_account')
@@ -679,7 +679,7 @@ export function AuthFilesOAuthDialog({
                             title={t(getProviderAuthKey(provider, 'copy_link'))}
                             aria-label={t(getProviderAuthKey(provider, 'copy_link'))}
                           >
-                            <IconCode size={16} />
+                            <IconCopy size={16} />
                           </Button>
                           <Button
                             variant="secondary"

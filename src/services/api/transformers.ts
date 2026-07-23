@@ -69,11 +69,7 @@ const normalizeHeaders = (headers: unknown) => {
 };
 
 const normalizeExcludedModels = (input: unknown): string[] => {
-  const rawList = Array.isArray(input)
-    ? input
-    : typeof input === 'string'
-      ? input.split(/[\n,]/)
-      : [];
+  const rawList = Array.isArray(input) ? input : typeof input === 'string' ? input.split(/[\n,]/) : [];
   const seen = new Set<string>();
   const normalized: string[] = [];
 
@@ -113,7 +109,7 @@ const normalizeApiKeyEntry = (entry: unknown): ApiKeyEntry | null => {
 
   const result: ApiKeyEntry = {
     apiKey: trimmed,
-    proxyUrl: proxyUrl ? String(proxyUrl) : undefined,
+    proxyUrl: proxyUrl ? String(proxyUrl) : undefined
   };
   if (authIndex) result.authIndex = authIndex;
   return result;
@@ -221,10 +217,7 @@ const normalizeGeminiKeyConfig = (item: unknown): GeminiKeyConfig | null => {
   return config;
 };
 
-const normalizeOpenAIProvider = (
-  provider: unknown,
-  sourceIndex?: number
-): OpenAIProviderConfig | null => {
+const normalizeOpenAIProvider = (provider: unknown): OpenAIProviderConfig | null => {
   if (!isRecord(provider)) return null;
   const name = provider.name;
   const baseUrl = provider['base-url'];
@@ -244,7 +237,7 @@ const normalizeOpenAIProvider = (
   const result: OpenAIProviderConfig = {
     name: String(name),
     baseUrl: String(baseUrl),
-    apiKeyEntries,
+    apiKeyEntries
   };
 
   const disabled = normalizeBoolean(provider.disabled);
@@ -259,7 +252,6 @@ const normalizeOpenAIProvider = (
   if (testModel) result.testModel = String(testModel);
   const authIndex = normalizeAuthIndex(provider['auth-index']);
   if (authIndex) result.authIndex = authIndex;
-  if (sourceIndex !== undefined) result.sourceIndex = sourceIndex;
   return result;
 };
 
@@ -289,11 +281,7 @@ export const normalizeConfigResponse = (raw: unknown): Config => {
   config.debug = normalizeBoolean(raw.debug);
   const proxyUrl = raw['proxy-url'];
   config.proxyUrl =
-    typeof proxyUrl === 'string'
-      ? proxyUrl
-      : proxyUrl === undefined || proxyUrl === null
-        ? undefined
-        : String(proxyUrl);
+    typeof proxyUrl === 'string' ? proxyUrl : proxyUrl === undefined || proxyUrl === null ? undefined : String(proxyUrl);
   const requestRetry = raw['request-retry'];
   if (typeof requestRetry === 'number' && Number.isFinite(requestRetry)) {
     config.requestRetry = requestRetry;
@@ -309,7 +297,7 @@ export const normalizeConfigResponse = (raw: unknown): Config => {
     config.quotaExceeded = {
       switchProject: normalizeBoolean(quota['switch-project']),
       switchPreviewModel: normalizeBoolean(quota['switch-preview-model']),
-      antigravityCredits: normalizeBoolean(quota['antigravity-credits']),
+      antigravityCredits: normalizeBoolean(quota['antigravity-credits'])
     };
   }
 
@@ -350,13 +338,6 @@ export const normalizeConfigResponse = (raw: unknown): Config => {
       .filter(Boolean) as ProviderKeyConfig[];
   }
 
-  const xaiList = raw['xai-api-key'];
-  if (Array.isArray(xaiList)) {
-    config.xaiApiKeys = xaiList
-      .map((item) => normalizeProviderKeyConfig(item))
-      .filter(Boolean) as ProviderKeyConfig[];
-  }
-
   const claudeList = raw['claude-api-key'];
   if (Array.isArray(claudeList)) {
     config.claudeApiKeys = claudeList
@@ -374,7 +355,7 @@ export const normalizeConfigResponse = (raw: unknown): Config => {
   const openaiList = raw['openai-compatibility'];
   if (Array.isArray(openaiList)) {
     config.openaiCompatibility = openaiList
-      .map((item, index) => normalizeOpenAIProvider(item, index))
+      .map((item) => normalizeOpenAIProvider(item))
       .filter(Boolean) as OpenAIProviderConfig[];
   }
 

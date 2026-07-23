@@ -313,12 +313,6 @@ export interface XaiProductUsageSummary {
 }
 
 export interface XaiBillingSummary {
-  mode: 'billing' | 'paid-health';
-  source?: 'cli-chat-proxy' | 'api.x.ai-fallback';
-  planType?: 'paid';
-  healthStatus?: 'chat-ok';
-  userId?: string;
-  teamId?: string;
   periodType: XaiBillingPeriodType;
   usagePercent: number | null;
   periodStart?: string;
@@ -338,6 +332,8 @@ export interface XaiBillingSummary {
 export interface XaiQuotaState {
   status: 'idle' | 'loading' | 'success' | 'error';
   billing: XaiBillingSummary | null;
+  planType?: string | null;
+  payAsYouGoDisabled?: boolean;
   error?: string;
   errorStatus?: number;
 }

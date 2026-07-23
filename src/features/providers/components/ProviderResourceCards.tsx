@@ -1,7 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-
+import iconClaude from '@/assets/icons/claude.svg';
+import iconCodex from '@/assets/icons/codex.svg';
+import iconGemini from '@/assets/icons/gemini.svg';
+import iconOpenAIDark from '@/assets/icons/openai-dark.svg';
+import iconOpenAILight from '@/assets/icons/openai-light.svg';
+import iconVertex from '@/assets/icons/vertex.svg';
 import { Button } from '@/components/ui/Button';
 import { ItemCard } from '@/components/ui/ItemCard';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
@@ -14,7 +19,7 @@ import {
   stripDisableAllModelsRule,
   type ProviderRecentUsageMap,
 } from '@/components/providers/utils';
-import { IconEye, IconKey, IconNetwork, IconPencil, IconTrash2 } from '@/components/ui/icons';
+import { IconEye, IconKey, IconPencil, IconSignal, IconTrash2 } from '@/components/ui/icons';
 import type {
   ApiKeyEntry,
   GeminiKeyConfig,
@@ -26,8 +31,6 @@ import { maskApiKey } from '@/utils/format';
 import { useThemeStore } from '@/stores';
 import type { ResolvedTheme } from '@/features/authFiles/constants';
 import type { ProviderBrand, ProviderResource } from '../types';
-import { PROVIDER_LOGOS } from '../brandLogos';
-import { isMultiProtocolSponsorBrand } from '../sponsorDefinitions';
 import keyBadgeStyles from '@/components/providers/OpenAISection/KeyCountBadge.module.scss';
 
 interface ProviderResourceCardsProps {
@@ -41,7 +44,17 @@ interface ProviderResourceCardsProps {
   onShowModels: (resource: ProviderResource) => void;
 }
 
-const PROVIDER_FALLBACKS: Partial<Record<ProviderBrand, string>> = {
+type ProviderIconAsset = string | { light: string; dark: string };
+
+const PROVIDER_ICONS: Record<ProviderBrand, ProviderIconAsset> = {
+  gemini: iconGemini,
+  codex: iconCodex,
+  claude: iconClaude,
+  vertex: iconVertex,
+  openaiCompatibility: { light: iconOpenAILight, dark: iconOpenAIDark },
+};
+
+const PROVIDER_FALLBACKS: Record<ProviderBrand, string> = {
   gemini: 'G',
   codex: 'C',
   claude: 'C',
@@ -49,7 +62,7 @@ const PROVIDER_FALLBACKS: Partial<Record<ProviderBrand, string>> = {
   openaiCompatibility: 'O',
 };
 
-const PROVIDER_LABELS: Partial<Record<ProviderBrand, string>> = {
+const PROVIDER_LABELS: Record<ProviderBrand, string> = {
   gemini: 'Gemini',
   codex: 'Codex',
   claude: 'Claude',
@@ -58,8 +71,8 @@ const PROVIDER_LABELS: Partial<Record<ProviderBrand, string>> = {
 };
 
 const getProviderIcon = (brand: ProviderBrand, resolvedTheme: ResolvedTheme): string => {
-  const logo = PROVIDER_LOGOS[brand];
-  return resolvedTheme === 'dark' && logo.darkSrc ? logo.darkSrc : logo.src;
+  const icon = PROVIDER_ICONS[brand];
+  return typeof icon === 'string' ? icon : resolvedTheme === 'dark' ? icon.dark : icon.light;
 };
 
 const EMPTY_STATUS_BAR: StatusBarData = {
@@ -222,7 +235,7 @@ export function ProviderResourceCards({
           border: '1px solid rgba(16, 185, 129, 0.25)',
         }}
       >
-        <IconNetwork size={12} /> P{priority}
+        <IconSignal size={12} /> P{priority}
       </span>
     ) : null;
 
@@ -269,7 +282,7 @@ export function ProviderResourceCards({
         subtitle={raw.baseUrl}
         headerExtra={renderHeaderExtra(
           apiKeyEntries,
-          PROVIDER_LABELS[resource.brand] ?? resource.identifier,
+          PROVIDER_LABELS[resource.brand],
           raw.baseUrl ?? '',
           raw.priority
         )}
@@ -325,7 +338,7 @@ export function ProviderResourceCards({
                   border: '1px solid rgba(16, 185, 129, 0.25)',
                 }}
               >
-                <IconNetwork size={12} /> P{provider.priority}
+                <IconSignal size={12} /> P{provider.priority}
               </span>
             ) : null}
           </div>
@@ -349,45 +362,20 @@ export function ProviderResourceCards({
     );
   };
 
-  const renderMultiProtocolCard = (resource: ProviderResource) => (
-    <ItemCard
-      key={resource.id}
-      disabled={resource.disabled}
-      compact
-      avatar={{
-        icon: getProviderIcon(resource.brand, resolvedTheme),
-        fallback: resource.identifier.slice(0, 1).toUpperCase(),
-        bgColor: 'transparent',
-      }}
-      title={resource.identifier}
-      subtitle={resource.baseUrl}
-      headerExtra={renderPriorityBadge(resource.priority)}
-      content={
-        <>
-          <FieldRow label={t('common.prefix')} value={resource.prefix} />
-          <FieldRow
-            label={t('providersPage.sponsor.protocol', { defaultValue: 'Protocol' })}
-            value={resource.flags.protocols?.join(' / ')}
-          />
-        </>
-      }
-      actions={renderActions(resource)}
-    />
-  );
-
   const renderActions = (resource: ProviderResource) => {
-    const cfg = isMultiProtocolSponsorBrand(resource.brand)
-      ? null
-      : resource.brand === 'openaiCompatibility'
-        ? openAIConfig(resource)
-        : resource.brand === 'gemini'
-          ? geminiConfig(resource)
-          : providerKeyConfig(resource);
-    const modelsTooltipItems = cfg
-      ? (cfg.models || [])
-          .filter((model) => model.name?.trim())
-          .map((model) => ({ id: model.name, displayName: model.alias }))
-      : resource.models.map((name) => ({ id: name }));
+    let modelsTooltipItems: { id: string; displayName?: string }[] = [];
+    if (resource.brand === 'openaiCompatibility') {
+      const cfg = openAIConfig(resource);
+      modelsTooltipItems = (cfg.models || [])
+        .filter((model) => model.name?.trim())
+        .map((model) => ({ id: model.name, displayName: model.alias }));
+    } else {
+      const cfg =
+        resource.brand === 'gemini' ? geminiConfig(resource) : providerKeyConfig(resource);
+      modelsTooltipItems = (cfg.models || [])
+        .filter((model) => model.name?.trim())
+        .map((model) => ({ id: model.name, displayName: model.alias }));
+    }
     const showModelsButton = modelsTooltipItems.length > 0;
 
     return (
@@ -458,7 +446,6 @@ export function ProviderResourceCards({
     <ItemCard.Grid>
       {resources.map((resource) => {
         if (resource.brand === 'openaiCompatibility') return renderOpenAICard(resource);
-        if (isMultiProtocolSponsorBrand(resource.brand)) return renderMultiProtocolCard(resource);
         return renderCommonCard(resource);
       })}
     </ItemCard.Grid>

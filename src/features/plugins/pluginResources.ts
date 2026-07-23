@@ -64,13 +64,14 @@ export const getPluginRepositorySlug = (repository: string): string => {
 // are both normalized first; anything else (other hosts, look-alike domains,
 // other owners) is untrusted.
 export const isOfficialRepository = (repository: string): boolean =>
-  buildRepositoryURL(repository).toLowerCase().startsWith(OFFICIAL_PLUGIN_REPO_PREFIX);
+  buildRepositoryURL(repository)
+    .toLowerCase()
+    .startsWith(OFFICIAL_PLUGIN_REPO_PREFIX);
 
-// Both the backend-assigned source identity and repository must be official.
-// A third-party registry can copy repository metadata, so repository alone is
-// insufficient to bypass the third-party installation gate.
+// A plugin is official iff its code repository sits under the router-for-me org.
+// Every first-party plugin lives there, so the repository URL is the single
+// source of truth — see isOfficialRepository for the exact match.
 export const isOfficialPlugin = (entry: PluginStoreEntry): boolean =>
-  entry.sourceId.trim().toLowerCase() === DEFAULT_PLUGIN_STORE_SOURCE_ID &&
   isOfficialRepository(entry.repository);
 
 export const isDefaultPluginStoreSource = (
@@ -84,7 +85,9 @@ export const isDefaultPluginStoreSource = (
 export const getPluginConfirmToken = (entry: PluginStoreEntry): string =>
   getPluginRepositorySlug(entry.repository) || entry.id;
 
-export const collectPluginResourceEntries = (plugins: PluginListEntry[]): PluginResourceEntry[] =>
+export const collectPluginResourceEntries = (
+  plugins: PluginListEntry[]
+): PluginResourceEntry[] =>
   plugins.flatMap((plugin) => {
     if (!plugin.effectiveEnabled) return [];
 

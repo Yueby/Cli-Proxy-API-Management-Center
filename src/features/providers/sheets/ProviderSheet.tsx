@@ -1,16 +1,18 @@
-import { useCallback, useEffect, useId, useImperativeHandle, useState, type Ref } from 'react';
+import { useCallback, useId, useImperativeHandle, useState, type Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sheet } from '@/components/ui/Sheet';
 import { IconLoader2, IconPencil } from '@/components/ui/icons';
 import type { ProviderRecentUsageMap } from '@/components/providers/utils';
 import { useNotificationStore } from '@/stores';
 import { PROVIDER_DESCRIPTORS } from '../descriptors';
-import { isMultiProtocolSponsorBrand } from '../sponsorDefinitions';
-import type { ProviderBrand, ProviderEntryFormInput, ProviderResource } from '../types';
+import type {
+  ProviderBrand,
+  ProviderEntryFormInput,
+  ProviderResource,
+} from '../types';
 import type { UseProviderWorkbenchResult } from '../useProviderWorkbench';
 import { BaseProviderForm } from './forms/BaseProviderForm';
 import { ResourceDetailView } from './ResourceDetailView';
-import { SponsorProviderForm } from './forms/SponsorProviderForm';
 import styles from './forms/sharedForm.module.scss';
 
 type SheetMode = 'detail' | 'create' | 'edit';
@@ -53,18 +55,19 @@ export function ProviderSheet({
   const { showConfirmation } = useNotificationStore();
   const formId = useId();
   const [submitting, setSubmitting] = useState(false);
-  const [isDirty, setIsDirty] = useState(false);
+  const dirtyKey = `${state.open}:${state.brand}:${state.mode}:${state.resource?.id ?? 'new'}`;
+  const [dirtyState, setDirtyState] = useState<{ key: string; value: boolean }>(() => ({
+    key: dirtyKey,
+    value: false,
+  }));
+  const isDirty = dirtyState.key === dirtyKey ? dirtyState.value : false;
 
-  // Reset dirty flag whenever the sheet is closed or the editing target
-  // (brand / resource / mode) changes — the child form will re-mount and
-  // re-report its own dirty state.
-  useEffect(() => {
-    setIsDirty(false);
-  }, [state.brand, state.mode, state.resource?.id, state.open]);
-
-  const handleDirtyChange = useCallback((dirty: boolean) => {
-    setIsDirty(dirty);
-  }, []);
+  const handleDirtyChange = useCallback(
+    (dirty: boolean) => {
+      setDirtyState({ key: dirtyKey, value: dirty });
+    },
+    [dirtyKey]
+  );
 
   const descriptor = PROVIDER_DESCRIPTORS[state.brand];
   const isEditingForm = state.mode === 'create' || state.mode === 'edit';
@@ -105,7 +108,9 @@ export function ProviderSheet({
         ? `${t('providersPage.form.editEyebrow')} · ${t(
             `providersPage.providerNames.${state.brand}`
           )}`
-        : `${t('providersPage.detail.title')} · ${t(`providersPage.providerNames.${state.brand}`)}`;
+        : `${t('providersPage.detail.title')} · ${t(
+            `providersPage.providerNames.${state.brand}`
+          )}`;
 
   const handleCreate = useCallback(
     async (input: ProviderEntryFormInput) => {
@@ -143,20 +148,6 @@ export function ProviderSheet({
       return <ResourceDetailView resource={state.resource} usageByProvider={usageByProvider} />;
     }
     const formKey = `${state.brand}:${state.resource?.id ?? 'new'}:${state.mode}`;
-    if (isMultiProtocolSponsorBrand(state.brand)) {
-      return (
-        <SponsorProviderForm
-          key={formKey}
-          brand={state.brand}
-          resource={state.resource}
-          mode={state.mode}
-          mutating={formMutating}
-          formId={formId}
-          onSubmit={state.mode === 'create' ? handleCreate : handleUpdate}
-          onDirtyChange={handleDirtyChange}
-        />
-      );
-    }
     return (
       <BaseProviderForm
         key={formKey}
@@ -173,7 +164,7 @@ export function ProviderSheet({
 
   const footer =
     state.mode === 'detail' ? (
-      state.resource ? (
+      state.resource && !state.resource.flags.isPlaceholder ? (
         <>
           <button
             type="button"
@@ -217,7 +208,9 @@ export function ProviderSheet({
           className={`${styles.footerBtn} ${styles.footerBtnPrimary}`}
           disabled={submitDisabled}
         >
-          {submitting ? <IconLoader2 size={14} /> : null}
+          {submitting ? (
+            <IconLoader2 size={14} />
+          ) : null}
           {state.mode === 'create'
             ? t('providersPage.actions.create')
             : t('providersPage.actions.save')}
@@ -239,20 +232,7 @@ export function ProviderSheet({
       }
       title={titleText}
       description={t('providersPage.table.description', {
-        route:
-          state.brand === 'openaiCompatibility'
-            ? '/ai-providers/openai'
-            : state.brand === 'claudeApi'
-              ? '/ai-providers/claudeapi'
-                : state.brand === 'code0'
-                  ? '/ai-providers/code0'
-                  : state.brand === 'fennoAI'
-                    ? '/ai-providers/fennoai'
-                    : state.brand === 'qiniuCloud'
-                      ? '/ai-providers/qiniu'
-                      : state.brand === 'kimi'
-                        ? '/ai-providers/kimi'
-                        : `/ai-providers/${state.brand}`,
+        route: `/ai-providers/${state.brand === 'openaiCompatibility' ? 'openai' : state.brand}`,
       })}
       footer={footer}
       closeDisabled={submitting}

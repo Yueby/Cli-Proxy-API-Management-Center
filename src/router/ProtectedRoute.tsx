@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { SkeletonCardGrid } from '@/components/common/LoadingSkeleton';
 
 export function ProtectedRoute({ children }: { children: ReactElement }) {
   const location = useLocation();
@@ -27,8 +27,8 @@ export function ProtectedRoute({ children }: { children: ReactElement }) {
 
   if (checking) {
     return (
-      <div className="main-content">
-        <LoadingSpinner />
+      <div className="main-content" aria-busy="true">
+        <SkeletonCardGrid count={3} />
       </div>
     );
   }

@@ -1,6 +1,5 @@
 import {
   ReactNode,
-  RefObject,
   SVGProps,
   useCallback,
   useEffect,
@@ -13,8 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { PageTransition } from '@/components/common/PageTransition';
 import { MainRoutes } from '@/router/MainRoutes';
-import { pluginsApi } from '@/services/api';
 import {
+  IconChevronDown,
   IconSidebarAuthFiles,
   IconSidebarConfig,
   IconSidebarDashboard,
@@ -22,12 +21,17 @@ import {
   IconSidebarOauth,
   IconSidebarPlugins,
   IconSidebarProviders,
-
   IconSidebarQuota,
   IconSidebarStore,
   IconSidebarSystem,
-  IconChevronDown,
 } from '@/components/ui/icons';
+import { pluginsApi } from '@/services/api';
+import {
+  collectPluginResourceEntries,
+  resolvePluginAssetURL,
+  PLUGIN_RESOURCES_REFRESH_EVENT,
+  type PluginResourceEntry,
+} from '@/features/plugins/pluginResources';
 import { INLINE_LOGO_JPEG } from '@/assets/logoInline';
 import {
   useAuthStore,
@@ -36,13 +40,6 @@ import {
   useNotificationStore,
   useThemeStore,
 } from '@/stores';
-import {
-  collectPluginResourceEntries,
-  PLUGIN_RESOURCES_REFRESH_EVENT,
-  resolvePluginAssetURL,
-  type PluginResourceEntry,
-} from '@/features/plugins/pluginResources';
-
 import { triggerHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { LANGUAGE_LABEL_KEYS, LANGUAGE_ORDER } from '@/utils/constants';
 import { isSupportedLanguage } from '@/utils/language';
@@ -50,7 +47,6 @@ import type { Theme } from '@/types';
 
 const sidebarIcons: Record<string, ReactNode> = {
   dashboard: <IconSidebarDashboard size={18} />,
-
   aiProviders: <IconSidebarProviders size={18} />,
   authFiles: <IconSidebarAuthFiles size={18} />,
   oauth: <IconSidebarOauth size={18} />,
@@ -92,39 +88,7 @@ interface SidebarNavGroup {
 const flattenNavItems = (items: SidebarNavItem[]): SidebarNavLinkItem[] =>
   items.flatMap((item) => (item.kind === 'drawer' ? item.children : [item]));
 
-/** 点击菜单外或按下 Escape 时关闭弹出菜单 */
-function useMenuDismiss(
-  open: boolean,
-  menuRef: RefObject<HTMLDivElement | null>,
-  onClose: () => void
-) {
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!menuRef.current?.contains(event.target as Node)) {
-        onClose();
-      }
-    };
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleEscape);
-
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [open, menuRef, onClose]);
-}
-
+// 插件侧边栏图标：优先展示插件 logo，加载失败或缺失时回退到通用插件图标。
 function PluginSidebarIcon({ src }: { src: string }) {
   const [failed, setFailed] = useState(false);
   const showImage = Boolean(src) && !failed;
@@ -302,13 +266,12 @@ export function MainLayout() {
   const location = useLocation();
 
   const logout = useAuthStore((state) => state.logout);
+  const supportsPlugin = useAuthStore((state) => state.supportsPlugin);
   const connectionStatus = useAuthStore((state) => state.connectionStatus);
   const apiBase = useAuthStore((state) => state.apiBase);
-  const supportsPlugin = useAuthStore((state) => state.supportsPlugin);
 
   const fetchConfig = useConfigStore((state) => state.fetchConfig);
   const clearCache = useConfigStore((state) => state.clearCache);
-
 
   const theme = useThemeStore((state) => state.theme);
   const setTheme = useThemeStore((state) => state.setTheme);
@@ -334,107 +297,7 @@ export function MainLayout() {
   const isPluginResourcePage = location.pathname.startsWith('/plugin-pages');
   const showSidebarLabels = !sidebarCollapsed || sidebarOpen;
 
-  // Keep floating header height available to sticky mobile elements and overlays.
-  useLayoutEffect(() => {
-    const updateHeaderHeight = () => {
-      const height = headerRef.current?.offsetHeight;
-      if (height) {
-        document.documentElement.style.setProperty('--header-height', `${height}px`);
-      }
-    };
-
-    updateHeaderHeight();
-
-    const resizeObserver =
-      typeof ResizeObserver !== 'undefined' && headerRef.current
-        ? new ResizeObserver(updateHeaderHeight)
-        : null;
-    if (resizeObserver && headerRef.current) {
-      resizeObserver.observe(headerRef.current);
-    }
-
-    window.addEventListener('resize', updateHeaderHeight);
-
-    return () => {
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-      }
-      window.removeEventListener('resize', updateHeaderHeight);
-    };
-  }, []);
-
-  // Keep the content center available to bottom overlays that align with the main area.
-  useLayoutEffect(() => {
-    const updateContentCenter = () => {
-      const el = contentRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      document.documentElement.style.setProperty('--content-center-x', `${centerX}px`);
-    };
-
-    updateContentCenter();
-
-    const resizeObserver =
-      typeof ResizeObserver !== 'undefined' && contentRef.current
-        ? new ResizeObserver(updateContentCenter)
-        : null;
-
-    if (resizeObserver && contentRef.current) {
-      resizeObserver.observe(contentRef.current);
-    }
-
-    window.addEventListener('resize', updateContentCenter);
-
-    return () => {
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-      }
-      window.removeEventListener('resize', updateContentCenter);
-      document.documentElement.style.removeProperty('--content-center-x');
-    };
-  }, []);
-
-  const closeLanguageMenu = useCallback(() => setLanguageMenuOpen(false), []);
-  const closeThemeMenu = useCallback(() => setThemeMenuOpen(false), []);
-  useMenuDismiss(languageMenuOpen, languageMenuRef, closeLanguageMenu);
-  useMenuDismiss(themeMenuOpen, themeMenuRef, closeThemeMenu);
-
-  const toggleLanguageMenu = useCallback(() => {
-    setLanguageMenuOpen((prev) => !prev);
-    setThemeMenuOpen(false);
-  }, []);
-
-  const toggleThemeMenu = useCallback(() => {
-    setThemeMenuOpen((prev) => !prev);
-    setLanguageMenuOpen(false);
-  }, []);
-
-  const handleThemeSelect = useCallback(
-    (nextTheme: Theme) => {
-      setTheme(nextTheme);
-      setThemeMenuOpen(false);
-    },
-    [setTheme]
-  );
-
-  const handleLanguageSelect = useCallback(
-    (nextLanguage: string) => {
-      if (!isSupportedLanguage(nextLanguage)) {
-        return;
-      }
-      setLanguage(nextLanguage);
-      setLanguageMenuOpen(false);
-    },
-    [setLanguage]
-  );
-
-  useEffect(() => {
-    fetchConfig().catch(() => {
-      // Ignore the initial failure; the login flow shows the user-facing prompt.
-    });
-  }, [fetchConfig]);
-
+  // 拉取已启用插件声明的页面菜单，转换为侧边栏可渲染的资源条目。
   const loadPluginResources = useCallback(async () => {
     if (connectionStatus !== 'connected' || !supportsPlugin) {
       setPluginResources([]);
@@ -462,6 +325,19 @@ export function MainLayout() {
     };
   }, [apiBase, loadPluginResources]);
 
+  const togglePluginResourceDrawer = useCallback((drawerID: string) => {
+    setExpandedPluginResourceIDs((current) => {
+      const next = new Set(current);
+      if (next.has(drawerID)) {
+        next.delete(drawerID);
+      } else {
+        next.add(drawerID);
+      }
+      return next;
+    });
+  }, []);
+
+  // 同一插件的多个页面归为一组，单页面直接作为链接，多页面折叠为抽屉。
   const pluginResourceGroups = pluginResources.reduce<
     Array<{ pluginID: string; pluginTitle: string; entries: PluginResourceEntry[] }>
   >((groups, resource) => {
@@ -513,6 +389,153 @@ export function MainLayout() {
       })
     : [];
 
+  // 将顶部悬浮控制区高度写入 CSS 变量，供移动端粘性元素和浮层避让。
+  useLayoutEffect(() => {
+    const updateHeaderHeight = () => {
+      const height = headerRef.current?.offsetHeight;
+      if (height) {
+        document.documentElement.style.setProperty('--header-height', `${height}px`);
+      }
+    };
+
+    updateHeaderHeight();
+
+    const resizeObserver =
+      typeof ResizeObserver !== 'undefined' && headerRef.current
+        ? new ResizeObserver(updateHeaderHeight)
+        : null;
+    if (resizeObserver && headerRef.current) {
+      resizeObserver.observe(headerRef.current);
+    }
+
+    window.addEventListener('resize', updateHeaderHeight);
+
+    return () => {
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+      window.removeEventListener('resize', updateHeaderHeight);
+    };
+  }, []);
+
+  // 将主内容区的中心点写入 CSS 变量，供底部浮层（配置面板操作栏、提供商导航）对齐到内容区
+  useLayoutEffect(() => {
+    const updateContentCenter = () => {
+      const el = contentRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      document.documentElement.style.setProperty('--content-center-x', `${centerX}px`);
+    };
+
+    updateContentCenter();
+
+    const resizeObserver =
+      typeof ResizeObserver !== 'undefined' && contentRef.current
+        ? new ResizeObserver(updateContentCenter)
+        : null;
+
+    if (resizeObserver && contentRef.current) {
+      resizeObserver.observe(contentRef.current);
+    }
+
+    window.addEventListener('resize', updateContentCenter);
+
+    return () => {
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+      window.removeEventListener('resize', updateContentCenter);
+      document.documentElement.style.removeProperty('--content-center-x');
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!languageMenuOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!languageMenuRef.current?.contains(event.target as Node)) {
+        setLanguageMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setLanguageMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [languageMenuOpen]);
+
+  useEffect(() => {
+    if (!themeMenuOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!themeMenuRef.current?.contains(event.target as Node)) {
+        setThemeMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setThemeMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [themeMenuOpen]);
+
+  const toggleLanguageMenu = useCallback(() => {
+    setLanguageMenuOpen((prev) => !prev);
+    setThemeMenuOpen(false);
+  }, []);
+
+  const toggleThemeMenu = useCallback(() => {
+    setThemeMenuOpen((prev) => !prev);
+    setLanguageMenuOpen(false);
+  }, []);
+
+  const handleThemeSelect = useCallback(
+    (nextTheme: Theme) => {
+      setTheme(nextTheme);
+      setThemeMenuOpen(false);
+    },
+    [setTheme]
+  );
+
+  const handleLanguageSelect = useCallback(
+    (nextLanguage: string) => {
+      if (!isSupportedLanguage(nextLanguage)) {
+        return;
+      }
+      setLanguage(nextLanguage);
+      setLanguageMenuOpen(false);
+    },
+    [setLanguage]
+  );
+
+  useEffect(() => {
+    fetchConfig().catch(() => {
+      // ignore initial failure; login flow会提示
+    });
+  }, [fetchConfig]);
 
   const navGroups: SidebarNavGroup[] = [
     {
@@ -525,7 +548,6 @@ export function MainLayout() {
           metaKey: 'nav_meta.dashboard',
           icon: sidebarIcons.dashboard,
         },
-
       ],
     },
     {
@@ -550,12 +572,6 @@ export function MainLayout() {
       id: 'observe',
       labelKey: 'nav_groups.observe',
       items: [
-        {
-          path: '/quota',
-          labelKey: 'nav.quota_management',
-          metaKey: 'nav_meta.quota_management',
-          icon: sidebarIcons.quota,
-        },
         {
           path: '/logs',
           labelKey: 'nav.logs',
@@ -615,6 +631,19 @@ export function MainLayout() {
       pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
     const normalizedPath = trimmedPath === '/dashboard' ? '/' : trimmedPath;
 
+    const aiProvidersIndex = navOrder.indexOf('/ai-providers');
+    if (aiProvidersIndex !== -1) {
+      if (normalizedPath === '/ai-providers') return aiProvidersIndex;
+      if (normalizedPath.startsWith('/ai-providers/')) {
+        if (normalizedPath.startsWith('/ai-providers/gemini')) return aiProvidersIndex + 0.1;
+        if (normalizedPath.startsWith('/ai-providers/codex')) return aiProvidersIndex + 0.2;
+        if (normalizedPath.startsWith('/ai-providers/claude')) return aiProvidersIndex + 0.3;
+        if (normalizedPath.startsWith('/ai-providers/vertex')) return aiProvidersIndex + 0.4;
+        if (normalizedPath.startsWith('/ai-providers/openai')) return aiProvidersIndex + 0.5;
+        return aiProvidersIndex + 0.05;
+      }
+    }
+
     const authFilesIndex = navOrder.indexOf('/auth-files');
     if (authFilesIndex !== -1) {
       if (normalizedPath === '/auth-files') return authFilesIndex;
@@ -644,15 +673,17 @@ export function MainLayout() {
     const to = normalize(toPathname);
     const isAuthFiles = (pathname: string) =>
       pathname === '/auth-files' || pathname.startsWith('/auth-files/');
+    const isAiProviders = (pathname: string) =>
+      pathname === '/ai-providers' || pathname.startsWith('/ai-providers/');
     if (isAuthFiles(from) && isAuthFiles(to)) return 'ios';
+    if (isAiProviders(from) && isAiProviders(to)) return 'ios';
     return 'vertical';
   }, []);
 
   const handleRefreshAll = async () => {
     clearCache();
     const results = await Promise.allSettled([
-      fetchConfig(true),
-      loadPluginResources(),
+      fetchConfig(undefined, true),
       triggerHeaderRefresh(),
     ]);
     const rejected = results.find((result) => result.status === 'rejected');
@@ -668,18 +699,9 @@ export function MainLayout() {
     }
     showNotification(t('notification.data_refreshed'), 'success');
   };
-
-  const togglePluginResourceDrawer = useCallback((drawerID: string) => {
-    setExpandedPluginResourceIDs((current) => {
-      const next = new Set(current);
-      if (next.has(drawerID)) {
-        next.delete(drawerID);
-      } else {
-        next.add(drawerID);
-      }
-      return next;
-    });
-  }, []);
+  const mobileSidebarToggleLabel = sidebarOpen
+    ? t('sidebar.toggle_collapse', { defaultValue: 'Close navigation' })
+    : t('sidebar.toggle_expand', { defaultValue: 'Open navigation' });
 
   const renderNavLink = (item: SidebarNavLinkItem, className = 'nav-item') => {
     const itemLabel = item.label ?? (item.labelKey ? t(item.labelKey) : '');
@@ -744,10 +766,6 @@ export function MainLayout() {
       </div>
     );
   };
-
-  const mobileSidebarToggleLabel = sidebarOpen
-    ? t('sidebar.toggle_collapse', { defaultValue: 'Close navigation' })
-    : t('sidebar.toggle_expand', { defaultValue: 'Open navigation' });
 
   return (
     <div

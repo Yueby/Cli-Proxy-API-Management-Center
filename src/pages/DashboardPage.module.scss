@@ -6,9 +6,7 @@
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: $spacing-xl;
-  max-width: 1000px;
-  margin: 0 auto;
+  gap: $spacing-md;
   position: relative;
 }
 

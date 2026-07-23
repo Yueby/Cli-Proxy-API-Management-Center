@@ -124,20 +124,6 @@ const buildInvalidContentPreview = (text: string): string => {
   return `${trimmed.slice(0, INVALID_CONTENT_PREVIEW_LIMIT)}\n...`;
 };
 
-const buildInvalidAuthFileContentState = (
-  text: string,
-  resolveError: (key: AuthFileContentErrorKey) => string
-): Pick<
-  PrefixProxyEditorState,
-  'loading' | 'error' | 'rawText' | 'originalText' | 'invalidContentPreview'
-> => ({
-  loading: false,
-  error: resolveError(getAuthFileContentErrorKey(text)),
-  rawText: text,
-  originalText: text,
-  invalidContentPreview: buildInvalidContentPreview(text),
-});
-
 const getAuthFileContentErrorKey = (text: string): AuthFileContentErrorKey => {
   const head = text.trimStart().slice(0, 4096).toLowerCase();
   const looksLikeHtml =
@@ -155,6 +141,20 @@ const getAuthFileContentErrorKey = (text: string): AuthFileContentErrorKey => {
     ? 'auth_files.prefix_proxy_html_challenge'
     : 'auth_files.prefix_proxy_invalid_json';
 };
+
+const buildInvalidAuthFileContentState = (
+  text: string,
+  resolveError: (key: AuthFileContentErrorKey) => string
+): Pick<
+  PrefixProxyEditorState,
+  'loading' | 'error' | 'rawText' | 'originalText' | 'invalidContentPreview'
+> => ({
+  loading: false,
+  error: resolveError(getAuthFileContentErrorKey(text)),
+  rawText: text,
+  originalText: text,
+  invalidContentPreview: buildInvalidContentPreview(text),
+});
 
 const hasKeys = (value: Record<string, unknown> | AuthFileFieldsPatch | null): boolean =>
   Boolean(value && Object.keys(value).length > 0);

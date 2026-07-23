@@ -26,7 +26,8 @@ export const withDisableAllModelsRule = (models?: string[]) => {
   return [...base, DISABLE_ALL_MODELS_RULE];
 };
 
-export const withoutDisableAllModelsRule = (models?: string[]) => stripDisableAllModelsRule(models);
+export const withoutDisableAllModelsRule = (models?: string[]) =>
+  stripDisableAllModelsRule(models);
 
 const normalizeUpstreamBaseUrl = (baseUrl: string, fallback = ''): string => {
   let trimmed = String(baseUrl || '').trim();
@@ -42,7 +43,7 @@ const normalizeUpstreamBaseUrl = (baseUrl: string, fallback = ''): string => {
 const buildGeminiModelResource = (model: string): string => {
   const trimmed = String(model || '')
     .trim()
-    .replace(/^\/+/g, '')
+    .replace(/^\/+/, '')
     .replace(/:generateContent$/i, '');
   if (!trimmed) return '';
 
@@ -119,9 +120,7 @@ const EMPTY_RECENT_USAGE_ENTRY: RecentRequestUsageEntry = {
 };
 
 const normalizeProviderRecentKey = (value: unknown): string =>
-  String(value ?? '')
-    .trim()
-    .toLowerCase();
+  String(value ?? '').trim().toLowerCase();
 
 const getProviderRecentUsageEntry = (
   usageByProvider: ProviderRecentUsageMap,
@@ -165,15 +164,6 @@ export function getProviderTotalStats(
 ): { success: number; failure: number } {
   const entry = getProviderRecentUsageEntry(usageByProvider, provider, apiKey, baseUrl);
   return { success: entry.success, failure: entry.failed };
-}
-
-export function getProviderRecentWindowStats(
-  usageByProvider: ProviderRecentUsageMap,
-  provider: string,
-  apiKey?: string,
-  baseUrl?: string
-): { success: number; failure: number } {
-  return sumRecentRequests(getProviderRecentBuckets(usageByProvider, provider, apiKey, baseUrl));
 }
 
 const collectOpenAIProviderRecentBuckets = (

@@ -1,6 +1,10 @@
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IconChevronDown, IconChevronUp, IconSlidersHorizontal } from '@/components/ui/icons';
+import {
+  IconChevronDown,
+  IconChevronUp,
+  IconSlidersHorizontal,
+} from '@/components/ui/icons';
 import { Select } from '@/components/ui/Select';
 import { SelectionCheckbox } from '@/components/ui/SelectionCheckbox';
 import styles from './OpenAIBrandToolbar.module.scss';
@@ -46,7 +50,10 @@ export function OpenAIBrandToolbar({
   useEffect(() => {
     if (!filterOpen) return;
     const onClickOutside = (e: PointerEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setFilterOpen(false);
       }
     };
@@ -141,7 +148,9 @@ export function OpenAIBrandToolbar({
               </button>
             </div>
             {availableModels.length === 0 ? (
-              <div className={styles.filterEmpty}>{t('providersPage.toolbar.filter.empty')}</div>
+              <div className={styles.filterEmpty}>
+                {t('providersPage.toolbar.filter.empty')}
+              </div>
             ) : (
               <ul className={styles.filterList}>
                 {availableModels.map((name) => (
