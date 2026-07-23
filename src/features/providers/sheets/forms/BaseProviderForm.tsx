@@ -58,7 +58,8 @@ const formatJsonObject = (value?: Record<string, unknown>): string => {
   return JSON.stringify(value, null, 2);
 };
 
-const isClaudeLikeBrand = (brand: ProviderBrand): boolean => brand === 'claude';
+const isClaudeLikeBrand = (brand: ProviderBrand): boolean =>
+  brand === 'claude' || brand === 'claudeApi';
 
 function buildInitialForm(
   brand: ProviderBrand,

@@ -117,6 +117,25 @@ export const PROVIDER_DESCRIPTORS: Record<ProviderBrand, ProviderDescriptor> = {
     supportsApiKeyEntries: false,
     sheetSize: 'md',
   },
+  claudeApi: {
+    id: 'claudeApi',
+    supportsName: false,
+    supportsApiKey: true,
+    supportsDisabled: true,
+    supportsBaseUrl: false,
+    baseUrlRequired: false,
+    supportsProxyUrl: true,
+    supportsPrefix: true,
+    supportsModels: true,
+    supportsHeaders: true,
+    supportsExcludedModels: true,
+    supportsPriority: true,
+    supportsTestModel: true,
+    supportsWebsockets: false,
+    supportsCloak: true,
+    supportsApiKeyEntries: false,
+    sheetSize: 'md',
+  },
   vertex: {
     id: 'vertex',
     supportsName: false,
@@ -155,6 +174,25 @@ export const PROVIDER_DESCRIPTORS: Record<ProviderBrand, ProviderDescriptor> = {
     supportsApiKeyEntries: true,
     sheetSize: 'lg',
   },
+  code0: {
+    id: 'code0',
+    supportsName: false,
+    supportsApiKey: false,
+    supportsDisabled: true,
+    supportsBaseUrl: false,
+    baseUrlRequired: false,
+    supportsProxyUrl: true,
+    supportsPrefix: true,
+    supportsModels: false,
+    supportsHeaders: false,
+    supportsExcludedModels: false,
+    supportsPriority: true,
+    supportsTestModel: false,
+    supportsWebsockets: false,
+    supportsCloak: false,
+    supportsApiKeyEntries: false,
+    sheetSize: 'md',
+  },
 };
 
 export const PROVIDER_BRAND_ORDER: ProviderBrand[] = [
@@ -163,8 +201,10 @@ export const PROVIDER_BRAND_ORDER: ProviderBrand[] = [
   'codex',
   'xai',
   'claude',
+  'claudeApi',
   'vertex',
   'openaiCompatibility',
+  'code0',
 ];
 
 export const PROVIDER_PATHS: Record<ProviderBrand, string> = {
@@ -173,6 +213,8 @@ export const PROVIDER_PATHS: Record<ProviderBrand, string> = {
   codex: '/ai-providers/codex',
   xai: '/ai-providers/xai',
   claude: '/ai-providers/claude',
+  claudeApi: '/ai-providers/claudeapi',
   vertex: '/ai-providers/vertex',
   openaiCompatibility: '/ai-providers/openai',
+  code0: '/ai-providers/code0',
 };

@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import iconClaude from '@/assets/icons/claude.svg';
+import iconClaudeApi from '@/assets/icons/claudeapi.png';
+import iconCode0 from '@/assets/icons/code0.png';
 import iconCodex from '@/assets/icons/codex.svg';
 import iconGemini from '@/assets/icons/gemini.svg';
 import iconOpenAIDark from '@/assets/icons/openai-dark.svg';
@@ -54,8 +56,10 @@ const PROVIDER_ICONS: Record<ProviderBrand, ProviderIconAsset> = {
   codex: iconCodex,
   xai: iconXAI,
   claude: iconClaude,
+  claudeApi: iconClaudeApi,
   vertex: iconVertex,
   openaiCompatibility: { light: iconOpenAILight, dark: iconOpenAIDark },
+  code0: iconCode0,
 };
 
 const PROVIDER_FALLBACKS: Record<ProviderBrand, string> = {
@@ -64,8 +68,10 @@ const PROVIDER_FALLBACKS: Record<ProviderBrand, string> = {
   codex: 'C',
   xai: 'X',
   claude: 'C',
+  claudeApi: 'C',
   vertex: 'V',
   openaiCompatibility: 'O',
+  code0: 'C',
 };
 
 const PROVIDER_LABELS: Record<ProviderBrand, string> = {
@@ -74,8 +80,10 @@ const PROVIDER_LABELS: Record<ProviderBrand, string> = {
   codex: 'Codex',
   xai: 'xAI',
   claude: 'Claude',
+  claudeApi: 'ClaudeAPI',
   vertex: 'Vertex',
   openaiCompatibility: 'OpenAI',
+  code0: 'Code0',
 };
 
 const getProviderIcon = (brand: ProviderBrand, resolvedTheme: ResolvedTheme): string => {

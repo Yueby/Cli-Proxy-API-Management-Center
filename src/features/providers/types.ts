@@ -2,14 +2,20 @@
  * AI 提供商 Workbench 视图模型(归一化各 brand 的异构 config)
  */
 
+import type { GeminiKeyConfig, OpenAIProviderConfig, ProviderKeyConfig } from '@/types';
+
 export type ProviderBrand =
   | 'gemini'
   | 'codex'
   | 'xai'
   | 'kimi'
   | 'claude'
+  | 'claudeApi'
   | 'vertex'
-  | 'openaiCompatibility';
+  | 'openaiCompatibility'
+  | 'code0';
+
+export type SponsorProviderBrand = 'code0';
 
 export type ProviderResourceSelector =
   | { brand: 'gemini'; apiKey: string; baseUrl?: string; index: number }
@@ -17,14 +23,23 @@ export type ProviderResourceSelector =
   | { brand: 'xai'; apiKey: string; baseUrl?: string; index: number }
   | { brand: 'kimi'; name: string; index: number }
   | { brand: 'claude'; apiKey: string; baseUrl?: string; index: number }
+  | { brand: 'claudeApi'; apiKey: string; baseUrl?: string; index: number }
   | { brand: 'vertex'; apiKey: string; baseUrl?: string; index: number }
-  | { brand: 'openaiCompatibility'; name: string; index: number };
+  | { brand: 'openaiCompatibility'; name: string; index: number }
+  | {
+      brand: 'code0';
+      openaiIndices: number[];
+      claudeIndices: number[];
+      codexIndices: number[];
+      geminiIndices: number[];
+    };
 
 export interface ProviderResourceFlags {
   cloakEnabled?: boolean;
   websockets?: boolean;
   forceModelMappings?: boolean;
   isPlaceholder?: boolean;
+  protocols?: string[];
 }
 
 export interface ProviderResource {
@@ -80,6 +95,13 @@ export interface ProviderSnapshot {
   issues: Array<{ brand: ProviderBrand; message: string }>;
 }
 
+export interface SponsorProviderRaw {
+  openai: Array<{ config: OpenAIProviderConfig; index: number }>;
+  claude: Array<{ config: ProviderKeyConfig; index: number }>;
+  codex: Array<{ config: ProviderKeyConfig; index: number }>;
+  gemini: Array<{ config: GeminiKeyConfig; index: number }>;
+}
+
 /**
  * 通用 Sheet 表单值。
  * Gemini/Codex/Claude/Vertex/OpenAI 共用基础字段,各自启用 advanced 区。
@@ -91,6 +113,21 @@ export interface ModelEntryInput {
   testModel?: string;
   image?: boolean;
   thinkingJson?: string;
+}
+
+export type SponsorProtocol = 'openai' | 'codex' | 'claude' | 'gemini';
+
+export interface SponsorKeyEntryInput {
+  protocol: SponsorProtocol;
+  apiKey: string;
+  existingApiKey?: string;
+  baseUrl: string;
+  proxyUrl: string;
+  prefix: string;
+  disabled: boolean;
+  disableCooling?: boolean;
+  priority?: number;
+  models: ModelEntryInput[];
 }
 
 export interface ApiKeyEntryInput {
@@ -132,4 +169,5 @@ export interface ProviderEntryFormInput {
   /** OpenAI persists this; Gemini/Codex/Claude use it for one-off connectivity tests. */
   testModel?: string;
   apiKeyEntries?: ApiKeyEntryInput[];
+  sponsorKeyEntries?: SponsorKeyEntryInput[];
 }

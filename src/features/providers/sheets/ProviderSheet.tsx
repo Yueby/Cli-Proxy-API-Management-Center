@@ -12,6 +12,7 @@ import type {
 } from '../types';
 import type { UseProviderWorkbenchResult } from '../useProviderWorkbench';
 import { BaseProviderForm } from './forms/BaseProviderForm';
+import { Code0ProviderForm } from './forms/Code0ProviderForm';
 import { ResourceDetailView } from './ResourceDetailView';
 import styles from './forms/sharedForm.module.scss';
 
@@ -148,6 +149,19 @@ export function ProviderSheet({
       return <ResourceDetailView resource={state.resource} usageByProvider={usageByProvider} />;
     }
     const formKey = `${state.brand}:${state.resource?.id ?? 'new'}:${state.mode}`;
+    if (state.brand === 'code0') {
+      return (
+        <Code0ProviderForm
+          key={formKey}
+          resource={state.resource}
+          mode={state.mode}
+          mutating={formMutating}
+          formId={formId}
+          onSubmit={state.mode === 'create' ? handleCreate : handleUpdate}
+          onDirtyChange={handleDirtyChange}
+        />
+      );
+    }
     return (
       <BaseProviderForm
         key={formKey}
