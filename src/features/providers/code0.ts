@@ -33,7 +33,7 @@ export const isCode0GeminiProvider = (config: GeminiKeyConfig | undefined | null
   Boolean(config) && normalizeBaseUrl(config?.baseUrl) === normalizeBaseUrl(CODE0_GEMINI_BASE_URL);
 
 export const buildCode0Raw = (config: Config | null | undefined): SponsorProviderRaw => ({
-  openai: (config?.openaiCompatibility ?? []).map((item, index) => ({ config: item, index })).filter((item) => isCode0OpenAIProvider(item.config)),
+  openai: (config?.openaiCompatibility ?? []).map((item, index) => ({ config: item, index: item.sourceIndex ?? index })).filter((item) => isCode0OpenAIProvider(item.config)),
   claude: (config?.claudeApiKeys ?? []).map((item, index) => ({ config: item, index })).filter((item) => isCode0ClaudeProvider(item.config)),
   codex: (config?.codexApiKeys ?? []).map((item, index) => ({ config: item, index })).filter((item) => isCode0CodexProvider(item.config)),
   gemini: (config?.geminiApiKeys ?? []).map((item, index) => ({ config: item, index })).filter((item) => isCode0GeminiProvider(item.config)),

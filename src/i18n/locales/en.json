@@ -579,7 +579,9 @@
     "plan_premium_plus_includes_supergrok": "Includes SuperGrok membership benefits",
     "pay_as_you_go_label": "Pay as you go",
     "pay_as_you_go_enabled": "Enabled, cap {{cap}}",
-    "pay_as_you_go_disabled": "Pay as you go disabled"
+    "pay_as_you_go_disabled": "Pay as you go disabled",
+    "plan_paid": "Paid API",
+    "paid_health": "Paid credential is healthy and the xAI chat API is reachable."
   },
   "vertex_import": {
     "title": "Vertex JSON Login",
@@ -1763,7 +1765,8 @@
       "description": "Configure one or more supported protocols for this provider.",
       "protocol": "Protocol",
       "endpoint": "Service endpoint",
-      "addProtocol": "Add protocol"
+      "addProtocol": "Add protocol",
+      "aggregationConflict": "This provider has multiple configurations for the same protocol or multiple OpenAI API keys. Editing is disabled to prevent data loss."
     }
   },
   "ai_providers": {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasDisableAllModelsRule } from '@/components/providers/utils';
+import { getMultiProtocolAggregationConflict } from '../../multiProtocolAggregation';
 import { getMultiProtocolProviderDefinition } from '../../multiProtocolDefinitions';
 import type {
   MultiProtocolKeyEntryInput,
@@ -102,12 +103,29 @@ export function MultiProtocolProviderForm({
   const initialSignature = useMemo(() => JSON.stringify(initial), [initial]);
   const [entries, setEntries] = useState(initial);
   const dirty = JSON.stringify(entries) !== initialSignature;
+  const aggregationConflict =
+    mode === 'edit'
+      ? getMultiProtocolAggregationConflict(resource?.raw as MultiProtocolProviderRaw | undefined)
+      : null;
 
   useEffect(() => onDirtyChange?.(dirty), [dirty, onDirtyChange]);
 
   const update = (index: number, patch: Partial<MultiProtocolKeyEntryInput>) => {
     setEntries((current) => current.map((entry, i) => (i === index ? { ...entry, ...patch } : entry)));
   };
+
+  if (aggregationConflict) {
+    return (
+      <form id={formId} className={styles.form} onSubmit={(event) => event.preventDefault()}>
+        <div className={styles.errorBox}>
+          {t('providersPage.multiProtocol.aggregationConflict', {
+            defaultValue:
+              'This provider has multiple configurations for one protocol and cannot be safely edited here.',
+          })}
+        </div>
+      </form>
+    );
+  }
 
   return (
     <form

@@ -7,10 +7,9 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { ModelMappingDiagram, type ModelMappingDiagramRef } from '@/components/modelAlias';
 import { IconChevronUp, IconPencil, IconPlus, IconTrash2 } from '@/components/ui/icons';
 import type { OAuthModelAliasEntry } from '@/types';
-import type { AuthFileModelItem } from '@/features/authFiles/constants';
+import type { AuthFileModelItem, OAuthConfigLoadError } from '@/features/authFiles/constants';
 import styles from '@/pages/AuthFilesPage.module.scss';
 
-type UnsupportedError = 'unsupported' | null;
 type ViewMode = 'diagram' | 'list';
 type SettingsTab = 'excluded' | 'alias';
 
@@ -20,8 +19,9 @@ export type OAuthSettingsModalProps = {
   disableControls: boolean;
 
   // Excluded state & handlers
-  excludedError: UnsupportedError;
+  excludedError: OAuthConfigLoadError;
   excluded: Record<string, string[]>;
+  onRetryExcluded: () => void | Promise<void>;
   onAddExcluded: () => void;
   onEditExcluded: (provider: string) => void;
   onDeleteExcluded: (provider: string) => void;
@@ -32,7 +32,8 @@ export type OAuthSettingsModalProps = {
   onAddAlias: () => void;
   onEditProvider: (provider?: string) => void;
   onDeleteProvider: (provider: string) => void;
-  modelAliasError: UnsupportedError;
+  modelAliasError: OAuthConfigLoadError;
+  onRetryAlias: () => void | Promise<void>;
   modelAlias: Record<string, OAuthModelAliasEntry[]>;
   allProviderModels: Record<string, AuthFileModelItem[]>;
   onUpdateAlias: (provider: string, sourceModel: string, newAlias: string) => Promise<void>;
@@ -58,6 +59,7 @@ export function OAuthSettingsModal(props: OAuthSettingsModalProps) {
     disableControls,
     excludedError,
     excluded,
+    onRetryExcluded,
     onAddExcluded,
     onEditExcluded,
     onDeleteExcluded,
@@ -67,6 +69,7 @@ export function OAuthSettingsModal(props: OAuthSettingsModalProps) {
     onEditProvider,
     onDeleteProvider,
     modelAliasError,
+    onRetryAlias,
     modelAlias,
     allProviderModels,
     onUpdateAlias,
@@ -85,6 +88,11 @@ export function OAuthSettingsModal(props: OAuthSettingsModalProps) {
         />
       );
     }
+
+    if (excludedError === 'load') {
+      return <EmptyState title={t('notification.refresh_failed')} action={<Button variant="secondary" size="sm" onClick={() => void onRetryExcluded()}>{t('common.refresh')}</Button>} />;
+    }
+    if (excludedError === 'loading') return <EmptyState title={t('common.loading')} />;
 
     if (Object.keys(excluded).length === 0) {
       return <EmptyState title={t('oauth_excluded.list_empty_all')} />;
@@ -138,6 +146,11 @@ export function OAuthSettingsModal(props: OAuthSettingsModalProps) {
       );
     }
 
+    if (modelAliasError === 'load') {
+      return <EmptyState title={t('notification.refresh_failed')} action={<Button variant="secondary" size="sm" onClick={() => void onRetryAlias()}>{t('common.refresh')}</Button>} />;
+    }
+    if (modelAliasError === 'loading') return <EmptyState title={t('common.loading')} />;
+
     if (viewMode === 'diagram') {
       if (Object.keys(modelAlias).length === 0) {
         return <EmptyState title={t('oauth_model_alias.list_empty_all')} />;
@@ -151,7 +164,7 @@ export function OAuthSettingsModal(props: OAuthSettingsModalProps) {
               variant="ghost"
               size="sm"
               onClick={() => diagramRef.current?.collapseAll()}
-              disabled={disableControls || modelAliasError === 'unsupported'}
+              disabled={disableControls || modelAliasError !== null}
               title={t('oauth_model_alias.diagram_collapse')}
               aria-label={t('oauth_model_alias.diagram_collapse')}
             >
@@ -256,7 +269,7 @@ export function OAuthSettingsModal(props: OAuthSettingsModalProps) {
                 ]}
                 value={viewMode}
                 onChange={(mode) => onViewModeChange(mode as ViewMode)}
-                disabled={disableControls}
+                disabled={disableControls || modelAliasError !== null}
               />
             )}
           </div>
@@ -270,8 +283,8 @@ export function OAuthSettingsModal(props: OAuthSettingsModalProps) {
               onClick={activeTab === 'excluded' ? onAddExcluded : onAddAlias}
               disabled={
                 disableControls ||
-                (activeTab === 'excluded' && excludedError === 'unsupported') ||
-                (activeTab === 'alias' && modelAliasError === 'unsupported')
+                (activeTab === 'excluded' && excludedError !== null) ||
+                (activeTab === 'alias' && modelAliasError !== null)
               }
             >
               <IconPlus size={14} />

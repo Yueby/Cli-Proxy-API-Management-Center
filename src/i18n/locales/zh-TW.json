@@ -579,7 +579,9 @@
     "plan_premium_plus_includes_supergrok": "包含 SuperGrok 會員權益",
     "pay_as_you_go_label": "按量付費",
     "pay_as_you_go_enabled": "已啟用，封頂 {{cap}}",
-    "pay_as_you_go_disabled": "按量付費未啟用"
+    "pay_as_you_go_disabled": "按量付費未啟用",
+    "plan_paid": "付費 API",
+    "paid_health": "付費憑證狀態正常，xAI 聊天 API 可存取。"
   },
   "vertex_import": {
     "title": "Vertex JSON 登入",
@@ -1790,7 +1792,8 @@
       "description": "為此提供商設定一個或多個後端已支援的協定。",
       "protocol": "協定",
       "endpoint": "服務端點",
-      "addProtocol": "新增協定"
+      "addProtocol": "新增協定",
+      "aggregationConflict": "此提供商的同一協定存在多筆設定，或 OpenAI 設定包含多個 API 金鑰。為防止資料遺失，目前禁止編輯。"
     }
   },
   "ai_providers": {

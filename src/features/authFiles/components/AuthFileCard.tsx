@@ -16,7 +16,12 @@ import {
   IconTrash2,
   IconZap,
 } from '@/components/ui/icons';
-import { useNotificationStore, useQuotaStore } from '@/stores';
+import {
+  captureQuotaCacheGeneration,
+  commitIfQuotaCacheCurrent,
+  useNotificationStore,
+  useQuotaStore,
+} from '@/stores';
 import { getAntigravityPlanLabel, CODEX_CONFIG } from '@/components/quota';
 import { formatShanghaiDateTime } from '@/utils/quota/resetCredits';
 import type { AuthFileItem } from '@/types';
@@ -287,17 +292,22 @@ export function AuthFileCard(props: AuthFileCardProps) {
       confirmText: t('codex_quota.reset_confirm_button'),
       variant: 'primary',
       onConfirm: async () => {
+        const cacheGeneration = captureQuotaCacheGeneration();
         setResettingQuota(true);
         try {
           const data = await resetQuota(file, t);
-          useQuotaStore.getState().setCodexQuota((prev) => ({
-            ...prev,
-            [file.name]: config.buildSuccessState(data) as never,
-          }));
-          showNotification(t('codex_quota.reset_success', { name: file.name }), 'success');
+          commitIfQuotaCacheCurrent(cacheGeneration, () => {
+            useQuotaStore.getState().setCodexQuota((prev) => ({
+              ...prev,
+              [file.name]: config.buildSuccessState(data) as never,
+            }));
+            showNotification(t('codex_quota.reset_success', { name: file.name }), 'success');
+          });
         } catch (err: unknown) {
           const message = err instanceof Error ? err.message : t('common.unknown_error');
-          showNotification(t('codex_quota.reset_failed', { name: file.name, message }), 'error');
+          commitIfQuotaCacheCurrent(cacheGeneration, () => {
+            showNotification(t('codex_quota.reset_failed', { name: file.name, message }), 'error');
+          });
         } finally {
           setResettingQuota(false);
         }

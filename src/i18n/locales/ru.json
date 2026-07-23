@@ -577,7 +577,9 @@
     "plan_premium_plus_includes_supergrok": "Включает преимущества подписки SuperGrok",
     "pay_as_you_go_label": "Оплата по факту",
     "pay_as_you_go_enabled": "Включено, лимит {{cap}}",
-    "pay_as_you_go_disabled": "Оплата по факту отключена"
+    "pay_as_you_go_disabled": "Оплата по факту отключена",
+    "plan_paid": "Платный API",
+    "paid_health": "Платные учётные данные исправны, API чата xAI доступен."
   },
   "vertex_import": {
     "title": "Вход с Vertex JSON",
@@ -1751,7 +1753,8 @@
       "description": "Настройте один или несколько поддерживаемых протоколов этого провайдера.",
       "protocol": "Протокол",
       "endpoint": "Адрес сервиса",
-      "addProtocol": "Добавить протокол"
+      "addProtocol": "Добавить протокол",
+      "aggregationConflict": "У этого провайдера несколько конфигураций одного протокола или несколько ключей OpenAI API. Редактирование отключено во избежание потери данных."
     }
   },
   "ai_providers": {

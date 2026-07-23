@@ -16,6 +16,8 @@ import { parseTimestamp } from '@/utils/timestamp';
 export type ThemeColors = { bg: string; text: string; border?: string };
 export type TypeColorSet = { light: ThemeColors; dark?: ThemeColors };
 export type ResolvedTheme = 'light' | 'dark';
+export type OAuthConfigLoadError = 'loading' | 'load' | 'unsupported' | null;
+
 export type AuthFileModelItem = {
   id: string;
   display_name?: string;

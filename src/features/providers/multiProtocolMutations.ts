@@ -118,7 +118,7 @@ export const applyMultiProtocolProviderMutation = (
   const entries = (input.multiProtocolKeyEntries ?? []).filter((entry) => entryApiKey(entry));
   const retainedProtocols = new Set(entries.map((entry) => entry.protocol));
 
-  let next = removeMultiProtocolProviderConfigs(current, {
+  const next = removeMultiProtocolProviderConfigs(current, {
     openai: retainedProtocols.has('openai') ? [] : raw.openai,
     claude: retainedProtocols.has('claude') ? [] : raw.claude,
     codex: retainedProtocols.has('codex') ? [] : raw.codex,

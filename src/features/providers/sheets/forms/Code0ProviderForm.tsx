@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CODE0_BASE_URL, CODE0_PROTOCOL_LABELS, getCode0ProtocolUrls } from '../../code0';
+import { getMultiProtocolAggregationConflict } from '../../multiProtocolAggregation';
 import type {
   ProviderEntryFormInput,
   ProviderResource,
@@ -96,6 +97,10 @@ export function Code0ProviderForm({ resource, mode, mutating, formId, onSubmit, 
   const initialSignature = useMemo(() => JSON.stringify(initialEntries(resource)), [resource]);
   const dirty = JSON.stringify(entries) !== initialSignature;
   const urls = getCode0ProtocolUrls(CODE0_BASE_URL);
+  const aggregationConflict =
+    mode === 'edit'
+      ? getMultiProtocolAggregationConflict(resource?.raw as SponsorProviderRaw | undefined)
+      : null;
 
   useEffect(() => onDirtyChange?.(dirty), [dirty, onDirtyChange]);
 
@@ -112,6 +117,19 @@ export function Code0ProviderForm({ resource, mode, mutating, formId, onSubmit, 
     setError(null);
     await onSubmit(toForm(configured));
   };
+
+  if (aggregationConflict) {
+    return (
+      <form id={formId} className={styles.form} onSubmit={(event) => event.preventDefault()}>
+        <div className={styles.errorBox}>
+          {t('providersPage.multiProtocol.aggregationConflict', {
+            defaultValue:
+              'This provider has multiple configurations for one protocol and cannot be safely edited here.',
+          })}
+        </div>
+      </form>
+    );
+  }
 
   return (
     <form id={formId} className={styles.form} onSubmit={handleSubmit} noValidate>

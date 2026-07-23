@@ -37,6 +37,7 @@ import {
 import { buildFennoAIRaw, isFennoAIClaudeProvider, isFennoAICodexProvider } from './fennoAI';
 import { buildQiniuCloudRaw, isQiniuCloudClaudeProvider, isQiniuCloudCodexProvider, isQiniuCloudGeminiProvider, isQiniuCloudOpenAIProvider } from './qiniuCloud';
 import { applyMultiProtocolProviderMutation, removeMultiProtocolProviderConfigs, toggleMultiProtocolProviderConfigs, type MultiProtocolConfigLists } from './multiProtocolMutations';
+import { runMultiProtocolMutationWithRecovery } from './multiProtocolMutationRecovery';
 import type {
   ProviderBrand,
   ProviderEntryFormInput,
@@ -489,36 +490,40 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
         (_, index) => !raw.gemini.some((item) => item.index === index)
       );
 
-      await persistGeminiKeys(
-        geminiEntry
-          ? [...nextGemini, buildCode0ProviderKey(geminiEntry, raw.gemini[0]?.config)]
-          : nextGemini
-      );
-      await persistCodexConfigs(
-        codexEntry
-          ? [...nextCodex, buildCode0ProviderKey(codexEntry, raw.codex[0]?.config)]
-          : nextCodex
-      );
-      await persistClaudeConfigs(
-        claudeEntry
-          ? [...nextClaude, buildCode0ProviderKey(claudeEntry, raw.claude[0]?.config)]
-          : nextClaude
-      );
-      await persistOpenAIConfigs(
-        openaiEntry
-          ? [...nextOpenAI, buildCode0OpenAI(openaiEntry, raw.openai[0]?.config)]
-          : nextOpenAI
-      );
+      await runMultiProtocolMutationWithRecovery(async () => {
+        await persistGeminiKeys(
+          geminiEntry
+            ? [...nextGemini, buildCode0ProviderKey(geminiEntry, raw.gemini[0]?.config)]
+            : nextGemini
+        );
+        await persistCodexConfigs(
+          codexEntry
+            ? [...nextCodex, buildCode0ProviderKey(codexEntry, raw.codex[0]?.config)]
+            : nextCodex
+        );
+        await persistClaudeConfigs(
+          claudeEntry
+            ? [...nextClaude, buildCode0ProviderKey(claudeEntry, raw.claude[0]?.config)]
+            : nextClaude
+        );
+        await persistOpenAIConfigs(
+          openaiEntry
+            ? [...nextOpenAI, buildCode0OpenAI(openaiEntry, raw.openai[0]?.config)]
+            : nextOpenAI
+        );
+      }, refetch);
     },
-    [config, persistClaudeConfigs, persistCodexConfigs, persistGeminiKeys, persistOpenAIConfigs]
+    [config, persistClaudeConfigs, persistCodexConfigs, persistGeminiKeys, persistOpenAIConfigs, refetch]
   );
 
   const persistMultiProtocolLists = useCallback(async (next: MultiProtocolConfigLists) => {
-    await persistGeminiKeys(next.geminiApiKeys);
-    await persistCodexConfigs(next.codexApiKeys);
-    await persistClaudeConfigs(next.claudeApiKeys);
-    await persistOpenAIConfigs(next.openaiCompatibility);
-  }, [persistClaudeConfigs, persistCodexConfigs, persistGeminiKeys, persistOpenAIConfigs]);
+    await runMultiProtocolMutationWithRecovery(async () => {
+      await persistGeminiKeys(next.geminiApiKeys);
+      await persistCodexConfigs(next.codexApiKeys);
+      await persistClaudeConfigs(next.claudeApiKeys);
+      await persistOpenAIConfigs(next.openaiCompatibility);
+    }, refetch);
+  }, [persistClaudeConfigs, persistCodexConfigs, persistGeminiKeys, persistOpenAIConfigs, refetch]);
 
   const createProvider = useCallback(
     async (brand: ProviderBrand, input: ProviderEntryFormInput) => {
@@ -575,6 +580,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
       persistCode0,
       persistMultiProtocolLists,
       persistVertexConfigs,
+      persistXAIConfigs,
       refreshSnapshot,
     ]
   );
@@ -766,6 +772,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
       persistCodexConfigs,
       persistGeminiKeys,
       persistMultiProtocolLists,
+      persistOpenAIConfigs,
       persistVertexConfigs,
       refreshSnapshot,
       updateConfigValue,

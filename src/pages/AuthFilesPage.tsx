@@ -1061,6 +1061,7 @@ export function AuthFilesPage() {
         disableControls={disableControls}
         excludedError={excludedError}
         excluded={excluded}
+        onRetryExcluded={loadExcluded}
         onAddExcluded={() => openExcludedEditor()}
         onEditExcluded={openExcludedEditor}
         onDeleteExcluded={deleteExcluded}
@@ -1070,6 +1071,7 @@ export function AuthFilesPage() {
         onEditProvider={openModelAliasEditor}
         onDeleteProvider={deleteModelAlias}
         modelAliasError={modelAliasError}
+        onRetryAlias={loadModelAlias}
         modelAlias={modelAlias}
         allProviderModels={allProviderModels}
         onUpdateAlias={handleMappingUpdate}
