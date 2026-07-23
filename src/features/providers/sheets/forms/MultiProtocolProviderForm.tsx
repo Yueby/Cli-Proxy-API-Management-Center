@@ -130,8 +130,9 @@ export function MultiProtocolProviderForm({
             <div className={styles.arrayItem} key={`${entry.protocol}:${index}`}>
               <div className={styles.fieldGrid}>
                 <label className={styles.field}>
-                  <span>{t('providersPage.multiProtocol.protocol')}</span>
+                  <span className={styles.label}>{t('providersPage.multiProtocol.protocol')}</span>
                   <select
+                    className={styles.input}
                     value={entry.protocol}
                     disabled={mutating}
                     onChange={(event) => update(index, { protocol: event.target.value as MultiProtocolProviderProtocol })}
@@ -144,8 +145,9 @@ export function MultiProtocolProviderForm({
                   </select>
                 </label>
                 <label className={styles.field}>
-                  <span>{t('providersPage.form.apiKey')}</span>
+                  <span className={styles.label}>{t('providersPage.form.apiKey')}</span>
                   <input
+                    className={styles.input}
                     type="password"
                     value={entry.apiKey}
                     disabled={mutating}
@@ -156,35 +158,35 @@ export function MultiProtocolProviderForm({
                 </label>
                 {definition.baseUrlOptions.length > 1 ? (
                   <label className={styles.field}>
-                    <span>{t('providersPage.multiProtocol.endpoint')}</span>
-                    <select value={entry.baseUrl} disabled={mutating} onChange={(event) => update(index, { baseUrl: event.target.value })}>
+                    <span className={styles.label}>{t('providersPage.multiProtocol.endpoint')}</span>
+                    <select className={styles.input} value={entry.baseUrl} disabled={mutating} onChange={(event) => update(index, { baseUrl: event.target.value })}>
                       {definition.baseUrlOptions.map((option) => <option key={option.id} value={option.baseUrl}>{option.id}</option>)}
                     </select>
                   </label>
                 ) : null}
                 <label className={styles.field}>
-                  <span>{t('providersPage.form.proxyUrl')}</span>
-                  <input value={entry.proxyUrl} disabled={mutating} onChange={(event) => update(index, { proxyUrl: event.target.value })} />
+                  <span className={styles.label}>{t('providersPage.form.proxyUrl')}</span>
+                  <input className={styles.input} value={entry.proxyUrl} disabled={mutating} onChange={(event) => update(index, { proxyUrl: event.target.value })} />
                 </label>
                 <label className={styles.field}>
-                  <span>{t('providersPage.form.prefix')}</span>
-                  <input value={entry.prefix} disabled={mutating} onChange={(event) => update(index, { prefix: event.target.value })} />
+                  <span className={styles.label}>{t('providersPage.form.prefix')}</span>
+                  <input className={styles.input} value={entry.prefix} disabled={mutating} onChange={(event) => update(index, { prefix: event.target.value })} />
                 </label>
                 <label className={styles.field}>
-                  <span>{t('providersPage.form.priority')}</span>
-                  <input type="number" value={entry.priority ?? ''} disabled={mutating} onChange={(event) => update(index, { priority: event.target.value === '' ? undefined : Number(event.target.value) })} />
+                  <span className={styles.label}>{t('providersPage.form.priority')}</span>
+                  <input className={styles.input} type="number" value={entry.priority ?? ''} disabled={mutating} onChange={(event) => update(index, { priority: event.target.value === '' ? undefined : Number(event.target.value) })} />
                 </label>
               </div>
               <label className={styles.checkboxRow}>
-                <input type="checkbox" checked={entry.disabled} disabled={mutating} onChange={(event) => update(index, { disabled: event.target.checked })} />
+                <input className={styles.checkboxBox} type="checkbox" checked={entry.disabled} disabled={mutating} onChange={(event) => update(index, { disabled: event.target.checked })} />
                 <span>{t('providersPage.form.disabled')}</span>
               </label>
-              {entries.length > 1 ? <button type="button" disabled={mutating} onClick={() => setEntries((current) => current.filter((_, i) => i !== index))}>{t('providersPage.actions.delete')}</button> : null}
+              {entries.length > 1 ? <button className={styles.removeBtn} type="button" disabled={mutating} onClick={() => setEntries((current) => current.filter((_, i) => i !== index))}>{t('providersPage.actions.delete')}</button> : null}
             </div>
           );
         })}
         {entries.length < definition.protocols.length ? (
-          <button type="button" disabled={mutating} onClick={() => {
+          <button className={styles.addBtn} type="button" disabled={mutating} onClick={() => {
             const used = new Set(entries.map((entry) => entry.protocol));
             const protocol = definition.protocols.find((candidate) => !used.has(candidate));
             if (protocol) setEntries((current) => [...current, emptyEntry(brand, protocol)]);
