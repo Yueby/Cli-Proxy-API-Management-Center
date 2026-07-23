@@ -3,6 +3,9 @@ import { describe, expect, test } from 'bun:test';
 const source = await Bun.file(
   new URL('../src/features/providers/sheets/forms/MultiProtocolProviderForm.tsx', import.meta.url)
 ).text();
+const styles = await Bun.file(
+  new URL('../src/features/providers/sheets/forms/sharedForm.module.scss', import.meta.url)
+).text();
 
 describe('multi-protocol provider form styling', () => {
   test('uses the shared themed classes instead of browser-default controls', () => {
@@ -22,5 +25,14 @@ describe('multi-protocol provider form styling', () => {
     expect(source).toContain('className={styles.multiProtocolGrid}');
     expect(source).toContain('className={styles.multiProtocolCardFooter}');
     expect(source).toContain('className={styles.multiProtocolActions}');
+  });
+
+  test('uses the project soft-surface style without nested outline cards', () => {
+    const cardBlock = styles.match(/\.multiProtocolCard\s*\{([\s\S]*?)\n\}/)?.[1] ?? '';
+    const headerBlock = styles.match(/\.multiProtocolCardHeader\s*\{([\s\S]*?)\n\}/)?.[1] ?? '';
+    expect(cardBlock).toContain('border: 0');
+    expect(cardBlock).toContain('color-mix');
+    expect(cardBlock).toContain('border-radius: $radius-lg');
+    expect(headerBlock).not.toContain('border-bottom');
   });
 });
