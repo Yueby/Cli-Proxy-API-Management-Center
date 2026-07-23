@@ -12,4 +12,15 @@ describe('multi-protocol provider form styling', () => {
     expect(source).toContain('className={styles.addBtn}');
     expect(source).toContain('className={styles.label}');
   });
+
+  test('uses the provider-sheet card hierarchy and responsive layout classes', () => {
+    expect(source).toContain('className={styles.multiProtocolIntro}');
+    expect(source).toContain('className={styles.multiProtocolCard}');
+    expect(source).toContain('className={styles.multiProtocolCardHeader}');
+    expect(source).toContain('className={styles.multiProtocolProtocolField}');
+    expect(source).toContain('styles.multiProtocolApiKey');
+    expect(source).toContain('className={styles.multiProtocolGrid}');
+    expect(source).toContain('className={styles.multiProtocolCardFooter}');
+    expect(source).toContain('className={styles.multiProtocolActions}');
+  });
 });

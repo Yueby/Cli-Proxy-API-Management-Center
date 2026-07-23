@@ -140,75 +140,161 @@ export function MultiProtocolProviderForm({
       }}
     >
       <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>{definition.displayName}</h3>
-        <p className={styles.sectionHint}>{t('providersPage.multiProtocol.description')}</p>
-        {entries.map((entry, index) => {
-          const used = new Set(entries.filter((_, i) => i !== index).map((item) => item.protocol));
-          return (
-            <div className={styles.arrayItem} key={`${entry.protocol}:${index}`}>
-              <div className={styles.fieldGrid}>
-                <label className={styles.field}>
-                  <span className={styles.label}>{t('providersPage.multiProtocol.protocol')}</span>
-                  <select
-                    className={styles.input}
-                    value={entry.protocol}
-                    disabled={mutating}
-                    onChange={(event) => update(index, { protocol: event.target.value as MultiProtocolProviderProtocol })}
-                  >
-                    {definition.protocols.map((protocol) => (
-                      <option key={protocol} value={protocol} disabled={used.has(protocol)}>
-                        {t(`providersPage.protocols.${protocol}`)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className={styles.field}>
+        <div className={styles.multiProtocolIntro}>
+          <h3 className={styles.sectionTitle}>{definition.displayName}</h3>
+          <p className={styles.sectionHint}>{t('providersPage.multiProtocol.description')}</p>
+        </div>
+
+        <div className={styles.multiProtocolList}>
+          {entries.map((entry, index) => {
+            const used = new Set(
+              entries.filter((_, i) => i !== index).map((item) => item.protocol)
+            );
+            return (
+              <div className={styles.multiProtocolCard} key={`${entry.protocol}:${index}`}>
+                <div className={styles.multiProtocolCardHeader}>
+                  <label className={styles.multiProtocolProtocolField}>
+                    <span className={styles.label}>{t('providersPage.multiProtocol.protocol')}</span>
+                    <select
+                      className={styles.input}
+                      value={entry.protocol}
+                      disabled={mutating}
+                      onChange={(event) =>
+                        update(index, {
+                          protocol: event.target.value as MultiProtocolProviderProtocol,
+                        })
+                      }
+                    >
+                      {definition.protocols.map((protocol) => (
+                        <option key={protocol} value={protocol} disabled={used.has(protocol)}>
+                          {t(`providersPage.protocols.${protocol}`)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {entries.length > 1 ? (
+                    <button
+                      className={styles.removeBtn}
+                      type="button"
+                      disabled={mutating}
+                      onClick={() =>
+                        setEntries((current) => current.filter((_, i) => i !== index))
+                      }
+                    >
+                      {t('providersPage.actions.delete')}
+                    </button>
+                  ) : null}
+                </div>
+
+                <label className={`${styles.field} ${styles.multiProtocolApiKey}`}>
                   <span className={styles.label}>{t('providersPage.form.apiKey')}</span>
                   <input
                     className={styles.input}
                     type="password"
+                    autoComplete="new-password"
                     value={entry.apiKey}
                     disabled={mutating}
                     required={mode === 'create' && !entry.existingApiKey}
-                    placeholder={mode === 'edit' && entry.existingApiKey ? '••••••••' : ''}
+                    placeholder={
+                      mode === 'edit' && entry.existingApiKey
+                        ? t('providersPage.form.apiKeyEditPlaceholder')
+                        : t('providersPage.form.apiKeyCreatePlaceholder')
+                    }
                     onChange={(event) => update(index, { apiKey: event.target.value })}
                   />
                 </label>
-                {definition.baseUrlOptions.length > 1 ? (
+
+                <div className={styles.multiProtocolGrid}>
+                  {definition.baseUrlOptions.length > 1 ? (
+                    <label className={styles.field}>
+                      <span className={styles.label}>
+                        {t('providersPage.multiProtocol.endpoint')}
+                      </span>
+                      <select
+                        className={styles.input}
+                        value={entry.baseUrl}
+                        disabled={mutating}
+                        onChange={(event) => update(index, { baseUrl: event.target.value })}
+                      >
+                        {definition.baseUrlOptions.map((option) => (
+                          <option key={option.id} value={option.baseUrl}>
+                            {option.id}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ) : null}
                   <label className={styles.field}>
-                    <span className={styles.label}>{t('providersPage.multiProtocol.endpoint')}</span>
-                    <select className={styles.input} value={entry.baseUrl} disabled={mutating} onChange={(event) => update(index, { baseUrl: event.target.value })}>
-                      {definition.baseUrlOptions.map((option) => <option key={option.id} value={option.baseUrl}>{option.id}</option>)}
-                    </select>
+                    <span className={styles.label}>{t('providersPage.form.proxyUrl')}</span>
+                    <input
+                      className={styles.input}
+                      value={entry.proxyUrl}
+                      disabled={mutating}
+                      onChange={(event) => update(index, { proxyUrl: event.target.value })}
+                    />
                   </label>
-                ) : null}
-                <label className={styles.field}>
-                  <span className={styles.label}>{t('providersPage.form.proxyUrl')}</span>
-                  <input className={styles.input} value={entry.proxyUrl} disabled={mutating} onChange={(event) => update(index, { proxyUrl: event.target.value })} />
-                </label>
-                <label className={styles.field}>
-                  <span className={styles.label}>{t('providersPage.form.prefix')}</span>
-                  <input className={styles.input} value={entry.prefix} disabled={mutating} onChange={(event) => update(index, { prefix: event.target.value })} />
-                </label>
-                <label className={styles.field}>
-                  <span className={styles.label}>{t('providersPage.form.priority')}</span>
-                  <input className={styles.input} type="number" value={entry.priority ?? ''} disabled={mutating} onChange={(event) => update(index, { priority: event.target.value === '' ? undefined : Number(event.target.value) })} />
-                </label>
+                  <label className={styles.field}>
+                    <span className={styles.label}>{t('providersPage.form.prefix')}</span>
+                    <input
+                      className={styles.input}
+                      value={entry.prefix}
+                      disabled={mutating}
+                      onChange={(event) => update(index, { prefix: event.target.value })}
+                    />
+                  </label>
+                  <label className={styles.field}>
+                    <span className={styles.label}>{t('providersPage.form.priority')}</span>
+                    <input
+                      className={styles.input}
+                      type="number"
+                      value={entry.priority ?? ''}
+                      disabled={mutating}
+                      onChange={(event) =>
+                        update(index, {
+                          priority:
+                            event.target.value === '' ? undefined : Number(event.target.value),
+                        })
+                      }
+                    />
+                  </label>
+                </div>
+
+                <div className={styles.multiProtocolCardFooter}>
+                  <label className={styles.checkboxRow}>
+                    <input
+                      className={styles.checkboxBox}
+                      type="checkbox"
+                      checked={entry.disabled}
+                      disabled={mutating}
+                      onChange={(event) => update(index, { disabled: event.target.checked })}
+                    />
+                    <span className={styles.checkboxText}>
+                      {t('providersPage.form.disabled')}
+                    </span>
+                  </label>
+                </div>
               </div>
-              <label className={styles.checkboxRow}>
-                <input className={styles.checkboxBox} type="checkbox" checked={entry.disabled} disabled={mutating} onChange={(event) => update(index, { disabled: event.target.checked })} />
-                <span>{t('providersPage.form.disabled')}</span>
-              </label>
-              {entries.length > 1 ? <button className={styles.removeBtn} type="button" disabled={mutating} onClick={() => setEntries((current) => current.filter((_, i) => i !== index))}>{t('providersPage.actions.delete')}</button> : null}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+
         {entries.length < definition.protocols.length ? (
-          <button className={styles.addBtn} type="button" disabled={mutating} onClick={() => {
-            const used = new Set(entries.map((entry) => entry.protocol));
-            const protocol = definition.protocols.find((candidate) => !used.has(candidate));
-            if (protocol) setEntries((current) => [...current, emptyEntry(brand, protocol)]);
-          }}>{t('providersPage.multiProtocol.addProtocol')}</button>
+          <div className={styles.multiProtocolActions}>
+            <button
+              className={styles.addBtn}
+              type="button"
+              disabled={mutating}
+              onClick={() => {
+                const used = new Set(entries.map((entry) => entry.protocol));
+                const protocol = definition.protocols.find((candidate) => !used.has(candidate));
+                if (protocol) {
+                  setEntries((current) => [...current, emptyEntry(brand, protocol)]);
+                }
+              }}
+            >
+              {t('providersPage.multiProtocol.addProtocol')}
+            </button>
+          </div>
         ) : null}
       </div>
     </form>
