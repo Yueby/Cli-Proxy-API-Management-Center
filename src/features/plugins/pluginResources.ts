@@ -72,6 +72,7 @@ export const isOfficialRepository = (repository: string): boolean =>
 // Every first-party plugin lives there, so the repository URL is the single
 // source of truth — see isOfficialRepository for the exact match.
 export const isOfficialPlugin = (entry: PluginStoreEntry): boolean =>
+  entry.sourceId.trim().toLowerCase() === DEFAULT_PLUGIN_STORE_SOURCE_ID &&
   isOfficialRepository(entry.repository);
 
 export const isDefaultPluginStoreSource = (

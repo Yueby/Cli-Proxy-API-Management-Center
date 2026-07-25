@@ -299,14 +299,13 @@ const normalizeOauthExcludedModels = (payload: unknown): Record<string, string[]
   return result;
 };
 
-const normalizeOauthModelAlias = (payload: unknown): Record<string, OAuthModelAliasEntry[]> => {
+export const normalizeOauthModelAlias = (
+  payload: unknown
+): Record<string, OAuthModelAliasEntry[]> => {
   if (!payload || typeof payload !== 'object') return {};
 
   const record = payload as Record<string, unknown>;
-  const source =
-    record['oauth-model-alias'] ??
-    record.items ??
-    payload;
+  const source = record['oauth-model-alias'] ?? record.items ?? payload;
   if (!source || typeof source !== 'object') return {};
 
   const result: Record<string, OAuthModelAliasEntry[]> = {};
@@ -315,36 +314,50 @@ const normalizeOauthModelAlias = (payload: unknown): Record<string, OAuthModelAl
     const key = String(channel ?? '')
       .trim()
       .toLowerCase();
-    if (!key) return;
-    if (!Array.isArray(mappings)) return;
+    if (!key || !Array.isArray(mappings)) return;
 
-	    const seen = new Set<string>();
-	    const normalized = mappings
-	      .map((item) => {
-	        if (!item || typeof item !== 'object') return null;
-	        const entry = item as Record<string, unknown>;
-	        const name = String(entry.name ?? entry.id ?? entry.model ?? '').trim();
-	        const alias = String(entry.alias ?? '').trim();
-	        if (!name || !alias) return null;
-	        const fork = entry.fork === true;
-	        return fork ? { name, alias, fork } : { name, alias };
-	      })
-      .filter(Boolean)
+    const seen = new Set<string>();
+    const normalized = mappings
+      .map((item) => {
+        if (!item || typeof item !== 'object') return null;
+        const entry = item as Record<string, unknown>;
+        const name = String(entry.name ?? entry.id ?? entry.model ?? '').trim();
+        const alias = String(entry.alias ?? '').trim();
+        if (!name || !alias) return null;
+        const normalizedEntry: OAuthModelAliasEntry = { name, alias };
+        if (entry.fork === true) normalizedEntry.fork = true;
+        const forceMapping = entry['force-mapping'] ?? entry.forceMapping;
+        if (typeof forceMapping === 'boolean') normalizedEntry.forceMapping = forceMapping;
+        return normalizedEntry;
+      })
+      .filter((entry): entry is OAuthModelAliasEntry => Boolean(entry))
       .filter((entry) => {
-        const aliasEntry = entry as OAuthModelAliasEntry;
-        const dedupeKey = `${aliasEntry.name.toLowerCase()}::${aliasEntry.alias.toLowerCase()}::${aliasEntry.fork ? '1' : '0'}`;
+        const dedupeKey = `${entry.name.toLowerCase()}::${entry.alias.toLowerCase()}::${entry.fork ? '1' : '0'}`;
         if (seen.has(dedupeKey)) return false;
         seen.add(dedupeKey);
         return true;
-      }) as OAuthModelAliasEntry[];
+      });
 
-    if (normalized.length) {
-      result[key] = normalized;
-    }
+    if (normalized.length) result[key] = normalized;
   });
 
   return result;
 };
+
+export const serializeOauthModelAliases = (
+  aliases: OAuthModelAliasEntry[]
+): Array<Record<string, unknown>> =>
+  aliases.map((entry) => {
+    const payload: Record<string, unknown> = {
+      name: entry.name,
+      alias: entry.alias,
+    };
+    if (entry.fork) payload.fork = true;
+    if (typeof entry.forceMapping === 'boolean') {
+      payload['force-mapping'] = entry.forceMapping;
+    }
+    return payload;
+  });
 
 const OAUTH_MODEL_ALIAS_ENDPOINT = '/oauth-model-alias';
 
@@ -432,8 +445,12 @@ export const authFilesApi = {
     const normalizedChannel = String(channel ?? '')
       .trim()
       .toLowerCase();
-    const normalizedAliases = normalizeOauthModelAlias({ [normalizedChannel]: aliases })[normalizedChannel] ?? [];
-    await apiClient.patch(OAUTH_MODEL_ALIAS_ENDPOINT, { channel: normalizedChannel, aliases: normalizedAliases });
+    const normalizedAliases =
+      normalizeOauthModelAlias({ [normalizedChannel]: aliases })[normalizedChannel] ?? [];
+    await apiClient.patch(OAUTH_MODEL_ALIAS_ENDPOINT, {
+      channel: normalizedChannel,
+      aliases: serializeOauthModelAliases(normalizedAliases),
+    });
   },
 
   deleteOauthModelAlias: async (channel: string) => {
