@@ -1,9 +1,9 @@
 # PORT_DECISIONS — candidate/nonpromo-upstream-port-20260725
 
-Check time: 2026-07-25 03:45 UTC
+Check time: 2026-07-25 (final release audit)
 Baseline origin/main: `ac6e74d5cf35fdff1a4936a408fdf3673ebbb85c`
-Upstream/main at audit: (see audit t_223429ef); current upstream tip: `7793321b189be64e23326c6e140b07ee4689a337`
-Candidate HEAD: `4bfa6a6f3bfb1314bf9ee7329b69062116980859`
+Upstream/main at final audit: `458e5e144bb9422a270c7df30e7b36d206839fa2` (`v1.19.2`)
+Candidate branch: `candidate/nonpromo-upstream-port-20260725`; final commit recorded by Git after this document update
 Branch: `candidate/nonpromo-upstream-port-20260725`
 Method: reuse verified `d1bf918` + `preview/providers-dev-20260723` stack, then selective ports of remaining C7/C1/C3-events.
 
@@ -35,10 +35,10 @@ Policy sources:
 - **Preserved:** Fork CPA/home version + plugin capability header interceptor
 - **Tests:** `tests/apiError.test.ts` (5)
 
-### C2 — Plugin dynamic OAuth / compat
+### C2 — Plugin dynamic OAuth / touched PATCH compatibility
 - **Sources:** `d1bf918` (+ earlier plugin commits already on main lineage where applicable)
 - **What:** `pluginConfigDraft` helpers + tests (touched-field patch semantics); plugin OAuth callback allowlist for dynamic plugins; trust/version selection tests already present
-- **Note:** Fork `PluginsPage` keeps its richer array list editor and full-config save path; extracted draft helpers are available and unit-tested but not forced into the page (would regress Fork array UX). Reachability of dynamic OAuth callback paths remains via Auth Files OAuth dialog / plugin providers.
+- **Final:** Fork `PluginsPage` now uses `pluginConfigDraft` touched-field `PATCH` semantics while preserving its richer array-list editor. Untouched/unknown backend fields are not sent. Dynamic OAuth callback paths remain via Auth Files OAuth dialog / plugin providers.
 
 ### C1 — Quota / Codex / xAI / Kimi logic (no page/SCSS overwrite)
 - **Sources:** `d1bf918`, `898a5eb`, `3447a0bd`, prior main xAI paid path
@@ -48,7 +48,7 @@ Policy sources:
 ### C5 / C6 — Dashboard Redis + Visual Config
 - **Sources:** `d1bf918` (+ visual config commits in stack)
 - **What:** dashboard model-count failure vs empty distinction; visual config concurrency (dirty fields on latest YAML); disable-image-generation passthrough; Redis usage retention validation
-- **Deferred full UI adapt:** upstream `configSearchIndex` + FieldAnchor jump-to-field search (large VisualConfigEditor structural merge). Helpers/behavior already improved; global search index not ported as page rewrite.
+- **Final:** semantically adapted `configSearchIndex`, translated search results, field anchors, conditional TLS reveal and jump-to-field behavior into the existing Fork drawer/editor without replacing its structure.
 
 ### A1 — Normal providers into Provider Workbench
 - **Sources:** `21eace1`, `fb6dfa7`, `53981c1`, `2eaa592`, `952946e`, `196d304`, form polish `5c110e4`/`cdc4050`, safety `898a5eb`
@@ -66,6 +66,16 @@ Policy sources:
 - **Ported related:** multi-protocol form soft-surface alignment only (provider forms)
 - **Why:** Fork UI is authoritative for shell chrome; upstream a11y/tooltips mixed with badge count chrome that would fight Fork sidebar
 
+### Final upstream parity batch (upstream through `458e5e1`)
+- ClaudeAPI new/legacy Base URL compatibility (affiliate URL excluded)
+- Kimi Auth Files theme surface
+- OAuth credential manual refresh
+- PluginsPage touched-field PATCH + retained array-list UX
+- Visual Config field search/reveal/jump
+- Plugin Store card header grid/badge layout
+- Shared `useApiKeysForModels` for Dashboard/System
+- Focused tests plus full 101-test gate
+
 ---
 
 ## Excluded (policy)
@@ -77,17 +87,15 @@ Policy sources:
 | Upstream `OAuthPage.tsx` as page shell | Fork uses Auth Files OAuth dialog + `/oauth` → `/auth-files` redirect; behavior ported there |
 | MainLayout / layout.scss from `4d081359` | Fork UI authority |
 | Quota page/SCSS wholesale | Fork UI authority; logic-only C1 |
-| VisualConfig FieldAnchor search index full rewrite | Large UI structure; deferred (see remaining) |
+| Upstream VisualConfig page rewrite | Rejected; only field-search behavior was semantically adapted into the Fork editor |
 
 ---
 
 ## Remaining / optional follow-ups (not release blockers for this candidate)
 
-1. Wire `pluginConfigDraft` into PluginsPage **or** extend helpers to support Fork array-list UX while keeping touched patches.
-2. Semantic adapt of VisualConfig jump-to-field search (`configSearchIndex`) without replacing Fork editor chrome.
-3. Extract `useApiKeysForModels` (DRY) — Fork already has equivalent inline resolvers on Dashboard/System.
-4. Optional rename of internal `Sponsor*` multi-protocol type aliases to `MultiProtocol*` (no behavior change).
-5. D1 sidebar tooltip/a11y if product wants it adapted into Fork shell (not copy-paste upstream).
+1. Optional rename of internal `Sponsor*` multi-protocol type aliases to `MultiProtocol*` (no behavior change).
+2. Optional D1 sidebar tooltip/a11y adaptation if product wants it; do not overwrite Fork shell chrome.
+3. Human visual smoke when browser automation is available; HTTP preview, tests and build already pass.
 
 ---
 

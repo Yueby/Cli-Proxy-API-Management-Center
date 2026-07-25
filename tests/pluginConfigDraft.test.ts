@@ -39,6 +39,20 @@ describe('plugin config draft', () => {
     });
   });
 
+  test('patches enabled only after the page marks the toggle as touched', () => {
+    const draft = buildPluginConfigDraft(
+      { enabled: true, configFields: fields },
+      { enabled: true, priority: 3 }
+    );
+    draft.enabled = false;
+    draft.enabledTouched = true;
+
+    expect(buildPluginConfigPatch(draft, fields, t)).toEqual({
+      patch: { enabled: false },
+      errors: {},
+    });
+  });
+
   test('parses touched array JSON without coercing item types', () => {
     const draft = buildPluginConfigDraft(
       { enabled: true, configFields: fields },

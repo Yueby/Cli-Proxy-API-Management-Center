@@ -401,7 +401,10 @@
     "subscription_plan_unknown": "Неизвестный план",
     "headers_label": "Пользовательские заголовки (headers)",
     "headers_placeholder": "{\n  \"Header-Name\": \"value\"\n}",
-    "headers_hint": "Введите пользовательские HTTP-заголовки как JSON-объект, например {\"X-My-Header\": \"value\"}"
+    "headers_hint": "Введите пользовательские HTTP-заголовки как JSON-объект, например {\"X-My-Header\": \"value\"}",
+    "manual_refresh_button": "Запросить обновление учётных данных",
+    "manual_refresh_requested": "Запрошено обновление для {{name}}",
+    "manual_refresh_failed": "Не удалось обновить {{name}}: {{message}}"
   },
   "antigravity_subscription": {
     "subscription_label": "Подписка",

@@ -403,7 +403,10 @@
     "subscription_expires_in_hours": "剩余 {{count}} 小时",
     "subscription_expires_in_minutes": "剩余 {{count}} 分钟",
     "subscription_expires_title": "{{plan}} 订阅到期时间：{{date}}",
-    "subscription_plan_unknown": "未知套餐"
+    "subscription_plan_unknown": "未知套餐",
+    "manual_refresh_button": "手动刷新凭据",
+    "manual_refresh_requested": "已请求刷新 {{name}}",
+    "manual_refresh_failed": "刷新 {{name}} 失败：{{message}}"
   },
   "antigravity_subscription": {
     "subscription_label": "订阅",

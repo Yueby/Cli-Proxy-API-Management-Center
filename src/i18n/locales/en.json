@@ -403,7 +403,10 @@
     "subscription_expires_in_hours": "{{count}} hours left",
     "subscription_expires_in_minutes": "{{count}} minutes left",
     "subscription_expires_title": "{{plan}} subscription expires at {{date}}",
-    "subscription_plan_unknown": "Unknown plan"
+    "subscription_plan_unknown": "Unknown plan",
+    "manual_refresh_button": "Request credential refresh",
+    "manual_refresh_requested": "Refresh requested for {{name}}",
+    "manual_refresh_failed": "Failed to refresh {{name}}: {{message}}"
   },
   "antigravity_subscription": {
     "subscription_label": "Subscription",

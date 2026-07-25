@@ -20,6 +20,7 @@ import {
   IconCode,
   IconDiamond,
   IconKey,
+  IconSearch,
   IconSatellite,
   IconSettings,
   IconShield,
@@ -44,6 +45,7 @@ import {
   PayloadRulesEditor,
   PluginStoreAuthEditor,
 } from './VisualConfigEditorBlocks';
+import { configFieldDomId, getFieldRevealPatch, searchConfigFields } from './configSearchIndex';
 import styles from './VisualConfigEditor.module.scss';
 
 type VisualSectionId =
@@ -133,6 +135,10 @@ function SectionSubsection({
   );
 }
 
+function FieldAnchor({ fieldId, children }: { fieldId: string; children: ReactNode }) {
+  return <div id={configFieldDomId(fieldId)} className={styles.fieldAnchor}>{children}</div>;
+}
+
 function FieldShell({
   label,
   labelId,
@@ -196,6 +202,8 @@ export function VisualConfigEditor({
   const workspaceRef = useRef<HTMLDivElement | null>(null);
   const sectionRefs = useRef<Partial<Record<VisualSectionId, HTMLElement | null>>>({});
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchResults = useMemo(() => searchConfigFields(searchQuery, t), [searchQuery, t]);
   const isJumpingRef = useRef(false);
 
   const isKeepaliveDisabled =
@@ -435,6 +443,19 @@ export function VisualConfigEditor({
     }, 600);
   }, []);
 
+  const handleSearchResultJump = useCallback(
+    (entry: (typeof searchResults)[number]) => {
+      const revealPatch = getFieldRevealPatch(entry.fieldId);
+      if (revealPatch) onChange(revealPatch);
+      setActiveSectionId(entry.sectionId);
+      setSidebarOpen(false);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const target = document.getElementById(configFieldDomId(entry.fieldId)) ?? sectionRefs.current[entry.sectionId];
+        target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }));
+    }, [onChange]
+  );
+
   // Close sidebar on outside click
   useEffect(() => {
     if (!sidebarOpen) return;
@@ -458,6 +479,13 @@ export function VisualConfigEditor({
 
   const navContent = (
     <div className={styles.navList}>
+      <div className={styles.searchBox}><IconSearch size={14} /><input className={styles.searchInput}
+        value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)}
+        placeholder={t('config_management.visual.search_placeholder', { defaultValue: 'Search fields' })} /></div>
+      {searchQuery.trim() ? <div className={styles.searchResults}>{searchResults.map((entry) => (
+        <button key={entry.fieldId} type="button" className={styles.searchResult} onClick={() => handleSearchResultJump(entry)}>
+          <span>{t(entry.labelKey)}</span><small>{t(`config_management.visual.sections.${entry.sectionId}.title`)}</small>
+        </button>))}</div> : null}
       {sections.map((section) => {
         const Icon = section.icon;
 
@@ -542,6 +570,7 @@ export function VisualConfigEditor({
                 <>
                   <Divider />
                   <SectionGrid>
+                    <FieldAnchor fieldId="tlsCert">
                     <Input
                       label={t('config_management.visual.sections.tls.cert')}
                       placeholder="/path/to/cert.pem"
@@ -549,6 +578,8 @@ export function VisualConfigEditor({
                       onChange={(e) => onChange({ tlsCert: e.target.value })}
                       disabled={disabled}
                     />
+                    </FieldAnchor>
+                    <FieldAnchor fieldId="tlsKey">
                     <Input
                       label={t('config_management.visual.sections.tls.key')}
                       placeholder="/path/to/key.pem"
@@ -556,6 +587,7 @@ export function VisualConfigEditor({
                       onChange={(e) => onChange({ tlsKey: e.target.value })}
                       disabled={disabled}
                     />
+                    </FieldAnchor>
                   </SectionGrid>
                 </>
               ) : null}
@@ -1286,7 +1318,8 @@ export function VisualConfigEditor({
                 {sidebarOpen ? <IconChevronRight size={14} /> : <IconChevronLeft size={14} />}
               </button>
               <div
-                className={`${styles.sidebarDrawer} ${sidebarOpen ? styles.sidebarDrawerOpen : ''}`}
+                className={styles.sidebarDrawer}
+                data-open={sidebarOpen ? 'true' : 'false'}
               >
                 {navContent}
               </div>

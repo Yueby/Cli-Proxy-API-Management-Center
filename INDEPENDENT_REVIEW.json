@@ -3,10 +3,8 @@
   "security_concerns": [],
   "logic_errors": [],
   "suggestions": [
-    "Optional rename of legacy Sponsor* type aliases (SponsorProviderRaw, getSponsorProviderDefinition, etc.) to MultiProtocol* for clarity; behavior is already non-affiliate metadata only.",
-    "pluginConfigDraft helpers are unit-tested but not wired into Fork PluginsPage array-list UX; track as follow-up to avoid dual edit paths.",
-    "VERIFICATION notes headless UI smoke gaps (workbench create sheets, OAuth load-fail disable, Kimi quota order, xAI paid fallback); worth a short manual pass before merge.",
-    "useProviderRecentRequests.ts lost final newline (style only)."
+    "Optional future rename of legacy Sponsor* internal type aliases to MultiProtocol*; current behavior contains no affiliate UI.",
+    "Run an additional human visual smoke pass when a browser automation service is available."
   ],
-  "summary": "Independent review of candidate/nonpromo-upstream-port-20260725 at 738fc1f (baseline ac6e74d ancestor). bun test tests/: 88 pass / 0 fail. Promo scan clean in src (only docs mention excluded affiliate strings). sponsorDefinitions.ts is Kimi multi-protocol metadata only; client.ts retains CPA/home version + plugin-support header interceptors with handleError envelope parse only; no MainLayout.tsx mass overwrite in port names. No secrets, injection, eval, or phone-home promo UI found. Concurrency/cache-isolation, multi-protocol identity delete/edit, OAuth load guards, and auth-files-changed events look coherent with tests."
+  "summary": "Final release review for candidate/nonpromo-upstream-port-20260725 against baseline ac6e74d and audited upstream 458e5e1. Full suite: 101 pass, 0 fail; type-check and production build pass; lint has 0 errors and 7 pre-existing no-explicit-any warnings. ClaudeAPI URL compatibility, Kimi themed Auth Files, manual OAuth credential refresh, touched-field plugin PATCH, Visual Config field search/jump, Plugin Store card layout, and shared model API-key resolver are integrated. Promo/affiliate and secret scans pass; Fork UI and deleted-page intent are preserved."
 }

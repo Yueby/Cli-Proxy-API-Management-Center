@@ -1,7 +1,11 @@
 import { afterEach, describe, expect, test } from 'bun:test';
 import { PROVIDER_BRAND_ORDER, PROVIDER_DESCRIPTORS } from '../src/features/providers/descriptors';
 import { claudeApiToResource, code0ToResource } from '../src/features/providers/adapters';
-import { CLAUDE_API_BASE_URL, isClaudeApiProvider } from '../src/features/providers/claudeApi';
+import {
+  CLAUDE_API_BASE_URL,
+  CLAUDE_API_LEGACY_BASE_URL,
+  isClaudeApiProvider,
+} from '../src/features/providers/claudeApi';
 import {
   CODE0_BASE_URL,
   CODE0_OPENAI_BASE_URL,
@@ -29,10 +33,14 @@ describe('ClaudeAPI and Code0 providers', () => {
     expect(PROVIDER_BRAND_ORDER).toContain('code0');
   });
 
-  test('ClaudeAPI is selected from Claude backend config with a ClaudeAPI selector', () => {
-    const config = { apiKey: 'claude-key', baseUrl: `${CLAUDE_API_BASE_URL}/` };
+  test('ClaudeAPI uses the current endpoint while recognizing current and legacy configs', () => {
+    expect(CLAUDE_API_BASE_URL).toBe('https://gw.apito.ai');
+    expect(CLAUDE_API_LEGACY_BASE_URL).toBe('https://gw.claudeapi.com');
+    expect(isClaudeApiProvider({ baseUrl: `${CLAUDE_API_BASE_URL}/` })).toBeTrue();
+    expect(isClaudeApiProvider({ baseUrl: `${CLAUDE_API_LEGACY_BASE_URL}/` })).toBeTrue();
+    expect(isClaudeApiProvider({ baseUrl: 'https://example.com' })).toBeFalse();
 
-    expect(isClaudeApiProvider(config)).toBeTrue();
+    const config = { apiKey: 'claude-key', baseUrl: `${CLAUDE_API_BASE_URL}/` };
     expect(claudeApiToResource(config, 3)).toMatchObject({
       brand: 'claudeApi',
       name: 'ClaudeAPI',
@@ -116,7 +124,7 @@ describe('ClaudeAPI and Code0 providers', () => {
       '/openai-compatibility',
     ]);
     expect(calls.filter((call) => call.method === 'DELETE').map((call) => call.url)).toEqual([
-      '/claude-api-key?api-key=claude-key&base-url=https%3A%2F%2Fgw.claudeapi.com',
+      '/claude-api-key?api-key=claude-key&base-url=https%3A%2F%2Fgw.apito.ai',
       '/codex-api-key?api-key=codex-key&base-url=https%3A%2F%2Fcode0.ai%2Fv1',
       '/gemini-api-key?api-key=gemini-key&base-url=https%3A%2F%2Fcode0.ai',
       '/openai-compatibility?name=code0',

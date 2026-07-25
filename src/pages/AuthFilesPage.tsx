@@ -44,10 +44,12 @@ import {
   QUOTA_PROVIDER_TYPES,
   clampCardPageSize,
   getAuthFileIcon,
+  getThemeSurfaceIconBackground,
   getTypeColor,
   getTypeLabel,
   hasAuthFileStatusMessage,
   isRuntimeOnlyAuthFile,
+  isThemeSurfaceIconProvider,
   normalizeProviderKey,
   parsePriorityValue,
   type QuotaProviderType,
@@ -161,6 +163,7 @@ export function AuthFilesPage() {
     uploading,
     deleting,
     statusUpdating,
+    manualRefreshing,
     batchStatusUpdating,
     fileInputRef,
     loadFiles,
@@ -168,6 +171,7 @@ export function AuthFilesPage() {
     handleFileChange,
     handleDelete,
     handleDownload,
+    handleManualRefresh,
     handleStatusToggle,
     toggleSelect,
     selectAllVisible,
@@ -503,10 +507,12 @@ export function AuthFilesPage() {
   const authCategoryItems = useMemo<CategoryItem[]>(() => {
     return existingTypes.map((type) => {
       const iconSrc = getAuthFileIcon(type, resolvedTheme);
+      const useThemeSurfaceIcon = isThemeSurfaceIconProvider(type);
       return {
         id: type,
         label: getTypeLabel(t, type),
         icon: iconSrc || undefined,
+        iconBackground: useThemeSurfaceIcon ? getThemeSurfaceIconBackground(resolvedTheme) : undefined,
         fallback: iconSrc ? undefined : getTypeLabel(t, type).slice(0, 1).toUpperCase(),
         count: typeCounts[type] ?? 0,
       };
@@ -1024,12 +1030,14 @@ export function AuthFilesPage() {
                     disableControls={disableControls}
                     deleting={deleting}
                     statusUpdating={statusUpdating}
+                    manualRefreshing={manualRefreshing}
                     quotaFilterType={quotaFilterType}
                     statusBarCache={statusBarCache}
                     onShowModels={showModels}
                     onPrefetchModels={prefetchModels}
                     getCachedModels={getCachedModels}
                     onDownload={handleDownload}
+                    onManualRefresh={handleManualRefresh}
                     onOpenPrefixProxyEditor={openPrefixProxyEditor}
                     onDelete={handleDelete}
                     onToggleStatus={handleStatusToggle}

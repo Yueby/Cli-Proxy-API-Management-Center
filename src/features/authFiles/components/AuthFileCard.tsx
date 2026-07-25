@@ -10,6 +10,7 @@ import { Modal } from '@/components/ui/Modal';
 import {
   IconDownload,
   IconInfo,
+  IconRefreshCw,
   IconSettings,
   IconSignal,
   IconTimer,
@@ -45,8 +46,11 @@ import {
   getTypeColor,
   getTypeLabel,
   isRuntimeOnlyAuthFile,
+  isThemeSurfaceIconProvider,
+  getThemeSurfaceIconBackground,
   normalizeProviderKey,
   parsePriorityValue,
+  supportsAuthFileManualRefresh,
   type QuotaProviderType,
   type ResolvedTheme,
 } from '@/features/authFiles/constants';
@@ -137,12 +141,14 @@ export type AuthFileCardProps = {
   disableControls: boolean;
   deleting: string | null;
   statusUpdating: Record<string, boolean>;
+  manualRefreshing: Record<string, boolean>;
   quotaFilterType: QuotaProviderType | null;
   statusBarCache: Map<string, AuthFileStatusBarData>;
   onShowModels: (file: AuthFileItem) => void;
   onPrefetchModels: (file: AuthFileItem) => void;
   getCachedModels: (name: string) => Array<{ id: string; display_name?: string }> | undefined;
   onDownload: (name: string) => void;
+  onManualRefresh: (file: AuthFileItem) => void;
   onOpenPrefixProxyEditor: (file: AuthFileItem) => void;
   onDelete: (name: string) => void;
   onToggleStatus: (file: AuthFileItem, enabled: boolean) => void;
@@ -161,12 +167,14 @@ export function AuthFileCard(props: AuthFileCardProps) {
     disableControls,
     deleting,
     statusUpdating,
+    manualRefreshing,
     quotaFilterType,
     statusBarCache,
     onShowModels,
     onPrefetchModels,
     getCachedModels,
     onDownload,
+    onManualRefresh,
     onOpenPrefixProxyEditor,
     onDelete,
     onToggleStatus,
@@ -186,6 +194,9 @@ export function AuthFileCard(props: AuthFileCardProps) {
   const typeColor = getTypeColor(providerKey, resolvedTheme);
   const typeLabel = getTypeLabel(t, providerKey);
   const providerIcon = getAuthFileIcon(providerKey, resolvedTheme);
+  const useThemeSurfaceIcon = isThemeSurfaceIconProvider(providerKey);
+  const showManualRefreshButton = !isRuntimeOnly && supportsAuthFileManualRefresh(providerKey);
+  const isManualRefreshing = manualRefreshing[file.name] === true;
   const googleProjectId = resolveGoogleProjectId(file);
   const isMissingGoogleProjectId = requiresGoogleProjectId(file) && !googleProjectId;
 
@@ -386,7 +397,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
       avatar={{
         icon: providerIcon || undefined,
         fallback: typeLabel.slice(0, 1).toUpperCase(),
-        bgColor: providerIcon ? 'transparent' : typeColor.bg,
+        bgColor: useThemeSurfaceIcon ? getThemeSurfaceIconBackground(resolvedTheme) : providerIcon ? 'transparent' : typeColor.bg,
         textColor: typeColor.text,
         border: providerIcon ? '1px solid transparent' : typeColor.border || undefined,
       }}
@@ -620,6 +631,14 @@ export function AuthFileCard(props: AuthFileCardProps) {
             )}
             {!isRuntimeOnly && (
               <ItemCard.UtilityActions>
+                {showManualRefreshButton && (
+                  <Button variant="secondary" size="sm" onClick={() => onManualRefresh(file)}
+                    className={ItemCard.styles.iconButton} title={t('auth_files.manual_refresh_button')}
+                    disabled={disableControls || file.disabled || statusUpdating[file.name] === true || isManualRefreshing}
+                    loading={isManualRefreshing}>
+                    {!isManualRefreshing && <IconRefreshCw size={16} />}
+                  </Button>
+                )}
                 {showQuota && cachedQuotaType && (
                   <Button
                     variant="secondary"
