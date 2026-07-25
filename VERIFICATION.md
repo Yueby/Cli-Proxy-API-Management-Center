@@ -47,4 +47,11 @@ Not captured in this headless candidate run (no live management backend + browse
 
 ## Independent review
 
-Pending — dispatched after docs commit; fail-closed if review unavailable or reports security/logic errors.
+**PASSED** (`passed: true`) — artifact `INDEPENDENT_REVIEW.json` at HEAD after this doc update.
+
+- security_concerns: []
+- logic_errors: []
+- suggestions (non-blocking): rename Sponsor* type aliases; wire pluginConfigDraft into PluginsPage carefully; manual UI smoke before merge; trailing newline on useProviderRecentRequests.ts
+- Re-verified: bun test 88/0; promo clean in src; sponsorDefinitions is multi-protocol metadata only; client keeps CPA/plugin headers; no MainLayout overwrite
+
+Note: independent reviewer subagent also marked kanban task complete; human merge approval for main is still required (no push/tag performed).
