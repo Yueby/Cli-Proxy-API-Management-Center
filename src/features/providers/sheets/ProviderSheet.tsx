@@ -5,6 +5,7 @@ import { IconLoader2, IconPencil } from '@/components/ui/icons';
 import type { ProviderRecentUsageMap } from '@/components/providers/utils';
 import { useNotificationStore } from '@/stores';
 import { PROVIDER_DESCRIPTORS } from '../descriptors';
+import { isMultiProtocolProviderBrand } from '../multiProtocolDefinitions';
 import type {
   ProviderBrand,
   ProviderEntryFormInput,
@@ -163,7 +164,7 @@ export function ProviderSheet({
         />
       );
     }
-    if (state.brand === 'fennoAI' || state.brand === 'qiniuCloud') {
+    if (isMultiProtocolProviderBrand(state.brand)) {
       return (
         <MultiProtocolProviderForm
           key={formKey}

@@ -15,10 +15,11 @@ export type ProviderBrand =
   | 'openaiCompatibility'
   | 'code0'
   | 'fennoAI'
-  | 'qiniuCloud';
+  | 'qiniuCloud'
+  | 'lmuAI';
 
 export type SponsorProviderBrand = 'code0';
-export type MultiProtocolProviderBrand = 'fennoAI' | 'qiniuCloud';
+export type MultiProtocolProviderBrand = 'fennoAI' | 'qiniuCloud' | 'lmuAI';
 export type MultiProtocolProviderProtocol = 'openai' | 'codex' | 'claude' | 'gemini';
 
 export type ProviderResourceSelector =

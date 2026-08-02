@@ -9,6 +9,7 @@ import type {
   ProviderKeyConfig,
 } from '@/types';
 import { buildFennoAIRaw } from './fennoAI';
+import { buildLmuAIRaw } from './lmuAI';
 import { getMultiProtocolProviderDefinition, multiProtocolUrl } from './multiProtocolDefinitions';
 import { buildQiniuCloudRaw } from './qiniuCloud';
 import type {
@@ -35,8 +36,11 @@ const listsFromConfig = (config: Config | null | undefined): MultiProtocolConfig
 const rawForBrand = (
   brand: MultiProtocolProviderBrand,
   config: Config | null | undefined
-): MultiProtocolProviderRaw =>
-  brand === 'fennoAI' ? buildFennoAIRaw(config) : buildQiniuCloudRaw(config);
+): MultiProtocolProviderRaw => {
+  if (brand === 'fennoAI') return buildFennoAIRaw(config);
+  if (brand === 'qiniuCloud') return buildQiniuCloudRaw(config);
+  return buildLmuAIRaw(config);
+};
 
 const entryApiKey = (entry: MultiProtocolKeyEntryInput): string =>
   entry.apiKey.trim() || entry.existingApiKey?.trim() || '';

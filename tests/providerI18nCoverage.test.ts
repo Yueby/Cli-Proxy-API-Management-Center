@@ -24,7 +24,7 @@ for await (const relativePath of glob.scan({ cwd: providersRoot.pathname })) {
 
 const providerBrands = [
   'gemini', 'codex', 'claude', 'vertex', 'openaiCompatibility',
-  'xai', 'kimi', 'claudeApi', 'code0', 'fennoAI', 'qiniuCloud',
+  'xai', 'kimi', 'claudeApi', 'code0', 'fennoAI', 'qiniuCloud', 'lmuAI',
 ];
 const protocolLabels = ['openai', 'claude', 'codex', 'gemini', 'anthropic', 'codexResponses'];
 const detailFields = [

@@ -1621,7 +1621,8 @@
       "claudeApi": "ClaudeAPI",
       "code0": "Code0",
       "fennoAI": "FennoAI",
-      "qiniuCloud": "七牛雲"
+      "qiniuCloud": "七牛雲",
+      "lmuAI": "LMU AI（靈眸AI）"
     },
     "table": {
       "key": "金鑰",

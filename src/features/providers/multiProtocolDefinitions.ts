@@ -14,6 +14,14 @@ import {
   getQiniuCloudProtocolUrls,
   resolveQiniuCloudBaseUrl,
 } from './qiniuCloud';
+import {
+  LMU_AI_BASE_URL_OPTIONS,
+  LMU_AI_DISPLAY_NAME,
+  LMU_AI_PROTOCOL_LABELS,
+  LMU_AI_PROVIDER_NAME,
+  getLmuAIProtocolUrls,
+  resolveLmuAIBaseUrl,
+} from './lmuAI';
 import type { MultiProtocolProviderBrand, MultiProtocolProviderProtocol } from './types';
 
 export interface MultiProtocolUrls {
@@ -68,11 +76,23 @@ const DEFINITIONS: Record<MultiProtocolProviderBrand, MultiProtocolProviderDefin
     resolveBaseUrl: resolveQiniuCloudBaseUrl,
     getProtocolUrls: getQiniuCloudProtocolUrls,
   },
+  lmuAI: {
+    brand: 'lmuAI',
+    displayName: LMU_AI_DISPLAY_NAME,
+    providerName: LMU_AI_PROVIDER_NAME,
+    protocols: ['openai', 'claude', 'gemini', 'codex'],
+    protocolLabels: LMU_AI_PROTOCOL_LABELS,
+    defaultProtocol: 'openai',
+    baseUrlOptions: LMU_AI_BASE_URL_OPTIONS,
+    resolveBaseUrl: resolveLmuAIBaseUrl,
+    getProtocolUrls: getLmuAIProtocolUrls,
+  },
 };
 
 export const isMultiProtocolProviderBrand = (
   brand: string
-): brand is MultiProtocolProviderBrand => brand === 'fennoAI' || brand === 'qiniuCloud';
+): brand is MultiProtocolProviderBrand =>
+  brand === 'fennoAI' || brand === 'qiniuCloud' || brand === 'lmuAI';
 
 export const getMultiProtocolProviderDefinition = (
   brand: MultiProtocolProviderBrand

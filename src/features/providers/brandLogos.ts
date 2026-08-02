@@ -1,5 +1,6 @@
 import kimiLightLogo from '@/assets/icons/kimi-light.svg';
 import kimiDarkLogo from '@/assets/icons/kimi-dark.svg';
+import lmuAILogo from '@/assets/icons/lmu-ai.png';
 import type { ProviderBrand } from './types';
 
 export interface ProviderBrandLogo {
@@ -10,6 +11,7 @@ export interface ProviderBrandLogo {
 }
 
 export const PROVIDER_LOGOS: Partial<Record<ProviderBrand, ProviderBrandLogo>> = {
+  lmuAI: { src: lmuAILogo, transparent: true },
   kimi: {
     src: kimiDarkLogo,
     darkSrc: kimiLightLogo,
