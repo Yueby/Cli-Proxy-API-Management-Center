@@ -75,6 +75,9 @@ import {
   buildXaiBillingSummary,
   buildXaiPaidHealthSummary,
   mergeXaiBillingSummaries,
+  claudePeriodHours,
+  periodHoursFromSeconds,
+  resolveResetMs,
   createStatusError,
   getStatusFromError,
   isAntigravityFile,
@@ -101,6 +104,7 @@ type AntigravityQuotaData = {
 
 type CodexResetCreditsData = {
   availableCount: number | null;
+  applicableAvailableCount: number | null;
   credits: CodexRateLimitResetCredit[];
   error: string;
 };
@@ -109,6 +113,7 @@ type CodexQuotaData = {
   planType: string | null;
   subscriptionActiveUntil: string | number | null;
   rateLimitResetCreditsAvailableCount: number | null;
+  rateLimitResetCreditsApplicableAvailableCount: number | null;
   rateLimitResetCredits: CodexRateLimitResetCredit[];
   rateLimitResetCreditsError: string;
   windows: CodexQuotaWindow[];
@@ -314,7 +319,10 @@ const toAntigravityQuotaSubscription = (
   };
 };
 
-export const buildCodexQuotaWindows = (payload: CodexUsagePayload, t: TFunction): CodexQuotaWindow[] => {
+export const buildCodexQuotaWindows = (
+  payload: CodexUsagePayload,
+  t: TFunction
+): CodexQuotaWindow[] => {
   const FIVE_HOUR_SECONDS = 18000;
   const WEEK_SECONDS = 604800;
   const MIN_MONTH_SECONDS = 28 * 24 * 60 * 60;
@@ -364,6 +372,13 @@ export const buildCodexQuotaWindows = (payload: CodexUsagePayload, t: TFunction)
       labelParams,
       usedPercent,
       resetLabel,
+      resetAtMs: resolveResetMs([
+        window.reset_at,
+        window.resetAt,
+        window.reset_at_timestamp,
+        window.resetAtTimestamp,
+      ]),
+      periodHours: periodHoursFromSeconds(window.limit_window_seconds ?? window.limitWindowSeconds),
     });
   };
 
@@ -563,6 +578,7 @@ const fetchCodexResetCredits = async (
     if (result.statusCode < 200 || result.statusCode >= 300) {
       return {
         availableCount: null,
+        applicableAvailableCount: null,
         credits: [],
         error: getApiCallErrorMessage(result),
       };
@@ -572,6 +588,7 @@ const fetchCodexResetCredits = async (
     if (summary.invalidPayload) {
       return {
         availableCount: null,
+        applicableAvailableCount: null,
         credits: [],
         error: t('codex_quota.reset_credits_invalid_payload'),
       };
@@ -579,12 +596,14 @@ const fetchCodexResetCredits = async (
 
     return {
       availableCount: summary.availableCount,
+      applicableAvailableCount: summary.applicableAvailableCount,
       credits: summary.credits,
       error: '',
     };
   } catch (err: unknown) {
     return {
       availableCount: null,
+      applicableAvailableCount: null,
       credits: [],
       error: err instanceof Error ? err.message : t('common.unknown_error'),
     };
@@ -620,20 +639,25 @@ const fetchCodexQuota = async (file: AuthFileItem, t: TFunction): Promise<CodexQ
 
   const planTypeFromUsage = normalizePlanType(payload.plan_type ?? payload.planType);
   const resetCredits = payload.rate_limit_reset_credits ?? payload.rateLimitResetCredits ?? null;
-  const usageResetCreditsAvailableCount = normalizeNumberValue(
-    resetCredits?.available_count ?? resetCredits?.availableCount
-  );
+  const usageResetCreditsData = normalizeCodexResetCreditsPayload(resetCredits);
   const resetCreditsData = await fetchCodexResetCredits(authIndex, requestHeader, t);
   const resetCreditsCountFromDetails =
     resetCreditsData.credits.length > 0 ? resetCreditsData.credits.length : null;
   const rateLimitResetCreditsAvailableCount =
-    resetCreditsData.availableCount ?? resetCreditsCountFromDetails ?? usageResetCreditsAvailableCount;
+    resetCreditsData.availableCount ??
+    resetCreditsCountFromDetails ??
+    usageResetCreditsData.availableCount;
+  const rateLimitResetCreditsApplicableAvailableCount =
+    usageResetCreditsData.applicableAvailableCount ??
+    resetCreditsData.applicableAvailableCount ??
+    rateLimitResetCreditsAvailableCount;
   const planType = planTypeFromUsage ?? planTypeFromFile;
   const windows = buildCodexQuotaWindows(payload, t);
   return {
     planType,
     subscriptionActiveUntil,
     rateLimitResetCreditsAvailableCount,
+    rateLimitResetCreditsApplicableAvailableCount,
     rateLimitResetCredits: resetCreditsData.credits,
     rateLimitResetCreditsError: resetCreditsData.error,
     windows,
@@ -926,25 +950,58 @@ const renderCodexItems = (
   return h(Fragment, null, ...nodes);
 };
 
-const buildClaudeQuotaWindows = (
+const findFableUsageLimit = (payload: ClaudeUsagePayload) => {
+  if (!Array.isArray(payload.limits)) return null;
+  const candidates = payload.limits.filter((limit) => {
+    const kind = (normalizeStringValue(limit?.kind) ?? '').toLowerCase();
+    const modelName = (normalizeStringValue(limit?.scope?.model?.display_name) ?? '').toLowerCase();
+    return (
+      kind === 'weekly_scoped' &&
+      (modelName === 'fable' || modelName === 'fable 5') &&
+      normalizeNumberValue(limit?.percent) !== null
+    );
+  });
+  return candidates.find((limit) => limit?.is_active === true) ?? candidates[0] ?? null;
+};
+
+export const buildClaudeQuotaWindows = (
   payload: ClaudeUsagePayload,
   t: TFunction
 ): ClaudeQuotaWindow[] => {
   const windows: ClaudeQuotaWindow[] = [];
+  const fableLimit = findFableUsageLimit(payload);
 
   for (const { key, id, labelKey } of CLAUDE_USAGE_WINDOW_KEYS) {
+    if (key === 'iguana_necktie' && fableLimit) continue;
     const window = payload[key as keyof ClaudeUsagePayload];
     if (!window || typeof window !== 'object' || !('utilization' in window)) continue;
-    const typedWindow = window as { utilization: number; resets_at: string };
+    const typedWindow = window as { utilization: number; resets_at: string | null };
     const usedPercent = normalizeNumberValue(typedWindow.utilization);
-    const resetLabel = formatQuotaResetTime(typedWindow.resets_at, t);
+    const resetLabel = formatQuotaResetTime(typedWindow.resets_at ?? undefined, t);
     windows.push({
       id,
       label: t(labelKey),
       labelKey,
       usedPercent,
       resetLabel,
+      resetAtMs: resolveResetMs([typedWindow.resets_at]),
+      periodHours: claudePeriodHours(key),
     });
+  }
+
+  if (fableLimit) {
+    const usedPercent = normalizeNumberValue(fableLimit.percent);
+    if (usedPercent !== null) {
+      windows.push({
+        id: 'seven-day-fable',
+        label: t('claude_quota.seven_day_fable'),
+        labelKey: 'claude_quota.seven_day_fable',
+        usedPercent,
+        resetLabel: formatQuotaResetTime(fableLimit.resets_at ?? undefined, t),
+        resetAtMs: resolveResetMs([fableLimit.resets_at]),
+        periodHours: 168,
+      });
+    }
   }
 
   return windows;
@@ -1228,6 +1285,8 @@ export const CODEX_CONFIG: QuotaConfig<CodexQuotaState, CodexQuotaData> = {
     planType: data.planType,
     subscriptionActiveUntil: data.subscriptionActiveUntil,
     rateLimitResetCreditsAvailableCount: data.rateLimitResetCreditsAvailableCount,
+    rateLimitResetCreditsApplicableAvailableCount:
+      data.rateLimitResetCreditsApplicableAvailableCount,
     rateLimitResetCredits: data.rateLimitResetCredits,
     rateLimitResetCreditsError: data.rateLimitResetCreditsError,
   }),
@@ -1403,33 +1462,45 @@ const requestXaiBilling = async (
 
 const requestXaiPaidHealth = async (authIndex: string): Promise<XaiBillingSummary> => {
   const [profileRequest, chatRequest] = await Promise.allSettled([
-    apiCallApi.request({
-      authIndex,
-      method: 'GET',
-      url: XAI_API_ME_URL,
-      header: XAI_API_REQUEST_HEADERS,
-    }, { timeout: XAI_PAID_HEALTH_REQUEST_TIMEOUT_MS }),
-    apiCallApi.request({
-      authIndex,
-      method: 'POST',
-      url: XAI_API_CHAT_URL,
-      header: { ...XAI_API_REQUEST_HEADERS, 'Content-Type': 'application/json' },
-      data: JSON.stringify({
-        model: XAI_PAID_HEALTH_MODEL,
-        messages: [{ role: 'user', content: 'ping' }],
-        max_tokens: 1,
-        stream: false,
-      }),
-    }, { timeout: XAI_PAID_HEALTH_REQUEST_TIMEOUT_MS }),
+    apiCallApi.request(
+      {
+        authIndex,
+        method: 'GET',
+        url: XAI_API_ME_URL,
+        header: XAI_API_REQUEST_HEADERS,
+      },
+      { timeout: XAI_PAID_HEALTH_REQUEST_TIMEOUT_MS }
+    ),
+    apiCallApi.request(
+      {
+        authIndex,
+        method: 'POST',
+        url: XAI_API_CHAT_URL,
+        header: { ...XAI_API_REQUEST_HEADERS, 'Content-Type': 'application/json' },
+        data: JSON.stringify({
+          model: XAI_PAID_HEALTH_MODEL,
+          messages: [{ role: 'user', content: 'ping' }],
+          max_tokens: 1,
+          stream: false,
+        }),
+      },
+      { timeout: XAI_PAID_HEALTH_REQUEST_TIMEOUT_MS }
+    ),
   ]);
 
   if (chatRequest.status === 'rejected') throw chatRequest.reason;
   if (chatRequest.value.statusCode < 200 || chatRequest.value.statusCode >= 300) {
-    throw createStatusError(getApiCallErrorMessage(chatRequest.value), chatRequest.value.statusCode);
+    throw createStatusError(
+      getApiCallErrorMessage(chatRequest.value),
+      chatRequest.value.statusCode
+    );
   }
-  const profile = profileRequest.status === 'fulfilled' &&
-    profileRequest.value.statusCode >= 200 && profileRequest.value.statusCode < 300
-    ? profileRequest.value.body : null;
+  const profile =
+    profileRequest.status === 'fulfilled' &&
+    profileRequest.value.statusCode >= 200 &&
+    profileRequest.value.statusCode < 300
+      ? profileRequest.value.body
+      : null;
   return buildXaiPaidHealthSummary(profile);
 };
 
@@ -1450,8 +1521,10 @@ const fetchXaiQuota = async (file: AuthFileItem, t: TFunction): Promise<XaiBilli
   const summary = mergeXaiBillingSummaries(weeklySummary, monthlySummary);
   if (summary) return summary;
 
-  const billingError = weeklyResult.status === 'rejected' && monthlyResult.status === 'rejected'
-    ? weeklyResult.reason : new Error(t('xai_quota.empty_data'));
+  const billingError =
+    weeklyResult.status === 'rejected' && monthlyResult.status === 'rejected'
+      ? weeklyResult.reason
+      : new Error(t('xai_quota.empty_data'));
   try {
     return await requestXaiPaidHealth(authIndex);
   } catch {
@@ -1569,8 +1642,7 @@ const renderXaiItems = (
   const weeklyRemaining = weeklyUsed === null ? null : Math.max(0, Math.min(100, 100 - weeklyUsed));
   const weeklyResetLabel = formatQuotaResetTime(billing.periodEnd, t);
   const hasWeeklyData =
-    billing.periodType === 'weekly' &&
-    (weeklyUsed !== null || Boolean(billing.periodEnd));
+    billing.periodType === 'weekly' && (weeklyUsed !== null || Boolean(billing.periodEnd));
   const hasMonthlyData =
     billing.monthlyLimitCents !== null ||
     billing.usedCents !== null ||
@@ -1606,37 +1678,33 @@ const renderXaiItems = (
     ...billing.productUsage
       .filter((item) => item.product.trim() && item.usagePercent !== null)
       .map((item) => {
-      const used =
-        item.usagePercent === null ? null : Math.max(0, Math.min(100, item.usagePercent));
-      const remainingPercent = used === null ? null : Math.max(0, Math.min(100, 100 - used));
-      return h(
-        'div',
-        { key: `product-${item.product}`, className: styleMap.quotaRow },
-        h(
+        const used =
+          item.usagePercent === null ? null : Math.max(0, Math.min(100, item.usagePercent));
+        const remainingPercent = used === null ? null : Math.max(0, Math.min(100, 100 - used));
+        return h(
           'div',
-          { className: styleMap.quotaRowHeader },
-          h(
-            'span',
-            { className: styleMap.quotaModel },
-            t('xai_quota.product_usage', { product: item.product })
-          ),
+          { key: `product-${item.product}`, className: styleMap.quotaRow },
           h(
             'div',
-            { className: styleMap.quotaMeta },
+            { className: styleMap.quotaRowHeader },
             h(
               'span',
-              { className: styleMap.quotaPercent },
-              formatXaiPercent(remainingPercent, t)
+              { className: styleMap.quotaModel },
+              t('xai_quota.product_usage', { product: item.product })
+            ),
+            h(
+              'div',
+              { className: styleMap.quotaMeta },
+              h('span', { className: styleMap.quotaPercent }, formatXaiPercent(remainingPercent, t))
             )
-          )
-        ),
-        h(QuotaProgressBar, {
-          percent: remainingPercent,
-          highThreshold: QUOTA_PROGRESS_HIGH_THRESHOLD,
-          mediumThreshold: QUOTA_PROGRESS_MEDIUM_THRESHOLD,
-        })
-      );
-    }),
+          ),
+          h(QuotaProgressBar, {
+            percent: remainingPercent,
+            highThreshold: QUOTA_PROGRESS_HIGH_THRESHOLD,
+            mediumThreshold: QUOTA_PROGRESS_MEDIUM_THRESHOLD,
+          })
+        );
+      }),
     onDemandCap > 0
       ? h(
           'div',
