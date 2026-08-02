@@ -9,7 +9,12 @@ export { useAuthStore } from './useAuthStore';
 export { useConfigStore } from './useConfigStore';
 export { useModelsStore } from './useModelsStore';
 export {
+  beginQuotaOperation,
   captureQuotaCacheGeneration,
   commitIfQuotaCacheCurrent,
+  finishQuotaOperation,
+  getQuotaOperation,
+  runQuotaOperation,
   useQuotaStore,
 } from './useQuotaStore';
+export type { QuotaOperationKind, QuotaOperationToken } from './useQuotaStore';

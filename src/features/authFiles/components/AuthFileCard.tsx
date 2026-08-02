@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
+import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -17,13 +17,8 @@ import {
   IconTrash2,
   IconZap,
 } from '@/components/ui/icons';
-import {
-  captureQuotaCacheGeneration,
-  commitIfQuotaCacheCurrent,
-  useNotificationStore,
-  useQuotaStore,
-} from '@/stores';
-import { getAntigravityPlanLabel, CODEX_CONFIG } from '@/components/quota';
+import { useQuotaStore } from '@/stores';
+import { getAntigravityPlanLabel } from '@/components/quota';
 import { formatShanghaiDateTime } from '@/utils/quota/resetCredits';
 import type { AuthFileItem } from '@/types';
 import type { CodexRateLimitResetCredit } from '@/types/quota';
@@ -284,51 +279,9 @@ export function AuthFileCard(props: AuthFileCardProps) {
     if (!quota || quota.status !== 'success') return null;
     return (quota.rateLimitResetCredits ?? []) as CodexRateLimitResetCredit[];
   });
-  const showNotification = useNotificationStore((state) => state.showNotification);
-  const showConfirmation = useNotificationStore((state) => state.showConfirmation);
-  const [resettingQuota, setResettingQuota] = useState(false);
-
-  const resetQuotaForFile = useCallback(() => {
-    if (disableControls) return;
-    if (isRuntimeOnlyAuthFile(file)) return;
-    if (file.disabled) return;
-    if (resettingQuota) return;
-
-    const config = CODEX_CONFIG as unknown as {
-      resetQuota?: (file: AuthFileItem, t: (key: string, opts?: Record<string, unknown>) => string) => Promise<unknown>;
-      buildSuccessState: (data: unknown) => unknown;
-    };
-    const resetQuota = config.resetQuota;
-    if (!resetQuota) return;
-
-    showConfirmation({
-      title: t('codex_quota.reset_confirm_title'),
-      message: t('codex_quota.reset_confirm_message', { name: file.name }),
-      confirmText: t('codex_quota.reset_confirm_button'),
-      variant: 'primary',
-      onConfirm: async () => {
-        const cacheGeneration = captureQuotaCacheGeneration();
-        setResettingQuota(true);
-        try {
-          const data = await resetQuota(file, t);
-          commitIfQuotaCacheCurrent(cacheGeneration, () => {
-            useQuotaStore.getState().setCodexQuota((prev) => ({
-              ...prev,
-              [file.name]: config.buildSuccessState(data) as never,
-            }));
-            showNotification(t('codex_quota.reset_success', { name: file.name }), 'success');
-          });
-        } catch (err: unknown) {
-          const message = err instanceof Error ? err.message : t('common.unknown_error');
-          commitIfQuotaCacheCurrent(cacheGeneration, () => {
-            showNotification(t('codex_quota.reset_failed', { name: file.name, message }), 'error');
-          });
-        } finally {
-          setResettingQuota(false);
-        }
-      },
-    });
-  }, [disableControls, file, resettingQuota, showConfirmation, showNotification, t]);
+  const pendingQuotaOperation = useQuotaStore(
+    (state) => state.pendingOperations[`${cachedQuotaType ?? ''}\u0000${file.name}`]?.kind ?? null
+  );
 
   const resolvedPlanLabel = codexPlan || quotaStorePlan || null;
   const xaiPremiumPlusTooltip =
@@ -667,24 +620,12 @@ export function AuthFileCard(props: AuthFileCardProps) {
                     onClick={() => onRefreshQuota(file, cachedQuotaType)}
                     className={ItemCard.styles.iconButton}
                     title={t('auth_files.quota_refresh_one')}
-                    disabled={disableControls || file.disabled}
+                    disabled={disableControls || file.disabled || pendingQuotaOperation !== null}
                   >
                     <IconZap size={16} />
                   </Button>
                 )}
-                {showQuota && cachedQuotaType === 'codex' && codexResetCreditsAvailableCount !== null && (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={resetQuotaForFile}
-                    className={ItemCard.styles.iconButton}
-                    title={t('codex_quota.reset_button')}
-                    disabled={disableControls || file.disabled || resettingQuota}
-                    loading={resettingQuota}
-                  >
-                    {!resettingQuota && <IconTimer size={16} />}
-                  </Button>
-                )}
+
                 <Button
                   variant="secondary"
                   size="sm"

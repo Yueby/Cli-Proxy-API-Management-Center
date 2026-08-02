@@ -463,9 +463,7 @@
     "weight_invalid_integer": "Weight must be an integer.",
     "weight_invalid_max": "Weight cannot exceed 1,000,000.",
     "quota": {
-      "details": "Quota details",
-      "timeline_title": "Quota windows",
-      "timeline_empty": "Window and reset timing is shown beside each quota meter.",
+
       "total_credits": "Total reset credits",
       "applicable_credits": "Applicable reset credits"
     }

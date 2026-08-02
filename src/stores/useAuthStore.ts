@@ -12,6 +12,7 @@ import { apiClient } from '@/services/api/client';
 import { versionApi } from '@/services/api/version';
 import { useConfigStore } from './useConfigStore';
 import { useModelsStore } from './useModelsStore';
+import { useQuotaStore } from './useQuotaStore';
 import { detectApiBaseFromLocation, normalizeApiBase } from '@/utils/connection';
 
 interface AuthStoreState extends AuthState {
@@ -110,6 +111,10 @@ export const useAuthStore = create<AuthStoreState>()(
         const managementKey = credentials.managementKey.trim();
         const rememberPassword = credentials.rememberPassword ?? get().rememberPassword ?? false;
 
+        // Invalidate quota before configuring or validating another connection. This also
+        // prevents a failed login from retaining metadata from the previous server.
+        useQuotaStore.getState().clearQuotaCache();
+
         try {
           set({
             connectionStatus: 'connecting',
@@ -165,6 +170,7 @@ export const useAuthStore = create<AuthStoreState>()(
         restoreSessionPromise = null;
         useConfigStore.getState().clearCache();
         useModelsStore.getState().clearCache();
+        useQuotaStore.getState().clearQuotaCache();
         set({
           isAuthenticated: false,
           apiBase: '',
@@ -182,6 +188,9 @@ export const useAuthStore = create<AuthStoreState>()(
       // 检查认证状态
       checkAuth: async () => {
         const { managementKey, apiBase } = get();
+
+        // checkAuth is a connection-validation boundary and may follow persisted target changes.
+        useQuotaStore.getState().clearQuotaCache();
 
         if (!managementKey || !apiBase) {
           return false;
