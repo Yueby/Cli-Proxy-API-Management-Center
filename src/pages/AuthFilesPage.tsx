@@ -154,11 +154,27 @@ export function AuthFilesPage() {
   const previousSelectionCountRef = useRef(0);
   const selectionCountRef = useRef(0);
 
+
+  const {
+    modelsModalOpen,
+    modelsLoading,
+    modelsList,
+    modelsFileName,
+    modelsFileType,
+    modelsError,
+    showModels,
+    prefetchModels,
+    getCachedModels,
+    closeModelsModal,
+    invalidateModels,
+  } = useAuthFilesModels();
+
   const {
     files,
     selectedFiles,
     selectionCount,
     loading,
+    refreshing,
     error,
     uploading,
     deleting,
@@ -180,7 +196,7 @@ export function AuthFilesPage() {
     batchDownload,
     batchSetStatus,
     batchDelete,
-  } = useAuthFilesData();
+  } = useAuthFilesData({ onFilesMutated: invalidateModels });
 
   const statusBarCache = useAuthFilesStatusBarCache(files);
 
@@ -200,19 +216,6 @@ export function AuthFilesPage() {
     handleRenameAlias,
     handleDeleteAlias,
   } = useAuthFilesOauth({ viewMode, files });
-
-  const {
-    modelsModalOpen,
-    modelsLoading,
-    modelsList,
-    modelsFileName,
-    modelsFileType,
-    modelsError,
-    showModels,
-    prefetchModels,
-    getCachedModels,
-    closeModelsModal,
-  } = useAuthFilesModels();
 
   const {
     prefixProxyEditor,
@@ -429,7 +432,7 @@ export function AuthFilesPage() {
 
   useInterval(
     () => {
-      void loadFiles().catch(() => {});
+      void loadFiles({ background: true }).catch(() => {});
     },
     isCurrentLayer ? 240_000 : null
   );
@@ -827,7 +830,8 @@ export function AuthFilesPage() {
                 variant="secondary"
                 size="sm"
                 onClick={handleHeaderRefresh}
-                disabled={loading}
+                disabled={loading || refreshing}
+                loading={refreshing}
                 title={t('common.refresh')}
                 aria-label={t('common.refresh')}
               >
