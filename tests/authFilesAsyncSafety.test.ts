@@ -1,9 +1,14 @@
 import { describe, expect, test } from 'bun:test';
 import { readFileSync } from 'node:fs';
+import { createAsyncSessionGuard } from '../src/features/authFiles/asyncSession';
 
 const dataHook = readFileSync('src/features/authFiles/hooks/useAuthFilesData.ts', 'utf8');
 const modelsHook = readFileSync('src/features/authFiles/hooks/useAuthFilesModels.ts', 'utf8');
 const page = readFileSync('src/pages/AuthFilesPage.tsx', 'utf8');
+const editorHook = readFileSync(
+  'src/features/authFiles/hooks/useAuthFilesPrefixProxyEditor.ts',
+  'utf8'
+);
 
 describe('auth files async safety', () => {
   test('guards upload entry points with a synchronous pending ref', () => {
@@ -33,5 +38,31 @@ describe('auth files async safety', () => {
   test('wires auth-file mutations to model cache invalidation', () => {
     expect(dataHook).toContain('onFilesMutated');
     expect(page).toContain('onFilesMutated: invalidateModels');
+  });
+
+  test('invalidates an earlier same-name editor session after close and reopen', () => {
+    const sessions = createAsyncSessionGuard();
+    const first = sessions.begin();
+    sessions.invalidate();
+    const second = sessions.begin();
+
+    expect(sessions.isCurrent(first)).toBe(false);
+    expect(sessions.isCurrent(second)).toBe(true);
+  });
+
+  test('binds editor download and save commits to the active session', () => {
+    expect(editorHook).toContain('createAsyncSessionGuard');
+    expect(editorHook).toContain('editorSessionRef.current.begin()');
+    expect(editorHook).toContain('editorSessionRef.current.invalidate()');
+    expect(editorHook).toContain('editorSessionRef.current.isCurrent(sessionId)');
+  });
+
+  test('manual refresh invalidates stale lists and reloads the refreshed credential', () => {
+    const refreshBody = dataHook.slice(
+      dataHook.indexOf('const handleManualRefresh'),
+      dataHook.indexOf('const handleStatusToggle')
+    );
+    expect(refreshBody).toContain('invalidateInFlightLoads()');
+    expect(refreshBody).toContain('await loadFiles({ background: true })');
   });
 });

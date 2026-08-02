@@ -493,6 +493,7 @@ export function useAuthFilesData(options?: UseAuthFilesDataOptions): UseAuthFile
       const provider = item.type ?? item.provider;
       if (!name || item.disabled === true || isRuntimeOnlyAuthFile(item) ||
           !supportsAuthFileManualRefresh(provider) || manualRefreshPendingRef.current.has(name)) return;
+      invalidateInFlightLoads();
       manualRefreshPendingRef.current.add(name);
       setManualRefreshing((prev) => ({ ...prev, [name]: true }));
       try {
@@ -500,6 +501,7 @@ export function useAuthFilesData(options?: UseAuthFilesDataOptions): UseAuthFile
         showNotification(t('auth_files.manual_refresh_requested', { name }), 'info');
         notifyAuthFilesChanged();
         onFilesMutatedRef.current?.([name]);
+        await loadFiles({ background: true });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : t('notification.update_failed');
         showNotification(t('auth_files.manual_refresh_failed', { name, message }), 'error');
@@ -507,7 +509,7 @@ export function useAuthFilesData(options?: UseAuthFilesDataOptions): UseAuthFile
         manualRefreshPendingRef.current.delete(name);
         setManualRefreshing((prev) => { const next = { ...prev }; delete next[name]; return next; });
       }
-    }, [showNotification, t]
+    }, [invalidateInFlightLoads, loadFiles, showNotification, t]
   );
 
   const handleStatusToggle = useCallback(

@@ -127,7 +127,7 @@ export const buildQiniuCloudRaw = (
   config: Config | null | undefined
 ): MultiProtocolProviderRaw => ({
   openai: (config?.openaiCompatibility ?? [])
-    .map((item, index) => ({ config: item, index: item.sourceIndex ?? index }))
+    .map((item, index) => ({ config: item, index }))
     .filter((item) => isQiniuCloudOpenAIProvider(item.config)),
   claude: (config?.claudeApiKeys ?? [])
     .map((item, index) => ({ config: item, index }))

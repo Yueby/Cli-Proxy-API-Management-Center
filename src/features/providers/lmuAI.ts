@@ -86,7 +86,7 @@ export const buildLmuAIRaw = (
   config: Config | null | undefined
 ): MultiProtocolProviderRaw => ({
   openai: (config?.openaiCompatibility ?? [])
-    .map((item, index) => ({ config: item, index: item.sourceIndex ?? index }))
+    .map((item, index) => ({ config: item, index }))
     .filter((item) => isLmuAIOpenAIProvider(item.config)),
   claude: (config?.claudeApiKeys ?? [])
     .map((item, index) => ({ config: item, index }))

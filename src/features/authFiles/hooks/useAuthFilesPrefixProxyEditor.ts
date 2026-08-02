@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { authFilesApi, type AuthFileFieldsPatch } from '@/services/api';
 import type { AuthFileItem } from '@/types';
+import { createAsyncSessionGuard } from '@/features/authFiles/asyncSession';
 import { useNotificationStore } from '@/stores';
 import {
   applyAuthFileWebsockets,
@@ -459,6 +460,7 @@ export function useAuthFilesPrefixProxyEditor(
   const showNotification = useNotificationStore((state) => state.showNotification);
 
   const [prefixProxyEditor, setPrefixProxyEditor] = useState<PrefixProxyEditorState | null>(null);
+  const editorSessionRef = useRef(createAsyncSessionGuard());
 
   const hasBlockingValidationError = Boolean(
     (prefixProxyEditor?.headersTouched && prefixProxyEditor.headersError) ||
@@ -477,6 +479,7 @@ export function useAuthFilesPrefixProxyEditor(
   const prefixProxyDirty = hasKeys(prefixProxyPatch);
 
   const closePrefixProxyEditor = () => {
+    editorSessionRef.current.invalidate();
     setPrefixProxyEditor(null);
   };
 
@@ -486,9 +489,11 @@ export function useAuthFilesPrefixProxyEditor(
 
     if (disableControls) return;
     if (prefixProxyEditor?.fileName === name) {
-      setPrefixProxyEditor(null);
+      closePrefixProxyEditor();
       return;
     }
+
+    const sessionId = editorSessionRef.current.begin();
 
     setPrefixProxyEditor({
       fileName: name,
@@ -530,7 +535,9 @@ export function useAuthFilesPrefixProxyEditor(
         parsed = JSON.parse(trimmed) as unknown;
       } catch {
         setPrefixProxyEditor((prev) => {
-          if (!prev || prev.fileName !== name) return prev;
+          if (!editorSessionRef.current.isCurrent(sessionId) || !prev || prev.fileName !== name) {
+            return prev;
+          }
           return {
             ...prev,
             ...buildInvalidAuthFileContentState(rawText, (key) => t(key)),
@@ -541,7 +548,9 @@ export function useAuthFilesPrefixProxyEditor(
 
       if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
         setPrefixProxyEditor((prev) => {
-          if (!prev || prev.fileName !== name) return prev;
+          if (!editorSessionRef.current.isCurrent(sessionId) || !prev || prev.fileName !== name) {
+            return prev;
+          }
           return {
             ...prev,
             ...buildInvalidAuthFileContentState(rawText, (key) => t(key)),
@@ -576,7 +585,9 @@ export function useAuthFilesPrefixProxyEditor(
       }
 
       setPrefixProxyEditor((prev) => {
-        if (!prev || prev.fileName !== name) return prev;
+        if (!editorSessionRef.current.isCurrent(sessionId) || !prev || prev.fileName !== name) {
+          return prev;
+        }
         return {
           ...prev,
           loading: false,
@@ -607,9 +618,12 @@ export function useAuthFilesPrefixProxyEditor(
         };
       });
     } catch (err: unknown) {
+      if (!editorSessionRef.current.isCurrent(sessionId)) return;
       const errorMessage = err instanceof Error ? err.message : t('notification.download_failed');
       setPrefixProxyEditor((prev) => {
-        if (!prev || prev.fileName !== name) return prev;
+        if (!editorSessionRef.current.isCurrent(sessionId) || !prev || prev.fileName !== name) {
+          return prev;
+        }
         return { ...prev, loading: false, error: errorMessage, rawText: '' };
       });
       showNotification(`${t('notification.download_failed')}: ${errorMessage}`, 'error');
@@ -674,6 +688,7 @@ export function useAuthFilesPrefixProxyEditor(
     if (!prefixProxyDirty) return;
 
     const name = prefixProxyEditor.fileName;
+    const sessionId = editorSessionRef.current.begin();
     let payload: AuthFileFieldsPatch;
     try {
       payload = buildAuthFileFieldsPatch(prefixProxyEditor, (key) => t(key));
@@ -685,20 +700,26 @@ export function useAuthFilesPrefixProxyEditor(
     if (!hasKeys(payload)) return;
 
     setPrefixProxyEditor((prev) => {
-      if (!prev || prev.fileName !== name) return prev;
+      if (!editorSessionRef.current.isCurrent(sessionId) || !prev || prev.fileName !== name) {
+        return prev;
+      }
       return { ...prev, saving: true };
     });
 
     try {
       await authFilesApi.patchFields(name, payload);
+      if (!editorSessionRef.current.isCurrent(sessionId)) return;
       showNotification(t('auth_files.prefix_proxy_saved_success', { name }), 'success');
       await loadFiles();
-      setPrefixProxyEditor(null);
+      if (editorSessionRef.current.isCurrent(sessionId)) closePrefixProxyEditor();
     } catch (err: unknown) {
+      if (!editorSessionRef.current.isCurrent(sessionId)) return;
       const errorMessage = err instanceof Error ? err.message : '';
       showNotification(`${t('notification.update_failed')}: ${errorMessage}`, 'error');
       setPrefixProxyEditor((prev) => {
-        if (!prev || prev.fileName !== name) return prev;
+        if (!editorSessionRef.current.isCurrent(sessionId) || !prev || prev.fileName !== name) {
+          return prev;
+        }
         return { ...prev, saving: false };
       });
     }

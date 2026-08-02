@@ -102,13 +102,13 @@ describe('LMU AI normal multi-protocol provider', () => {
     });
     const resource = lmuAIToResource(raw);
 
-    expect(raw.openai.map((item) => item.index)).toEqual([3]);
+    expect(raw.openai.map((item) => item.index)).toEqual([0]);
     expect(resource?.brand).toBe('lmuAI');
     expect(resource?.name).toBe('LMU AI（灵眸AI）');
     expect(resource?.flags.protocols).toEqual(['openai', 'anthropic', 'gemini', 'codexResponses']);
     expect(resource?.selector).toEqual({
       brand: 'lmuAI',
-      openaiIndices: [3],
+      openaiIndices: [0],
       claudeIndices: [0],
       codexIndices: [0],
       geminiIndices: [0],
@@ -156,6 +156,54 @@ describe('LMU AI normal multi-protocol provider', () => {
     expect(removed.claudeApiKeys).toEqual(initial.claudeApiKeys);
     expect(removed.codexApiKeys).toEqual([]);
     expect(removed.geminiApiKeys).toEqual([]);
+  });
+
+  test('uses normalized list indexes when backend source indexes contain filtered gaps', () => {
+    const normalized = {
+      openaiCompatibility: [
+        {
+          name: 'lmuAI',
+          baseUrl: LMU_AI_OPENAI_BASE_URL,
+          apiKeyEntries: [],
+          sourceIndex: 1,
+        },
+        {
+          name: 'unrelated',
+          baseUrl: 'https://unrelated.example/v1',
+          apiKeyEntries: [],
+          sourceIndex: 2,
+        },
+      ],
+      claudeApiKeys: [],
+      codexApiKeys: [],
+      geminiApiKeys: [],
+    };
+
+    const updated = applyMultiProtocolProviderMutation('lmuAI', normalized, {
+      ...input,
+      multiProtocolKeyEntries: [
+        {
+          ...input.multiProtocolKeyEntries[0],
+          prefix: 'updated',
+        },
+      ],
+    });
+
+    expect(updated.openaiCompatibility).toHaveLength(2);
+    expect(updated.openaiCompatibility[0]?.prefix).toBe('updated');
+    expect(updated.openaiCompatibility[1]?.name).toBe('unrelated');
+    expect(updated.openaiCompatibility[1]?.baseUrl).toBe('https://unrelated.example/v1');
+
+    const disabled = toggleMultiProtocolProviderConfigs(
+      normalized,
+      buildLmuAIRaw(normalized),
+      true
+    );
+    expect(disabled.openaiCompatibility[0]?.disabled).toBe(true);
+    expect(disabled.openaiCompatibility[1]?.disabled).not.toBe(true);
+
+    const removed = removeMultiProtocolProviderConfigs(normalized, buildLmuAIRaw(normalized));
+    expect(removed.openaiCompatibility).toEqual([normalized.openaiCompatibility[1]]);
   });
 
   test('appends LMU AI after existing workbench providers with its normal descriptor, path, and logo', () => {
