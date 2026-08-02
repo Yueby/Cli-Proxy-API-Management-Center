@@ -6,7 +6,16 @@ import zhCN from '../src/i18n/locales/zh-CN.json';
 import zhTW from '../src/i18n/locales/zh-TW.json';
 
 const originalOrder = ['gemini', 'codex', 'claude', 'vertex', 'openaiCompatibility'];
-const addedProviders = ['xai', 'kimi', 'claudeApi', 'code0', 'fennoAI', 'qiniuCloud', 'lmuAI'];
+const addedProviders = [
+  'xai',
+  'kimi',
+  'claudeApi',
+  'code0',
+  'fennoAI',
+  'qiniuCloud',
+  'lmuAI',
+  'interactions',
+];
 const locales = { en, ru, zhCN, zhTW } as const;
 
 const getPath = (value: unknown, path: string): unknown =>

@@ -37,6 +37,7 @@ const PROVIDER_TAB_STORAGE_KEY = 'ai-providers.active-tab';
 const PROVIDER_LOGOS: Record<ProviderBrand, string> = {
   kimi: kimiLogo,
   gemini: geminiLogo,
+  interactions: geminiLogo,
   claude: claudeLogo,
   claudeApi: claudeApiLogo,
   codex: codexLogo,
@@ -61,6 +62,7 @@ const PROVIDER_TAB_IDS: ProviderBrand[] = [
   'fennoAI',
   'qiniuCloud',
   'lmuAI',
+  'interactions',
 ];
 
 interface SheetState {

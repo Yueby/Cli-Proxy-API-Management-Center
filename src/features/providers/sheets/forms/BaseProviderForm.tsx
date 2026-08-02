@@ -88,7 +88,8 @@ function buildInitialForm(
         brand === 'openaiCompatibility' ||
         brand === 'codex' ||
         isClaudeLikeBrand(brand) ||
-        brand === 'gemini'
+        brand === 'gemini' ||
+        brand === 'interactions'
           ? ''
           : undefined,
       apiKeyEntries: brand === 'openaiCompatibility' ? [emptyApiKeyEntry()] : undefined,
@@ -173,7 +174,14 @@ function buildInitialForm(
     experimentalCchSigning: isClaudeLikeBrand(brand)
       ? (cfg as ProviderKeyConfig).experimentalCchSigning === true
       : undefined,
-    testModel: brand === 'codex' || isClaudeLikeBrand(brand) || brand === 'gemini' ? '' : undefined,
+    testModel:
+      brand === 'codex' ||
+      brand === 'xai' ||
+      isClaudeLikeBrand(brand) ||
+      brand === 'gemini' ||
+      brand === 'interactions'
+        ? ''
+        : undefined,
   };
 }
 
@@ -405,6 +413,7 @@ export function BaseProviderForm({
   const actualApiKeyEntries = form.apiKeyEntries ?? [];
   const supportsDisableCooling =
     brand === 'gemini' ||
+    brand === 'interactions' ||
     brand === 'codex' ||
     isClaudeLikeBrand(brand) ||
     brand === 'openaiCompatibility';
@@ -412,7 +421,7 @@ export function BaseProviderForm({
   const singleConnectivity =
     brand === 'codex'
       ? { status: connectivity.codexStatus, run: connectivity.runCodex }
-      : brand === 'gemini'
+      : brand === 'gemini' || brand === 'interactions'
         ? { status: connectivity.geminiStatus, run: connectivity.runGemini }
         : isClaudeLikeBrand(brand)
           ? { status: connectivity.claudeStatus, run: connectivity.runClaude }
@@ -575,7 +584,11 @@ export function BaseProviderForm({
           <div className={styles.field}>
             <label className={styles.label} htmlFor={`${fid}-testModel`}>
               {t('providersPage.form.testModel')}
-              {brand === 'codex' || isClaudeLikeBrand(brand) || brand === 'gemini' ? (
+              {brand === 'codex' ||
+              brand === 'xai' ||
+              isClaudeLikeBrand(brand) ||
+              brand === 'gemini' ||
+              brand === 'interactions' ? (
                 <span className={styles.labelHint}>
                   {' '}
                   · {t('providersPage.form.testModelClaudeHint')}

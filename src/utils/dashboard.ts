@@ -1,6 +1,32 @@
-import type { AuthFileItem } from '@/types';
+import type { AuthFileItem, Config } from '@/types';
 import type { RecentRequestUsageEntry } from './recentRequests';
 import { normalizeRecentRequestUsageEntry, sumRecentRequests } from './recentRequests';
+
+export const getProviderKeyCounts = (config: Config) => ({
+  gemini: config.geminiApiKeys?.length ?? 0,
+  interactions: config.interactionsApiKeys?.length ?? 0,
+  codex: config.codexApiKeys?.length ?? 0,
+  xai: config.xaiApiKeys?.length ?? 0,
+  claude: config.claudeApiKeys?.length ?? 0,
+  vertex: config.vertexApiKeys?.length ?? 0,
+  openai: config.openaiCompatibility?.length ?? 0,
+});
+
+const PROVIDER_LABELS: Record<string, string> = {
+  gemini: 'Gemini',
+  'gemini-interactions': 'Interactions API',
+  codex: 'Codex',
+  claude: 'Claude',
+  xai: 'xAI',
+  vertex: 'Vertex AI',
+  openai: 'OpenAI Compatible',
+  'openai-compatibility': 'OpenAI Compatible',
+};
+
+export function providerLabel(id: string, unknownLabel: string): string {
+  if (!id || id === 'unknown') return unknownLabel;
+  return PROVIDER_LABELS[id] ?? id.charAt(0).toUpperCase() + id.slice(1);
+}
 
 export function getDashboardModelsStatValue(
   count: number,

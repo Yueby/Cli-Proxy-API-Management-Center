@@ -56,6 +56,7 @@ type ProviderIconAsset = string | { light: string; dark: string };
 const PROVIDER_ICONS: Record<ProviderBrand, ProviderIconAsset> = {
   kimi: iconKimi,
   gemini: iconGemini,
+  interactions: iconGemini,
   codex: iconCodex,
   xai: iconXAI,
   claude: iconClaude,
@@ -71,6 +72,7 @@ const PROVIDER_ICONS: Record<ProviderBrand, ProviderIconAsset> = {
 const PROVIDER_FALLBACKS: Record<ProviderBrand, string> = {
   kimi: 'K',
   gemini: 'G',
+  interactions: 'I',
   codex: 'C',
   xai: 'X',
   claude: 'C',
@@ -86,6 +88,7 @@ const PROVIDER_FALLBACKS: Record<ProviderBrand, string> = {
 const PROVIDER_LABELS: Record<ProviderBrand, string> = {
   kimi: 'Kimi',
   gemini: 'Gemini',
+  interactions: 'Interactions API',
   codex: 'Codex',
   xai: 'xAI',
   claude: 'Claude',

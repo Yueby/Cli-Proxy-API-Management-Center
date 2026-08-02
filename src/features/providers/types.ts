@@ -6,6 +6,7 @@ import type { GeminiKeyConfig, OpenAIProviderConfig, ProviderKeyConfig } from '@
 
 export type ProviderBrand =
   | 'gemini'
+  | 'interactions'
   | 'codex'
   | 'xai'
   | 'kimi'
@@ -24,6 +25,7 @@ export type MultiProtocolProviderProtocol = 'openai' | 'codex' | 'claude' | 'gem
 
 export type ProviderResourceSelector =
   | { brand: 'gemini'; apiKey: string; baseUrl?: string; index: number }
+  | { brand: 'interactions'; apiKey: string; baseUrl?: string; index: number }
   | { brand: 'codex'; apiKey: string; baseUrl?: string; index: number }
   | { brand: 'xai'; apiKey: string; baseUrl?: string; index: number }
   | { brand: 'kimi'; name: string; index: number }

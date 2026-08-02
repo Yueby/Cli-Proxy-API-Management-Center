@@ -18,6 +18,7 @@ import {
   fennoAIToResource,
   geminiToResource,
   lmuAIToResource,
+  interactionsToResource,
   openaiToResource,
   qiniuCloudToResource,
   vertexToResource,
@@ -127,7 +128,7 @@ export const buildExcludedModels = (
 };
 
 const buildProviderKeyConfig = (
-  brand: 'gemini' | 'codex' | 'xai' | 'claude' | 'vertex',
+  brand: 'gemini' | 'interactions' | 'codex' | 'xai' | 'claude' | 'vertex',
   input: ProviderEntryFormInput,
   existing?: ProviderKeyConfig | GeminiKeyConfig | null
 ): ProviderKeyConfig | GeminiKeyConfig => {
@@ -145,6 +146,7 @@ const buildProviderKeyConfig = (
   const next: ProviderKeyConfig = {
     apiKey: apiKeyChanged ? input.apiKey.trim() : (existing?.apiKey ?? ''),
     priority: input.priority,
+    weight: existing?.weight,
     prefix: input.prefix.trim() || undefined,
     baseUrl: input.baseUrl.trim() || undefined,
     proxyUrl: input.proxyUrl.trim() || undefined,
@@ -358,6 +360,11 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
             return out;
           }, []);
           break;
+        case 'interactions':
+          resources = (config.interactionsApiKeys ?? []).map((item, index) =>
+            interactionsToResource(item, index)
+          );
+          break;
         case 'codex':
           resources = (config.codexApiKeys ?? []).reduce<ProviderResource[]>((out, item, index) => {
             if (!isCode0CodexProvider(item) && !isFennoAICodexProvider(item) && !isQiniuCloudCodexProvider(item) && !isLmuAICodexProvider(item)) out.push(codexToResource(item, index));
@@ -432,6 +439,14 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
       await providersApi.saveGeminiKeys(next);
       updateConfigValue('gemini-api-key', next);
       clearCache('gemini-api-key');
+    },
+    [clearCache, updateConfigValue]
+  );
+
+  const updateInteractionsConfig = useCallback(
+    (next: GeminiKeyConfig[]) => {
+      updateConfigValue('interactions-api-key', next);
+      clearCache('interactions-api-key');
     },
     [clearCache, updateConfigValue]
   );
@@ -545,6 +560,10 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           const next = [...(config?.geminiApiKeys ?? [])];
           next.push(buildProviderKeyConfig('gemini', input) as GeminiKeyConfig);
           await persistGeminiKeys(next);
+        } else if (brand === 'interactions') {
+          const created = buildProviderKeyConfig('interactions', input) as GeminiKeyConfig;
+          await providersApi.createInteractionsKey(created);
+          updateInteractionsConfig([...(config?.interactionsApiKeys ?? []), created]);
         } else if (brand === 'codex') {
           const next = [...(config?.codexApiKeys ?? [])];
           next.push(buildProviderKeyConfig('codex', input) as ProviderKeyConfig);
@@ -588,6 +607,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
       persistClaudeConfigs,
       persistCodexConfigs,
       persistGeminiKeys,
+      updateInteractionsConfig,
       persistOpenAIConfigs,
       persistCode0,
       persistMultiProtocolLists,
@@ -608,6 +628,14 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           const existing = list[idx];
           list[idx] = buildProviderKeyConfig('gemini', input, existing) as GeminiKeyConfig;
           await persistGeminiKeys(list);
+        } else if (brand === 'interactions') {
+          const list = [...(config?.interactionsApiKeys ?? [])];
+          const existing = list[idx];
+          if (!existing) return;
+          const updated = buildProviderKeyConfig('interactions', input, existing) as GeminiKeyConfig;
+          await providersApi.updateInteractionsKey(existing.apiKey, existing.baseUrl, updated);
+          list[idx] = updated;
+          updateInteractionsConfig(list);
         } else if (brand === 'codex') {
           const list = [...(config?.codexApiKeys ?? [])];
           const existing = list[idx];
@@ -648,6 +676,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
       persistClaudeConfigs,
       persistCodexConfigs,
       persistGeminiKeys,
+      updateInteractionsConfig,
       persistOpenAIConfigs,
       persistCode0,
       persistMultiProtocolLists,
@@ -666,6 +695,11 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           const next = (config?.geminiApiKeys ?? []).filter((_, i) => i !== sel.index);
           updateConfigValue('gemini-api-key', next);
           clearCache('gemini-api-key');
+        } else if (sel.brand === 'interactions') {
+          await providersApi.deleteInteractionsKey(sel.apiKey, sel.baseUrl);
+          const next = (config?.interactionsApiKeys ?? []).filter((_, i) => i !== sel.index);
+          updateConfigValue('interactions-api-key', next);
+          clearCache('interactions-api-key');
         } else if (sel.brand === 'codex') {
           await providersApi.deleteCodexConfig(sel.apiKey, sel.baseUrl);
           const next = (config?.codexApiKeys ?? []).filter((_, i) => i !== sel.index);
@@ -732,6 +766,18 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
             : withoutDisableAllModelsRule(current.excludedModels);
           list[idx] = { ...current, excludedModels: excluded };
           await persistGeminiKeys(list);
+        } else if (brand === 'interactions') {
+          const list = [...(config?.interactionsApiKeys ?? [])];
+          const current = list[idx];
+          if (!current) return;
+          const excludedModels = disabled
+            ? withDisableAllModelsRule(current.excludedModels)
+            : withoutDisableAllModelsRule(current.excludedModels);
+          const updated = { ...current, excludedModels };
+          await providersApi.updateInteractionsKey(current.apiKey, current.baseUrl, updated);
+          list[idx] = updated;
+          updateConfigValue('interactions-api-key', list);
+          clearCache('interactions-api-key');
         } else if (
           brand === 'codex' ||
           brand === 'claude' ||

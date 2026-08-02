@@ -159,7 +159,8 @@ describe('LMU AI normal multi-protocol provider', () => {
   });
 
   test('appends LMU AI after existing workbench providers with its normal descriptor, path, and logo', () => {
-    expect(PROVIDER_BRAND_ORDER.at(-1)).toBe('lmuAI');
+    expect(PROVIDER_BRAND_ORDER.indexOf('lmuAI')).toBeGreaterThan(PROVIDER_BRAND_ORDER.indexOf('qiniuCloud'));
+    expect(PROVIDER_BRAND_ORDER.indexOf('lmuAI')).toBeLessThan(PROVIDER_BRAND_ORDER.indexOf('interactions'));
     expect(PROVIDER_DESCRIPTORS.lmuAI.id).toBe('lmuAI');
     expect(PROVIDER_PATHS.lmuAI).toBe('/ai-providers/lmuai');
     expect(PROVIDER_LOGOS.lmuAI?.src).toContain('lmu-ai.png');

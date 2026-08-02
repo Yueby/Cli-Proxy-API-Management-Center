@@ -151,7 +151,7 @@
     "quick_actions": "Быстрые действия",
     "current_config": "Текущая конфигурация",
     "management_keys": "Ключи управления",
-    "provider_keys_detail": "G:{{gemini}} C:{{codex}} Cl:{{claude}} V:{{vertex}} O:{{openai}}",
+    "provider_keys_detail": "G:{{gemini}} I:{{interactions}} C:{{codex}} Cl:{{claude}} V:{{vertex}} O:{{openai}}",
     "oauth_credentials": "Учётные данные OAuth",
     "edit_settings": "Изменить настройки",
     "routing_strategy": "Стратегия маршрутизации",
@@ -1573,6 +1573,7 @@
     },
     "providerNames": {
       "gemini": "Gemini",
+      "interactions": "Interactions API",
       "codex": "Codex",
       "claude": "Claude",
       "vertex": "Vertex",

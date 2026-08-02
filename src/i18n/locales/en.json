@@ -151,7 +151,7 @@
     "quick_actions": "Quick Actions",
     "current_config": "Current Configuration",
     "management_keys": "Management Keys",
-    "provider_keys_detail": "G:{{gemini}} C:{{codex}} Cl:{{claude}} V:{{vertex}} O:{{openai}}",
+    "provider_keys_detail": "G:{{gemini}} I:{{interactions}} C:{{codex}} Cl:{{claude}} V:{{vertex}} O:{{openai}}",
     "oauth_credentials": "OAuth Credentials",
     "edit_settings": "Edit Settings",
     "routing_strategy": "Routing Strategy",
@@ -1585,6 +1585,7 @@
     },
     "providerNames": {
       "gemini": "Gemini",
+      "interactions": "Interactions API",
       "codex": "Codex",
       "claude": "Claude",
       "vertex": "Vertex",
