@@ -81,6 +81,8 @@
   --glass-bg: color-mix(in srgb, var(--bg-primary) 82%, transparent);
   --glass-bg-secondary: color-mix(in srgb, var(--bg-secondary) 82%, transparent);
   --glass-border: color-mix(in srgb, var(--border-color) 60%, transparent);
+  --viz-success: #0f9f6e;
+  --viz-failure: #c65746;
 }
 
 // 纯白主题
@@ -153,6 +155,8 @@
   --muted-bg: var(--bg-tertiary);
   --muted-foreground: var(--text-secondary);
   --accent-bg: var(--bg-tertiary);
+  --viz-success: #0f9f6e;
+  --viz-failure: #c65746;
 }
 
 // 深色主题（#191919）
@@ -228,6 +232,8 @@
   --accent-bg: var(--bg-tertiary);
 
   --glass-border: color-mix(in srgb, var(--border-color) 55%, transparent);
+  --viz-success: #0fae78;
+  --viz-failure: #cf4b3a;
 }
 
 @media (max-width: 768px), (prefers-reduced-motion: reduce), (prefers-reduced-transparency: reduce) {
