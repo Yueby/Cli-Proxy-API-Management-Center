@@ -103,7 +103,11 @@ const parseThinkingJson = (value: string | undefined): Record<string, unknown> |
   return parsed as Record<string, unknown>;
 };
 
-const buildExcludedModels = (
+/**
+ * `'*'` is the backend's provider-disabled rule. The disabled switch owns it;
+ * the excluded-model editor must never create or retain it independently.
+ */
+export const buildExcludedModels = (
   textValue: string,
   disabled: boolean,
   brand: ProviderBrand

@@ -39,6 +39,7 @@ import {
   statusBarDataFromRecentRequests,
 } from '@/utils/recentRequests';
 import { formatFileSize } from '@/utils/format';
+import { formatCredentialWeightBadge } from '@/utils/credentialWeight';
 import {
   formatModified,
   getAuthFileIcon,
@@ -56,6 +57,7 @@ import {
 } from '@/features/authFiles/constants';
 import type { AuthFileStatusBarData } from '@/features/authFiles/hooks/useAuthFilesStatusBarCache';
 import { AuthFileQuotaSection } from '@/features/authFiles/components/AuthFileQuotaSection';
+import { deriveAuthFileIdentity } from '@/features/authFiles/identity';
 import { resolveAuthFileQuotaType } from '@/features/authFiles/quotaConfig';
 import { resolveCodexSubscriptionBadge } from '@/features/authFiles/codexSubscription';
 import keyBadgeStyles from '@/components/providers/OpenAISection/KeyCountBadge.module.scss';
@@ -228,6 +230,8 @@ export function AuthFileCard(props: AuthFileCardProps) {
     Boolean(rawStatusMessage) && !HEALTHY_STATUS_MESSAGES.has(rawStatusMessage.toLowerCase());
 
   const priorityValue = parsePriorityValue(file.priority ?? file['priority']);
+  const weightBadge = formatCredentialWeightBadge(file.weight);
+  const identity = deriveAuthFileIdentity(file);
   const stateLabel = isRuntimeOnly
     ? t('auth_files.type_virtual')
     : file.disabled
@@ -401,7 +405,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
         textColor: typeColor.text,
         border: providerIcon ? '1px solid transparent' : typeColor.border || undefined,
       }}
-      title={file.name}
+      title={identity.primary}
       badges={[
         {
           label: typeLabel,
@@ -507,6 +511,23 @@ export function AuthFileCard(props: AuthFileCardProps) {
               <span title={t('auth_files.priority_badge_title', { value: priorityValue })}>
                 P{priorityValue}
               </span>
+            </span>
+          );
+        }
+
+        if (weightBadge) {
+          badges.push(
+            <span
+              key="weight"
+              className={ItemCard.styles.typeBadge}
+              style={{
+                backgroundColor: 'rgba(59, 130, 246, 0.10)',
+                color: '#3b82f6',
+                border: '1px solid rgba(59, 130, 246, 0.25)',
+              }}
+              title={t('auth_files.weight_display')}
+            >
+              {weightBadge}
             </span>
           );
         }

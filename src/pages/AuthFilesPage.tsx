@@ -51,7 +51,6 @@ import {
   isRuntimeOnlyAuthFile,
   isThemeSurfaceIconProvider,
   normalizeProviderKey,
-  parsePriorityValue,
   type QuotaProviderType,
   type ResolvedTheme,
 } from '@/features/authFiles/constants';
@@ -59,6 +58,7 @@ import { AuthFileCard } from '@/features/authFiles/components/AuthFileCard';
 import { ItemCard } from '@/components/ui/ItemCard';
 import { AuthFileModelsModal } from '@/features/authFiles/components/AuthFileModelsModal';
 import { AuthFilesPrefixProxyEditorModal } from '@/features/authFiles/components/AuthFilesPrefixProxyEditorModal';
+import { matchesAuthFileSearch, sortAuthFiles } from '@/features/authFiles/logic';
 import { AuthFilesOAuthDialog } from '@/features/authFiles/components/AuthFilesOAuthDialog';
 import { OAuthSettingsModal } from '@/features/authFiles/components/OAuthSettingsModal';
 import { useAuthFilesData } from '@/features/authFiles/hooks/useAuthFilesData';
@@ -531,14 +531,7 @@ export function AuthFilesPage() {
     return filesMatchingStatusFilters.filter((item) => {
       const type = normalizeProviderKey(String(item.type ?? item.provider ?? ''));
       const matchType = type === effectiveFilter;
-      const matchSearch =
-        !normalizedSearch ||
-        [item.name, item.type, item.provider].some((value) => {
-          const content = (value || '').toString();
-          return wildcardSearch
-            ? wildcardSearch.test(content)
-            : content.toLowerCase().includes(normalizedTerm);
-        });
+      const matchSearch = matchesAuthFileSearch(item, normalizedTerm, wildcardSearch);
       return matchType && matchSearch;
     });
   }, [
@@ -550,29 +543,9 @@ export function AuthFilesPage() {
   ]);
 
   const sorted = useMemo(() => {
-    const compareByBaseSort = (a: AuthFileItem, b: AuthFileItem) => {
-      if (sortMode === 'default') {
-        const providerA = normalizeProviderKey(String(a.provider ?? a.type ?? 'unknown'));
-        const providerB = normalizeProviderKey(String(b.provider ?? b.type ?? 'unknown'));
-        const providerCompare = providerA.localeCompare(providerB);
-        if (providerCompare !== 0) return providerCompare;
-        return a.name.localeCompare(b.name);
-      }
-      if (sortMode === 'az') {
-        return a.name.localeCompare(b.name);
-      }
-      if (sortMode === 'priority') {
-        const pa = parsePriorityValue(a.priority ?? a['priority']) ?? 0;
-        const pb = parsePriorityValue(b.priority ?? b['priority']) ?? 0;
-        const priorityCompare = pb - pa;
-        return priorityCompare !== 0 ? priorityCompare : a.name.localeCompare(b.name);
-      }
-      return 0;
-    };
-
     const sortWithinSubscriptionGroups = (items: AuthFileItem[]) => {
       if (!codexSubscriptionFirst || normalizedFilter !== 'codex') {
-        return [...items].sort(compareByBaseSort);
+        return sortAuthFiles(items, sortMode);
       }
 
       const subscribed: AuthFileItem[] = [];
@@ -586,8 +559,8 @@ export function AuthFilesPage() {
       });
 
       return [
-        ...subscribed.sort(compareByBaseSort),
-        ...freeOrExpired.sort(compareByBaseSort),
+        ...sortAuthFiles(subscribed, sortMode),
+        ...sortAuthFiles(freeOrExpired, sortMode),
       ];
     };
 
