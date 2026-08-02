@@ -10,7 +10,7 @@ import type { AuthFileItem } from '@/types';
 import { resolveAuthProvider } from '@/utils/quota';
 import { QUOTA_PROVIDER_TYPES, type QuotaProviderType } from './constants';
 
-type AnyQuotaConfig = QuotaConfig<never, never>;
+type AnyQuotaConfig = QuotaConfig<unknown, unknown>;
 const asAnyQuotaConfig = (config: unknown): AnyQuotaConfig => config as AnyQuotaConfig;
 
 const assertNever = (value: never): never => {

@@ -461,7 +461,14 @@
     "weight_label": "Scheduling weight (weight)",
     "weight_hint": "Defaults to 1. Values at or below 0 exclude this credential from weighted scheduling; maximum 1,000,000.",
     "weight_invalid_integer": "Weight must be an integer.",
-    "weight_invalid_max": "Weight cannot exceed 1,000,000."
+    "weight_invalid_max": "Weight cannot exceed 1,000,000.",
+    "quota": {
+      "details": "Quota details",
+      "timeline_title": "Quota windows",
+      "timeline_empty": "Window and reset timing is shown beside each quota meter.",
+      "total_credits": "Total reset credits",
+      "applicable_credits": "Applicable reset credits"
+    }
   },
   "antigravity_subscription": {
     "subscription_label": "Subscription",
