@@ -326,6 +326,7 @@
     "problem_filter_only": "仅显示有问题凭证",
     "disabled_filter_only": "仅显示已停用凭证",
     "display_options_label": "显示选项",
+    "display_options_summary": "已选 {{count}} 项",
     "compact_mode_label": "简略模式",
     "sort_label": "排序",
     "sort_default": "默认",

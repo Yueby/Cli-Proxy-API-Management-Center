@@ -92,4 +92,15 @@ describe('Auth Files upstream compatibility port', () => {
       expect(messages.auth_files.codex_subscription_first).toBeUndefined();
     }
   });
+
+  test('Auth Files display options use a compact multi-select dropdown', () => {
+    const page = source('src/pages/AuthFilesPage.tsx');
+    const multiSelect = source('src/components/ui/MultiSelect.tsx');
+
+    expect(page).toContain("import { MultiSelect } from '@/components/ui/MultiSelect'");
+    expect(page).toContain('<MultiSelect');
+    expect(page).not.toContain('filterToggleGroup');
+    expect(multiSelect).toContain('aria-multiselectable="true"');
+    expect(multiSelect).toContain('SelectionCheckbox');
+  });
 });

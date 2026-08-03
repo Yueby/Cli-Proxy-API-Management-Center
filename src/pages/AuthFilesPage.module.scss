@@ -329,44 +329,6 @@
 
 .filterToggleItem {
   min-width: 0;
-  grid-column: 1 / -1;
-}
-
-.filterToggleGroup {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: $spacing-sm;
-  min-height: 40px;
-
-  @include mobile {
-    grid-template-columns: 1fr;
-  }
-}
-
-.filterToggleCard {
-  display: flex;
-  align-items: center;
-  min-height: 40px;
-  padding: 0 2px;
-  border-radius: $radius-md;
-  border: 1px solid color-mix(in srgb, var(--border-color) 60%, transparent);
-  background: color-mix(in srgb, var(--bg-secondary) 50%, transparent);
-}
-
-.filterToggle {
-  display: flex;
-  align-items: center;
-  min-height: 40px;
-  padding-inline: 2px;
-}
-
-.filterToggleLabel {
-  display: inline-flex;
-  align-items: center;
-  color: var(--text-primary);
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
 }
 
 .searchInput {

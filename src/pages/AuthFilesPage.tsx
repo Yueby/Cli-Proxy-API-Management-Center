@@ -23,6 +23,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
+import { MultiSelect } from '@/components/ui/MultiSelect';
 import {
   IconDownload,
   IconRefreshCw,
@@ -35,7 +36,7 @@ import {
 } from '@/components/ui/icons';
 import { Pagination } from '@/components/ui/Pagination';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
+
 import { CategoryList, type CategoryItem } from '@/components/common/CategoryList';
 import { copyToClipboard } from '@/utils/clipboard';
 import {
@@ -479,6 +480,19 @@ export function AuthFilesPage() {
     ],
     [t]
   );
+  const displayOptionValues = useMemo(() => {
+    const values: string[] = [];
+    if (problemOnly) values.push('problem');
+    if (disabledOnly) values.push('disabled');
+    return values;
+  }, [disabledOnly, problemOnly]);
+  const displayOptions = useMemo(
+    () => [
+      { value: 'problem', label: t('auth_files.problem_filter_only') },
+      { value: 'disabled', label: t('auth_files.disabled_filter_only') },
+    ],
+    [t]
+  );
 
   const typeCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -902,38 +916,19 @@ export function AuthFilesPage() {
                 </div>
                 <div className={`${styles.filterItem} ${styles.filterToggleItem}`}>
                   <label>{t('auth_files.display_options_label')}</label>
-                  <div className={styles.filterToggleGroup}>
-                    <div className={styles.filterToggleCard}>
-                      <ToggleSwitch
-                        checked={problemOnly}
-                        onChange={(value) => {
-                          setProblemOnly(value);
-                          setPage(1);
-                        }}
-                        ariaLabel={t('auth_files.problem_filter_only')}
-                        label={
-                          <span className={styles.filterToggleLabel}>
-                            {t('auth_files.problem_filter_only')}
-                          </span>
-                        }
-                      />
-                    </div>
-                    <div className={styles.filterToggleCard}>
-                      <ToggleSwitch
-                        checked={disabledOnly}
-                        onChange={(value) => {
-                          setDisabledOnly(value);
-                          setPage(1);
-                        }}
-                        ariaLabel={t('auth_files.disabled_filter_only')}
-                        label={
-                          <span className={styles.filterToggleLabel}>
-                            {t('auth_files.disabled_filter_only')}
-                          </span>
-                        }
-                      />
-                    </div>
-                  </div>
+                  <MultiSelect
+                    values={displayOptionValues}
+                    options={displayOptions}
+                    summary={t('auth_files.display_options_summary', {
+                      count: displayOptionValues.length,
+                    })}
+                    ariaLabel={t('auth_files.display_options_label')}
+                    onChange={(values) => {
+                      setProblemOnly(values.includes('problem'));
+                      setDisabledOnly(values.includes('disabled'));
+                      setPage(1);
+                    }}
+                  />
                 </div>
               </div>
             </div>
