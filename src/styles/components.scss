@@ -19,8 +19,7 @@
     background-color var(--motion-hover),
     border-color var(--motion-hover),
     color var(--motion-hover),
-    box-shadow var(--motion-hover),
-    transform var(--motion-hover);
+    box-shadow var(--motion-hover);
   background: var(--surface-panel);
   color: var(--text-primary);
   white-space: nowrap;
@@ -33,7 +32,6 @@
     &:hover {
       background-color: var(--primary-hover);
       border-color: var(--primary-hover);
-      transform: translateY(-1px);
     }
 
     &:focus-visible {
@@ -171,7 +169,6 @@ textarea {
   background: var(--surface-panel);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-panel);
-  box-shadow: var(--shadow-panel);
   padding: 0;
   overflow: hidden;
 }

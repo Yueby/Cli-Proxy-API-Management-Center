@@ -16,7 +16,6 @@
 .aboutCard {
   overflow: hidden;
   background: var(--surface-panel);
-  box-shadow: var(--shadow-panel);
 }
 
 .aboutHeader {
@@ -35,7 +34,6 @@
   border-radius: 18px;
   object-fit: cover;
   border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-panel);
 }
 
 .aboutTitle {
@@ -80,18 +78,12 @@
   padding: $spacing-md $spacing-lg;
   cursor: pointer;
   transition:
-    transform var(--motion-hover),
     border-color var(--motion-hover),
     background-color var(--motion-hover);
 
   &:hover {
-    transform: translateX(3px);
     border-color: var(--primary-color);
     background: var(--surface-panel);
-  }
-
-  &:active {
-    transform: translateY(0);
   }
 }
 
@@ -292,18 +284,12 @@
   text-decoration: none;
   color: inherit;
   transition:
-    transform var(--motion-hover),
     border-color var(--motion-hover),
     background-color var(--motion-hover);
 
   &:hover {
     background: var(--surface-panel);
     border-color: var(--primary-color);
-    transform: translateX(3px);
-  }
-
-  &:active {
-    transform: translateY(0);
   }
 }
 

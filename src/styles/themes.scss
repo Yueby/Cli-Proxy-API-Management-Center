@@ -90,9 +90,9 @@
   --surface-muted: var(--bg-tertiary);
   --surface-floating: var(--floating-surface);
   --border-subtle: color-mix(in srgb, var(--border-color) 72%, transparent);
-  --radius-control: 7px;
-  --radius-panel: 10px;
-  --shadow-panel: 0 1px 2px rgb(45 42 38 / 0.05);
+  --radius-control: 6px;
+  --radius-panel: 8px;
+  --shadow-panel: none;
   --type-page-title: clamp(26px, 2.4vw, 34px);
   --motion-hover: 160ms ease;
   --content-max-width: 1440px;
@@ -247,7 +247,7 @@
   --glass-border: color-mix(in srgb, var(--border-color) 55%, transparent);
   --viz-success: #0fae78;
   --viz-failure: #cf4b3a;
-  --shadow-panel: 0 1px 2px rgb(0 0 0 / 0.24);
+  --shadow-panel: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

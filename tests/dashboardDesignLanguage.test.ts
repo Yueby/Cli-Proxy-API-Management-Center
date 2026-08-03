@@ -27,18 +27,21 @@ describe('dashboard flat design language', () => {
     expect(themes).toContain('@media (prefers-reduced-motion: reduce)');
   });
 
-  test('shared page headers and controls use the flat design tokens', () => {
+  test('shared headers and controls stay flat and avoid decorative motion', () => {
+    const themes = source('src/styles/themes.scss');
     const header = source('src/components/common/PageHeader.module.scss');
     const components = source('src/styles/components.scss');
 
+    expect(themes).toContain('--radius-control: 6px');
+    expect(themes).toContain('--radius-panel: 8px');
+    expect(themes).toContain('--shadow-panel: none');
     expect(header).toContain('var(--type-page-title)');
-    expect(header).toContain("content: '▍'");
-    expect(header).toContain('var(--viz-success)');
+    expect(header).not.toContain("content: '▍'");
+    expect(header).not.toContain('var(--viz-success)');
     expect(components).toContain('border-radius: var(--radius-control)');
     expect(components).toContain('background: var(--surface-panel)');
-    expect(components).toContain('box-shadow: var(--shadow-panel)');
-    expect(components).toContain('.btn:hover');
-    expect(components).toContain('transform: none');
+    expect(components).not.toContain('box-shadow: var(--shadow-panel)');
+    expect(components).not.toContain('transform: translateY(-1px)');
     expect(components).not.toContain('transition: all $transition-fast');
   });
 
@@ -47,7 +50,7 @@ describe('dashboard flat design language', () => {
 
     expect(styles).not.toContain('max-width: var(--content-max-width)');
     expect(styles).toContain('background: var(--surface-panel)');
-    expect(styles).toContain('box-shadow: var(--shadow-panel)');
+    expect(styles).not.toContain('box-shadow: var(--shadow-panel)');
     expect(styles).toContain('font-family: $font-mono');
     expect(styles).toContain('@media (prefers-reduced-motion: reduce)');
   });
@@ -58,7 +61,8 @@ describe('dashboard flat design language', () => {
     expect(styles).not.toContain('max-width: var(--content-max-width)');
     expect(styles).toContain('background: var(--surface-panel)');
     expect(styles).toContain('font-family: $font-mono');
-    expect(styles).toContain('transform: translateX(3px)');
+    expect(styles).not.toContain('box-shadow: var(--shadow-panel)');
+    expect(styles).not.toContain('transform: translateX(3px)');
     expect(styles).toContain('width: 76px');
     expect(styles).toContain('height: 76px');
     expect(styles).toContain('&:hover,');
