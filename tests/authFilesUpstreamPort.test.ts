@@ -107,7 +107,11 @@ describe('Auth Files upstream compatibility port', () => {
     expect(styles).toContain('grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);');
     expect(styles).toContain('.filterSearchItem');
     expect(styles).toContain('grid-column: 1 / -1;');
-    expect(multiSelect).toContain('aria-multiselectable="true"');
+    expect(multiSelect).toContain('role="group"');
+    expect(multiSelect).not.toContain('role="listbox"');
+    expect(multiSelect).not.toContain('role="option"');
+    expect(multiSelect).toContain('triggerRef.current?.focus()');
+    expect(multiSelect).toContain('aria-label={`${ariaLabel ?? summary}，${summary}`}');
     expect(multiSelect).toContain('SelectionCheckbox');
   });
 });

@@ -100,6 +100,16 @@
 }
 
 @media (max-width: 640px) {
+  .trigger {
+    min-height: 40px;
+    height: 40px;
+  }
+
+  .checkbox {
+    min-height: 44px;
+    padding-block: 10px;
+  }
+
   .dropdown {
     width: 100%;
     min-width: 0;

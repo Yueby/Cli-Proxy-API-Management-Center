@@ -28,9 +28,10 @@ export function MultiSelect({
   className,
 }: MultiSelectProps) {
   const generatedId = useId();
-  const listboxId = `${generatedId}-listbox`;
+  const groupId = `${generatedId}-group`;
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
   const selected = new Set(values);
 
   useEffect(() => {
@@ -40,7 +41,10 @@ export function MultiSelect({
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
     };
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false);
+      if (event.key === 'Escape') {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
     };
 
     document.addEventListener('mousedown', handlePointerDown);
@@ -61,13 +65,13 @@ export function MultiSelect({
   return (
     <div ref={rootRef} className={`${styles.root} ${className ?? ''}`.trim()}>
       <button
+        ref={triggerRef}
         type="button"
         className={styles.trigger}
         disabled={disabled}
-        aria-label={ariaLabel ?? summary}
-        aria-haspopup="listbox"
+        aria-label={`${ariaLabel ?? summary}，${summary}`}
         aria-expanded={open}
-        aria-controls={open ? listboxId : undefined}
+        aria-controls={open ? groupId : undefined}
         onClick={() => setOpen((current) => !current)}
       >
         <span className={styles.summary}>{summary}</span>
@@ -77,14 +81,13 @@ export function MultiSelect({
 
       {open && !disabled && (
         <div
-          id={listboxId}
+          id={groupId}
           className={styles.dropdown}
-          role="listbox"
-          aria-multiselectable="true"
+          role="group"
           aria-label={ariaLabel ?? summary}
         >
           {options.map((option) => (
-            <div key={option.value} className={styles.option} role="option" aria-selected={selected.has(option.value)}>
+            <div key={option.value} className={styles.option}>
               <SelectionCheckbox
                 checked={selected.has(option.value)}
                 onChange={(checked) => toggleValue(option.value, checked)}
