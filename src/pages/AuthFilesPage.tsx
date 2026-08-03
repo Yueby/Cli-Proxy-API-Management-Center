@@ -75,7 +75,6 @@ import {
 import { useAuthStore, useNotificationStore, useQuotaStore, useThemeStore } from '@/stores';
 import { getStatusFromError } from '@/utils/quota';
 import { getAuthFileQuotaConfig, resolveAuthFileQuotaType } from '@/features/authFiles/quotaConfig';
-import { hasActiveCodexSubscription } from '@/features/authFiles/codexSubscription';
 import styles from './AuthFilesPage.module.scss';
 
 const easePower3Out = (progress: number) => 1 - (1 - progress) ** 4;
@@ -141,7 +140,6 @@ export function AuthFilesPage() {
   const [pageSizeInput, setPageSizeInput] = useState(String(DEFAULT_COMPACT_PAGE_SIZE));
   const [viewMode, setViewMode] = useState<'diagram' | 'list'>('list');
   const [sortMode, setSortMode] = useState<AuthFilesSortMode>('default');
-  const [codexSubscriptionFirst, setCodexSubscriptionFirst] = useState(false);
   const [batchActionBarVisible, setBatchActionBarVisible] = useState(false);
   const [uiStateHydrated, setUiStateHydrated] = useState(false);
   const [oauthDialogOpen, setOauthDialogOpen] = useState(false);
@@ -256,15 +254,6 @@ export function AuthFilesPage() {
         if (typeof persisted.disabledOnly === 'boolean') {
           setDisabledOnly(persisted.disabledOnly);
         }
-        const legacyCodexNonFreeFirst = (persisted as { codexNonFreeFirst?: unknown })
-          .codexNonFreeFirst;
-        const persistedCodexSubscriptionFirst =
-          typeof persisted.codexSubscriptionFirst === 'boolean'
-            ? persisted.codexSubscriptionFirst
-            : legacyCodexNonFreeFirst;
-        if (typeof persistedCodexSubscriptionFirst === 'boolean') {
-          setCodexSubscriptionFirst(persistedCodexSubscriptionFirst);
-        }
         if (typeof persisted.search === 'string') {
           setSearch(persisted.search);
         }
@@ -299,7 +288,6 @@ export function AuthFilesPage() {
       filter,
       problemOnly,
       disabledOnly,
-      codexSubscriptionFirst,
       search,
       page,
       pageSize,
@@ -307,7 +295,6 @@ export function AuthFilesPage() {
       sortMode,
     });
   }, [
-    codexSubscriptionFirst,
     compactPageSize,
     disabledOnly,
     filter,
@@ -546,35 +533,14 @@ export function AuthFilesPage() {
   ]);
 
   const sorted = useMemo(() => {
-    const sortWithinSubscriptionGroups = (items: AuthFileItem[]) => {
-      if (!codexSubscriptionFirst || normalizedFilter !== 'codex') {
-        return sortAuthFiles(items, sortMode);
-      }
-
-      const subscribed: AuthFileItem[] = [];
-      const freeOrExpired: AuthFileItem[] = [];
-      items.forEach((item) => {
-        if (hasActiveCodexSubscription(item)) {
-          subscribed.push(item);
-        } else {
-          freeOrExpired.push(item);
-        }
-      });
-
-      return [
-        ...sortAuthFiles(subscribed, sortMode),
-        ...sortAuthFiles(freeOrExpired, sortMode),
-      ];
-    };
-
     const enabledItems = filtered.filter((item) => item.disabled !== true);
     const disabledItems = filtered.filter((item) => item.disabled === true);
 
     return [
-      ...sortWithinSubscriptionGroups(enabledItems),
-      ...sortWithinSubscriptionGroups(disabledItems),
+      ...sortAuthFiles(enabledItems, sortMode),
+      ...sortAuthFiles(disabledItems, sortMode),
     ];
-  }, [codexSubscriptionFirst, filtered, normalizedFilter, sortMode]);
+  }, [filtered, sortMode]);
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -967,23 +933,6 @@ export function AuthFilesPage() {
                         }
                       />
                     </div>
-                    {normalizedFilter === 'codex' && (
-                      <div className={styles.filterToggleCard}>
-                        <ToggleSwitch
-                          checked={codexSubscriptionFirst}
-                          onChange={(value) => {
-                            setCodexSubscriptionFirst(value);
-                            setPage(1);
-                          }}
-                          ariaLabel={t('auth_files.codex_subscription_first')}
-                          label={
-                            <span className={styles.filterToggleLabel}>
-                              {t('auth_files.codex_subscription_first')}
-                            </span>
-                          }
-                        />
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>

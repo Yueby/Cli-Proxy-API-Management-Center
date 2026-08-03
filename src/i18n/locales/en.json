@@ -435,7 +435,7 @@
     "quota_refresh_failed": "Failed to refresh quota for \"{{name}}\": {{message}}",
     "project_id_missing": "Missing Project ID",
     "project_id_missing_title": "This Google credential is missing a Project ID, so quota checks or related API calls may fail.",
-    "codex_subscription_first": "Subscriptions first",
+
     "delete_all_title": "Delete all files",
     "delete_title": "Delete file",
     "oauth_settings_button": "OAuth settings",

@@ -435,7 +435,7 @@
     "quota_refresh_failed": "重新整理「{{name}}」的配額失敗：{{message}}",
     "project_id_missing": "缺少 Project ID",
     "project_id_missing_title": "此 Google 系列驗證檔案缺少 Project ID，可能無法查詢配額或呼叫相關 API。",
-    "codex_subscription_first": "訂閱提前",
+
     "delete_all_title": "刪除全部檔案",
     "delete_title": "刪除檔案",
     "oauth_settings_button": "OAuth 設定",

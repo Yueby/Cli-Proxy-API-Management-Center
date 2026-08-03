@@ -76,4 +76,20 @@ describe('Auth Files upstream compatibility port', () => {
       }
     }
   });
+
+  test('Auth Files no longer exposes or persists the subscriptions-first toggle', () => {
+    const page = source('src/pages/AuthFilesPage.tsx');
+    const uiState = source('src/features/authFiles/uiState.ts');
+
+    expect(page).not.toContain('codexSubscriptionFirst');
+    expect(page).not.toContain('codex_subscription_first');
+    expect(page).not.toContain('hasActiveCodexSubscription');
+    expect(uiState).not.toContain('codexSubscriptionFirst');
+    expect(uiState).not.toContain('codexNonFreeFirst');
+
+    for (const locale of ['en', 'ru', 'zh-CN', 'zh-TW']) {
+      const messages = JSON.parse(source(`src/i18n/locales/${locale}.json`));
+      expect(messages.auth_files.codex_subscription_first).toBeUndefined();
+    }
+  });
 });

@@ -430,7 +430,7 @@
     "quota_refresh_failed": "Не удалось обновить квоту для \"{{name}}\": {{message}}",
     "project_id_missing": "Нет Project ID",
     "project_id_missing_title": "В этом Google-файле авторизации отсутствует Project ID, поэтому проверка квоты или связанные API-вызовы могут не работать.",
-    "codex_subscription_first": "Сначала подписки",
+
     "delete_all_title": "Удалить все файлы",
     "delete_title": "Удалить файл",
     "oauth_settings_button": "Настройки OAuth",

@@ -435,7 +435,7 @@
     "quota_refresh_failed": "刷新 \"{{name}}\" 的额度失败：{{message}}",
     "project_id_missing": "缺少 Project ID",
     "project_id_missing_title": "该 Google 系列认证文件缺少 Project ID，可能无法查询额度或调用相关接口。",
-    "codex_subscription_first": "订阅提前",
+
     "delete_all_title": "删除全部文件",
     "delete_title": "删除文件",
     "oauth_settings_button": "OAuth 设置",
