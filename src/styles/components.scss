@@ -210,6 +210,12 @@ textarea {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .btn:hover {
+    transform: none;
+  }
+}
+
 .status-badge {
   display: inline-flex;
   align-items: center;

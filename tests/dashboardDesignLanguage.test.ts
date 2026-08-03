@@ -37,6 +37,8 @@ describe('dashboard flat design language', () => {
     expect(components).toContain('border-radius: var(--radius-control)');
     expect(components).toContain('background: var(--surface-panel)');
     expect(components).toContain('box-shadow: var(--shadow-panel)');
+    expect(components).toContain('.btn:hover');
+    expect(components).toContain('transform: none');
     expect(components).not.toContain('transition: all $transition-fast');
   });
 
@@ -59,6 +61,8 @@ describe('dashboard flat design language', () => {
     expect(styles).toContain('transform: translateX(3px)');
     expect(styles).toContain('width: 76px');
     expect(styles).toContain('height: 76px');
+    expect(styles).toContain('&:hover,');
+    expect(styles).toContain('transform: none');
     expect(styles).not.toContain('transform: translateY(-2px)');
     expect(styles).not.toContain('transition: all 0.2s ease');
   });
