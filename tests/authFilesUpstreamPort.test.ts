@@ -99,7 +99,14 @@ describe('Auth Files upstream compatibility port', () => {
 
     expect(page).toContain("import { MultiSelect } from '@/components/ui/MultiSelect'");
     expect(page).toContain('<MultiSelect');
+    const styles = source('src/pages/AuthFilesPage.module.scss');
     expect(page).not.toContain('filterToggleGroup');
+    expect(styles).toMatch(
+      /grid-template-columns:\s*minmax\(280px, 2fr\)\s+minmax\(96px, 0\.55fr\)\s+minmax\(140px, 0\.8fr\)\s+minmax\(\s*170px,\s*0\.95fr\s*\);/
+    );
+    expect(styles).toContain('grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);');
+    expect(styles).toContain('.filterSearchItem');
+    expect(styles).toContain('grid-column: 1 / -1;');
     expect(multiSelect).toContain('aria-multiselectable="true"');
     expect(multiSelect).toContain('SelectionCheckbox');
   });
