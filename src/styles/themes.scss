@@ -83,6 +83,19 @@
   --glass-border: color-mix(in srgb, var(--border-color) 60%, transparent);
   --viz-success: #0f9f6e;
   --viz-failure: #c65746;
+
+  // Dashboard-derived semantic design language
+  --surface-page: var(--bg-secondary);
+  --surface-panel: var(--bg-primary);
+  --surface-muted: var(--bg-tertiary);
+  --surface-floating: var(--floating-surface);
+  --border-subtle: color-mix(in srgb, var(--border-color) 72%, transparent);
+  --radius-control: 7px;
+  --radius-panel: 10px;
+  --shadow-panel: 0 1px 2px rgb(45 42 38 / 0.05);
+  --type-page-title: clamp(26px, 2.4vw, 34px);
+  --motion-hover: 160ms ease;
+  --content-max-width: 1440px;
 }
 
 // 纯白主题
@@ -234,6 +247,13 @@
   --glass-border: color-mix(in srgb, var(--border-color) 55%, transparent);
   --viz-success: #0fae78;
   --viz-failure: #cf4b3a;
+  --shadow-panel: 0 1px 2px rgb(0 0 0 / 0.24);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-hover: 0ms;
+  }
 }
 
 @media (max-width: 768px), (prefers-reduced-motion: reduce), (prefers-reduced-transparency: reduce) {
