@@ -45,7 +45,7 @@ describe('dashboard flat design language', () => {
   test('logs adopts a quiet workspace surface while preserving the terminal viewer', () => {
     const styles = source('src/pages/LogsPage.module.scss');
 
-    expect(styles).toContain('max-width: var(--content-max-width)');
+    expect(styles).not.toContain('max-width: var(--content-max-width)');
     expect(styles).toContain('background: var(--surface-panel)');
     expect(styles).toContain('box-shadow: var(--shadow-panel)');
     expect(styles).toContain('font-family: $font-mono');
@@ -55,7 +55,7 @@ describe('dashboard flat design language', () => {
   test('system uses flat telemetry tiles and restrained link interactions', () => {
     const styles = source('src/pages/SystemPage.module.scss');
 
-    expect(styles).toContain('max-width: var(--content-max-width)');
+    expect(styles).not.toContain('max-width: var(--content-max-width)');
     expect(styles).toContain('background: var(--surface-panel)');
     expect(styles).toContain('font-family: $font-mono');
     expect(styles).toContain('transform: translateX(3px)');
@@ -65,5 +65,16 @@ describe('dashboard flat design language', () => {
     expect(styles).toContain('transform: none');
     expect(styles).not.toContain('transform: translateY(-2px)');
     expect(styles).not.toContain('transition: all 0.2s ease');
+  });
+
+  test('plugin management and store share the global page header', () => {
+    const management = source('src/features/plugins/PluginsPage.tsx');
+    const store = source('src/features/plugins/PluginStorePage.tsx');
+
+    for (const page of [management, store]) {
+      expect(page).toContain("import { PageHeader } from '@/components/common/PageHeader'");
+      expect(page).toContain('<PageHeader');
+      expect(page).not.toContain('className={styles.pageHeader}');
+    }
   });
 });
