@@ -10,13 +10,19 @@ import { Modal } from '@/components/ui/Modal';
 import {
   IconDownload,
   IconInfo,
+  IconRefreshCw,
   IconSettings,
   IconSignal,
   IconTimer,
   IconTrash2,
   IconZap,
 } from '@/components/ui/icons';
-import { useNotificationStore, useQuotaStore } from '@/stores';
+import {
+  captureQuotaCacheGeneration,
+  commitIfQuotaCacheCurrent,
+  useNotificationStore,
+  useQuotaStore,
+} from '@/stores';
 import { getAntigravityPlanLabel, CODEX_CONFIG } from '@/components/quota';
 import { formatShanghaiDateTime } from '@/utils/quota/resetCredits';
 import type { AuthFileItem } from '@/types';
@@ -33,6 +39,7 @@ import {
   statusBarDataFromRecentRequests,
 } from '@/utils/recentRequests';
 import { formatFileSize } from '@/utils/format';
+import { formatCredentialWeightBadge } from '@/utils/credentialWeight';
 import {
   formatModified,
   getAuthFileIcon,
@@ -40,13 +47,17 @@ import {
   getTypeColor,
   getTypeLabel,
   isRuntimeOnlyAuthFile,
+  isThemeSurfaceIconProvider,
+  getThemeSurfaceIconBackground,
   normalizeProviderKey,
   parsePriorityValue,
+  supportsAuthFileManualRefresh,
   type QuotaProviderType,
   type ResolvedTheme,
 } from '@/features/authFiles/constants';
 import type { AuthFileStatusBarData } from '@/features/authFiles/hooks/useAuthFilesStatusBarCache';
 import { AuthFileQuotaSection } from '@/features/authFiles/components/AuthFileQuotaSection';
+import { deriveAuthFileIdentity } from '@/features/authFiles/identity';
 import { resolveAuthFileQuotaType } from '@/features/authFiles/quotaConfig';
 import { resolveCodexSubscriptionBadge } from '@/features/authFiles/codexSubscription';
 import keyBadgeStyles from '@/components/providers/OpenAISection/KeyCountBadge.module.scss';
@@ -132,12 +143,14 @@ export type AuthFileCardProps = {
   disableControls: boolean;
   deleting: string | null;
   statusUpdating: Record<string, boolean>;
+  manualRefreshing: Record<string, boolean>;
   quotaFilterType: QuotaProviderType | null;
   statusBarCache: Map<string, AuthFileStatusBarData>;
   onShowModels: (file: AuthFileItem) => void;
   onPrefetchModels: (file: AuthFileItem) => void;
   getCachedModels: (name: string) => Array<{ id: string; display_name?: string }> | undefined;
   onDownload: (name: string) => void;
+  onManualRefresh: (file: AuthFileItem) => void;
   onOpenPrefixProxyEditor: (file: AuthFileItem) => void;
   onDelete: (name: string) => void;
   onToggleStatus: (file: AuthFileItem, enabled: boolean) => void;
@@ -156,12 +169,14 @@ export function AuthFileCard(props: AuthFileCardProps) {
     disableControls,
     deleting,
     statusUpdating,
+    manualRefreshing,
     quotaFilterType,
     statusBarCache,
     onShowModels,
     onPrefetchModels,
     getCachedModels,
     onDownload,
+    onManualRefresh,
     onOpenPrefixProxyEditor,
     onDelete,
     onToggleStatus,
@@ -181,6 +196,9 @@ export function AuthFileCard(props: AuthFileCardProps) {
   const typeColor = getTypeColor(providerKey, resolvedTheme);
   const typeLabel = getTypeLabel(t, providerKey);
   const providerIcon = getAuthFileIcon(providerKey, resolvedTheme);
+  const useThemeSurfaceIcon = isThemeSurfaceIconProvider(providerKey);
+  const showManualRefreshButton = !isRuntimeOnly && supportsAuthFileManualRefresh(providerKey);
+  const isManualRefreshing = manualRefreshing[file.name] === true;
   const googleProjectId = resolveGoogleProjectId(file);
   const isMissingGoogleProjectId = requiresGoogleProjectId(file) && !googleProjectId;
 
@@ -212,6 +230,8 @@ export function AuthFileCard(props: AuthFileCardProps) {
     Boolean(rawStatusMessage) && !HEALTHY_STATUS_MESSAGES.has(rawStatusMessage.toLowerCase());
 
   const priorityValue = parsePriorityValue(file.priority ?? file['priority']);
+  const weightBadge = formatCredentialWeightBadge(file.weight);
+  const identity = deriveAuthFileIdentity(file);
   const stateLabel = isRuntimeOnly
     ? t('auth_files.type_virtual')
     : file.disabled
@@ -287,17 +307,22 @@ export function AuthFileCard(props: AuthFileCardProps) {
       confirmText: t('codex_quota.reset_confirm_button'),
       variant: 'primary',
       onConfirm: async () => {
+        const cacheGeneration = captureQuotaCacheGeneration();
         setResettingQuota(true);
         try {
           const data = await resetQuota(file, t);
-          useQuotaStore.getState().setCodexQuota((prev) => ({
-            ...prev,
-            [file.name]: config.buildSuccessState(data) as never,
-          }));
-          showNotification(t('codex_quota.reset_success', { name: file.name }), 'success');
+          commitIfQuotaCacheCurrent(cacheGeneration, () => {
+            useQuotaStore.getState().setCodexQuota((prev) => ({
+              ...prev,
+              [file.name]: config.buildSuccessState(data) as never,
+            }));
+            showNotification(t('codex_quota.reset_success', { name: file.name }), 'success');
+          });
         } catch (err: unknown) {
           const message = err instanceof Error ? err.message : t('common.unknown_error');
-          showNotification(t('codex_quota.reset_failed', { name: file.name, message }), 'error');
+          commitIfQuotaCacheCurrent(cacheGeneration, () => {
+            showNotification(t('codex_quota.reset_failed', { name: file.name, message }), 'error');
+          });
         } finally {
           setResettingQuota(false);
         }
@@ -376,11 +401,11 @@ export function AuthFileCard(props: AuthFileCardProps) {
       avatar={{
         icon: providerIcon || undefined,
         fallback: typeLabel.slice(0, 1).toUpperCase(),
-        bgColor: providerIcon ? 'transparent' : typeColor.bg,
+        bgColor: useThemeSurfaceIcon ? getThemeSurfaceIconBackground(resolvedTheme) : providerIcon ? 'transparent' : typeColor.bg,
         textColor: typeColor.text,
         border: providerIcon ? '1px solid transparent' : typeColor.border || undefined,
       }}
-      title={file.name}
+      title={identity.primary}
       badges={[
         {
           label: typeLabel,
@@ -486,6 +511,23 @@ export function AuthFileCard(props: AuthFileCardProps) {
               <span title={t('auth_files.priority_badge_title', { value: priorityValue })}>
                 P{priorityValue}
               </span>
+            </span>
+          );
+        }
+
+        if (weightBadge) {
+          badges.push(
+            <span
+              key="weight"
+              className={ItemCard.styles.typeBadge}
+              style={{
+                backgroundColor: 'rgba(59, 130, 246, 0.10)',
+                color: '#3b82f6',
+                border: '1px solid rgba(59, 130, 246, 0.25)',
+              }}
+              title={t('auth_files.weight_display')}
+            >
+              {weightBadge}
             </span>
           );
         }
@@ -610,6 +652,14 @@ export function AuthFileCard(props: AuthFileCardProps) {
             )}
             {!isRuntimeOnly && (
               <ItemCard.UtilityActions>
+                {showManualRefreshButton && (
+                  <Button variant="secondary" size="sm" onClick={() => onManualRefresh(file)}
+                    className={ItemCard.styles.iconButton} title={t('auth_files.manual_refresh_button')}
+                    disabled={disableControls || file.disabled || statusUpdating[file.name] === true || isManualRefreshing}
+                    loading={isManualRefreshing}>
+                    {!isManualRefreshing && <IconRefreshCw size={16} />}
+                  </Button>
+                )}
                 {showQuota && cachedQuotaType && (
                   <Button
                     variant="secondary"

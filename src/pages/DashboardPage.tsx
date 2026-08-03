@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,7 +8,8 @@ import {
   IconSatellite
 } from '@/components/ui/icons';
 import { useAuthStore, useConfigStore, useModelsStore } from '@/stores';
-import { apiKeysApi, providersApi, authFilesApi } from '@/services/api';
+import { providersApi, authFilesApi, apiKeysApi } from '@/services/api';
+import { useApiKeysForModels } from '@/hooks/useApiKeysForModels';
 import styles from './DashboardPage.module.scss';
 
 interface QuickStat {
@@ -22,6 +23,7 @@ interface QuickStat {
 
 interface ProviderStats {
   gemini: number | null;
+  interactions: number | null;
   codex: number | null;
   claude: number | null;
   vertex: number | null;
@@ -45,6 +47,7 @@ export function DashboardPage() {
   const serverBuildDate = useAuthStore((state) => state.serverBuildDate);
   const apiBase = useAuthStore((state) => state.apiBase);
   const config = useConfigStore((state) => state.config);
+  const resolveApiKeysForModels = useApiKeysForModels();
 
   const models = useModelsStore((state) => state.models);
   const modelsLoading = useModelsStore((state) => state.loading);
@@ -60,6 +63,7 @@ export function DashboardPage() {
 
   const [providerStats, setProviderStats] = useState<ProviderStats>({
     gemini: null,
+    interactions: null,
     codex: null,
     claude: null,
     vertex: null,
@@ -72,11 +76,6 @@ export function DashboardPage() {
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>(getTimeOfDay);
   const [currentTime, setCurrentTime] = useState(() => new Date());
 
-  const apiKeysCache = useRef<string[]>([]);
-
-  useEffect(() => {
-    apiKeysCache.current = [];
-  }, [apiBase, config?.apiKeys]);
 
   // Update time every 60 seconds
   useEffect(() => {
@@ -87,53 +86,6 @@ export function DashboardPage() {
     return () => clearInterval(id);
   }, []);
 
-  const normalizeApiKeyList = (input: unknown): string[] => {
-    if (!Array.isArray(input)) return [];
-    const seen = new Set<string>();
-    const keys: string[] = [];
-
-    input.forEach((item) => {
-      const record =
-        item !== null && typeof item === 'object' && !Array.isArray(item)
-          ? (item as Record<string, unknown>)
-          : null;
-      const value =
-        typeof item === 'string'
-          ? item
-          : record
-            ? (record['api-key'] ?? record['apiKey'] ?? record.key ?? record.Key)
-            : '';
-      const trimmed = String(value ?? '').trim();
-      if (!trimmed || seen.has(trimmed)) return;
-      seen.add(trimmed);
-      keys.push(trimmed);
-    });
-
-    return keys;
-  };
-
-  const resolveApiKeysForModels = useCallback(async () => {
-    if (apiKeysCache.current.length) {
-      return apiKeysCache.current;
-    }
-
-    const configKeys = normalizeApiKeyList(config?.apiKeys);
-    if (configKeys.length) {
-      apiKeysCache.current = configKeys;
-      return configKeys;
-    }
-
-    try {
-      const list = await apiKeysApi.list();
-      const normalized = normalizeApiKeyList(list);
-      if (normalized.length) {
-        apiKeysCache.current = normalized;
-      }
-      return normalized;
-    } catch {
-      return [];
-    }
-  }, [config?.apiKeys]);
 
   const fetchModels = useCallback(async () => {
     if (connectionStatus !== 'connected' || !apiBase) {
@@ -153,10 +105,11 @@ export function DashboardPage() {
     const fetchStats = async () => {
       setLoading(true);
       try {
-        const [keysRes, filesRes, geminiRes, codexRes, claudeRes, vertexRes, openaiRes] = await Promise.allSettled([
+        const [keysRes, filesRes, geminiRes, interactionsRes, codexRes, claudeRes, vertexRes, openaiRes] = await Promise.allSettled([
           apiKeysApi.list(),
           authFilesApi.list(),
           providersApi.getGeminiKeys(),
+          providersApi.getInteractionsKeys(),
           providersApi.getCodexConfigs(),
           providersApi.getClaudeConfigs(),
           providersApi.getVertexConfigs(),
@@ -170,6 +123,7 @@ export function DashboardPage() {
 
         setProviderStats({
           gemini: geminiRes.status === 'fulfilled' ? geminiRes.value.length : null,
+          interactions: interactionsRes.status === 'fulfilled' ? interactionsRes.value.length : null,
           codex: codexRes.status === 'fulfilled' ? codexRes.value.length : null,
           claude: claudeRes.status === 'fulfilled' ? claudeRes.value.length : null,
           vertex: vertexRes.status === 'fulfilled' ? vertexRes.value.length : null,
@@ -191,18 +145,21 @@ export function DashboardPage() {
   // Calculate total provider keys only when all provider stats are available.
   const providerStatsReady =
     providerStats.gemini !== null &&
+    providerStats.interactions !== null &&
     providerStats.codex !== null &&
     providerStats.claude !== null &&
     providerStats.vertex !== null &&
     providerStats.openai !== null;
   const hasProviderStats =
     providerStats.gemini !== null ||
+    providerStats.interactions !== null ||
     providerStats.codex !== null ||
     providerStats.claude !== null ||
     providerStats.vertex !== null ||
     providerStats.openai !== null;
   const totalProviderKeys = providerStatsReady
     ? (providerStats.gemini ?? 0) +
+      (providerStats.interactions ?? 0) +
       (providerStats.codex ?? 0) +
       (providerStats.claude ?? 0) +
       (providerStats.vertex ?? 0) +
@@ -227,6 +184,7 @@ export function DashboardPage() {
       sublabel: hasProviderStats
         ? t('dashboard.provider_keys_detail', {
             gemini: providerStats.gemini ?? '-',
+            interactions: providerStats.interactions ?? '-',
             codex: providerStats.codex ?? '-',
             claude: providerStats.claude ?? '-',
             vertex: providerStats.vertex ?? '-',

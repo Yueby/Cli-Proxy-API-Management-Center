@@ -2,11 +2,18 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import iconClaude from '@/assets/icons/claude.svg';
+import iconClaudeApi from '@/assets/icons/claudeapi.png';
+import iconCode0 from '@/assets/icons/code0.png';
 import iconCodex from '@/assets/icons/codex.svg';
 import iconGemini from '@/assets/icons/gemini.svg';
 import iconOpenAIDark from '@/assets/icons/openai-dark.svg';
 import iconOpenAILight from '@/assets/icons/openai-light.svg';
 import iconVertex from '@/assets/icons/vertex.svg';
+import iconXAI from '@/assets/icons/grok.svg';
+import iconKimi from '@/assets/icons/kimi-dark.svg';
+import iconFennoAI from '@/assets/icons/fenno-ai.png';
+import iconQiniuCloud from '@/assets/icons/qiniu-cloud.png';
+import iconLmuAI from '@/assets/icons/lmu-ai.png';
 import { Button } from '@/components/ui/Button';
 import { ItemCard } from '@/components/ui/ItemCard';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
@@ -47,27 +54,51 @@ interface ProviderResourceCardsProps {
 type ProviderIconAsset = string | { light: string; dark: string };
 
 const PROVIDER_ICONS: Record<ProviderBrand, ProviderIconAsset> = {
+  kimi: iconKimi,
   gemini: iconGemini,
+  interactions: iconGemini,
   codex: iconCodex,
+  xai: iconXAI,
   claude: iconClaude,
+  claudeApi: iconClaudeApi,
   vertex: iconVertex,
   openaiCompatibility: { light: iconOpenAILight, dark: iconOpenAIDark },
+  code0: iconCode0,
+  fennoAI: iconFennoAI,
+  qiniuCloud: iconQiniuCloud,
+  lmuAI: iconLmuAI,
 };
 
 const PROVIDER_FALLBACKS: Record<ProviderBrand, string> = {
+  kimi: 'K',
   gemini: 'G',
+  interactions: 'I',
   codex: 'C',
+  xai: 'X',
   claude: 'C',
+  claudeApi: 'C',
   vertex: 'V',
   openaiCompatibility: 'O',
+  code0: 'C',
+  fennoAI: 'F',
+  qiniuCloud: 'Q',
+  lmuAI: 'L',
 };
 
 const PROVIDER_LABELS: Record<ProviderBrand, string> = {
+  kimi: 'Kimi',
   gemini: 'Gemini',
+  interactions: 'Interactions API',
   codex: 'Codex',
+  xai: 'xAI',
   claude: 'Claude',
+  claudeApi: 'ClaudeAPI',
   vertex: 'Vertex',
   openaiCompatibility: 'OpenAI',
+  code0: 'Code0',
+  fennoAI: 'FennoAI',
+  qiniuCloud: 'Qiniu Cloud',
+  lmuAI: 'LMU AI',
 };
 
 const getProviderIcon = (brand: ProviderBrand, resolvedTheme: ResolvedTheme): string => {

@@ -23,6 +23,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
+import { MultiSelect } from '@/components/ui/MultiSelect';
 import {
   IconDownload,
   IconRefreshCw,
@@ -35,7 +36,7 @@ import {
 } from '@/components/ui/icons';
 import { Pagination } from '@/components/ui/Pagination';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
+
 import { CategoryList, type CategoryItem } from '@/components/common/CategoryList';
 import { copyToClipboard } from '@/utils/clipboard';
 import {
@@ -44,12 +45,13 @@ import {
   QUOTA_PROVIDER_TYPES,
   clampCardPageSize,
   getAuthFileIcon,
+  getThemeSurfaceIconBackground,
   getTypeColor,
   getTypeLabel,
   hasAuthFileStatusMessage,
   isRuntimeOnlyAuthFile,
+  isThemeSurfaceIconProvider,
   normalizeProviderKey,
-  parsePriorityValue,
   type QuotaProviderType,
   type ResolvedTheme,
 } from '@/features/authFiles/constants';
@@ -57,6 +59,7 @@ import { AuthFileCard } from '@/features/authFiles/components/AuthFileCard';
 import { ItemCard } from '@/components/ui/ItemCard';
 import { AuthFileModelsModal } from '@/features/authFiles/components/AuthFileModelsModal';
 import { AuthFilesPrefixProxyEditorModal } from '@/features/authFiles/components/AuthFilesPrefixProxyEditorModal';
+import { matchesAuthFileSearch, sortAuthFiles } from '@/features/authFiles/logic';
 import { AuthFilesOAuthDialog } from '@/features/authFiles/components/AuthFilesOAuthDialog';
 import { OAuthSettingsModal } from '@/features/authFiles/components/OAuthSettingsModal';
 import { useAuthFilesData } from '@/features/authFiles/hooks/useAuthFilesData';
@@ -73,7 +76,6 @@ import {
 import { useAuthStore, useNotificationStore, useQuotaStore, useThemeStore } from '@/stores';
 import { getStatusFromError } from '@/utils/quota';
 import { getAuthFileQuotaConfig, resolveAuthFileQuotaType } from '@/features/authFiles/quotaConfig';
-import { hasActiveCodexSubscription } from '@/features/authFiles/codexSubscription';
 import styles from './AuthFilesPage.module.scss';
 
 const easePower3Out = (progress: number) => 1 - (1 - progress) ** 4;
@@ -139,7 +141,6 @@ export function AuthFilesPage() {
   const [pageSizeInput, setPageSizeInput] = useState(String(DEFAULT_COMPACT_PAGE_SIZE));
   const [viewMode, setViewMode] = useState<'diagram' | 'list'>('list');
   const [sortMode, setSortMode] = useState<AuthFilesSortMode>('default');
-  const [codexSubscriptionFirst, setCodexSubscriptionFirst] = useState(false);
   const [batchActionBarVisible, setBatchActionBarVisible] = useState(false);
   const [uiStateHydrated, setUiStateHydrated] = useState(false);
   const [oauthDialogOpen, setOauthDialogOpen] = useState(false);
@@ -152,15 +153,32 @@ export function AuthFilesPage() {
   const previousSelectionCountRef = useRef(0);
   const selectionCountRef = useRef(0);
 
+
+  const {
+    modelsModalOpen,
+    modelsLoading,
+    modelsList,
+    modelsFileName,
+    modelsFileType,
+    modelsError,
+    showModels,
+    prefetchModels,
+    getCachedModels,
+    closeModelsModal,
+    invalidateModels,
+  } = useAuthFilesModels();
+
   const {
     files,
     selectedFiles,
     selectionCount,
     loading,
+    refreshing,
     error,
     uploading,
     deleting,
     statusUpdating,
+    manualRefreshing,
     batchStatusUpdating,
     fileInputRef,
     loadFiles,
@@ -168,6 +186,7 @@ export function AuthFilesPage() {
     handleFileChange,
     handleDelete,
     handleDownload,
+    handleManualRefresh,
     handleStatusToggle,
     toggleSelect,
     selectAllVisible,
@@ -176,7 +195,7 @@ export function AuthFilesPage() {
     batchDownload,
     batchSetStatus,
     batchDelete,
-  } = useAuthFilesData();
+  } = useAuthFilesData({ onFilesMutated: invalidateModels });
 
   const statusBarCache = useAuthFilesStatusBarCache(files);
 
@@ -196,19 +215,6 @@ export function AuthFilesPage() {
     handleRenameAlias,
     handleDeleteAlias,
   } = useAuthFilesOauth({ viewMode, files });
-
-  const {
-    modelsModalOpen,
-    modelsLoading,
-    modelsList,
-    modelsFileName,
-    modelsFileType,
-    modelsError,
-    showModels,
-    prefetchModels,
-    getCachedModels,
-    closeModelsModal,
-  } = useAuthFilesModels();
 
   const {
     prefixProxyEditor,
@@ -249,15 +255,6 @@ export function AuthFilesPage() {
         if (typeof persisted.disabledOnly === 'boolean') {
           setDisabledOnly(persisted.disabledOnly);
         }
-        const legacyCodexNonFreeFirst = (persisted as { codexNonFreeFirst?: unknown })
-          .codexNonFreeFirst;
-        const persistedCodexSubscriptionFirst =
-          typeof persisted.codexSubscriptionFirst === 'boolean'
-            ? persisted.codexSubscriptionFirst
-            : legacyCodexNonFreeFirst;
-        if (typeof persistedCodexSubscriptionFirst === 'boolean') {
-          setCodexSubscriptionFirst(persistedCodexSubscriptionFirst);
-        }
         if (typeof persisted.search === 'string') {
           setSearch(persisted.search);
         }
@@ -292,7 +289,6 @@ export function AuthFilesPage() {
       filter,
       problemOnly,
       disabledOnly,
-      codexSubscriptionFirst,
       search,
       page,
       pageSize,
@@ -300,7 +296,6 @@ export function AuthFilesPage() {
       sortMode,
     });
   }, [
-    codexSubscriptionFirst,
     compactPageSize,
     disabledOnly,
     filter,
@@ -425,7 +420,7 @@ export function AuthFilesPage() {
 
   useInterval(
     () => {
-      void loadFiles().catch(() => {});
+      void loadFiles({ background: true }).catch(() => {});
     },
     isCurrentLayer ? 240_000 : null
   );
@@ -485,6 +480,19 @@ export function AuthFilesPage() {
     ],
     [t]
   );
+  const displayOptionValues = useMemo(() => {
+    const values: string[] = [];
+    if (problemOnly) values.push('problem');
+    if (disabledOnly) values.push('disabled');
+    return values;
+  }, [disabledOnly, problemOnly]);
+  const displayOptions = useMemo(
+    () => [
+      { value: 'problem', label: t('auth_files.problem_filter_only') },
+      { value: 'disabled', label: t('auth_files.disabled_filter_only') },
+    ],
+    [t]
+  );
 
   const typeCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -503,10 +511,12 @@ export function AuthFilesPage() {
   const authCategoryItems = useMemo<CategoryItem[]>(() => {
     return existingTypes.map((type) => {
       const iconSrc = getAuthFileIcon(type, resolvedTheme);
+      const useThemeSurfaceIcon = isThemeSurfaceIconProvider(type);
       return {
         id: type,
         label: getTypeLabel(t, type),
         icon: iconSrc || undefined,
+        iconBackground: useThemeSurfaceIcon ? getThemeSurfaceIconBackground(resolvedTheme) : undefined,
         fallback: iconSrc ? undefined : getTypeLabel(t, type).slice(0, 1).toUpperCase(),
         count: typeCounts[type] ?? 0,
       };
@@ -525,14 +535,7 @@ export function AuthFilesPage() {
     return filesMatchingStatusFilters.filter((item) => {
       const type = normalizeProviderKey(String(item.type ?? item.provider ?? ''));
       const matchType = type === effectiveFilter;
-      const matchSearch =
-        !normalizedSearch ||
-        [item.name, item.type, item.provider].some((value) => {
-          const content = (value || '').toString();
-          return wildcardSearch
-            ? wildcardSearch.test(content)
-            : content.toLowerCase().includes(normalizedTerm);
-        });
+      const matchSearch = matchesAuthFileSearch(item, normalizedTerm, wildcardSearch);
       return matchType && matchSearch;
     });
   }, [
@@ -544,55 +547,14 @@ export function AuthFilesPage() {
   ]);
 
   const sorted = useMemo(() => {
-    const compareByBaseSort = (a: AuthFileItem, b: AuthFileItem) => {
-      if (sortMode === 'default') {
-        const providerA = normalizeProviderKey(String(a.provider ?? a.type ?? 'unknown'));
-        const providerB = normalizeProviderKey(String(b.provider ?? b.type ?? 'unknown'));
-        const providerCompare = providerA.localeCompare(providerB);
-        if (providerCompare !== 0) return providerCompare;
-        return a.name.localeCompare(b.name);
-      }
-      if (sortMode === 'az') {
-        return a.name.localeCompare(b.name);
-      }
-      if (sortMode === 'priority') {
-        const pa = parsePriorityValue(a.priority ?? a['priority']) ?? 0;
-        const pb = parsePriorityValue(b.priority ?? b['priority']) ?? 0;
-        const priorityCompare = pb - pa;
-        return priorityCompare !== 0 ? priorityCompare : a.name.localeCompare(b.name);
-      }
-      return 0;
-    };
-
-    const sortWithinSubscriptionGroups = (items: AuthFileItem[]) => {
-      if (!codexSubscriptionFirst || normalizedFilter !== 'codex') {
-        return [...items].sort(compareByBaseSort);
-      }
-
-      const subscribed: AuthFileItem[] = [];
-      const freeOrExpired: AuthFileItem[] = [];
-      items.forEach((item) => {
-        if (hasActiveCodexSubscription(item)) {
-          subscribed.push(item);
-        } else {
-          freeOrExpired.push(item);
-        }
-      });
-
-      return [
-        ...subscribed.sort(compareByBaseSort),
-        ...freeOrExpired.sort(compareByBaseSort),
-      ];
-    };
-
     const enabledItems = filtered.filter((item) => item.disabled !== true);
     const disabledItems = filtered.filter((item) => item.disabled === true);
 
     return [
-      ...sortWithinSubscriptionGroups(enabledItems),
-      ...sortWithinSubscriptionGroups(disabledItems),
+      ...sortAuthFiles(enabledItems, sortMode),
+      ...sortAuthFiles(disabledItems, sortMode),
     ];
-  }, [codexSubscriptionFirst, filtered, normalizedFilter, sortMode]);
+  }, [filtered, sortMode]);
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -848,7 +810,8 @@ export function AuthFilesPage() {
                 variant="secondary"
                 size="sm"
                 onClick={handleHeaderRefresh}
-                disabled={loading}
+                disabled={loading || refreshing}
+                loading={refreshing}
                 title={t('common.refresh')}
                 aria-label={t('common.refresh')}
               >
@@ -953,55 +916,19 @@ export function AuthFilesPage() {
                 </div>
                 <div className={`${styles.filterItem} ${styles.filterToggleItem}`}>
                   <label>{t('auth_files.display_options_label')}</label>
-                  <div className={styles.filterToggleGroup}>
-                    <div className={styles.filterToggleCard}>
-                      <ToggleSwitch
-                        checked={problemOnly}
-                        onChange={(value) => {
-                          setProblemOnly(value);
-                          setPage(1);
-                        }}
-                        ariaLabel={t('auth_files.problem_filter_only')}
-                        label={
-                          <span className={styles.filterToggleLabel}>
-                            {t('auth_files.problem_filter_only')}
-                          </span>
-                        }
-                      />
-                    </div>
-                    <div className={styles.filterToggleCard}>
-                      <ToggleSwitch
-                        checked={disabledOnly}
-                        onChange={(value) => {
-                          setDisabledOnly(value);
-                          setPage(1);
-                        }}
-                        ariaLabel={t('auth_files.disabled_filter_only')}
-                        label={
-                          <span className={styles.filterToggleLabel}>
-                            {t('auth_files.disabled_filter_only')}
-                          </span>
-                        }
-                      />
-                    </div>
-                    {normalizedFilter === 'codex' && (
-                      <div className={styles.filterToggleCard}>
-                        <ToggleSwitch
-                          checked={codexSubscriptionFirst}
-                          onChange={(value) => {
-                            setCodexSubscriptionFirst(value);
-                            setPage(1);
-                          }}
-                          ariaLabel={t('auth_files.codex_subscription_first')}
-                          label={
-                            <span className={styles.filterToggleLabel}>
-                              {t('auth_files.codex_subscription_first')}
-                            </span>
-                          }
-                        />
-                      </div>
-                    )}
-                  </div>
+                  <MultiSelect
+                    values={displayOptionValues}
+                    options={displayOptions}
+                    summary={t('auth_files.display_options_summary', {
+                      count: displayOptionValues.length,
+                    })}
+                    ariaLabel={t('auth_files.display_options_label')}
+                    onChange={(values) => {
+                      setProblemOnly(values.includes('problem'));
+                      setDisabledOnly(values.includes('disabled'));
+                      setPage(1);
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -1024,12 +951,14 @@ export function AuthFilesPage() {
                     disableControls={disableControls}
                     deleting={deleting}
                     statusUpdating={statusUpdating}
+                    manualRefreshing={manualRefreshing}
                     quotaFilterType={quotaFilterType}
                     statusBarCache={statusBarCache}
                     onShowModels={showModels}
                     onPrefetchModels={prefetchModels}
                     getCachedModels={getCachedModels}
                     onDownload={handleDownload}
+                    onManualRefresh={handleManualRefresh}
                     onOpenPrefixProxyEditor={openPrefixProxyEditor}
                     onDelete={handleDelete}
                     onToggleStatus={handleStatusToggle}
@@ -1061,6 +990,7 @@ export function AuthFilesPage() {
         disableControls={disableControls}
         excludedError={excludedError}
         excluded={excluded}
+        onRetryExcluded={loadExcluded}
         onAddExcluded={() => openExcludedEditor()}
         onEditExcluded={openExcludedEditor}
         onDeleteExcluded={deleteExcluded}
@@ -1070,6 +1000,7 @@ export function AuthFilesPage() {
         onEditProvider={openModelAliasEditor}
         onDeleteProvider={deleteModelAlias}
         modelAliasError={modelAliasError}
+        onRetryAlias={loadModelAlias}
         modelAlias={modelAlias}
         allProviderModels={allProviderModels}
         onUpdateAlias={handleMappingUpdate}

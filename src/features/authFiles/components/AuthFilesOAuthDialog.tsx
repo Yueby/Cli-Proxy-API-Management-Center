@@ -11,6 +11,7 @@ import { vertexApi, type VertexImportResponse } from '@/services/api/vertex';
 import { copyToClipboard } from '@/utils/clipboard';
 import { IconCopy, IconExternalLink, IconPlug } from '@/components/ui/icons';
 import { getPluginTitle, resolvePluginAssetURL } from '@/features/plugins/pluginResources';
+import { notifyAuthFilesChanged } from '@/features/authFiles/authFilesEvents';
 import type { PluginListEntry } from '@/types';
 import styles from './AuthFilesOAuthDialog.module.scss';
 import iconCodex from '@/assets/icons/codex.svg';
@@ -400,6 +401,7 @@ export function AuthFilesOAuthDialog({
   const completeProviderAuth = (provider: OAuthProvider) => {
     clearPollingTimer(provider);
     clearSuccessResetTimer(provider);
+    notifyAuthFilesChanged();
     updateProviderState(provider, {
       url: undefined,
       state: undefined,
@@ -602,6 +604,7 @@ export function AuthFilesOAuthDialog({
         authFile: res['auth-file'] ?? res.auth_file,
       };
       setVertexState((prev) => ({ ...prev, loading: false, result }));
+      notifyAuthFilesChanged();
       showNotification(t('vertex_import.success'), 'success');
 
       if (onAuthFileCreated) {

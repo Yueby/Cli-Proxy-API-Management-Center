@@ -41,6 +41,8 @@ export interface CodexUsageWindow {
   resetAfterSeconds?: number | string;
   reset_at?: number | string;
   resetAt?: number | string;
+  reset_at_timestamp?: number | string;
+  resetAtTimestamp?: number | string;
 }
 
 export interface CodexRateLimitInfo {
@@ -65,6 +67,8 @@ export interface CodexAdditionalRateLimit {
 export interface CodexRateLimitResetCredits {
   available_count?: number | string;
   availableCount?: number | string;
+  applicable_available_count?: number | string;
+  applicableAvailableCount?: number | string;
 }
 
 export interface CodexRateLimitResetCredit {
@@ -93,6 +97,20 @@ export interface ClaudeUsageWindow {
   resets_at: string;
 }
 
+export interface ClaudeScopedUsageLimit {
+  kind?: string;
+  group?: string;
+  percent?: number | string | null;
+  resets_at?: string | null;
+  is_active?: boolean;
+  scope?: {
+    model?: {
+      id?: string | null;
+      display_name?: string | null;
+    } | null;
+  } | null;
+}
+
 export interface ClaudeExtraUsage {
   is_enabled: boolean;
   monthly_limit: number;
@@ -108,6 +126,7 @@ export interface ClaudeUsagePayload {
   seven_day_sonnet?: ClaudeUsageWindow | null;
   seven_day_cowork?: ClaudeUsageWindow | null;
   iguana_necktie?: ClaudeUsageWindow | null;
+  limits?: Array<ClaudeScopedUsageLimit | null> | null;
   extra_usage?: ClaudeExtraUsage | null;
 }
 
@@ -139,6 +158,8 @@ export interface ClaudeQuotaWindow {
   labelKey?: string;
   usedPercent: number | null;
   resetLabel: string;
+  resetAtMs?: number | null;
+  periodHours?: number | null;
 }
 
 export interface ClaudeQuotaState {
@@ -171,6 +192,8 @@ export interface AntigravityQuotaBucket {
   remainingFraction: number;
   resetTime?: string;
   description?: string;
+  resetAtMs?: number | null;
+  periodHours?: number | null;
 }
 
 export interface AntigravityQuotaState {
@@ -189,6 +212,8 @@ export interface CodexQuotaWindow {
   labelParams?: Record<string, string | number>;
   usedPercent: number | null;
   resetLabel: string;
+  resetAtMs?: number | null;
+  periodHours?: number | null;
 }
 
 export interface CodexQuotaState {
@@ -197,6 +222,7 @@ export interface CodexQuotaState {
   planType?: string | null;
   subscriptionActiveUntil?: string | number | null;
   rateLimitResetCreditsAvailableCount?: number | null;
+  rateLimitResetCreditsApplicableAvailableCount?: number | null;
   rateLimitResetCredits?: CodexRateLimitResetCredit[];
   rateLimitResetCreditsError?: string;
   error?: string;
@@ -255,6 +281,8 @@ export interface KimiQuotaRow {
   used: number;
   limit: number;
   resetHint?: string;
+  resetAtMs?: number | null;
+  periodHours?: number | null;
 }
 
 export interface KimiQuotaState {
@@ -313,6 +341,12 @@ export interface XaiProductUsageSummary {
 }
 
 export interface XaiBillingSummary {
+  mode: 'billing' | 'paid-health';
+  source?: 'cli-chat-proxy' | 'api.x.ai-fallback';
+  planType?: 'paid';
+  healthStatus?: 'chat-ok';
+  userId?: string;
+  teamId?: string;
   periodType: XaiBillingPeriodType;
   usagePercent: number | null;
   periodStart?: string;
@@ -327,6 +361,8 @@ export interface XaiBillingSummary {
   billingPeriodStart?: string;
   billingPeriodEnd?: string;
   usedPercent: number | null;
+  resetAtMs?: number | null;
+  periodHours?: number | null;
 }
 
 export interface XaiQuotaState {

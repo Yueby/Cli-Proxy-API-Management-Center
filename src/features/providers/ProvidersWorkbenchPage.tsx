@@ -13,6 +13,13 @@ import codexLogo from '@/assets/icons/codex.svg';
 import geminiLogo from '@/assets/icons/gemini.svg';
 import openaiLogo from '@/assets/icons/openai-light.svg';
 import vertexLogo from '@/assets/icons/vertex.svg';
+import xaiLogo from '@/assets/icons/grok.svg';
+import kimiLogo from '@/assets/icons/kimi-dark.svg';
+import claudeApiLogo from '@/assets/icons/claudeapi.png';
+import code0Logo from '@/assets/icons/code0.png';
+import fennoAILogo from '@/assets/icons/fenno-ai.png';
+import qiniuCloudLogo from '@/assets/icons/qiniu-cloud.png';
+import lmuAILogo from '@/assets/icons/lmu-ai.png';
 import { CategoryList, type CategoryItem } from '@/components/common/CategoryList';
 import type { GeminiKeyConfig, OpenAIProviderConfig, ProviderKeyConfig } from '@/types';
 import { ProviderHeaderCard } from './components/ProviderHeaderCard';
@@ -28,11 +35,19 @@ type SheetMode = 'detail' | 'create' | 'edit';
 
 const PROVIDER_TAB_STORAGE_KEY = 'ai-providers.active-tab';
 const PROVIDER_LOGOS: Record<ProviderBrand, string> = {
+  kimi: kimiLogo,
   gemini: geminiLogo,
+  interactions: geminiLogo,
   claude: claudeLogo,
+  claudeApi: claudeApiLogo,
   codex: codexLogo,
+  xai: xaiLogo,
   vertex: vertexLogo,
   openaiCompatibility: openaiLogo,
+  code0: code0Logo,
+  fennoAI: fennoAILogo,
+  qiniuCloud: qiniuCloudLogo,
+  lmuAI: lmuAILogo,
 };
 const PROVIDER_TAB_IDS: ProviderBrand[] = [
   'openaiCompatibility',
@@ -40,6 +55,14 @@ const PROVIDER_TAB_IDS: ProviderBrand[] = [
   'codex',
   'claude',
   'vertex',
+  'xai',
+  'kimi',
+  'claudeApi',
+  'code0',
+  'fennoAI',
+  'qiniuCloud',
+  'lmuAI',
+  'interactions',
 ];
 
 interface SheetState {

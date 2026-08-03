@@ -1,5 +1,29 @@
 import { parseTimestamp } from './timestamp';
 
+const COMPACT_SUFFIXES = ['', 'K', 'M', 'B', 'T'] as const;
+
+export function formatCompactNumber(value: number): string {
+  if (!Number.isFinite(value)) return '0';
+  const sign = value < 0 ? '-' : '';
+  let scaled = Math.abs(value);
+  let tier = 0;
+  while (scaled >= 1000 && tier < COMPACT_SUFFIXES.length - 1) {
+    scaled /= 1000;
+    tier += 1;
+  }
+  let rendered = tier === 0 ? Math.round(scaled) : Number(scaled.toFixed(scaled < 100 ? 1 : 0));
+  if (rendered >= 1000 && tier < COMPACT_SUFFIXES.length - 1) {
+    rendered = 1;
+    tier += 1;
+  }
+  return `${sign}${rendered}${COMPACT_SUFFIXES[tier]}`;
+}
+
+export function formatPercent(value: number, fractionDigits = 1): string {
+  if (!Number.isFinite(value)) return '—';
+  return `${value.toFixed(fractionDigits).replace(/\.0+$/, '')}%`;
+}
+
 /**
  * 格式化工具函数
  * 从原项目 src/utils/string.js 迁移

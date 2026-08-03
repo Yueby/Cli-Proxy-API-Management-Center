@@ -4,14 +4,19 @@
 .pageHeader {
   display: flex;
   flex-direction: column;
-  gap: $spacing-xs;
+  gap: 6px;
+  padding-bottom: $spacing-sm;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .pageTitle {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: var(--type-page-title);
+  font-weight: 650;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
   color: var(--text-primary);
   margin: 0;
+
 }
 
 .description {

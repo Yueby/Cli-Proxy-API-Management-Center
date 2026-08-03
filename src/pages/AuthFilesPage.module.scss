@@ -284,7 +284,10 @@
 
 .filterControls {
   display: grid;
-  grid-template-columns: minmax(240px, 1.4fr) repeat(2, minmax(120px, 0.72fr));
+  grid-template-columns: minmax(280px, 2fr) minmax(96px, 0.55fr) minmax(140px, 0.8fr) minmax(
+      170px,
+      0.95fr
+    );
   gap: $spacing-md;
   align-items: flex-end;
 
@@ -299,16 +302,25 @@
   }
 
   @include tablet {
-    grid-template-columns: minmax(220px, 1fr) repeat(2, minmax(140px, 0.8fr));
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
   @include mobile {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
   }
 }
 
 .filterSearchItem {
   min-width: 0;
+
+  @include tablet {
+    grid-column: 1 / -1;
+  }
+
+  @include mobile {
+    grid-column: 1 / -1;
+  }
 }
 
 .filterItem {
@@ -329,44 +341,6 @@
 
 .filterToggleItem {
   min-width: 0;
-  grid-column: 1 / -1;
-}
-
-.filterToggleGroup {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: $spacing-sm;
-  min-height: 40px;
-
-  @include mobile {
-    grid-template-columns: 1fr;
-  }
-}
-
-.filterToggleCard {
-  display: flex;
-  align-items: center;
-  min-height: 40px;
-  padding: 0 2px;
-  border-radius: $radius-md;
-  border: 1px solid color-mix(in srgb, var(--border-color) 60%, transparent);
-  background: color-mix(in srgb, var(--bg-secondary) 50%, transparent);
-}
-
-.filterToggle {
-  display: flex;
-  align-items: center;
-  min-height: 40px;
-  padding-inline: 2px;
-}
-
-.filterToggleLabel {
-  display: inline-flex;
-  align-items: center;
-  color: var(--text-primary);
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
 }
 
 .searchInput {

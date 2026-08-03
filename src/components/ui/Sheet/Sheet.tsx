@@ -41,6 +41,22 @@ const SIZE_CLASS: Record<SheetSize, string> = {
   xl: styles.sizeXl,
 };
 
+interface ScrollContainer {
+  scrollTop: number;
+}
+
+interface FocusTarget {
+  focus: (options?: FocusOptions) => void;
+}
+
+export function prepareSheetForOpen(
+  body: ScrollContainer | null,
+  target: FocusTarget | null
+): void {
+  if (body) body.scrollTop = 0;
+  target?.focus({ preventScroll: true });
+}
+
 export function Sheet({
   open,
   onClose,
@@ -63,6 +79,7 @@ export function Sheet({
   const [isEntering, setIsEntering] = useState(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sheetRef = useRef<HTMLDivElement | null>(null);
+  const bodyRef = useRef<HTMLDivElement | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
@@ -148,7 +165,7 @@ export function Sheet({
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const t = window.setTimeout(() => {
       const first = getFocusableElements()[0];
-      (first ?? closeBtnRef.current ?? sheetRef.current)?.focus();
+      prepareSheetForOpen(bodyRef.current, first ?? closeBtnRef.current ?? sheetRef.current);
     }, 0);
     return () => window.clearTimeout(t);
   }, [getFocusableElements, open]);
@@ -257,7 +274,9 @@ export function Sheet({
             ) : null}
           </div>
         )}
-        <div className={styles.body}>{children}</div>
+        <div ref={bodyRef} className={styles.body}>
+          {children}
+        </div>
         {footer ? <div className={styles.footer}>{footer}</div> : null}
       </div>
     </div>
