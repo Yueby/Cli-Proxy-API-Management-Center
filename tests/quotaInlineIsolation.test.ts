@@ -3,8 +3,8 @@ import { describe, expect, test } from 'bun:test';
 const quotaLoader = await Bun.file(
   new URL('../src/components/quota/useQuotaLoader.ts', import.meta.url)
 ).text();
-const authFileQuotaSection = await Bun.file(
-  new URL('../src/features/authFiles/components/AuthFileQuotaSection.tsx', import.meta.url)
+const authFileCard = await Bun.file(
+  new URL('../src/features/authFiles/components/AuthFileCard.tsx', import.meta.url)
 ).text();
 
 describe('inline quota response isolation', () => {
@@ -14,7 +14,7 @@ describe('inline quota response isolation', () => {
   });
 
   test('guards auth-file quota reset commits with the quota cache generation', () => {
-    expect(authFileQuotaSection).toContain('captureQuotaCacheGeneration');
-    expect(authFileQuotaSection).toContain('commitIfQuotaCacheCurrent');
+    expect(authFileCard).toContain('captureQuotaCacheGeneration');
+    expect(authFileCard).toContain('commitIfQuotaCacheCurrent');
   });
 });

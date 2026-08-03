@@ -30,51 +30,32 @@ describe('Auth Files quota UX production wiring', () => {
 });
 
 describe('Auth Files quota card interaction contracts', () => {
-  test('uses the shared operation coordinator for the single reset entry and refresh handler', () => {
+  test('shows Codex reset from total credits and blocks refresh throughout reset', () => {
     const section = source('src/features/authFiles/components/AuthFileQuotaSection.tsx');
-    const card = source('src/features/authFiles/components/AuthFileCard.tsx');
-    const page = source('src/pages/AuthFilesPage.tsx');
     expect(section).toContain('Boolean(config.canResetQuota?.(quota))');
-    expect(section).toContain("beginQuotaOperation(quotaType, file.name, 'reset')");
-    expect(section).toContain('finishQuotaOperation(operation)');
+    expect(section).toMatch(/canRefreshQuota\s*=\s*[\s\S]*!resettingQuota/);
     expect(section).toMatch(/disabled=\{!canUseResetQuota\}/);
-    expect(card).toContain('pendingQuotaOperation');
-    expect(card).not.toContain('resetQuotaForFile');
-    expect(page).toContain('executeQuotaRefresh({');
-    expect(source('src/features/authFiles/quotaRefresh.ts')).toContain(
-      "beginQuotaOperation(provider, fileName, 'refresh')"
-    );
-    expect(source('src/features/authFiles/quotaRefresh.ts')).toContain(
-      'finishQuotaOperation(operation)'
-    );
     expect(source('src/components/quota/quotaConfigs.ts')).toContain(
       "canResetQuota: (quota) => (quota.rateLimitResetCreditsAvailableCount ?? 0) > 0"
     );
   });
 
-  test('keeps provider cards and existing editing actions on the same Auth Files card', () => {
+  test('keeps provider cards, existing editing actions, and quota details on the same Auth Files card', () => {
     const card = source('src/features/authFiles/components/AuthFileCard.tsx');
     expect(card).toContain('<AuthFileQuotaSection');
     expect(card).toContain('onOpenPrefixProxyEditor');
     expect(card).toContain('onToggleStatus');
     expect(card).toContain('onDelete');
   });
-
-  test('success rendering has no permanently empty quota details entry', () => {
-    const section = source('src/features/authFiles/components/AuthFileQuotaSection.tsx');
-    expect(section).not.toContain('<details');
-    expect(section).not.toContain('auth_files.quota.timeline_empty');
-    expect(section).not.toContain('quotaTimelineEmpty');
-  });
 });
 
 const localeFiles = ['en', 'ru', 'zh-CN', 'zh-TW'];
 
 describe('Auth Files quota UX localization and responsive policy', () => {
-  test('ships reset-credit semantics in all four locales', () => {
+  test('ships timeline/detail and credit semantics in all four locales', () => {
     for (const locale of localeFiles) {
       const messages = JSON.parse(source(`src/i18n/locales/${locale}.json`));
-      for (const key of ['total_credits', 'applicable_credits']) {
+      for (const key of ['details', 'timeline_title', 'timeline_empty', 'total_credits', 'applicable_credits']) {
         expect(messages.auth_files?.quota?.[key]).toBeTruthy();
       }
     }

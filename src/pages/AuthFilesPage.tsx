@@ -72,13 +72,7 @@ import {
   writeAuthFilesUiState,
   type AuthFilesSortMode,
 } from '@/features/authFiles/uiState';
-import {
-  useAuthStore,
-  useNotificationStore,
-  useQuotaStore,
-  useThemeStore,
-} from '@/stores';
-import { executeQuotaRefresh } from '@/features/authFiles/quotaRefresh';
+import { useAuthStore, useNotificationStore, useQuotaStore, useThemeStore } from '@/stores';
 import { getStatusFromError } from '@/utils/quota';
 import { getAuthFileQuotaConfig, resolveAuthFileQuotaType } from '@/features/authFiles/quotaConfig';
 import { hasActiveCodexSubscription } from '@/features/authFiles/codexSubscription';
@@ -389,40 +383,36 @@ export function AuthFilesPage() {
         updater: Record<string, unknown> | ((prev: Record<string, unknown>) => Record<string, unknown>)
       ) => void;
 
-      return executeQuotaRefresh({
-        provider: quotaType,
-        fileName: file.name,
-        fetchQuota: () => config.fetchQuota(file, t),
-        commitLoading: () => {
-          setQuota((prev) => ({
-            ...prev,
-            [file.name]: config.buildLoadingState(),
-          }));
-        },
-        commitSuccess: (data) => {
-          setQuota((prev) => ({
-            ...prev,
-            [file.name]: config.buildSuccessState(data),
-          }));
-          if (notify) {
-            showNotification(t('auth_files.quota_refresh_success', { name: file.name }), 'success');
-          }
-        },
-        commitError: (error) => {
-          const message = error instanceof Error ? error.message : t('common.unknown_error');
-          const status = getStatusFromError(error);
-          setQuota((prev) => ({
-            ...prev,
-            [file.name]: config.buildErrorState(message, status),
-          }));
-          if (notify) {
-            showNotification(
-              t('auth_files.quota_refresh_failed', { name: file.name, message }),
-              'error'
-            );
-          }
-        },
-      });
+      setQuota((prev) => ({
+        ...prev,
+        [file.name]: config.buildLoadingState(),
+      }));
+
+      try {
+        const data = await config.fetchQuota(file, t);
+        setQuota((prev) => ({
+          ...prev,
+          [file.name]: config.buildSuccessState(data),
+        }));
+        if (notify) {
+          showNotification(t('auth_files.quota_refresh_success', { name: file.name }), 'success');
+        }
+        return true;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : t('common.unknown_error');
+        const status = getStatusFromError(err);
+        setQuota((prev) => ({
+          ...prev,
+          [file.name]: config.buildErrorState(message, status),
+        }));
+        if (notify) {
+          showNotification(
+            t('auth_files.quota_refresh_failed', { name: file.name, message }),
+            'error'
+          );
+        }
+        return false;
+      }
     },
     [quotaStore, showNotification, t]
   );

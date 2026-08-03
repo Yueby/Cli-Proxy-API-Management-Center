@@ -1,14 +1,12 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { SkeletonTextBlock } from '@/components/common/LoadingSkeleton';
 import { Button } from '@/components/ui/Button';
 import { IconRefreshCw } from '@/components/ui/icons';
 import {
-  beginQuotaOperation,
   captureQuotaCacheGeneration,
   commitIfQuotaCacheCurrent,
-  finishQuotaOperation,
   useNotificationStore,
   useQuotaStore,
 } from '@/stores';
@@ -48,6 +46,9 @@ export function AuthFileQuotaSection({
   const { t } = useTranslation();
   const showNotification = useNotificationStore((state) => state.showNotification);
   const showConfirmation = useNotificationStore((state) => state.showConfirmation);
+  const [resettingQuota, setResettingQuota] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
   const quota = useQuotaStore((state) => {
     if (quotaType === 'antigravity') return state.antigravityQuota[file.name] as QuotaState;
     if (quotaType === 'claude') return state.claudeQuota[file.name] as QuotaState;
@@ -68,14 +69,8 @@ export function AuthFileQuotaSection({
 
   const config = getAuthFileQuotaConfig(quotaType);
   const quotaStatus = quota?.status ?? 'idle';
-  const pendingQuotaOperation = useQuotaStore(
-    (state) => state.pendingOperations[`${quotaType}\u0000${file.name}`]?.kind ?? null
-  );
   const canRefreshQuota =
-    !disableControls &&
-    !file.disabled &&
-    !isRuntimeOnlyAuthFile(file) &&
-    pendingQuotaOperation === null;
+    !disableControls && !file.disabled && !isRuntimeOnlyAuthFile(file) && !resettingQuota;
   const canUseResetQuota = canRefreshQuota && quotaStatus !== 'loading';
   const showResetQuotaAction = quota !== undefined && Boolean(config.canResetQuota?.(quota));
 
@@ -88,9 +83,8 @@ export function AuthFileQuotaSection({
       confirmText: t('codex_quota.reset_confirm_button'),
       variant: 'primary',
       onConfirm: async () => {
-        const operation = beginQuotaOperation(quotaType, file.name, 'reset');
-        if (!operation) return;
         const cacheGeneration = captureQuotaCacheGeneration();
+        setResettingQuota(true);
         try {
           const data = await config.resetQuota!(file, t as TFunction);
           commitIfQuotaCacheCurrent(cacheGeneration, () => {
@@ -103,11 +97,11 @@ export function AuthFileQuotaSection({
             showNotification(t('codex_quota.reset_failed', { name: file.name, message }), 'error');
           });
         } finally {
-          finishQuotaOperation(operation);
+          setResettingQuota(false);
         }
       },
     });
-  }, [canUseResetQuota, config, file, quotaType, showConfirmation, showNotification, t, updateQuotaState]);
+  }, [canUseResetQuota, config, file, showConfirmation, showNotification, t, updateQuotaState]);
 
   const quotaErrorMessage = resolveQuotaErrorMessage(
     t,
@@ -133,6 +127,15 @@ export function AuthFileQuotaSection({
         </div>
       ) : null}
 
+      {quotaStatus === 'success' && quota && (
+        <details className={styles.quotaDetails} open={detailsOpen} onToggle={(event) => setDetailsOpen(event.currentTarget.open)}>
+          <summary>{t('auth_files.quota.details')}</summary>
+          <div className={styles.quotaTimelineEmpty} role="status">
+            {t('auth_files.quota.timeline_empty')}
+          </div>
+        </details>
+      )}
+
       {quotaStatus !== 'idle' && config.resetQuota && showResetQuotaAction && (
         <div className={styles.quotaCardActions}>
           <Button
@@ -142,11 +145,11 @@ export function AuthFileQuotaSection({
             className={styles.quotaResetCreditButton}
             onClick={resetQuotaForFile}
             disabled={!canUseResetQuota}
-            loading={pendingQuotaOperation === 'reset'}
+            loading={resettingQuota}
             title={t('codex_quota.reset_button')}
             aria-label={t('codex_quota.reset_button')}
           >
-            {pendingQuotaOperation !== 'reset' && <IconRefreshCw size={14} />}
+            {!resettingQuota && <IconRefreshCw size={14} />}
             {t('codex_quota.reset_button')}
           </Button>
         </div>

@@ -463,7 +463,9 @@
     "weight_invalid_integer": "權重必須是整數。",
     "weight_invalid_max": "權重不能超過 1,000,000。",
     "quota": {
-
+      "details": "額度詳情",
+      "timeline_title": "額度視窗",
+      "timeline_empty": "每個額度進度條旁已顯示週期與重設時間。",
       "total_credits": "重設積分總數",
       "applicable_credits": "目前可用重設積分"
     }
