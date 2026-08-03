@@ -89,14 +89,7 @@ import {
   isXaiFile,
 } from '@/utils/quota';
 import { normalizeAuthIndex } from '@/utils/authIndex';
-import type { ComponentType } from 'react';
 import type { QuotaRenderHelpers } from './QuotaCard';
-import type { QuotaBodyProps } from '@/features/quota/types';
-import { AntigravityQuotaBody } from '@/features/quota/providers/antigravity/AntigravityQuotaBody';
-import { ClaudeQuotaBody } from '@/features/quota/providers/claude/ClaudeQuotaBody';
-import { CodexQuotaBody } from '@/features/quota/providers/codex/CodexQuotaBody';
-import { KimiQuotaBody } from '@/features/quota/providers/kimi/KimiQuotaBody';
-import { XaiQuotaBody } from '@/features/quota/providers/xai/XaiQuotaBody';
 import styles from '@/pages/QuotaPage.module.scss';
 
 type QuotaUpdater<T> = T | ((prev: T) => T);
@@ -163,7 +156,6 @@ export interface QuotaConfig<TState, TData> {
   controlClassName: string;
   gridClassName: string;
   renderQuotaItems: (quota: TState, t: TFunction, helpers: QuotaRenderHelpers) => ReactNode;
-  Body: ComponentType<QuotaBodyProps<TState>>;
 }
 
 const resolveAntigravityProjectId = async (file: AuthFileItem): Promise<string> => {
@@ -1234,7 +1226,6 @@ export const CLAUDE_CONFIG: QuotaConfig<
   controlClassName: styles.claudeControl,
   gridClassName: styles.claudeGrid,
   renderQuotaItems: renderClaudeItems,
-  Body: ClaudeQuotaBody,
 };
 
 export const ANTIGRAVITY_CONFIG: QuotaConfig<AntigravityQuotaState, AntigravityQuotaData> = {
@@ -1270,7 +1261,6 @@ export const ANTIGRAVITY_CONFIG: QuotaConfig<AntigravityQuotaState, AntigravityQ
   controlClassName: styles.antigravityControl,
   gridClassName: styles.antigravityGrid,
   renderQuotaItems: renderAntigravityItems,
-  Body: AntigravityQuotaBody,
 };
 
 export const CODEX_CONFIG: QuotaConfig<CodexQuotaState, CodexQuotaData> = {
@@ -1313,7 +1303,6 @@ export const CODEX_CONFIG: QuotaConfig<CodexQuotaState, CodexQuotaData> = {
   controlClassName: styles.codexControl,
   gridClassName: styles.codexGrid,
   renderQuotaItems: renderCodexItems,
-  Body: CodexQuotaBody,
 };
 
 const fetchKimiQuota = async (file: AuthFileItem, t: TFunction): Promise<KimiQuotaRow[]> => {
@@ -1785,7 +1774,6 @@ export const KIMI_CONFIG: QuotaConfig<KimiQuotaState, KimiQuotaRow[]> = {
   controlClassName: styles.kimiControl,
   gridClassName: styles.kimiGrid,
   renderQuotaItems: renderKimiItems,
-  Body: KimiQuotaBody,
 };
 
 export const XAI_CONFIG: QuotaConfig<XaiQuotaState, XaiBillingSummary> = {
@@ -1816,5 +1804,4 @@ export const XAI_CONFIG: QuotaConfig<XaiQuotaState, XaiBillingSummary> = {
   controlClassName: styles.xaiControl,
   gridClassName: styles.xaiGrid,
   renderQuotaItems: renderXaiItems,
-  Body: XaiQuotaBody,
 };

@@ -12,4 +12,3 @@ export * from './resetCredits';
 export * from './xaiPaid';
 export * from './resetInstants';
 export * from './quotaTimeline';
-export * from './planTier';

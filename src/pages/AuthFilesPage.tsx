@@ -380,7 +380,7 @@ export function AuthFilesPage() {
     async (file: AuthFileItem, quotaType: QuotaProviderType, notify = true) => {
       const config = getAuthFileQuotaConfig(quotaType);
       const setQuota = quotaStore[config.storeSetter] as (
-        updater: Record<string, unknown> | ((prev: Record<string, unknown>) => Record<string, unknown>)
+        updater: Record<string, never> | ((prev: Record<string, never>) => Record<string, never>)
       ) => void;
 
       setQuota((prev) => ({

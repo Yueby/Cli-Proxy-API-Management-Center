@@ -461,14 +461,7 @@
     "weight_label": "调度权重（weight）",
     "weight_hint": "默认值为 1；小于或等于 0 时不参与加权调度；最大值为 1,000,000。",
     "weight_invalid_integer": "权重必须是整数。",
-    "weight_invalid_max": "权重不能超过 1,000,000。",
-    "quota": {
-      "details": "额度详情",
-      "timeline_title": "额度窗口",
-      "timeline_empty": "每个额度进度条旁已显示周期与重置时间。",
-      "total_credits": "重置积分总数",
-      "applicable_credits": "当前可用重置积分"
-    }
+    "weight_invalid_max": "权重不能超过 1,000,000。"
   },
   "antigravity_subscription": {
     "subscription_label": "订阅",
