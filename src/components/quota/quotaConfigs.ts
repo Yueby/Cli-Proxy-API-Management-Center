@@ -89,6 +89,7 @@ import {
   isXaiFile,
 } from '@/utils/quota';
 import { normalizeAuthIndex } from '@/utils/authIndex';
+import { formatInstantShort, isValidInstant } from '@/utils/time/instant';
 import type { QuotaRenderHelpers } from './QuotaCard';
 import styles from '@/pages/QuotaPage.module.scss';
 
@@ -1367,7 +1368,10 @@ const renderKimiItems = (
     const rowLabel = row.labelKey
       ? t(row.labelKey, (rowLabelParams ?? {}) as Record<string, string | number>)
       : (row.label ?? '');
-    const resetLabel = formatKimiResetHint(t, row.resetHint);
+    const resetLabel =
+      typeof row.resetAtMs === 'number' && isValidInstant(row.resetAtMs)
+        ? formatInstantShort(row.resetAtMs)
+        : formatKimiResetHint(t, row.resetHint);
 
     return h(
       'div',
