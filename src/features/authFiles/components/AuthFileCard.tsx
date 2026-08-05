@@ -24,7 +24,9 @@ import {
   useQuotaStore,
 } from '@/stores';
 import { getAntigravityPlanLabel, CODEX_CONFIG } from '@/components/quota';
-import { formatShanghaiDateTime } from '@/utils/quota/resetCredits';
+import { formatResetCreditExpiry } from '@/utils/quota/resetCredits';
+import { formatRelativeInstant } from '@/utils/time/relativeTime';
+import { useNow } from '@/hooks/useNow';
 import type { AuthFileItem } from '@/types';
 import type { CodexRateLimitResetCredit } from '@/types/quota';
 import {
@@ -69,11 +71,14 @@ function ResetCreditsBadge({
   count,
   credits,
   tooltipTitle,
+  locale,
 }: {
   count: number;
   credits: CodexRateLimitResetCredit[];
   tooltipTitle: string;
+  locale: string;
 }) {
+  const nowMs = useNow(true);
   const [show, setShow] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const ref = useRef<HTMLSpanElement>(null);
@@ -124,7 +129,10 @@ function ResetCreditsBadge({
                 <div key={credit.id || `${credit.expiresAt}-${index}`} className={styles.resetCreditsTooltipRow}>
                   <span className={styles.resetCreditsTooltipIndex}>{index + 1}</span>
                   <span className={styles.resetCreditsTooltipTime}>
-                    {formatShanghaiDateTime(credit.expiresAt) || credit.expiresAt}
+                    {formatResetCreditExpiry(credit.expiresAt)}
+                    <span className={styles.resetCreditsTooltipRelative}>
+                      {formatRelativeInstant(Date.parse(credit.expiresAt), nowMs, locale)}
+                    </span>
                   </span>
                 </div>
               ))}
@@ -491,6 +499,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
               count={codexResetCreditsAvailableCount}
               credits={codexResetCredits}
               tooltipTitle={t('codex_quota.reset_credits_expiry_label')}
+              locale={i18n.resolvedLanguage ?? i18n.language}
             />
           );
         }

@@ -562,7 +562,7 @@
     "expires_label": "Истекает",
     "reset_credits_label": "Сбросов доступно",
     "reset_credits_badge": "Сбросы ×{{count}}",
-    "reset_credits_expiry_label": "Срок действия сбросов (GMT+8)",
+    "reset_credits_expiry_label": "Срок действия сбросов (местное время)",
     "reset_credit_number": "Сброс {{index}}",
     "reset_credits_expiry_failed": "Не удалось загрузить срок действия сбросов: {{message}}",
     "reset_credits_invalid_payload": "Некорректный ответ со сроками действия сбросов",

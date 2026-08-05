@@ -9,6 +9,7 @@ import type { AuthFileItem, ResolvedTheme } from '@/types';
 import { resolveCodexPlanType } from '@/utils/quota/resolvers';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { useNow } from '@/hooks/useNow';
 import styles from '@/pages/QuotaPage.module.scss';
 
 type QuotaStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -55,6 +56,8 @@ export function QuotaProgressBar({
 export interface QuotaRenderHelpers {
   styles: typeof styles;
   QuotaProgressBar: (props: QuotaProgressBarProps) => ReactElement;
+  nowMs: number;
+  locale?: string;
 }
 
 interface QuotaCardProps<TState extends QuotaStatusState> {
@@ -83,7 +86,8 @@ export function QuotaCard<TState extends QuotaStatusState>({
   resetQuotaAction,
   renderQuotaItems,
 }: QuotaCardProps<TState>) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const nowMs = useNow(quota?.status === 'success');
   const [showErrorModal, setShowErrorModal] = useState(false);
 
   const quotaStatus = quota?.status ?? 'idle';
@@ -230,7 +234,12 @@ export function QuotaCard<TState extends QuotaStatusState>({
             </Modal>
           </>
         ) : quota ? (
-          renderQuotaItems(quota, t, { styles, QuotaProgressBar })
+          renderQuotaItems(quota, t, {
+            styles,
+            QuotaProgressBar,
+            nowMs,
+            locale: i18n.resolvedLanguage || i18n.language,
+          })
         ) : (
           <div className={styles.quotaMessage}>{t(idleMessageKey)}</div>
         )}

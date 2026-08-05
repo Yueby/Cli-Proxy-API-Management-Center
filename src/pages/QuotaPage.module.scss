@@ -434,6 +434,13 @@
   gap: $spacing-xs;
 }
 
+.quotaRowRecoverySoon {
+  .quotaResetRelative {
+    color: var(--success-color, #22c55e);
+    font-weight: 700;
+  }
+}
+
 .quotaRowHeader {
   display: flex;
   align-items: center;
@@ -506,7 +513,27 @@
 }
 
 .quotaReset {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0;
   color: var(--text-tertiary);
+  min-width: 0;
+  white-space: normal;
+  text-align: right;
+}
+
+.quotaResetAbsolute,
+.quotaResetRelative {
+  white-space: nowrap;
+}
+
+.quotaResetRelative {
+  color: var(--text-secondary);
+}
+
+.quotaResetSeparator {
+  white-space: pre;
 }
 
 .quotaAmount {

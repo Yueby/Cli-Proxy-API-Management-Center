@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNow } from '@/hooks/useNow';
 import { SkeletonTextBlock } from '@/components/common/LoadingSkeleton';
 import { useQuotaStore } from '@/stores';
 import type { AuthFileItem } from '@/types';
@@ -23,9 +23,8 @@ export type AuthFileQuotaSectionProps = {
 };
 
 // Force reload
-export function AuthFileQuotaSection(props: AuthFileQuotaSectionProps) {
-  const { file, quotaType } = props;
-  const { t } = useTranslation();
+export function AuthFileQuotaSection({ file, quotaType }: AuthFileQuotaSectionProps) {
+  const { t, i18n } = useTranslation();
 
   const quota = useQuotaStore((state) => {
     if (quotaType === 'antigravity') return state.antigravityQuota[file.name] as QuotaState;
@@ -35,6 +34,7 @@ export function AuthFileQuotaSection(props: AuthFileQuotaSectionProps) {
     if (quotaType === 'xai') return state.xaiQuota[file.name] as QuotaState;
     return assertNever(quotaType);
   });
+  const nowMs = useNow(quota?.status === 'success');
 
   const config = getAuthFileQuotaConfig(quotaType);
   const quotaStatus = quota?.status ?? 'idle';
@@ -64,7 +64,12 @@ export function AuthFileQuotaSection(props: AuthFileQuotaSectionProps) {
     <div className={styles.quotaSection}>
       {quotaStatus === 'success' && quota ? (
         <div className={gridClass}>
-          {config.renderQuotaItems(quota as never, t, { styles, QuotaProgressBar }) as ReactNode}
+          {config.renderQuotaItems(quota as never, t, {
+            styles,
+            QuotaProgressBar,
+            nowMs,
+            locale: i18n.resolvedLanguage || i18n.language,
+          })}
         </div>
       ) : isLoading ? (
         <div

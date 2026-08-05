@@ -693,6 +693,13 @@
   width: 100%;
 }
 
+.quotaRowRecoverySoon {
+  .quotaResetRelative {
+    color: var(--success-color, #22c55e);
+    font-weight: 700;
+  }
+}
+
 .quotaRowHeader {
   display: flex;
   align-items: center;
@@ -765,7 +772,27 @@
 }
 
 .quotaReset {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0;
   color: var(--text-tertiary);
+  min-width: 0;
+  white-space: normal;
+  text-align: right;
+}
+
+.quotaResetAbsolute,
+.quotaResetRelative {
+  white-space: nowrap;
+}
+
+.quotaResetRelative {
+  color: var(--text-secondary);
+}
+
+.quotaResetSeparator {
+  white-space: pre;
 }
 
 .quotaAmount {
@@ -923,10 +950,21 @@
 }
 
 .resetCreditsTooltipTime {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
   font-family: $font-mono;
   font-weight: 600;
   color: var(--text-primary);
   font-size: 12px;
+}
+
+.resetCreditsTooltipRelative {
+  display: block;
+  color: var(--text-secondary);
+  font-family: $font-family;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .codexPlan {

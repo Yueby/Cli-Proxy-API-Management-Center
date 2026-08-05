@@ -1,3 +1,5 @@
+import { formatInstantShort } from '@/utils/time/instant';
+
 export interface CodexResetCredit {
   id: string;
   status: string;
@@ -11,17 +13,6 @@ export interface CodexResetCreditsSummary {
   credits: CodexResetCredit[];
   invalidPayload: boolean;
 }
-
-const SHANGHAI_TIME_FORMATTER = new Intl.DateTimeFormat('en-CA', {
-  timeZone: 'Asia/Shanghai',
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-  hour: '2-digit',
-  minute: '2-digit',
-  second: '2-digit',
-  hour12: false,
-});
 
 const asRecord = (value: unknown): Record<string, unknown> | null =>
   value && typeof value === 'object' && !Array.isArray(value)
@@ -127,8 +118,7 @@ export const normalizeCodexResetCreditsPayload = (payload: unknown): CodexResetC
   };
 };
 
-export const formatShanghaiDateTime = (value: string): string => {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  return SHANGHAI_TIME_FORMATTER.format(date).replace(',', '');
+export const formatResetCreditExpiry = (value: string): string => {
+  const instant = Date.parse(value);
+  return Number.isFinite(instant) ? formatInstantShort(instant) : value;
 };

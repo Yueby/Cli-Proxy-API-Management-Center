@@ -76,6 +76,7 @@ import {
   buildXaiPaidHealthSummary,
   mergeXaiBillingSummaries,
   claudePeriodHours,
+  parseOffsetSecondsToMs,
   periodHoursFromSeconds,
   resolveResetMs,
   createStatusError,
@@ -90,6 +91,12 @@ import {
 } from '@/utils/quota';
 import { normalizeAuthIndex } from '@/utils/authIndex';
 import { formatInstantShort, isValidInstant } from '@/utils/time/instant';
+import { buildResetDisplay } from '@/utils/time/relativeTime';
+import {
+  collectQuotaRowInstants,
+  pickUrgentRowId,
+  XAI_WEEKLY_ROW_ID,
+} from '@/utils/quota/resetSchedule';
 import type { QuotaRenderHelpers } from './QuotaCard';
 import styles from '@/pages/QuotaPage.module.scss';
 
@@ -124,6 +131,31 @@ const QUOTA_PROGRESS_HIGH_THRESHOLD = 70;
 const QUOTA_PROGRESS_MEDIUM_THRESHOLD = 30;
 const CODEX_RESET_CREDITS_REQUEST_TIMEOUT_MS = 8000;
 const XAI_PAID_HEALTH_REQUEST_TIMEOUT_MS = 15000;
+
+const renderResetDisplay = (
+  h: typeof React.createElement,
+  styleMap: QuotaRenderHelpers['styles'],
+  absoluteLabel: string | null | undefined,
+  atMs: number | null | undefined,
+  nowMs: number,
+  locale?: string
+): ReactNode => {
+  const display = buildResetDisplay(absoluteLabel, atMs, nowMs, locale);
+  if (!display) return null;
+  return h(
+    'span',
+    { className: styleMap.quotaReset },
+    h('span', { className: styleMap.quotaResetAbsolute }, display.absolute),
+    display.relative
+      ? h(
+          React.Fragment,
+          null,
+          h('span', { className: styleMap.quotaResetSeparator, 'aria-hidden': true }, ' · '),
+          h('span', { className: styleMap.quotaResetRelative }, display.relative)
+        )
+      : null
+  );
+};
 
 export interface QuotaStore {
   antigravityQuota: Record<string, AntigravityQuotaState>;
@@ -373,12 +405,17 @@ export const buildCodexQuotaWindows = (
       labelParams,
       usedPercent,
       resetLabel,
-      resetAtMs: resolveResetMs([
-        window.reset_at,
-        window.resetAt,
-        window.reset_at_timestamp,
-        window.resetAtTimestamp,
-      ]),
+      resetAtMs:
+        resolveResetMs([
+          window.reset_at,
+          window.resetAt,
+          window.reset_at_timestamp,
+          window.resetAtTimestamp,
+        ]) ??
+        parseOffsetSecondsToMs(
+          window.reset_after_seconds ?? window.resetAfterSeconds,
+          Date.now()
+        ),
       periodHours: periodHoursFromSeconds(window.limit_window_seconds ?? window.limitWindowSeconds),
     });
   };
@@ -811,7 +848,7 @@ const renderAntigravityItems = (
   t: TFunction,
   helpers: QuotaRenderHelpers
 ): ReactNode => {
-  const { styles: styleMap, QuotaProgressBar } = helpers;
+  const { styles: styleMap, QuotaProgressBar, nowMs: browserNowMs, locale } = helpers;
   const { createElement: h, Fragment } = React;
   const groups = quota.groups ?? [];
   const nodes: ReactNode[] = [];
@@ -827,7 +864,12 @@ const renderAntigravityItems = (
     return h(Fragment, null, ...nodes);
   }
 
-  const nowMs = Date.now() + (quota.serverTimeOffsetMs ?? 0);
+  const nowMs = browserNowMs;
+  const urgentRowId = pickUrgentRowId(
+    collectQuotaRowInstants('antigravity', quota),
+    nowMs,
+    'window'
+  );
 
   nodes.push(
     ...groups.map((group) => {
@@ -869,7 +911,15 @@ const renderAntigravityItems = (
 
           return h(
             'div',
-            { key: bucket.id, className: styleMap.quotaRow },
+            {
+              key: bucket.id,
+              className: [
+                styleMap.quotaRow,
+                bucket.id === urgentRowId ? styleMap.quotaRowRecoverySoon : '',
+              ]
+                .filter(Boolean)
+                .join(' '),
+            },
             h(
               'div',
               { className: styleMap.quotaRowHeader },
@@ -878,7 +928,7 @@ const renderAntigravityItems = (
                 'div',
                 { className: styleMap.quotaMeta },
                 h('span', { className: styleMap.quotaPercent }, percentLabel),
-                h('span', { className: styleMap.quotaReset }, resetLabel)
+                renderResetDisplay(h, styleMap, resetLabel, bucket.resetAtMs, nowMs, locale)
               )
             ),
             h(QuotaProgressBar, {
@@ -900,9 +950,10 @@ const renderCodexItems = (
   t: TFunction,
   helpers: QuotaRenderHelpers
 ): ReactNode => {
-  const { styles: styleMap, QuotaProgressBar } = helpers;
+  const { styles: styleMap, QuotaProgressBar, nowMs, locale } = helpers;
   const { createElement: h, Fragment } = React;
   const windows = quota.windows ?? [];
+  const urgentRowId = pickUrgentRowId(collectQuotaRowInstants('codex', quota), nowMs, 'window');
   const nodes: ReactNode[] = [];
 
   if (windows.length === 0) {
@@ -927,7 +978,12 @@ const renderCodexItems = (
 
       return h(
         'div',
-        { key: window.id, className: styleMap.quotaRow },
+        {
+          key: window.id,
+          className: [styleMap.quotaRow, window.id === urgentRowId ? styleMap.quotaRowRecoverySoon : '']
+            .filter(Boolean)
+            .join(' '),
+        },
         h(
           'div',
           { className: styleMap.quotaRowHeader },
@@ -936,7 +992,7 @@ const renderCodexItems = (
             'div',
             { className: styleMap.quotaMeta },
             h('span', { className: styleMap.quotaPercent }, percentLabel),
-            h('span', { className: styleMap.quotaReset }, window.resetLabel)
+            renderResetDisplay(h, styleMap, window.resetLabel, window.resetAtMs, nowMs, locale)
           )
         ),
         h(QuotaProgressBar, {
@@ -1124,9 +1180,10 @@ const renderClaudeItems = (
   t: TFunction,
   helpers: QuotaRenderHelpers
 ): ReactNode => {
-  const { styles: styleMap, QuotaProgressBar } = helpers;
+  const { styles: styleMap, QuotaProgressBar, nowMs, locale } = helpers;
   const { createElement: h, Fragment } = React;
   const windows = quota.windows ?? [];
+  const urgentRowId = pickUrgentRowId(collectQuotaRowInstants('claude', quota), nowMs, 'window');
   const extraUsage = quota.extraUsage ?? null;
   const planType = quota.planType ?? null;
   const nodes: ReactNode[] = [];
@@ -1174,7 +1231,12 @@ const renderClaudeItems = (
 
       return h(
         'div',
-        { key: window.id, className: styleMap.quotaRow },
+        {
+          key: window.id,
+          className: [styleMap.quotaRow, window.id === urgentRowId ? styleMap.quotaRowRecoverySoon : '']
+            .filter(Boolean)
+            .join(' '),
+        },
         h(
           'div',
           { className: styleMap.quotaRowHeader },
@@ -1183,7 +1245,7 @@ const renderClaudeItems = (
             'div',
             { className: styleMap.quotaMeta },
             h('span', { className: styleMap.quotaPercent }, percentLabel),
-            h('span', { className: styleMap.quotaReset }, window.resetLabel)
+            renderResetDisplay(h, styleMap, window.resetLabel, window.resetAtMs, nowMs, locale)
           )
         ),
         h(QuotaProgressBar, {
@@ -1337,9 +1399,10 @@ const renderKimiItems = (
   t: TFunction,
   helpers: QuotaRenderHelpers
 ): ReactNode => {
-  const { styles: styleMap, QuotaProgressBar } = helpers;
+  const { styles: styleMap, QuotaProgressBar, nowMs, locale } = helpers;
   const { createElement: h } = React;
   const rows = quota.rows ?? [];
+  const urgentRowId = pickUrgentRowId(collectQuotaRowInstants('kimi', quota), nowMs, 'window');
 
   if (rows.length === 0) {
     return h('div', { className: styleMap.quotaMessage }, t('kimi_quota.empty_data'));
@@ -1375,7 +1438,12 @@ const renderKimiItems = (
 
     return h(
       'div',
-      { key: row.id, className: styleMap.quotaRow },
+      {
+        key: row.id,
+        className: [styleMap.quotaRow, row.id === urgentRowId ? styleMap.quotaRowRecoverySoon : '']
+          .filter(Boolean)
+          .join(' '),
+      },
       h(
         'div',
         { className: styleMap.quotaRowHeader },
@@ -1384,7 +1452,7 @@ const renderKimiItems = (
           'div',
           { className: styleMap.quotaMeta },
           h('span', { className: styleMap.quotaPercent }, percentLabel),
-          resetLabel ? h('span', { className: styleMap.quotaReset }, resetLabel) : null
+          renderResetDisplay(h, styleMap, resetLabel, row.resetAtMs, nowMs, locale)
         )
       ),
       h(QuotaProgressBar, {
@@ -1602,7 +1670,7 @@ const renderXaiItems = (
   t: TFunction,
   helpers: QuotaRenderHelpers
 ): ReactNode => {
-  const { styles: styleMap, QuotaProgressBar } = helpers;
+  const { styles: styleMap, QuotaProgressBar, nowMs, locale } = helpers;
   const { createElement: h, Fragment } = React;
   const billing = quota.billing;
 
@@ -1624,6 +1692,7 @@ const renderXaiItems = (
     );
   }
 
+  const urgentRowId = pickUrgentRowId(collectQuotaRowInstants('xai', quota), nowMs, 'window');
   const clampedUsed =
     billing.usedPercent === null ? null : Math.max(0, Math.min(100, billing.usedPercent));
   const remaining = clampedUsed === null ? null : Math.max(0, Math.min(100, 100 - clampedUsed));
@@ -1644,9 +1713,12 @@ const renderXaiItems = (
       ? Math.max(0, Math.min(100, billing.usagePercent))
       : null;
   const weeklyRemaining = weeklyUsed === null ? null : Math.max(0, Math.min(100, 100 - weeklyUsed));
-  const weeklyResetLabel = formatQuotaResetTime(billing.periodEnd, t);
+  const weeklyResetLabel = billing.resetAtMs
+    ? formatInstantShort(billing.resetAtMs)
+    : formatQuotaResetTime(billing.periodEnd, t);
   const hasWeeklyData =
-    billing.periodType === 'weekly' && (weeklyUsed !== null || Boolean(billing.periodEnd));
+    billing.periodType === 'weekly' &&
+    (weeklyUsed !== null || Boolean(billing.periodEnd) || isValidInstant(billing.resetAtMs ?? Number.NaN));
   const hasMonthlyData =
     billing.monthlyLimitCents !== null ||
     billing.usedCents !== null ||
@@ -1658,7 +1730,15 @@ const renderXaiItems = (
     hasWeeklyData
       ? h(
           'div',
-          { key: 'weekly-limit', className: styleMap.quotaRow },
+          {
+            key: 'weekly-limit',
+            className: [
+              styleMap.quotaRow,
+              XAI_WEEKLY_ROW_ID === urgentRowId ? styleMap.quotaRowRecoverySoon : '',
+            ]
+              .filter(Boolean)
+              .join(' '),
+          },
           h(
             'div',
             { className: styleMap.quotaRowHeader },
@@ -1668,7 +1748,14 @@ const renderXaiItems = (
               { className: styleMap.quotaMeta },
               h('span', { className: styleMap.quotaPercent }, formatXaiPercent(weeklyRemaining, t)),
               weeklyResetLabel !== '-'
-                ? h('span', { className: styleMap.quotaReset }, weeklyResetLabel)
+                ? renderResetDisplay(
+                    h,
+                    styleMap,
+                    weeklyResetLabel,
+                    billing.resetAtMs,
+                    nowMs,
+                    locale
+                  )
                 : null
             )
           ),
@@ -1744,7 +1831,16 @@ const renderXaiItems = (
               { className: styleMap.quotaMeta },
               h('span', { className: styleMap.quotaPercent }, percentLabel),
               h('span', { className: styleMap.quotaAmount }, amountLabel),
-              resetLabel !== '-' ? h('span', { className: styleMap.quotaReset }, resetLabel) : null
+              resetLabel !== '-'
+                ? renderResetDisplay(
+                    h,
+                    styleMap,
+                    resetLabel,
+                    billing.billingPeriodEnd ? Date.parse(billing.billingPeriodEnd) : null,
+                    nowMs,
+                    locale
+                  )
+                : null
             )
           ),
           h(QuotaProgressBar, {

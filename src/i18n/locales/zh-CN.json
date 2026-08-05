@@ -564,7 +564,7 @@
     "expires_label": "续期时间",
     "reset_credits_label": "主动重置次数",
     "reset_credits_badge": "主动重置 ×{{count}}",
-    "reset_credits_expiry_label": "主动重置到期时间（GMT+8）",
+    "reset_credits_expiry_label": "主动重置到期时间（本地时间）",
     "reset_credit_number": "重置 {{index}}",
     "reset_credits_expiry_failed": "主动重置到期时间加载失败：{{message}}",
     "reset_credits_invalid_payload": "主动重置到期时间响应无效",
