@@ -2,16 +2,20 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   IconChevronDown,
+  IconCopy,
   IconEye,
   IconEyeOff,
   IconLoader2,
   IconPlus,
   IconX,
 } from '@/components/ui/icons';
+import { useNotificationStore } from '@/stores';
+import { copyToClipboard } from '@/utils/clipboard';
 import { maskApiKey } from '@/utils/format';
 import type { ApiKeyEntryInput } from '../../types';
 import type { ConnectivityState, ConnectivityStatus } from './useConnectivityTest';
 import { ConnectivityStatusIcon } from './ConnectivityStatusIcon';
+import { resolveCopyableProviderKey } from './providerKeyClipboard';
 import styles from './sharedForm.module.scss';
 
 const COLLAPSED_LIMIT = 10;
@@ -48,6 +52,7 @@ export function ApiKeyEntriesEditor({
   onTestAll,
 }: ApiKeyEntriesEditorProps) {
   const { t } = useTranslation();
+  const showNotification = useNotificationStore((state) => state.showNotification);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(() =>
     entries.length === 1 && isBlankEntry(entries[0]) ? 0 : null
   );
@@ -120,6 +125,14 @@ export function ApiKeyEntriesEditor({
         const status = statuses[idx] ?? idleStatus;
         const expanded = expandedIdx === idx;
         const summaryKey = entry.apiKey.trim() || entry.existingApiKey?.trim() || '';
+        const copyableKey = resolveCopyableProviderKey(entry.apiKey, entry.existingApiKey);
+        const copyApiKey = async () => {
+          const copied = await copyToClipboard(copyableKey);
+          showNotification(
+            copied ? t('providersPage.form.apiKeyCopied') : t('notification.copy_failed'),
+            copied ? 'success' : 'error'
+          );
+        };
         return (
           <div key={idx} className={styles.entryCard}>
             <div className={styles.entryCardHeader}>
@@ -207,6 +220,16 @@ export function ApiKeyEntriesEditor({
                           : t('providersPage.form.apiKeyCreatePlaceholder')
                       }
                     />
+                    <button
+                      type="button"
+                      className={`${styles.passwordToggle} ${styles.passwordCopy}`}
+                      onClick={() => void copyApiKey()}
+                      disabled={mutating || !copyableKey}
+                      aria-label={t('providersPage.form.copyApiKey')}
+                      title={t('providersPage.form.copyApiKey')}
+                    >
+                      <IconCopy size={16} />
+                    </button>
                     <button
                       type="button"
                       className={styles.passwordToggle}

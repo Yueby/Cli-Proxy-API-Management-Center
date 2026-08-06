@@ -976,6 +976,10 @@
 
 .passwordInput {
   @extend .input;
+  padding-right: 68px;
+}
+
+.passwordInputSingleAction {
   padding-right: 36px;
 }
 
@@ -1001,6 +1005,14 @@
     opacity: 0.5;
     cursor: not-allowed;
   }
+}
+
+.passwordCopy {
+  right: 36px;
+}
+
+.passwordCopyOnly {
+  right: 8px;
 }
 
 .entriesList {

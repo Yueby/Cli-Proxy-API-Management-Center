@@ -1728,6 +1728,8 @@
       "addApiKeyEntry": "添加密钥条目",
       "showApiKey": "显示密钥",
       "hideApiKey": "隐藏密钥",
+      "copyApiKey": "复制密钥",
+      "apiKeyCopied": "密钥已复制到剪贴板",
       "disableCooling": "禁用冷却调度",
       "disableCoolingHint": "仅对当前凭据或提供商禁用失败后的冷却窗口",
       "modelEntry": "模型 #{{index}}",

@@ -1716,6 +1716,8 @@
       "addApiKeyEntry": "Добавить ключ",
       "showApiKey": "Показать ключ API",
       "hideApiKey": "Скрыть ключ API",
+      "copyApiKey": "Копировать API-ключ",
+      "apiKeyCopied": "API-ключ скопирован в буфер обмена",
       "disableCooling": "Отключить cooldown",
       "disableCoolingHint": "Отключает окна охлаждения после ошибок только для этой записи",
       "modelEntry": "Модель #{{index}}",

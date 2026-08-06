@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   IconDownload,
+  IconCopy,
   IconEye,
   IconEyeOff,
   IconLoader2,
@@ -11,7 +12,9 @@ import {
 import { Collapsible } from '@/components/ui/Collapsible';
 import { Select } from '@/components/ui/Select';
 import { hasDisableAllModelsRule } from '@/components/providers/utils';
+import { useNotificationStore } from '@/stores';
 import type { GeminiKeyConfig, OpenAIProviderConfig, ProviderKeyConfig } from '@/types';
+import { copyToClipboard } from '@/utils/clipboard';
 import type { ModelInfo } from '@/utils/models';
 import { PROVIDER_DESCRIPTORS } from '../../descriptors';
 import type {
@@ -27,6 +30,7 @@ import { ModelDiscoveryPanel } from './ModelDiscoveryPanel';
 import { ConnectivityStatusIcon } from './ConnectivityStatusIcon';
 import { ApiKeyEntriesEditor } from './ApiKeyEntriesEditor';
 import { ModelEntriesEditor } from './ModelEntriesEditor';
+import { resolveCopyableProviderKey } from './providerKeyClipboard';
 import styles from './sharedForm.module.scss';
 
 export interface BaseProviderFormHandle {
@@ -195,6 +199,7 @@ export function BaseProviderForm({
   onDirtyChange,
 }: BaseProviderFormProps) {
   const { t } = useTranslation();
+  const showNotification = useNotificationStore((state) => state.showNotification);
   const descriptor = PROVIDER_DESCRIPTORS[brand];
   const fid = useId();
   const [form, setForm] = useState<ProviderEntryFormInput>(() =>
@@ -225,6 +230,15 @@ export function BaseProviderForm({
     if (mode !== 'edit' || !resource) return '';
     return (resource.raw as { authIndex?: string } | undefined)?.authIndex ?? '';
   }, [mode, resource]);
+  const copyableSingleApiKey = resolveCopyableProviderKey(form.apiKey, fallbackApiKey);
+
+  const copySingleApiKey = async () => {
+    const copied = await copyToClipboard(copyableSingleApiKey);
+    showNotification(
+      copied ? t('providersPage.form.apiKeyCopied') : t('notification.copy_failed'),
+      copied ? 'success' : 'error'
+    );
+  };
 
   const connectivityMessages = useMemo<ConnectivityErrorMessages>(
     () => ({
@@ -483,6 +497,16 @@ export function BaseProviderForm({
                 }
                 disabled={mutating}
               />
+              <button
+                type="button"
+                className={`${styles.passwordToggle} ${styles.passwordCopy}`}
+                onClick={() => void copySingleApiKey()}
+                disabled={mutating || !copyableSingleApiKey}
+                aria-label={t('providersPage.form.copyApiKey')}
+                title={t('providersPage.form.copyApiKey')}
+              >
+                <IconCopy size={16} />
+              </button>
               <button
                 type="button"
                 className={styles.passwordToggle}

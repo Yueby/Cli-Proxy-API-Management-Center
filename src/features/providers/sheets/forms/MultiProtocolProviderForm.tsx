@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasDisableAllModelsRule } from '@/components/providers/utils';
+import { IconCopy } from '@/components/ui/icons';
+import { useNotificationStore } from '@/stores';
+import { copyToClipboard } from '@/utils/clipboard';
 import { getMultiProtocolAggregationConflict } from '../../multiProtocolAggregation';
 import { getMultiProtocolProviderDefinition } from '../../multiProtocolDefinitions';
 import type {
@@ -11,6 +14,7 @@ import type {
   ProviderEntryFormInput,
   ProviderResource,
 } from '../../types';
+import { resolveCopyableProviderKey } from './providerKeyClipboard';
 import styles from './sharedForm.module.scss';
 
 interface Props {
@@ -98,6 +102,7 @@ export function MultiProtocolProviderForm({
   onDirtyChange,
 }: Props) {
   const { t } = useTranslation();
+  const showNotification = useNotificationStore((state) => state.showNotification);
   const definition = getMultiProtocolProviderDefinition(brand);
   const initial = useMemo(() => fromRaw(brand, resource), [brand, resource]);
   const initialSignature = useMemo(() => JSON.stringify(initial), [initial]);
@@ -147,6 +152,14 @@ export function MultiProtocolProviderForm({
 
         <div className={styles.multiProtocolList}>
           {entries.map((entry, index) => {
+            const copyableKey = resolveCopyableProviderKey(entry.apiKey, entry.existingApiKey);
+            const copyApiKey = async () => {
+              const copied = await copyToClipboard(copyableKey);
+              showNotification(
+                copied ? t('providersPage.form.apiKeyCopied') : t('notification.copy_failed'),
+                copied ? 'success' : 'error'
+              );
+            };
             const used = new Set(
               entries.filter((_, i) => i !== index).map((item) => item.protocol)
             );
@@ -186,23 +199,35 @@ export function MultiProtocolProviderForm({
                   ) : null}
                 </div>
 
-                <label className={`${styles.field} ${styles.multiProtocolApiKey}`}>
+                <div className={`${styles.field} ${styles.multiProtocolApiKey}`}>
                   <span className={styles.label}>{t('providersPage.form.apiKey')}</span>
-                  <input
-                    className={styles.input}
-                    type="password"
-                    autoComplete="new-password"
-                    value={entry.apiKey}
-                    disabled={mutating}
-                    required={mode === 'create' && !entry.existingApiKey}
-                    placeholder={
-                      mode === 'edit' && entry.existingApiKey
-                        ? t('providersPage.form.apiKeyEditPlaceholder')
-                        : t('providersPage.form.apiKeyCreatePlaceholder')
-                    }
-                    onChange={(event) => update(index, { apiKey: event.target.value })}
-                  />
-                </label>
+                  <div className={styles.passwordField}>
+                    <input
+                      className={`${styles.passwordInput} ${styles.passwordInputSingleAction}`}
+                      type="password"
+                      autoComplete="new-password"
+                      value={entry.apiKey}
+                      disabled={mutating}
+                      required={mode === 'create' && !entry.existingApiKey}
+                      placeholder={
+                        mode === 'edit' && entry.existingApiKey
+                          ? t('providersPage.form.apiKeyEditPlaceholder')
+                          : t('providersPage.form.apiKeyCreatePlaceholder')
+                      }
+                      onChange={(event) => update(index, { apiKey: event.target.value })}
+                    />
+                    <button
+                      type="button"
+                      className={`${styles.passwordToggle} ${styles.passwordCopyOnly}`}
+                      onClick={() => void copyApiKey()}
+                      disabled={mutating || !copyableKey}
+                      aria-label={t('providersPage.form.copyApiKey')}
+                      title={t('providersPage.form.copyApiKey')}
+                    >
+                      <IconCopy size={16} />
+                    </button>
+                  </div>
+                </div>
 
                 <div className={styles.multiProtocolGrid}>
                   {definition.baseUrlOptions.length > 1 ? (

@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { IconCopy } from '@/components/ui/icons';
+import { useNotificationStore } from '@/stores';
+import { copyToClipboard } from '@/utils/clipboard';
 import { CODE0_BASE_URL, CODE0_PROTOCOL_LABELS, getCode0ProtocolUrls } from '../../code0';
 import { getMultiProtocolAggregationConflict } from '../../multiProtocolAggregation';
 import type {
@@ -9,6 +12,7 @@ import type {
   SponsorProtocol,
   SponsorProviderRaw,
 } from '../../types';
+import { resolveCopyableProviderKey } from './providerKeyClipboard';
 import styles from './sharedForm.module.scss';
 
 interface Props {
@@ -92,6 +96,7 @@ const toForm = (entries: SponsorKeyEntryInput[]): ProviderEntryFormInput => ({
 
 export function Code0ProviderForm({ resource, mode, mutating, formId, onSubmit, onDirtyChange }: Props) {
   const { t } = useTranslation();
+  const showNotification = useNotificationStore((state) => state.showNotification);
   const [entries, setEntries] = useState(() => initialEntries(resource));
   const [error, setError] = useState<string | null>(null);
   const initialSignature = useMemo(() => JSON.stringify(initialEntries(resource)), [resource]);
@@ -135,6 +140,14 @@ export function Code0ProviderForm({ resource, mode, mutating, formId, onSubmit, 
     <form id={formId} className={styles.form} onSubmit={handleSubmit} noValidate>
       <div className={styles.section}>
         {entries.map((entry, index) => {
+          const copyableKey = resolveCopyableProviderKey(entry.apiKey, entry.existingApiKey);
+          const copyApiKey = async () => {
+            const copied = await copyToClipboard(copyableKey);
+            showNotification(
+              copied ? t('providersPage.form.apiKeyCopied') : t('notification.copy_failed'),
+              copied ? 'success' : 'error'
+            );
+          };
           const labelKey = CODE0_PROTOCOL_LABELS[index];
           const endpoint = entry.protocol === 'openai' ? urls.openai : entry.protocol === 'claude' ? urls.anthropic : entry.protocol === 'codex' ? urls.codex : urls.gemini;
           return (
@@ -143,15 +156,27 @@ export function Code0ProviderForm({ resource, mode, mutating, formId, onSubmit, 
               <div className={styles.labelHint}>{endpoint}</div>
               <div className={styles.field}>
                 <label className={styles.label}>{t('providersPage.form.apiKey')}</label>
-                <input
-                  className={styles.input}
-                  type="password"
-                  autoComplete="new-password"
-                  value={entry.apiKey}
-                  placeholder={mode === 'edit' && entry.existingApiKey ? t('providersPage.form.apiKeyEditPlaceholder') : t('providersPage.form.apiKeyCreatePlaceholder')}
-                  onChange={(event) => update(index, { apiKey: event.target.value })}
-                  disabled={mutating}
-                />
+                <div className={styles.passwordField}>
+                  <input
+                    className={`${styles.passwordInput} ${styles.passwordInputSingleAction}`}
+                    type="password"
+                    autoComplete="new-password"
+                    value={entry.apiKey}
+                    placeholder={mode === 'edit' && entry.existingApiKey ? t('providersPage.form.apiKeyEditPlaceholder') : t('providersPage.form.apiKeyCreatePlaceholder')}
+                    onChange={(event) => update(index, { apiKey: event.target.value })}
+                    disabled={mutating}
+                  />
+                  <button
+                    type="button"
+                    className={`${styles.passwordToggle} ${styles.passwordCopyOnly}`}
+                    onClick={() => void copyApiKey()}
+                    disabled={mutating || !copyableKey}
+                    aria-label={t('providersPage.form.copyApiKey')}
+                    title={t('providersPage.form.copyApiKey')}
+                  >
+                    <IconCopy size={16} />
+                  </button>
+                </div>
               </div>
               <div className={styles.fieldRow}>
                 <div className={styles.field}>

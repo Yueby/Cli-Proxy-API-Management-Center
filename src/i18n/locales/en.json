@@ -1728,6 +1728,8 @@
       "addApiKeyEntry": "Add key entry",
       "showApiKey": "Show API key",
       "hideApiKey": "Hide API key",
+      "copyApiKey": "Copy API key",
+      "apiKeyCopied": "API key copied to clipboard",
       "disableCooling": "Disable cooling",
       "disableCoolingHint": "Disable failure cooldown windows only for this credential or provider",
       "modelEntry": "Model #{{index}}",
