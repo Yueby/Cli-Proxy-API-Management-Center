@@ -14,6 +14,7 @@ import iconKimi from '@/assets/icons/kimi-dark.svg';
 import iconFennoAI from '@/assets/icons/fenno-ai.png';
 import iconQiniuCloud from '@/assets/icons/qiniu-cloud.png';
 import iconLmuAI from '@/assets/icons/lmu-ai.png';
+import iconInfistar from '@/assets/icons/infistar.png';
 import { Button } from '@/components/ui/Button';
 import { ItemCard } from '@/components/ui/ItemCard';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
@@ -67,6 +68,7 @@ const PROVIDER_ICONS: Record<ProviderBrand, ProviderIconAsset> = {
   fennoAI: iconFennoAI,
   qiniuCloud: iconQiniuCloud,
   lmuAI: iconLmuAI,
+  infistar: iconInfistar,
 };
 
 const PROVIDER_FALLBACKS: Record<ProviderBrand, string> = {
@@ -83,6 +85,7 @@ const PROVIDER_FALLBACKS: Record<ProviderBrand, string> = {
   fennoAI: 'F',
   qiniuCloud: 'Q',
   lmuAI: 'L',
+  infistar: 'I',
 };
 
 const PROVIDER_LABELS: Record<ProviderBrand, string> = {
@@ -99,6 +102,7 @@ const PROVIDER_LABELS: Record<ProviderBrand, string> = {
   fennoAI: 'FennoAI',
   qiniuCloud: 'Qiniu Cloud',
   lmuAI: 'LMU AI',
+  infistar: 'Infistar',
 };
 
 const getProviderIcon = (brand: ProviderBrand, resolvedTheme: ResolvedTheme): string => {

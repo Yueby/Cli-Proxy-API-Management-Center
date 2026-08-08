@@ -1635,7 +1635,8 @@
       "code0": "Code0",
       "fennoAI": "FennoAI",
       "qiniuCloud": "Qiniu Cloud",
-      "lmuAI": "LMU AI (Lingmou AI)"
+      "lmuAI": "LMU AI (Lingmou AI)",
+      "infistar": "Infistar"
     },
     "table": {
       "key": "Ключ",

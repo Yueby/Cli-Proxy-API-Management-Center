@@ -233,6 +233,13 @@ export const PROVIDER_DESCRIPTORS: Record<ProviderBrand, ProviderDescriptor> = {
     supportsExcludedModels: false, supportsPriority: true, supportsTestModel: false,
     supportsWebsockets: false, supportsCloak: false, supportsApiKeyEntries: false, sheetSize: 'lg',
   },
+  infistar: {
+    id: 'infistar', supportsName: false, supportsApiKey: true, supportsDisabled: true,
+    supportsBaseUrl: false, baseUrlRequired: false, supportsProxyUrl: true,
+    supportsPrefix: true, supportsModels: true, supportsHeaders: false,
+    supportsExcludedModels: false, supportsPriority: true, supportsTestModel: false,
+    supportsWebsockets: false, supportsCloak: false, supportsApiKeyEntries: false, sheetSize: 'lg',
+  },
 };
 
 export const PROVIDER_BRAND_ORDER: ProviderBrand[] = [
@@ -248,6 +255,7 @@ export const PROVIDER_BRAND_ORDER: ProviderBrand[] = [
   'fennoAI',
   'qiniuCloud',
   'lmuAI',
+  'infistar',
   'interactions',
 ];
 
@@ -265,4 +273,5 @@ export const PROVIDER_PATHS: Record<ProviderBrand, string> = {
   fennoAI: '/ai-providers/fenno-ai',
   qiniuCloud: '/ai-providers/qiniu-cloud',
   lmuAI: '/ai-providers/lmuai',
+  infistar: '/ai-providers/infistar',
 };

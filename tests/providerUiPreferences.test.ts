@@ -14,6 +14,7 @@ const addedProviders = [
   'fennoAI',
   'qiniuCloud',
   'lmuAI',
+  'infistar',
   'interactions',
 ];
 const locales = { en, ru, zhCN, zhTW } as const;

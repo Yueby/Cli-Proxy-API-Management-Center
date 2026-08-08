@@ -20,6 +20,7 @@ import code0Logo from '@/assets/icons/code0.png';
 import fennoAILogo from '@/assets/icons/fenno-ai.png';
 import qiniuCloudLogo from '@/assets/icons/qiniu-cloud.png';
 import lmuAILogo from '@/assets/icons/lmu-ai.png';
+import infistarLogo from '@/assets/icons/infistar.png';
 import { CategoryList, type CategoryItem } from '@/components/common/CategoryList';
 import type { GeminiKeyConfig, OpenAIProviderConfig, ProviderKeyConfig } from '@/types';
 import { ProviderHeaderCard } from './components/ProviderHeaderCard';
@@ -48,6 +49,7 @@ const PROVIDER_LOGOS: Record<ProviderBrand, string> = {
   fennoAI: fennoAILogo,
   qiniuCloud: qiniuCloudLogo,
   lmuAI: lmuAILogo,
+  infistar: infistarLogo,
 };
 const PROVIDER_TAB_IDS: ProviderBrand[] = [
   'openaiCompatibility',
@@ -62,6 +64,7 @@ const PROVIDER_TAB_IDS: ProviderBrand[] = [
   'fennoAI',
   'qiniuCloud',
   'lmuAI',
+  'infistar',
   'interactions',
 ];
 

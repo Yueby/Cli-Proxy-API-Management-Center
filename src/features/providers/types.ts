@@ -17,10 +17,11 @@ export type ProviderBrand =
   | 'code0'
   | 'fennoAI'
   | 'qiniuCloud'
-  | 'lmuAI';
+  | 'lmuAI'
+  | 'infistar';
 
 export type SponsorProviderBrand = 'code0';
-export type MultiProtocolProviderBrand = 'fennoAI' | 'qiniuCloud' | 'lmuAI';
+export type MultiProtocolProviderBrand = 'fennoAI' | 'qiniuCloud' | 'lmuAI' | 'infistar';
 export type MultiProtocolProviderProtocol = 'openai' | 'codex' | 'claude' | 'gemini';
 
 export type ProviderResourceSelector =

@@ -17,6 +17,7 @@ import {
   codexToResource,
   fennoAIToResource,
   geminiToResource,
+  infistarToResource,
   lmuAIToResource,
   interactionsToResource,
   openaiToResource,
@@ -37,6 +38,7 @@ import {
   isCode0OpenAIProvider,
 } from './code0';
 import { buildFennoAIRaw, isFennoAIClaudeProvider, isFennoAICodexProvider } from './fennoAI';
+import { buildInfistarRaw, isInfistarClaudeProvider, isInfistarCodexProvider, isInfistarGeminiProvider, isInfistarOpenAIProvider } from './infistar';
 import { buildLmuAIRaw, isLmuAIClaudeProvider, isLmuAICodexProvider, isLmuAIGeminiProvider, isLmuAIOpenAIProvider } from './lmuAI';
 import { buildQiniuCloudRaw, isQiniuCloudClaudeProvider, isQiniuCloudCodexProvider, isQiniuCloudGeminiProvider, isQiniuCloudOpenAIProvider } from './qiniuCloud';
 import { applyMultiProtocolProviderMutation, removeMultiProtocolProviderConfigs, toggleMultiProtocolProviderConfigs, type MultiProtocolConfigLists } from './multiProtocolMutations';
@@ -356,7 +358,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
         }
         case 'gemini':
           resources = (config.geminiApiKeys ?? []).reduce<ProviderResource[]>((out, item, index) => {
-            if (!isCode0GeminiProvider(item) && !isQiniuCloudGeminiProvider(item) && !isLmuAIGeminiProvider(item)) out.push(geminiToResource(item, index));
+            if (!isCode0GeminiProvider(item) && !isQiniuCloudGeminiProvider(item) && !isLmuAIGeminiProvider(item) && !isInfistarGeminiProvider(item)) out.push(geminiToResource(item, index));
             return out;
           }, []);
           break;
@@ -367,7 +369,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           break;
         case 'codex':
           resources = (config.codexApiKeys ?? []).reduce<ProviderResource[]>((out, item, index) => {
-            if (!isCode0CodexProvider(item) && !isFennoAICodexProvider(item) && !isQiniuCloudCodexProvider(item) && !isLmuAICodexProvider(item)) out.push(codexToResource(item, index));
+            if (!isCode0CodexProvider(item) && !isFennoAICodexProvider(item) && !isQiniuCloudCodexProvider(item) && !isLmuAICodexProvider(item) && !isInfistarCodexProvider(item)) out.push(codexToResource(item, index));
             return out;
           }, []);
           break;
@@ -376,7 +378,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           break;
         case 'claude':
           resources = (config.claudeApiKeys ?? []).reduce<ProviderResource[]>((out, item, index) => {
-            if (!isClaudeApiProvider(item) && !isCode0ClaudeProvider(item) && !isFennoAIClaudeProvider(item) && !isQiniuCloudClaudeProvider(item) && !isLmuAIClaudeProvider(item)) {
+            if (!isClaudeApiProvider(item) && !isCode0ClaudeProvider(item) && !isFennoAIClaudeProvider(item) && !isQiniuCloudClaudeProvider(item) && !isLmuAIClaudeProvider(item) && !isInfistarClaudeProvider(item)) {
               out.push(claudeToResource(item, index));
             }
             return out;
@@ -393,7 +395,7 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           break;
         case 'openaiCompatibility':
           resources = (config.openaiCompatibility ?? []).reduce<ProviderResource[]>((out, item, index) => {
-            if (!isCode0OpenAIProvider(item) && !isQiniuCloudOpenAIProvider(item) && !isLmuAIOpenAIProvider(item)) out.push(openaiToResource(item, index));
+            if (!isCode0OpenAIProvider(item) && !isQiniuCloudOpenAIProvider(item) && !isLmuAIOpenAIProvider(item) && !isInfistarOpenAIProvider(item)) out.push(openaiToResource(item, index));
             return out;
           }, []);
           break;
@@ -414,6 +416,11 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
         }
         case 'lmuAI': {
           const resource = lmuAIToResource(buildLmuAIRaw(config));
+          resources = resource ? [resource] : [];
+          break;
+        }
+        case 'infistar': {
+          const resource = infistarToResource(buildInfistarRaw(config));
           resources = resource ? [resource] : [];
           break;
         }

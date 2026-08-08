@@ -22,6 +22,14 @@ import {
   getLmuAIProtocolUrls,
   resolveLmuAIBaseUrl,
 } from './lmuAI';
+import {
+  INFISTAR_BASE_URL_OPTIONS,
+  INFISTAR_DISPLAY_NAME,
+  INFISTAR_PROTOCOL_LABELS,
+  INFISTAR_PROVIDER_NAME,
+  getInfistarProtocolUrls,
+  resolveInfistarBaseUrl,
+} from './infistar';
 import type { MultiProtocolProviderBrand, MultiProtocolProviderProtocol } from './types';
 
 export interface MultiProtocolUrls {
@@ -87,12 +95,21 @@ const DEFINITIONS: Record<MultiProtocolProviderBrand, MultiProtocolProviderDefin
     resolveBaseUrl: resolveLmuAIBaseUrl,
     getProtocolUrls: getLmuAIProtocolUrls,
   },
+  infistar: {
+    brand: 'infistar',
+    displayName: INFISTAR_DISPLAY_NAME,
+    providerName: INFISTAR_PROVIDER_NAME,
+    protocols: ['openai', 'claude', 'gemini', 'codex'],
+    protocolLabels: INFISTAR_PROTOCOL_LABELS,
+    defaultProtocol: 'openai',
+    baseUrlOptions: INFISTAR_BASE_URL_OPTIONS,
+    resolveBaseUrl: resolveInfistarBaseUrl,
+    getProtocolUrls: getInfistarProtocolUrls,
+  },
 };
 
-export const isMultiProtocolProviderBrand = (
-  brand: string
-): brand is MultiProtocolProviderBrand =>
-  brand === 'fennoAI' || brand === 'qiniuCloud' || brand === 'lmuAI';
+export const isMultiProtocolProviderBrand = (brand: string): brand is MultiProtocolProviderBrand =>
+  brand === 'fennoAI' || brand === 'qiniuCloud' || brand === 'lmuAI' || brand === 'infistar';
 
 export const getMultiProtocolProviderDefinition = (
   brand: MultiProtocolProviderBrand

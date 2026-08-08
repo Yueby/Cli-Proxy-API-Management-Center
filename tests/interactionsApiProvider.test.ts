@@ -57,11 +57,12 @@ describe('Interactions API provider contract', () => {
     });
     expect(PROVIDER_DESCRIPTORS.interactions.baseUrlRequired).toBe(false);
     expect(PROVIDER_DESCRIPTORS.interactions.supportsTestModel).toBe(true);
-    expect(PROVIDER_BRAND_ORDER.slice(0, -2)).toEqual([
+    expect(PROVIDER_BRAND_ORDER.slice(0, -3)).toEqual([
       'gemini', 'codex', 'claude', 'vertex', 'openaiCompatibility',
       'xai', 'kimi', 'claudeApi', 'code0', 'fennoAI', 'qiniuCloud',
     ]);
-    expect(PROVIDER_BRAND_ORDER.at(-2)).toBe('lmuAI');
+    expect(PROVIDER_BRAND_ORDER.at(-3)).toBe('lmuAI');
+    expect(PROVIDER_BRAND_ORDER.at(-2)).toBe('infistar');
     expect(PROVIDER_BRAND_ORDER.at(-1)).toBe('interactions');
     expect(MODEL_DISCOVERY_BRANDS).toContain('interactions');
   });

@@ -18,6 +18,7 @@ import {
 import { FENNO_AI_DISPLAY_NAME, FENNO_AI_PROTOCOL_LABELS, getFennoAIProtocolUrls, resolveFennoAIBaseUrl } from './fennoAI';
 import { QINIU_CLOUD_DISPLAY_NAME, QINIU_CLOUD_PROTOCOL_LABELS, getQiniuCloudProtocolUrls, resolveQiniuCloudBaseUrl } from './qiniuCloud';
 import { LMU_AI_DISPLAY_NAME, LMU_AI_PROTOCOL_LABELS, getLmuAIProtocolUrls, resolveLmuAIBaseUrl } from './lmuAI';
+import { INFISTAR_DISPLAY_NAME, INFISTAR_PROTOCOL_LABELS, getInfistarProtocolUrls, resolveInfistarBaseUrl } from './infistar';
 import type {
   MultiProtocolProviderBrand,
   MultiProtocolProviderRaw,
@@ -283,3 +284,4 @@ function multiProtocolRawToResource(brand: MultiProtocolProviderBrand, raw: Mult
 export const fennoAIToResource = (raw: MultiProtocolProviderRaw) => multiProtocolRawToResource('fennoAI', raw, { displayName: FENNO_AI_DISPLAY_NAME, protocolLabels: FENNO_AI_PROTOCOL_LABELS, resolveBaseUrl: resolveFennoAIBaseUrl, getProtocolUrls: getFennoAIProtocolUrls });
 export const qiniuCloudToResource = (raw: MultiProtocolProviderRaw) => multiProtocolRawToResource('qiniuCloud', raw, { displayName: QINIU_CLOUD_DISPLAY_NAME, protocolLabels: QINIU_CLOUD_PROTOCOL_LABELS, resolveBaseUrl: resolveQiniuCloudBaseUrl, getProtocolUrls: getQiniuCloudProtocolUrls });
 export const lmuAIToResource = (raw: MultiProtocolProviderRaw) => multiProtocolRawToResource('lmuAI', raw, { displayName: LMU_AI_DISPLAY_NAME, protocolLabels: LMU_AI_PROTOCOL_LABELS, resolveBaseUrl: resolveLmuAIBaseUrl, getProtocolUrls: getLmuAIProtocolUrls });
+export const infistarToResource = (raw: MultiProtocolProviderRaw) => multiProtocolRawToResource('infistar', raw, { displayName: INFISTAR_DISPLAY_NAME, protocolLabels: INFISTAR_PROTOCOL_LABELS, resolveBaseUrl: resolveInfistarBaseUrl, getProtocolUrls: getInfistarProtocolUrls });
