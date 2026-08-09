@@ -25,6 +25,11 @@ import {
 } from '@/stores';
 import { getAntigravityPlanLabel, CODEX_CONFIG } from '@/components/quota';
 import { formatResetCreditExpiry } from '@/utils/quota/resetCredits';
+import {
+  collectQuotaRowInstants,
+  pickUrgentRowId,
+  resetCreditRowId,
+} from '@/utils/quota/resetSchedule';
 import { formatRelativeInstant } from '@/utils/time/relativeTime';
 import { useNow } from '@/hooks/useNow';
 import type { AuthFileItem } from '@/types';
@@ -79,6 +84,11 @@ function ResetCreditsBadge({
   locale: string;
 }) {
   const nowMs = useNow(true);
+  const creditInstants = collectQuotaRowInstants('codex', {
+    status: 'success',
+    rateLimitResetCredits: credits,
+  });
+  const urgentCreditRowId = pickUrgentRowId(creditInstants, nowMs, 'credit');
   const [show, setShow] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const ref = useRef<HTMLSpanElement>(null);
@@ -111,7 +121,7 @@ function ResetCreditsBadge({
     <>
       <span
         ref={ref}
-        className={`${keyBadgeStyles.badge} ${styles.resetCreditsBadge}`}
+        className={`${keyBadgeStyles.badge} ${styles.resetCreditsBadge} ${urgentCreditRowId ? styles.resetCreditsBadgeSoon : ''}`}
         onPointerEnter={(e) => { if (e.pointerType === 'mouse') handleEnter(); }}
         onPointerLeave={(e) => { if (e.pointerType === 'mouse') setShow(false); }}
       >
@@ -126,7 +136,10 @@ function ResetCreditsBadge({
             <div className={styles.resetCreditsTooltip}>
               <div className={styles.resetCreditsTooltipTitle}>{tooltipTitle}</div>
               {credits.map((credit, index) => (
-                <div key={credit.id || `${credit.expiresAt}-${index}`} className={styles.resetCreditsTooltipRow}>
+                <div
+                  key={resetCreditRowId(credit, index)}
+                  className={`${styles.resetCreditsTooltipRow} ${resetCreditRowId(credit, index) === urgentCreditRowId ? styles.resetCreditsTooltipRowSoon : ''}`}
+                >
                   <span className={styles.resetCreditsTooltipIndex}>{index + 1}</span>
                   <span className={styles.resetCreditsTooltipTime}>
                     {formatResetCreditExpiry(credit.expiresAt)}

@@ -346,4 +346,37 @@ describe('provider-independent quota recovery schedule', () => {
       )
     ).toBe('credit');
   });
+
+  test('marks only the nearest available reset credit as urgent', () => {
+    const firstExpiry = new Date(now + 15 * MINUTE_MS).toISOString();
+    const laterExpiry = new Date(now + 40 * MINUTE_MS).toISOString();
+    const instants = collectQuotaRowInstants('codex', {
+      status: 'success',
+      windows: [{ id: 'window', resetAtMs: now + 5 * MINUTE_MS }],
+      rateLimitResetCredits: [
+        { id: 'consumed', status: 'consumed', expiresAt: new Date(now + MINUTE_MS).toISOString() },
+        { id: 'first-credit', status: 'available', expiresAt: firstExpiry },
+        { id: 'later-credit', status: 'available', expiresAt: laterExpiry },
+      ],
+    });
+
+    expect(pickUrgentRowId(instants, now, 'credit')).toBe('first-credit');
+    expect(pickUrgentRowId(instants, now, 'window')).toBe('window');
+  });
+
+  test('wires the urgent reset-credit selection into the Auth Files badge', async () => {
+    const card = await Bun.file(
+      new URL('../src/features/authFiles/components/AuthFileCard.tsx', import.meta.url)
+    ).text();
+
+    expect(card).toContain("pickUrgentRowId(creditInstants, nowMs, 'credit')");
+    expect(card).toContain('styles.resetCreditsTooltipRowSoon');
+    expect(card).toContain('styles.resetCreditsBadgeSoon');
+
+    const styles = await Bun.file(
+      new URL('../src/pages/AuthFilesPage.module.scss', import.meta.url)
+    ).text();
+    expect(styles).toContain('.resetCreditsBadgeSoon');
+    expect(styles).toContain('.resetCreditsTooltipRowSoon');
+  });
 });
