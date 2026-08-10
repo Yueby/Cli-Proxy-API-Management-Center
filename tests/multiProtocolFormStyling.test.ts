@@ -8,8 +8,29 @@ const styles = await Bun.file(
 ).text();
 
 describe('multi-protocol provider form styling', () => {
+  test('uses the shared custom Select instead of native dropdowns', () => {
+    expect(source).toContain("import { Select } from '@/components/ui/Select';");
+    expect(source).not.toContain('<select');
+    expect(source).not.toContain('<option');
+    expect(source.match(/<Select/g)?.length ?? 0).toBe(2);
+  });
+
+  test('keeps the current protocol while excluding protocols used by other entries', () => {
+    expect(source).toContain(
+      '.filter((protocol) => protocol === entry.protocol || !used.has(protocol))'
+    );
+  });
+
+  test('uses localized endpoint labels while preserving the base URL as the selected value', () => {
+    expect(source).toContain('value: option.baseUrl');
+    expect(source).toContain(
+      'label: t(`providersPage.multiProtocol.${option.descriptionKey ?? option.id}`'
+    );
+    expect(source).toContain('onChange={(baseUrl) => update(index, { baseUrl })}');
+  });
+
   test('uses the shared themed classes instead of browser-default controls', () => {
-    expect(source.match(/className=\{styles\.input\}/g)?.length ?? 0).toBeGreaterThanOrEqual(5);
+    expect(source.match(/className=\{styles\.input\}/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
     expect(source).toContain('className={styles.checkboxBox}');
     expect(source).toContain('className={styles.removeBtn}');
     expect(source).toContain('className={styles.addBtn}');

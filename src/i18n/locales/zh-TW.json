@@ -1856,6 +1856,10 @@
       "description": "為此提供商設定一個或多個後端已支援的協定。",
       "protocol": "協定",
       "endpoint": "服務端點",
+      "domestic": "中國大陸",
+      "overseas": "海外",
+      "mainlandChina": "中國大陸",
+      "global": "全球",
       "addProtocol": "新增協定",
       "aggregationConflict": "此提供商的同一協定存在多筆設定，或 OpenAI 設定包含多個 API 金鑰。為防止資料遺失，目前禁止編輯。"
     }

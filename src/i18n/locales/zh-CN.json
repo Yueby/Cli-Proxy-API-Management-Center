@@ -1829,6 +1829,10 @@
       "description": "为此提供商配置一个或多个后端已支持的协议。",
       "protocol": "协议",
       "endpoint": "服务端点",
+      "domestic": "中国大陆",
+      "overseas": "海外",
+      "mainlandChina": "中国大陆",
+      "global": "全球",
       "addProtocol": "添加协议",
       "aggregationConflict": "此提供商的同一协议存在多条配置，或 OpenAI 配置包含多个 API 密钥。为防止数据丢失，当前禁止编辑。"
     }

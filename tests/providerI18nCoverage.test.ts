@@ -35,6 +35,9 @@ const detailFields = [
 providerBrands.forEach((brand) => requiredKeys.add(`providersPage.providerNames.${brand}`));
 protocolLabels.forEach((protocol) => requiredKeys.add(`providersPage.protocols.${protocol}`));
 detailFields.forEach((field) => requiredKeys.add(`providersPage.detail.fields.${field}`));
+['domestic', 'overseas', 'mainlandChina', 'global'].forEach((endpoint) =>
+  requiredKeys.add(`providersPage.multiProtocol.${endpoint}`)
+);
 
 describe('provider i18n coverage', () => {
   for (const [localeName, locale] of Object.entries(locales)) {

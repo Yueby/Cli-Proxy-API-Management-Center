@@ -1829,6 +1829,10 @@
       "description": "Configure one or more supported protocols for this provider.",
       "protocol": "Protocol",
       "endpoint": "Service endpoint",
+      "domestic": "Mainland China",
+      "overseas": "Overseas",
+      "mainlandChina": "Mainland China",
+      "global": "Global",
       "addProtocol": "Add protocol",
       "aggregationConflict": "This provider has multiple configurations for the same protocol or multiple OpenAI API keys. Editing is disabled to prevent data loss."
     }

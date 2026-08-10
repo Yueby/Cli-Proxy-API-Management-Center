@@ -269,6 +269,7 @@ export function Select({
             id={listboxId}
             role="listbox"
             aria-label={ariaLabel}
+            aria-labelledby={ariaLabelledBy}
             style={dropdownStyle}
           >
             {options.map((opt, index) => {
@@ -303,6 +304,7 @@ export function Select({
         <button
           id={selectId}
           type="button"
+          role="combobox"
           className={`${styles.trigger} ${size === 'sm' ? styles.triggerSm : ''}`.trim()}
           onClick={disabled ? undefined : () => setOpen((prev) => !prev)}
           onKeyDown={handleKeyDown}

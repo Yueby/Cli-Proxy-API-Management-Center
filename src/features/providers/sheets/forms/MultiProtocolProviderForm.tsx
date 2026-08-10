@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasDisableAllModelsRule } from '@/components/providers/utils';
+import { Select } from '@/components/ui/Select';
 import { IconCopy } from '@/components/ui/icons';
 import { useNotificationStore } from '@/stores';
 import { copyToClipboard } from '@/utils/clipboard';
@@ -166,25 +167,27 @@ export function MultiProtocolProviderForm({
             return (
               <div className={styles.multiProtocolCard} key={`${entry.protocol}:${index}`}>
                 <div className={styles.multiProtocolCardHeader}>
-                  <label className={styles.multiProtocolProtocolField}>
-                    <span className={styles.label}>{t('providersPage.multiProtocol.protocol')}</span>
-                    <select
-                      className={styles.input}
+                  <div className={styles.multiProtocolProtocolField}>
+                    <span className={styles.label} id={`${formId}-protocol-${index}-label`}>
+                      {t('providersPage.multiProtocol.protocol')}
+                    </span>
+                    <Select
                       value={entry.protocol}
                       disabled={mutating}
-                      onChange={(event) =>
+                      ariaLabelledBy={`${formId}-protocol-${index}-label`}
+                      options={definition.protocols
+                        .filter((protocol) => protocol === entry.protocol || !used.has(protocol))
+                        .map((protocol) => ({
+                          value: protocol,
+                          label: t(`providersPage.protocols.${protocol}`),
+                        }))}
+                      onChange={(protocol) =>
                         update(index, {
-                          protocol: event.target.value as MultiProtocolProviderProtocol,
+                          protocol: protocol as MultiProtocolProviderProtocol,
                         })
                       }
-                    >
-                      {definition.protocols.map((protocol) => (
-                        <option key={protocol} value={protocol} disabled={used.has(protocol)}>
-                          {t(`providersPage.protocols.${protocol}`)}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                    />
+                  </div>
                   {entries.length > 1 ? (
                     <button
                       className={styles.removeBtn}
@@ -231,23 +234,23 @@ export function MultiProtocolProviderForm({
 
                 <div className={styles.multiProtocolGrid}>
                   {definition.baseUrlOptions.length > 1 ? (
-                    <label className={styles.field}>
-                      <span className={styles.label}>
+                    <div className={styles.field}>
+                      <span className={styles.label} id={`${formId}-endpoint-${index}-label`}>
                         {t('providersPage.multiProtocol.endpoint')}
                       </span>
-                      <select
-                        className={styles.input}
+                      <Select
                         value={entry.baseUrl}
                         disabled={mutating}
-                        onChange={(event) => update(index, { baseUrl: event.target.value })}
-                      >
-                        {definition.baseUrlOptions.map((option) => (
-                          <option key={option.id} value={option.baseUrl}>
-                            {option.id}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
+                        ariaLabelledBy={`${formId}-endpoint-${index}-label`}
+                        options={definition.baseUrlOptions.map((option) => ({
+                          value: option.baseUrl,
+                          label: t(`providersPage.multiProtocol.${option.descriptionKey ?? option.id}`, {
+                            defaultValue: option.id,
+                          }),
+                        }))}
+                        onChange={(baseUrl) => update(index, { baseUrl })}
+                      />
+                    </div>
                   ) : null}
                   <label className={styles.field}>
                     <span className={styles.label}>{t('providersPage.form.proxyUrl')}</span>
