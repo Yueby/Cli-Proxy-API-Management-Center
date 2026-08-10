@@ -14,7 +14,7 @@ import iconKimi from '@/assets/icons/kimi-dark.svg';
 import iconFennoAI from '@/assets/icons/fenno-ai.png';
 import iconQiniuCloud from '@/assets/icons/qiniu-cloud.png';
 import iconLmuAI from '@/assets/icons/lmu-ai.png';
-import iconInfistar from '@/assets/icons/infistar.png';
+import iconInfistar from '@/assets/icons/infistar-icon.png';
 import { Button } from '@/components/ui/Button';
 import { ItemCard } from '@/components/ui/ItemCard';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';

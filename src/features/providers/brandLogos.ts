@@ -13,7 +13,7 @@ export interface ProviderBrandLogo {
 
 export const PROVIDER_LOGOS: Partial<Record<ProviderBrand, ProviderBrandLogo>> = {
   lmuAI: { src: lmuAILogo, transparent: true },
-  infistar: { src: infistarLogo, transparent: true },
+  infistar: { src: infistarLogo, transparent: false },
   kimi: {
     src: kimiDarkLogo,
     darkSrc: kimiLightLogo,

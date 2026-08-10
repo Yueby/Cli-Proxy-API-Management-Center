@@ -177,6 +177,22 @@ describe('Infistar normal multi-protocol provider', () => {
     expect(cardsSource).toContain('infistar: iconInfistar');
   });
 
+  test('uses the full wordmark only where its opaque background is represented honestly', async () => {
+    expect(PROVIDER_LOGOS.infistar).toMatchObject({
+      src: expect.stringContaining('infistar.png'),
+      transparent: false,
+    });
+
+    const pageSource = await Bun.file(
+      new URL('../src/features/providers/ProvidersWorkbenchPage.tsx', import.meta.url)
+    ).text();
+    const cardsSource = await Bun.file(
+      new URL('../src/features/providers/components/ProviderResourceCards.tsx', import.meta.url)
+    ).text();
+    expect(pageSource).toContain("@/assets/icons/infistar-icon.png");
+    expect(cardsSource).toContain("@/assets/icons/infistar-icon.png");
+  });
+
   test('contains no affiliate, registration, sponsor, or recommendation hooks', async () => {
     const files = [
       '../src/features/providers/infistar.ts',
