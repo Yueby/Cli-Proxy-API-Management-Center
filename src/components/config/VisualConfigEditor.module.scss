@@ -613,6 +613,44 @@
   }
 }
 
+.strengthMeter {
+  --strength-color: var(--text-quaternary);
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  min-height: 20px;
+}
+
+.strengthTrack {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(28px, 1fr));
+  gap: 5px;
+  flex: 1;
+}
+
+.strengthSegment {
+  display: block;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border-color);
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+
+  &[data-filled='true'] {
+    background: var(--strength-color);
+    transform: scaleY(1.25);
+  }
+}
+
+.strengthLabel {
+  min-width: 56px;
+  color: var(--strength-color);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: right;
+}
+
 // ─── Expandable textarea ─────────────────────────────────
 
 .expandableInputWrapper {

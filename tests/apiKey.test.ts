@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { generateSecureApiKey } from '../src/utils/apiKey';
+import { evaluateApiKeyStrength } from '../src/utils/apiKeyStrength';
 
 describe('API key generation', () => {
   test('generates a 51-character key with the expected prefix and charset', () => {
@@ -17,11 +18,12 @@ describe('API key generation', () => {
     expect(new Set(apiKeys).size).toBe(apiKeys.length);
   });
 
-  test('rejects out-of-range bytes instead of folding them into base62', () => {
+  test('rejects out-of-range and weak random candidates', () => {
     const originalCrypto = globalThis.crypto;
     const batches = [
       Uint8Array.from(Array(64).fill(255)),
       Uint8Array.from(Array(64).fill(0)),
+      Uint8Array.from({ length: 64 }, (_, index) => index),
     ];
     let calls = 0;
 
@@ -38,8 +40,38 @@ describe('API key generation', () => {
     });
 
     try {
-      expect(generateSecureApiKey()).toBe(`sk-${'A'.repeat(48)}`);
-      expect(calls).toBe(2);
+      const generated = generateSecureApiKey();
+      expect(generated).not.toBe(`sk-${'A'.repeat(48)}`);
+      expect(evaluateApiKeyStrength(generated).tier).toBe('strong');
+      expect(calls).toBeGreaterThanOrEqual(3);
+    } finally {
+      Object.defineProperty(globalThis, 'crypto', { configurable: true, value: originalCrypto });
+    }
+  });
+
+  test('rejects a periodic random body even when the prefix masks the pattern', () => {
+    const originalCrypto = globalThis.crypto;
+    let calls = 0;
+
+    Object.defineProperty(globalThis, 'crypto', {
+      configurable: true,
+      value: {
+        getRandomValues<T extends ArrayBufferView>(array: T): T {
+          const bytes = new Uint8Array(array.buffer, array.byteOffset, array.byteLength);
+          for (let index = 0; index < bytes.length; index += 1) {
+            bytes[index] = calls === 0 ? 26 + (index % 5) : index % 62;
+          }
+          calls += 1;
+          return array;
+        },
+      },
+    });
+
+    try {
+      const generated = generateSecureApiKey();
+      expect(generated).not.toBe(`sk-${'abcde'.repeat(9)}abc`);
+      expect(evaluateApiKeyStrength(generated).tier).toBe('strong');
+      expect(calls).toBeGreaterThanOrEqual(2);
     } finally {
       Object.defineProperty(globalThis, 'crypto', { configurable: true, value: originalCrypto });
     }
@@ -59,6 +91,6 @@ describe('API key generation', () => {
     expect(blocks).toContain("import { generateSecureApiKey } from '@/utils/apiKey'");
     expect(blocks).toContain('setInputValue(generateSecureApiKey())');
     expect(editor).toContain('<ApiKeysCardEditor');
-    expect(routes).toContain("path: '/api-keys', element: <Navigate to=\"/config\" replace />");
+    expect(routes).toContain('path: \'/api-keys\', element: <Navigate to="/config" replace />');
   });
 });

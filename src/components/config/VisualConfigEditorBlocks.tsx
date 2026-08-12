@@ -37,6 +37,7 @@ import {
 import { generateSecureApiKey } from '@/utils/apiKey';
 import { maskApiKey } from '@/utils/format';
 import { isValidApiKeyCharset } from '@/utils/validation';
+import { ApiKeyStrengthMeter } from './ApiKeyStrengthMeter';
 
 /** Minimum character count before the expand/collapse toggle appears. */
 const EXPAND_THRESHOLD = 30;
@@ -412,6 +413,7 @@ export const ApiKeysCardEditor = memo(function ApiKeysCardEditor({
               <IconRefreshCw size={16} />
             </Button>
           </div>
+          <ApiKeyStrengthMeter value={inputValue} />
           <div id={apiKeyHintId} className="hint">
             {t('config_management.visual.api_keys.input_hint')}
           </div>
