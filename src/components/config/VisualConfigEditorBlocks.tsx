@@ -292,8 +292,12 @@ export const ApiKeysCardEditor = memo(function ApiKeysCardEditor({
   };
 
   const handleGenerate = () => {
-    setInputValue(generateSecureApiKey());
-    setFormError('');
+    try {
+      setInputValue(generateSecureApiKey());
+      setFormError('');
+    } catch {
+      setFormError(t('config_management.visual.api_keys.generate_failed'));
+    }
   };
 
   return (

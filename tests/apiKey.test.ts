@@ -77,6 +77,33 @@ describe('API key generation', () => {
     }
   });
 
+  test('terminates deterministically and throws when crypto source persistently generates weak candidates', () => {
+    const originalCrypto = globalThis.crypto;
+    let calls = 0;
+
+    Object.defineProperty(globalThis, 'crypto', {
+      configurable: true,
+      value: {
+        getRandomValues<T extends ArrayBufferView>(array: T): T {
+          const bytes = new Uint8Array(array.buffer, array.byteOffset, array.byteLength);
+          // Always fill with the same character index (0 -> 'A') which yields 'AAAA...' (weak candidate)
+          bytes.fill(0);
+          calls += 1;
+          return array;
+        },
+      },
+    });
+
+    try {
+      expect(() => generateSecureApiKey()).toThrow(
+        /Failed to generate a sufficiently strong API key after 32 attempts/
+      );
+      expect(calls).toBe(32);
+    } finally {
+      Object.defineProperty(globalThis, 'crypto', { configurable: true, value: originalCrypto });
+    }
+  });
+
   test('is wired into the reachable visual config API key editor', () => {
     const blocks = readFileSync(
       resolve(import.meta.dir, '../src/components/config/VisualConfigEditorBlocks.tsx'),
@@ -90,6 +117,9 @@ describe('API key generation', () => {
 
     expect(blocks).toContain("import { generateSecureApiKey } from '@/utils/apiKey'");
     expect(blocks).toContain('setInputValue(generateSecureApiKey())');
+    expect(blocks).toContain(
+      "setFormError(t('config_management.visual.api_keys.generate_failed'))"
+    );
     expect(editor).toContain('<ApiKeysCardEditor');
     expect(routes).toContain('path: \'/api-keys\', element: <Navigate to="/config" replace />');
   });

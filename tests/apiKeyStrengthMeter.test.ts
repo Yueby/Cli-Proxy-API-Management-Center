@@ -51,6 +51,10 @@ describe('ApiKeyStrengthMeter', () => {
         expect(i18n.exists(path)).toBe(true);
         expect(i18n.t(path)).not.toBe(path);
       }
+      expect(i18n.exists('config_management.visual.api_keys.generate_failed')).toBe(true);
+      expect(i18n.t('config_management.visual.api_keys.generate_failed')).not.toBe(
+        'config_management.visual.api_keys.generate_failed'
+      );
     }
 
     await i18n.changeLanguage(original);
