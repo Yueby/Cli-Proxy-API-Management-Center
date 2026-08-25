@@ -104,6 +104,33 @@ describe('API key generation', () => {
     }
   });
 
+  test('terminates deterministically and throws when crypto source persistently generates out-of-range unbiased bytes (e.g. 255)', () => {
+    const originalCrypto = globalThis.crypto;
+    let calls = 0;
+
+    Object.defineProperty(globalThis, 'crypto', {
+      configurable: true,
+      value: {
+        getRandomValues<T extends ArrayBufferView>(array: T): T {
+          const bytes = new Uint8Array(array.buffer, array.byteOffset, array.byteLength);
+          // 255 is >= MAX_UNBIASED_BYTE (248), rejected by rejection sampling
+          bytes.fill(255);
+          calls += 1;
+          return array;
+        },
+      },
+    });
+
+    try {
+      expect(() => generateSecureApiKey(1)).toThrow(
+        /Failed to collect enough unbiased random bytes after 16 sampling rounds/
+      );
+      expect(calls).toBe(16);
+    } finally {
+      Object.defineProperty(globalThis, 'crypto', { configurable: true, value: originalCrypto });
+    }
+  });
+
   test('is wired into the reachable visual config API key editor', () => {
     const blocks = readFileSync(
       resolve(import.meta.dir, '../src/components/config/VisualConfigEditorBlocks.tsx'),

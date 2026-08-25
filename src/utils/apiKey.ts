@@ -6,6 +6,7 @@ const API_KEY_CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012
 const MAX_UNBIASED_BYTE = Math.floor(256 / API_KEY_CHARSET.length) * API_KEY_CHARSET.length;
 
 const MAX_API_KEY_GENERATION_ATTEMPTS = 32;
+const MAX_REJECTION_SAMPLING_ROUNDS_PER_ATTEMPT = 16;
 
 /** Generates a cryptographically secure, uniformly distributed API key. */
 export function generateSecureApiKey(
@@ -15,8 +16,16 @@ export function generateSecureApiKey(
 
   for (let attempt = 1; attempt <= attemptsLimit; attempt += 1) {
     const characters: string[] = [];
+    let samplingRound = 0;
 
     while (characters.length < API_KEY_RANDOM_LENGTH) {
+      if (samplingRound >= MAX_REJECTION_SAMPLING_ROUNDS_PER_ATTEMPT) {
+        throw new Error(
+          `Failed to collect enough unbiased random bytes after ${MAX_REJECTION_SAMPLING_ROUNDS_PER_ATTEMPT} sampling rounds. Please check the randomness source.`
+        );
+      }
+      samplingRound += 1;
+
       const remaining = API_KEY_RANDOM_LENGTH - characters.length;
       const randomBytes = new Uint8Array(Math.ceil(remaining * 1.1));
       globalThis.crypto.getRandomValues(randomBytes);
