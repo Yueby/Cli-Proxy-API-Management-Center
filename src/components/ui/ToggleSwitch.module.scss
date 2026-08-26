@@ -14,6 +14,7 @@
 
 .disabled {
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .root input {
@@ -30,7 +31,10 @@
   border: 2px solid transparent;
   border-radius: $radius-full;
   position: relative;
-  transition: background $transition-fast, border-color $transition-fast, box-shadow $transition-fast;
+  transition:
+    background var(--motion-hover),
+    border-color var(--motion-hover),
+    box-shadow var(--motion-hover);
 }
 
 .thumb {

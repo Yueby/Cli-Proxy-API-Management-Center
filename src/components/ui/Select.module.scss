@@ -19,8 +19,8 @@
   height: 32px;
   padding: 0 12px;
   border: 1px solid var(--border-color);
-  border-radius: $radius-md;
-  background-color: var(--bg-secondary);
+  border-radius: var(--radius-control);
+  background-color: var(--surface-panel);
   color: var(--text-primary);
   font-size: 14px;
   font-weight: 500;
@@ -28,7 +28,10 @@
   appearance: none;
   text-align: left;
   box-sizing: border-box;
-  transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+  transition:
+    border-color var(--motion-hover),
+    background-color var(--motion-hover),
+    box-shadow var(--motion-hover);
 
   &:hover {
     border-color: var(--primary-color);
@@ -78,11 +81,11 @@
 
 .dropdown {
   position: fixed;
-  background: var(--bg-primary);
+  background: var(--surface-floating);
   border: 1px solid var(--border-color);
-  border-radius: $radius-lg;
+  border-radius: var(--radius-panel);
   padding: 6px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--floating-shadow);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -94,7 +97,7 @@
 
 .option {
   padding: 8px 14px;
-  border-radius: $radius-md;
+  border-radius: var(--radius-control);
   border: 1px solid transparent;
   background: transparent;
   color: var(--text-primary);
@@ -102,7 +105,9 @@
   text-align: left;
   font-size: 14px;
   font-weight: 500;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background-color var(--motion-hover),
+    border-color var(--motion-hover);
   flex-shrink: 0;
 
   &:hover {
