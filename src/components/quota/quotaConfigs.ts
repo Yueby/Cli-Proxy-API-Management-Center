@@ -91,11 +91,9 @@ import {
 } from '@/utils/quota';
 import { normalizeAuthIndex } from '@/utils/authIndex';
 import { formatInstantShort, isValidInstant } from '@/utils/time/instant';
-import { buildResetDisplay } from '@/utils/time/relativeTime';
 import {
   collectQuotaRowInstants,
   pickUrgentRowId,
-  XAI_WEEKLY_ROW_ID,
 } from '@/utils/quota/resetSchedule';
 import type { QuotaRenderHelpers } from './QuotaCard';
 import styles from '@/pages/QuotaPage.module.scss';
@@ -131,31 +129,6 @@ const QUOTA_PROGRESS_HIGH_THRESHOLD = 70;
 const QUOTA_PROGRESS_MEDIUM_THRESHOLD = 30;
 const CODEX_RESET_CREDITS_REQUEST_TIMEOUT_MS = 8000;
 const XAI_PAID_HEALTH_REQUEST_TIMEOUT_MS = 15000;
-
-const renderResetDisplay = (
-  h: typeof React.createElement,
-  styleMap: QuotaRenderHelpers['styles'],
-  absoluteLabel: string | null | undefined,
-  atMs: number | null | undefined,
-  nowMs: number,
-  locale?: string
-): ReactNode => {
-  const display = buildResetDisplay(absoluteLabel, atMs, nowMs, locale);
-  if (!display) return null;
-  return h(
-    'span',
-    { className: styleMap.quotaReset },
-    h('span', { className: styleMap.quotaResetAbsolute }, display.absolute),
-    display.relative
-      ? h(
-          React.Fragment,
-          null,
-          h('span', { className: styleMap.quotaResetSeparator, 'aria-hidden': true }, ' · '),
-          h('span', { className: styleMap.quotaResetRelative }, display.relative)
-        )
-      : null
-  );
-};
 
 export interface QuotaStore {
   antigravityQuota: Record<string, AntigravityQuotaState>;
@@ -848,7 +821,7 @@ const renderAntigravityItems = (
   t: TFunction,
   helpers: QuotaRenderHelpers
 ): ReactNode => {
-  const { styles: styleMap, QuotaProgressBar, nowMs: browserNowMs, locale } = helpers;
+  const { styles: styleMap, QuotaProgressBar, nowMs: browserNowMs } = helpers;
   const { createElement: h, Fragment } = React;
   const groups = quota.groups ?? [];
   const nodes: ReactNode[] = [];
@@ -865,7 +838,7 @@ const renderAntigravityItems = (
   }
 
   const nowMs = browserNowMs;
-  const urgentRowId = pickUrgentRowId(
+  pickUrgentRowId(
     collectQuotaRowInstants('antigravity', quota),
     nowMs,
     'window'
@@ -895,12 +868,7 @@ const renderAntigravityItems = (
         ...group.buckets.map((bucket) => {
           const clamped = Math.max(0, Math.min(1, bucket.remainingFraction));
           const percent = clamped * 100;
-          const percentLabel =
-            bucket.remainingFraction === 1
-              ? t('antigravity_quota.quota_available')
-              : t('antigravity_quota.remaining_percent', {
-                  percent: Math.round(percent),
-                });
+          const percentLabel = `${Math.round(percent)}%`;
           const resetLabel = formatAntigravityResetLabel(bucket.resetTime, t, nowMs);
           const bucketLabel = translateAntigravityQuotaLabel(
             bucket.label,
@@ -913,12 +881,7 @@ const renderAntigravityItems = (
             'div',
             {
               key: bucket.id,
-              className: [
-                styleMap.quotaRow,
-                bucket.id === urgentRowId ? styleMap.quotaRowRecoverySoon : '',
-              ]
-                .filter(Boolean)
-                .join(' '),
+              className: styleMap.quotaRow,
             },
             h(
               'div',
@@ -928,7 +891,9 @@ const renderAntigravityItems = (
                 'div',
                 { className: styleMap.quotaMeta },
                 h('span', { className: styleMap.quotaPercent }, percentLabel),
-                renderResetDisplay(h, styleMap, resetLabel, bucket.resetAtMs, nowMs, locale)
+                resetLabel && resetLabel !== '-'
+                  ? h('span', { className: styleMap.quotaReset }, resetLabel)
+                  : null
               )
             ),
             h(QuotaProgressBar, {
@@ -950,10 +915,10 @@ const renderCodexItems = (
   t: TFunction,
   helpers: QuotaRenderHelpers
 ): ReactNode => {
-  const { styles: styleMap, QuotaProgressBar, nowMs, locale } = helpers;
+  const { styles: styleMap, QuotaProgressBar, nowMs } = helpers;
   const { createElement: h, Fragment } = React;
   const windows = quota.windows ?? [];
-  const urgentRowId = pickUrgentRowId(collectQuotaRowInstants('codex', quota), nowMs, 'window');
+  pickUrgentRowId(collectQuotaRowInstants('codex', quota), nowMs, 'window');
   const nodes: ReactNode[] = [];
 
   if (windows.length === 0) {
@@ -968,10 +933,7 @@ const renderCodexItems = (
       const used = window.usedPercent;
       const clampedUsed = used === null ? null : Math.max(0, Math.min(100, used));
       const remaining = clampedUsed === null ? null : Math.max(0, Math.min(100, 100 - clampedUsed));
-      const percentLabel =
-        remaining === null
-          ? '--'
-          : t('codex_quota.remaining_percent', { percent: Math.round(remaining) });
+      const percentLabel = remaining === null ? '--' : `${Math.round(remaining)}%`;
       const windowLabel = window.labelKey
         ? t(window.labelKey, window.labelParams as Record<string, string | number>)
         : window.label;
@@ -980,9 +942,7 @@ const renderCodexItems = (
         'div',
         {
           key: window.id,
-          className: [styleMap.quotaRow, window.id === urgentRowId ? styleMap.quotaRowRecoverySoon : '']
-            .filter(Boolean)
-            .join(' '),
+          className: styleMap.quotaRow,
         },
         h(
           'div',
@@ -992,7 +952,9 @@ const renderCodexItems = (
             'div',
             { className: styleMap.quotaMeta },
             h('span', { className: styleMap.quotaPercent }, percentLabel),
-            renderResetDisplay(h, styleMap, window.resetLabel, window.resetAtMs, nowMs, locale)
+            window.resetLabel && window.resetLabel !== '-'
+              ? h('span', { className: styleMap.quotaReset }, window.resetLabel)
+              : null
           )
         ),
         h(QuotaProgressBar, {
@@ -1180,10 +1142,10 @@ const renderClaudeItems = (
   t: TFunction,
   helpers: QuotaRenderHelpers
 ): ReactNode => {
-  const { styles: styleMap, QuotaProgressBar, nowMs, locale } = helpers;
+  const { styles: styleMap, QuotaProgressBar, nowMs } = helpers;
   const { createElement: h, Fragment } = React;
   const windows = quota.windows ?? [];
-  const urgentRowId = pickUrgentRowId(collectQuotaRowInstants('claude', quota), nowMs, 'window');
+  pickUrgentRowId(collectQuotaRowInstants('claude', quota), nowMs, 'window');
   const extraUsage = quota.extraUsage ?? null;
   const planType = quota.planType ?? null;
   const nodes: ReactNode[] = [];
@@ -1223,19 +1185,14 @@ const renderClaudeItems = (
       const used = window.usedPercent;
       const clampedUsed = used === null ? null : Math.max(0, Math.min(100, used));
       const remaining = clampedUsed === null ? null : Math.max(0, Math.min(100, 100 - clampedUsed));
-      const percentLabel =
-        remaining === null
-          ? '--'
-          : t('claude_quota.remaining_percent', { percent: Math.round(remaining) });
+      const percentLabel = remaining === null ? '--' : `${Math.round(remaining)}%`;
       const windowLabel = window.labelKey ? t(window.labelKey) : window.label;
 
       return h(
         'div',
         {
           key: window.id,
-          className: [styleMap.quotaRow, window.id === urgentRowId ? styleMap.quotaRowRecoverySoon : '']
-            .filter(Boolean)
-            .join(' '),
+          className: styleMap.quotaRow,
         },
         h(
           'div',
@@ -1245,7 +1202,9 @@ const renderClaudeItems = (
             'div',
             { className: styleMap.quotaMeta },
             h('span', { className: styleMap.quotaPercent }, percentLabel),
-            renderResetDisplay(h, styleMap, window.resetLabel, window.resetAtMs, nowMs, locale)
+            window.resetLabel && window.resetLabel !== '-'
+              ? h('span', { className: styleMap.quotaReset }, window.resetLabel)
+              : null
           )
         ),
         h(QuotaProgressBar, {
@@ -1399,10 +1358,10 @@ const renderKimiItems = (
   t: TFunction,
   helpers: QuotaRenderHelpers
 ): ReactNode => {
-  const { styles: styleMap, QuotaProgressBar, nowMs, locale } = helpers;
+  const { styles: styleMap, QuotaProgressBar, nowMs } = helpers;
   const { createElement: h } = React;
   const rows = quota.rows ?? [];
-  const urgentRowId = pickUrgentRowId(collectQuotaRowInstants('kimi', quota), nowMs, 'window');
+  pickUrgentRowId(collectQuotaRowInstants('kimi', quota), nowMs, 'window');
 
   if (rows.length === 0) {
     return h('div', { className: styleMap.quotaMessage }, t('kimi_quota.empty_data'));
@@ -1417,8 +1376,7 @@ const renderKimiItems = (
         : used > 0
           ? 0
           : null;
-    const percentLabel =
-      remaining === null ? '--' : t('kimi_quota.remaining_percent', { percent: remaining });
+    const percentLabel = remaining === null ? '--' : `${Math.round(remaining)}%`;
     const rowLabelParams = row.labelParams
       ? {
           ...row.labelParams,
@@ -1440,9 +1398,7 @@ const renderKimiItems = (
       'div',
       {
         key: row.id,
-        className: [styleMap.quotaRow, row.id === urgentRowId ? styleMap.quotaRowRecoverySoon : '']
-          .filter(Boolean)
-          .join(' '),
+        className: styleMap.quotaRow,
       },
       h(
         'div',
@@ -1452,7 +1408,9 @@ const renderKimiItems = (
           'div',
           { className: styleMap.quotaMeta },
           h('span', { className: styleMap.quotaPercent }, percentLabel),
-          renderResetDisplay(h, styleMap, resetLabel, row.resetAtMs, nowMs, locale)
+          resetLabel && resetLabel !== '-'
+            ? h('span', { className: styleMap.quotaReset }, resetLabel)
+            : null
         )
       ),
       h(QuotaProgressBar, {
@@ -1634,8 +1592,8 @@ const formatXaiOnDemandAmount = (billing: XaiBillingSummary): string => {
   return `${remaining} / ${cap}`;
 };
 
-const formatXaiPercent = (value: number | null, t: TFunction): string =>
-  value === null ? '--' : t('xai_quota.remaining_percent', { percent: Math.round(value) });
+const formatXaiPercent = (value: number | null): string =>
+  value === null ? '--' : `${Math.round(value)}%`;
 
 const XAI_PREMIUM_LIMIT_CENTS = 4_000;
 const XAI_PREMIUM_PLUS_LIMIT_CENTS = 20_000;
@@ -1670,7 +1628,7 @@ const renderXaiItems = (
   t: TFunction,
   helpers: QuotaRenderHelpers
 ): ReactNode => {
-  const { styles: styleMap, QuotaProgressBar, nowMs, locale } = helpers;
+  const { styles: styleMap, QuotaProgressBar, nowMs } = helpers;
   const { createElement: h, Fragment } = React;
   const billing = quota.billing;
 
@@ -1692,11 +1650,11 @@ const renderXaiItems = (
     );
   }
 
-  const urgentRowId = pickUrgentRowId(collectQuotaRowInstants('xai', quota), nowMs, 'window');
+  pickUrgentRowId(collectQuotaRowInstants('xai', quota), nowMs, 'window');
   const clampedUsed =
     billing.usedPercent === null ? null : Math.max(0, Math.min(100, billing.usedPercent));
   const remaining = clampedUsed === null ? null : Math.max(0, Math.min(100, 100 - clampedUsed));
-  const percentLabel = formatXaiPercent(remaining, t);
+  const percentLabel = formatXaiPercent(remaining);
   const amountLabel = formatXaiRemainingAmount(billing);
   const resetLabel = formatQuotaResetTime(billing.billingPeriodEnd, t);
   const onDemandCap = billing.onDemandCapCents ?? 0;
@@ -1706,7 +1664,7 @@ const renderXaiItems = (
       : Math.max(0, Math.min(100, billing.onDemandUsedPercent));
   const onDemandRemaining =
     clampedOnDemandUsed === null ? null : Math.max(0, Math.min(100, 100 - clampedOnDemandUsed));
-  const onDemandPercentLabel = formatXaiPercent(onDemandRemaining, t);
+  const onDemandPercentLabel = formatXaiPercent(onDemandRemaining);
   const onDemandAmountLabel = formatXaiOnDemandAmount(billing);
   const weeklyUsed =
     billing.periodType === 'weekly' && billing.usagePercent !== null
@@ -1732,12 +1690,7 @@ const renderXaiItems = (
           'div',
           {
             key: 'weekly-limit',
-            className: [
-              styleMap.quotaRow,
-              XAI_WEEKLY_ROW_ID === urgentRowId ? styleMap.quotaRowRecoverySoon : '',
-            ]
-              .filter(Boolean)
-              .join(' '),
+            className: styleMap.quotaRow,
           },
           h(
             'div',
@@ -1746,16 +1699,9 @@ const renderXaiItems = (
             h(
               'div',
               { className: styleMap.quotaMeta },
-              h('span', { className: styleMap.quotaPercent }, formatXaiPercent(weeklyRemaining, t)),
-              weeklyResetLabel !== '-'
-                ? renderResetDisplay(
-                    h,
-                    styleMap,
-                    weeklyResetLabel,
-                    billing.resetAtMs,
-                    nowMs,
-                    locale
-                  )
+              h('span', { className: styleMap.quotaPercent }, formatXaiPercent(weeklyRemaining)),
+              weeklyResetLabel && weeklyResetLabel !== '-'
+                ? h('span', { className: styleMap.quotaReset }, weeklyResetLabel)
                 : null
             )
           ),
@@ -1786,7 +1732,7 @@ const renderXaiItems = (
             h(
               'div',
               { className: styleMap.quotaMeta },
-              h('span', { className: styleMap.quotaPercent }, formatXaiPercent(remainingPercent, t))
+              h('span', { className: styleMap.quotaPercent }, formatXaiPercent(remainingPercent))
             )
           ),
           h(QuotaProgressBar, {
@@ -1831,15 +1777,8 @@ const renderXaiItems = (
               { className: styleMap.quotaMeta },
               h('span', { className: styleMap.quotaPercent }, percentLabel),
               h('span', { className: styleMap.quotaAmount }, amountLabel),
-              resetLabel !== '-'
-                ? renderResetDisplay(
-                    h,
-                    styleMap,
-                    resetLabel,
-                    billing.billingPeriodEnd ? Date.parse(billing.billingPeriodEnd) : null,
-                    nowMs,
-                    locale
-                  )
+              resetLabel && resetLabel !== '-'
+                ? h('span', { className: styleMap.quotaReset }, resetLabel)
                 : null
             )
           ),
