@@ -121,7 +121,7 @@ describe('dashboard flat design language', () => {
     expect(dashboardStyles).toContain('max-width: 64ch');
   });
 
-  test('page transition layers and container use transparent, inherited, or theme page surface without black overlay masks', () => {
+  test('active page transition layer strictly uses opaque semantic page surface without transparent or hardcoded black masks', () => {
     const transitionStyles = source('src/components/common/PageTransition.scss');
     const layoutStyles = source('src/styles/layout.scss');
 
@@ -133,15 +133,39 @@ describe('dashboard flat design language', () => {
     expect(transitionStyles).not.toContain('background-color: #000000');
     expect(transitionStyles).not.toContain('background-color: black');
     expect(transitionStyles).not.toContain('background: var(--bg-secondary)');
+    expect(transitionStyles).not.toContain('background: transparent');
+    expect(transitionStyles).not.toContain('background: none');
+    expect(transitionStyles).not.toContain('background: inherit');
 
     expect(transitionStyles).toContain('&__layer {');
-    expect(transitionStyles).toMatch(
-      /background:\s*(transparent|inherit|var\(--surface-page\)|none);/
-    );
+    expect(transitionStyles).toContain('background: var(--surface-page);');
 
     // layout.scss plugin-resource isolation maintains its required white surface without arbitrary overrides
     expect(layoutStyles).toContain('.main-content-plugin-resource {');
     expect(layoutStyles).toContain('.page-transition,');
     expect(layoutStyles).toContain('background: #ffffff;');
+  });
+
+  test('page transition layers maintain opaque page surface during animation crossfade and stacked states', () => {
+    const transitionStyles = source('src/components/common/PageTransition.scss');
+    const transitionComponent = source('src/components/common/PageTransition.tsx');
+
+    // PageTransition SCSS rules enforce surface and positioning
+    expect(transitionStyles).toContain('.page-transition {');
+    expect(transitionStyles).toContain('background: var(--surface-page);');
+    expect(transitionStyles).toContain('&.page-transition__layer--stacked-keep {');
+    expect(transitionStyles).toContain('opacity: 0;');
+
+    // PageTransition TSX preserves layer semantics
+    expect(transitionComponent).toContain('className={[');
+    expect(transitionComponent).toContain("'page-transition__layer',");
+    expect(transitionComponent).toContain(
+      "layer.status === 'exiting' ? 'page-transition__layer--exit' : ''"
+    );
+    expect(transitionComponent).toContain(
+      "shouldKeepStacked ? 'page-transition__layer--stacked-keep' : ''"
+    );
+    expect(transitionComponent).toContain("inert={layer.status !== 'current'}");
+    expect(transitionComponent).toContain("aria-hidden={layer.status !== 'current'}");
   });
 });
