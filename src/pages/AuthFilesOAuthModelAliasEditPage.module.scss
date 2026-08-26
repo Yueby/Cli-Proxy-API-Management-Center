@@ -22,7 +22,7 @@
   flex-direction: column;
   gap: $spacing-xs;
   padding: $spacing-md $spacing-lg;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-subtle);
 
   @include mobile {
     padding-left: $spacing-md;
@@ -47,7 +47,7 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-sm;
-  padding: $spacing-md $spacing-lg $spacing-lg;
+  padding: $spacing-sm $spacing-lg $spacing-lg;
 
   @include mobile {
     padding-left: $spacing-md;

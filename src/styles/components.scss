@@ -121,7 +121,10 @@ textarea {
   background: var(--surface-panel);
   color: var(--text-primary);
   box-sizing: border-box;
-  transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+  transition:
+    border-color $transition-fast,
+    background-color $transition-fast,
+    box-shadow $transition-fast;
 
   &:hover:not(:focus):not(:disabled) {
     border-color: var(--primary-color);
@@ -205,6 +208,10 @@ textarea {
   &:first-child {
     padding-top: $spacing-lg;
   }
+}
+
+.card-header + .card-body {
+  padding-top: $spacing-sm;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -300,7 +307,9 @@ textarea {
   background: color-mix(in srgb, var(--bg-primary) 85%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.04);
   color: var(--text-primary);
   display: flex;
   align-items: flex-start;
@@ -329,23 +338,39 @@ textarea {
 
   &.success {
     border-color: rgba($success-color, 0.3);
-    &::before { background-color: $success-color; }
-    .notification-icon { color: $success-color; }
+    &::before {
+      background-color: $success-color;
+    }
+    .notification-icon {
+      color: $success-color;
+    }
   }
   &.warning {
     border-color: rgba($warning-color, 0.3);
-    &::before { background-color: $warning-color; }
-    .notification-icon { color: $warning-color; }
+    &::before {
+      background-color: $warning-color;
+    }
+    .notification-icon {
+      color: $warning-color;
+    }
   }
   &.error {
     border-color: rgba($error-color, 0.3);
-    &::before { background-color: $error-color; }
-    .notification-icon { color: $error-color; }
+    &::before {
+      background-color: $error-color;
+    }
+    .notification-icon {
+      color: $error-color;
+    }
   }
   &.info {
     border-color: rgba($primary-color, 0.3);
-    &::before { background-color: $primary-color; }
-    .notification-icon { color: $primary-color; }
+    &::before {
+      background-color: $primary-color;
+    }
+    .notification-icon {
+      color: $primary-color;
+    }
   }
 
   .notification-icon {
@@ -390,12 +415,22 @@ textarea {
 
 [data-theme='dark'] .notification {
   background: color-mix(in srgb, var(--bg-secondary) 85%, transparent);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    0 1px 4px rgba(0, 0, 0, 0.2);
 
-  &.success { border-color: rgba($success-color, 0.4); }
-  &.warning { border-color: rgba($warning-color, 0.4); }
-  &.error { border-color: rgba($error-color, 0.4); }
-  &.info { border-color: rgba($primary-color, 0.4); }
+  &.success {
+    border-color: rgba($success-color, 0.4);
+  }
+  &.warning {
+    border-color: rgba($warning-color, 0.4);
+  }
+  &.error {
+    border-color: rgba($error-color, 0.4);
+  }
+  &.info {
+    border-color: rgba($primary-color, 0.4);
+  }
 }
 
 .switch {
@@ -591,7 +626,10 @@ textarea {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.15s ease;
   z-index: 10;
 
   svg {

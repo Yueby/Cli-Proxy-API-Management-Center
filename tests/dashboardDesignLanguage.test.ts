@@ -1,8 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { readFileSync } from 'node:fs';
 
-const source = (path: string) =>
-  readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
+const source = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
 
 describe('dashboard flat design language', () => {
   test('publishes semantic surface, radius, shadow, typography and motion tokens', () => {
@@ -69,6 +68,34 @@ describe('dashboard flat design language', () => {
     expect(styles).toContain('transform: none');
     expect(styles).not.toContain('transform: translateY(-2px)');
     expect(styles).not.toContain('transition: all 0.2s ease');
+  });
+
+  test('card header maintains 8-12px balanced spacing with body and avoids top text sticking', () => {
+    const components = source('src/styles/components.scss');
+    expect(components).toContain('.card-header + .card-body');
+    expect(components).toContain('padding-top: $spacing-sm');
+  });
+
+  test('pages clean up obsolete scoped page header styles in favor of shared PageHeader component', () => {
+    const authFilesStyles = source('src/pages/AuthFilesPage.module.scss');
+    const quotaStyles = source('src/pages/QuotaPage.module.scss');
+    const configStyles = source('src/pages/ConfigPage.module.scss');
+
+    expect(authFilesStyles).not.toContain('.pageHeader {');
+    expect(authFilesStyles).not.toContain('.pageTitle {');
+    expect(quotaStyles).not.toContain('.pageHeader {');
+    expect(quotaStyles).not.toContain('.pageTitle {');
+    expect(configStyles).not.toContain('.pageHeader,');
+  });
+
+  test('auth files edit pages use subtle borders and consistent header spacing in settings cards', () => {
+    const oauthExcludedStyles = source('src/pages/AuthFilesOAuthExcludedEditPage.module.scss');
+    const oauthModelAliasStyles = source('src/pages/AuthFilesOAuthModelAliasEditPage.module.scss');
+
+    expect(oauthExcludedStyles).toContain('border-bottom: 1px solid var(--border-subtle)');
+    expect(oauthExcludedStyles).toContain('padding: $spacing-sm $spacing-lg $spacing-lg');
+    expect(oauthModelAliasStyles).toContain('border-bottom: 1px solid var(--border-subtle)');
+    expect(oauthModelAliasStyles).toContain('padding: $spacing-sm $spacing-lg $spacing-lg');
   });
 
   test('plugin management and store share the global page header', () => {
