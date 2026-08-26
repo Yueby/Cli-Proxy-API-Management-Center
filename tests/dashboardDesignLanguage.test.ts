@@ -108,4 +108,40 @@ describe('dashboard flat design language', () => {
       expect(page).not.toContain('className={styles.pageHeader}');
     }
   });
+
+  test('dashboard page adopts available full-width content area without restrictive max-width or centering margin', () => {
+    const dashboardStyles = source('src/features/dashboard/dashboard.module.scss');
+
+    expect(dashboardStyles).not.toContain('max-width: 1120px');
+    expect(dashboardStyles).not.toContain('margin: 0 auto');
+    expect(dashboardStyles).toContain('.page {');
+    expect(dashboardStyles).toContain('width: 100%');
+    expect(dashboardStyles).toContain('min-width: 0');
+    // sectionDescription readable text measure constraint is preserved
+    expect(dashboardStyles).toContain('max-width: 64ch');
+  });
+
+  test('page transition layers and container use transparent, inherited, or theme page surface without black overlay masks', () => {
+    const transitionStyles = source('src/components/common/PageTransition.scss');
+    const layoutStyles = source('src/styles/layout.scss');
+
+    // PageTransition component styles
+    expect(transitionStyles).not.toContain('background: #000');
+    expect(transitionStyles).not.toContain('background: #000000');
+    expect(transitionStyles).not.toContain('background: black');
+    expect(transitionStyles).not.toContain('background-color: #000');
+    expect(transitionStyles).not.toContain('background-color: #000000');
+    expect(transitionStyles).not.toContain('background-color: black');
+    expect(transitionStyles).not.toContain('background: var(--bg-secondary)');
+
+    expect(transitionStyles).toContain('&__layer {');
+    expect(transitionStyles).toMatch(
+      /background:\s*(transparent|inherit|var\(--surface-page\)|none);/
+    );
+
+    // layout.scss plugin-resource isolation maintains its required white surface without arbitrary overrides
+    expect(layoutStyles).toContain('.main-content-plugin-resource {');
+    expect(layoutStyles).toContain('.page-transition,');
+    expect(layoutStyles).toContain('background: #ffffff;');
+  });
 });

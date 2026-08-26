@@ -3,9 +3,8 @@
 /* 可视化配色与动效 tokens（--viz-*、--ease-out-strong、--dur-*）已提升到 themes.scss :root。 */
 .page {
   position: relative;
-  max-width: 1120px;
   width: 100%;
-  margin: 0 auto;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: clamp(44px, 6.5vh, 76px);
