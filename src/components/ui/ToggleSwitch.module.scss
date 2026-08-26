@@ -49,7 +49,7 @@
   transition: transform $transition-fast;
 }
 
-.root input:checked + .track {
+.root:not(.disabled) input:checked + .track {
   background: var(--primary-color);
 }
 

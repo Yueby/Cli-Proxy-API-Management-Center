@@ -122,8 +122,8 @@ describe('shared UI components design contracts (Phase 1)', () => {
       expect(toggleStyles).toContain('.thumb {');
       expect(toggleStyles).toContain('border-radius: $radius-full');
 
-      // Enabled state: uses semantic active color
-      expect(toggleStyles).toContain('.root input:checked + .track {');
+      // Enabled state: uses semantic active color only when not disabled
+      expect(toggleStyles).toContain('.root:not(.disabled) input:checked + .track {');
       expect(toggleStyles).toContain('background: var(--primary-color)');
 
       // Focus-visible ring
@@ -134,6 +134,12 @@ describe('shared UI components design contracts (Phase 1)', () => {
       expect(toggleStyles).toContain('.disabled {');
       expect(toggleStyles).toContain('cursor: not-allowed');
       expect(toggleStyles).toContain('opacity: 0.6');
+    });
+
+    test('ensures checked+disabled track does not show primary green color', () => {
+      const toggleStyles = source('src/components/ui/ToggleSwitch.module.scss');
+      expect(toggleStyles).not.toContain('.root input:checked + .track {');
+      expect(toggleStyles).toContain('.root:not(.disabled) input:checked + .track');
     });
 
     test('preserves checkbox accessibility, aria-label, and left/right label positioning', () => {
