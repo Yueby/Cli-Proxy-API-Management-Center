@@ -719,47 +719,6 @@ const resetCodexQuota = async (file: AuthFileItem, t: TFunction): Promise<CodexQ
   return fetchCodexQuota(file, t);
 };
 
-const formatAntigravityDuration = (t: TFunction, deltaMs: number): string => {
-  const totalMinutes = Math.max(1, Math.ceil(deltaMs / 60000));
-  const days = Math.floor(totalMinutes / 1440);
-  const hours = Math.floor((totalMinutes % 1440) / 60);
-  const minutes = totalMinutes % 60;
-
-  if (days > 0) {
-    return t('antigravity_quota.duration_day_hour', {
-      days,
-      hours,
-    });
-  }
-  if (hours > 0) {
-    return t('antigravity_quota.duration_hour_minute', {
-      hours,
-      minutes,
-    });
-  }
-  if (minutes > 0) {
-    return t('antigravity_quota.duration_minute', {
-      minutes,
-    });
-  }
-  return t('antigravity_quota.duration_less_than_minute');
-};
-
-const formatAntigravityResetLabel = (
-  resetTime: string | undefined,
-  t: TFunction,
-  nowMs: number
-): string => {
-  if (!resetTime) return '-';
-  const resetMs = new Date(resetTime).getTime();
-  if (Number.isNaN(resetMs)) return '-';
-  const deltaMs = resetMs - nowMs;
-  if (deltaMs <= 0) return t('antigravity_quota.refresh_available');
-  return t('antigravity_quota.refreshes_in', {
-    duration: formatAntigravityDuration(t, deltaMs),
-  });
-};
-
 const ANTIGRAVITY_GROUP_LABEL_KEYS = new Map<string, string>([
   ['gemini models', 'group_gemini_models'],
   ['claude and gpt models', 'group_claude_gpt_models'],
@@ -775,7 +734,7 @@ const ANTIGRAVITY_BUCKET_LABEL_KEYS = new Map<string, string>([
 ]);
 
 const normalizeAntigravityQuotaText = (value: string): string =>
-  value.trim().toLowerCase().replace(/\s+/g, ' ');
+  value.trim().toLowerCase().replace(/\s+/g, ' ').replace(/\s+remaining$/i, '');
 
 const translateAntigravityQuotaLabel = (
   value: string,
@@ -869,7 +828,7 @@ const renderAntigravityItems = (
           const clamped = Math.max(0, Math.min(1, bucket.remainingFraction));
           const percent = clamped * 100;
           const percentLabel = `${Math.round(percent)}%`;
-          const resetLabel = formatAntigravityResetLabel(bucket.resetTime, t, nowMs);
+          const resetLabel = formatQuotaResetTime(bucket.resetTime, t);
           const bucketLabel = translateAntigravityQuotaLabel(
             bucket.label,
             ANTIGRAVITY_BUCKET_LABEL_KEYS,
