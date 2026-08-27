@@ -1615,7 +1615,6 @@ const renderXaiItems = (
   const remaining = clampedUsed === null ? null : Math.max(0, Math.min(100, 100 - clampedUsed));
   const percentLabel = formatXaiPercent(remaining);
   const amountLabel = formatXaiRemainingAmount(billing);
-  const resetLabel = formatQuotaResetTime(billing.billingPeriodEnd, t);
   const onDemandCap = billing.onDemandCapCents ?? 0;
   const clampedOnDemandUsed =
     billing.onDemandUsedPercent === null
@@ -1735,10 +1734,7 @@ const renderXaiItems = (
               'div',
               { className: styleMap.quotaMeta },
               h('span', { className: styleMap.quotaPercent }, percentLabel),
-              h('span', { className: styleMap.quotaAmount }, amountLabel),
-              resetLabel && resetLabel !== '-'
-                ? h('span', { className: styleMap.quotaReset }, resetLabel)
-                : null
+              h('span', { className: styleMap.quotaAmount }, amountLabel)
             )
           ),
           h(QuotaProgressBar, {

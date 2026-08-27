@@ -70,5 +70,37 @@ describe('compact quota row text contracts', () => {
     expect(source).toContain('periodHours');
     expect(source).toContain('collectQuotaRowInstants');
     expect(source).toContain('pickUrgentRowId');
+    expect(source).toContain('billingPeriodEnd');
+  });
+
+  test('xAI/Grok billing rows follow compact text rules: percentage + dual amount, no visible monthly reset time', () => {
+    const renderer = rendererSource('renderXaiItems', 'export const KIMI_CONFIG');
+
+    // Dual-amount formatting helper must format remaining / total, not single amount
+    expect(source).toContain('formatXaiRemainingAmount');
+    expect(source).toContain('formatXaiOnDemandAmount');
+    expect(source).toMatch(/formatXaiRemainingAmount[\s\S]*`\$\{remaining\} \/ \$\{limit\}`/);
+    expect(source).toMatch(/formatXaiOnDemandAmount[\s\S]*`\$\{remaining\} \/ \$\{cap\}`/);
+
+    // Weekly row keeps short label + pure percentage + short reset label
+    expect(renderer).toContain("t('xai_quota.weekly_limit')");
+    expect(renderer).toContain('weeklyResetLabel');
+
+    // Product usage row keeps product name + pure percentage
+    expect(renderer).toContain("t('xai_quota.product_usage', { product: item.product })");
+
+    // Pay-as-you-go row keeps short label + pure percentage + dual amount
+    expect(renderer).toContain("t('xai_quota.pay_as_you_go_label')");
+    expect(renderer).toContain('onDemandPercentLabel');
+    expect(renderer).toContain('onDemandAmountLabel');
+
+    // Monthly credits row keeps short label + pure percentage + dual amount, but no visible reset time
+    expect(renderer).toContain("t('xai_quota.monthly_credits')");
+    expect(renderer).toContain('percentLabel');
+    expect(renderer).toContain('amountLabel');
+
+    // Monthly credits must NOT render reset time in quotaMeta to avoid stacking percentage, amount, time
+    const monthlyCreditsBlock = renderer.slice(renderer.indexOf("'monthly-credits'"));
+    expect(monthlyCreditsBlock).not.toContain('resetLabel');
   });
 });
