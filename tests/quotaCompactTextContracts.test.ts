@@ -40,6 +40,31 @@ describe('compact quota row text contracts', () => {
     });
   }
 
+  test('Antigravity normalizes remaining suffixes before translating compact bucket labels', () => {
+    const renderer = rendererSource('renderAntigravityItems', 'renderCodexItems');
+
+    expect(source).toMatch(
+      /normalizeAntigravityQuotaText[\s\S]*replace\(\/\\s\+remaining\$\/i, ''\)/
+    );
+    expect(source).toContain("['five hour limit', 'five_hour_limit']");
+    expect(renderer).toContain('ANTIGRAVITY_BUCKET_LABEL_KEYS');
+  });
+
+  test('Antigravity uses the shared quota reset formatter without extra refresh wording', () => {
+    const renderer = rendererSource('renderAntigravityItems', 'renderCodexItems');
+
+    expect(renderer).toContain('formatQuotaResetTime(bucket.resetTime, t)');
+    expect(renderer).not.toContain('formatAntigravityResetLabel');
+    expect(renderer.match(/className: styleMap\.quotaReset/g)).toHaveLength(1);
+  });
+
+  test('Antigravity keeps pure percentages and does not truncate quota text in code', () => {
+    const renderer = rendererSource('renderAntigravityItems', 'renderCodexItems');
+
+    expect(renderer).toContain('`${Math.round(percent)}%`');
+    expect(renderer).not.toMatch(/textOverflow|ellipsis|lineClamp|\.slice\(/);
+  });
+
   test('reset scheduling data and urgency selection logic remain available', () => {
     expect(source).toContain('resetAtMs');
     expect(source).toContain('periodHours');
