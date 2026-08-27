@@ -1611,15 +1611,21 @@ const renderXaiItems = (
 
   pickUrgentRowId(collectQuotaRowInstants('xai', quota), nowMs, 'window');
   const clampedUsed =
-    billing.usedPercent === null ? null : Math.max(0, Math.min(100, billing.usedPercent));
+    billing.monthlyLimitCents === 0
+      ? 100
+      : billing.usedPercent === null
+        ? null
+        : Math.max(0, Math.min(100, billing.usedPercent));
   const remaining = clampedUsed === null ? null : Math.max(0, Math.min(100, 100 - clampedUsed));
   const percentLabel = formatXaiPercent(remaining);
   const amountLabel = formatXaiRemainingAmount(billing);
   const onDemandCap = billing.onDemandCapCents ?? 0;
   const clampedOnDemandUsed =
-    billing.onDemandUsedPercent === null
-      ? null
-      : Math.max(0, Math.min(100, billing.onDemandUsedPercent));
+    billing.onDemandCapCents === 0
+      ? 100
+      : billing.onDemandUsedPercent === null
+        ? null
+        : Math.max(0, Math.min(100, billing.onDemandUsedPercent));
   const onDemandRemaining =
     clampedOnDemandUsed === null ? null : Math.max(0, Math.min(100, 100 - clampedOnDemandUsed));
   const onDemandPercentLabel = formatXaiPercent(onDemandRemaining);

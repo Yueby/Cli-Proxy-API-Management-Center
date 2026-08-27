@@ -1,5 +1,8 @@
 import { describe, expect, test } from 'bun:test';
 import { readFileSync } from 'node:fs';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { XAI_CONFIG } from '@/components/quota/quotaConfigs';
 
 const source = readFileSync(
   new URL('../src/components/quota/quotaConfigs.ts', import.meta.url),
@@ -102,5 +105,78 @@ describe('compact quota row text contracts', () => {
     // Monthly credits must NOT render reset time in quotaMeta to avoid stacking percentage, amount, time
     const monthlyCreditsBlock = renderer.slice(renderer.indexOf("'monthly-credits'"));
     expect(monthlyCreditsBlock).not.toContain('resetLabel');
+  });
+
+  test('xAI/Grok renders 0% percentage when limits are explicitly zero, and -- when null', () => {
+    // When monthlyLimitCents === 0, percentage must be 0%
+    const zeroMonthlyBilling = {
+      periodType: 'monthly',
+      usagePercent: null,
+      monthlyLimitCents: 0,
+      usedCents: 0,
+      includedUsedCents: 0,
+      onDemandCapCents: 0,
+      onDemandUsedCents: 0,
+      onDemandUsedPercent: null,
+      usedPercent: null,
+      billingPeriodEnd: '2026-09-01T00:00:00Z',
+      productUsage: [],
+    };
+    const zeroQuotaState = {
+      status: 'success',
+      billing: zeroMonthlyBilling,
+      planType: null,
+      payAsYouGoDisabled: true,
+    } as any;
+
+    const nullMonthlyBilling = {
+      periodType: 'monthly',
+      usagePercent: null,
+      monthlyLimitCents: null,
+      usedCents: null,
+      includedUsedCents: null,
+      onDemandCapCents: null,
+      onDemandUsedCents: null,
+      onDemandUsedPercent: null,
+      usedPercent: null,
+      billingPeriodEnd: '2026-09-01T00:00:00Z',
+      productUsage: [],
+    };
+    const nullQuotaState = {
+      status: 'success',
+      billing: nullMonthlyBilling,
+      planType: null,
+      payAsYouGoDisabled: true,
+    } as any;
+
+    const mockT = ((key: string) => key) as any;
+    const mockHelpers = {
+      styles: {
+        quotaMessage: 'quotaMessage',
+        codexPlan: 'codexPlan',
+        codexPlanLabel: 'codexPlanLabel',
+        premiumPlanValue: 'premiumPlanValue',
+        quotaRow: 'quotaRow',
+        quotaRowHeader: 'quotaRowHeader',
+        quotaModel: 'quotaModel',
+        quotaMeta: 'quotaMeta',
+        quotaPercent: 'quotaPercent',
+        quotaAmount: 'quotaAmount',
+        quotaReset: 'quotaReset',
+      },
+      QuotaProgressBar: () => null,
+      nowMs: Date.now(),
+    } as any;
+
+    const zeroElement = XAI_CONFIG.renderQuotaItems(zeroQuotaState, mockT, mockHelpers);
+    const zeroMarkup = renderToStaticMarkup(createElement('div', null, zeroElement));
+    expect(zeroMarkup).toContain('<span class="quotaPercent">0%</span>');
+    expect(zeroMarkup).toContain('<span class="quotaAmount">$0.00 / $0.00</span>');
+    expect(zeroMarkup).not.toContain('<span class="quotaPercent">--</span>');
+
+    const nullElement = XAI_CONFIG.renderQuotaItems(nullQuotaState, mockT, mockHelpers);
+    const nullMarkup = renderToStaticMarkup(createElement('div', null, nullElement));
+    expect(nullMarkup).toContain('<span class="quotaPercent">--</span>');
+    expect(nullMarkup).toContain('<span class="quotaAmount">--</span>');
   });
 });

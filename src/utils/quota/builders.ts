@@ -486,12 +486,16 @@ export function buildXaiBillingSummary(
       : null;
   const onDemandUsedCents = explicitOnDemandUsedCents ?? derivedOnDemandUsedCents;
   const usedPercent =
-    monthlyLimitCents !== null && monthlyLimitCents > 0 && includedUsedCents !== null
-      ? (includedUsedCents / monthlyLimitCents) * 100
+    monthlyLimitCents !== null && includedUsedCents !== null
+      ? monthlyLimitCents === 0
+        ? 100
+        : (includedUsedCents / monthlyLimitCents) * 100
       : null;
   const onDemandUsedPercent =
-    onDemandCapCents !== null && onDemandCapCents > 0 && onDemandUsedCents !== null
-      ? (onDemandUsedCents / onDemandCapCents) * 100
+    onDemandCapCents !== null && onDemandUsedCents !== null
+      ? onDemandCapCents === 0
+        ? 100
+        : (onDemandUsedCents / onDemandCapCents) * 100
       : null;
 
   const hasWeeklyData =
