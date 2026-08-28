@@ -53,8 +53,10 @@ function providerKeyToResource(
     flags.websockets = (config as ProviderKeyConfig).websockets === true;
   }
   if (brand === 'claude' || brand === 'claudeApi') {
-    const cloak = (config as ProviderKeyConfig).cloak;
+    const claudeConfig = config as ProviderKeyConfig;
+    const cloak = claudeConfig.cloak;
     flags.cloakEnabled = Boolean(cloak?.mode?.trim());
+    flags.claudeCodeCliProfile = claudeConfig.fingerprintProfile === 'claude-code-cli';
   }
 
   const selector: ProviderResourceSelector = {

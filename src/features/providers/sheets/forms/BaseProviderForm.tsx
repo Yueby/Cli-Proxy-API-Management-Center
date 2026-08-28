@@ -87,7 +87,7 @@ function buildInitialForm(
       cloak: isClaudeLikeBrand(brand)
         ? { mode: '', strictMode: false, sensitiveWordsText: '', cacheUserId: false }
         : undefined,
-      experimentalCchSigning: isClaudeLikeBrand(brand) ? false : undefined,
+      fingerprintProfile: isClaudeLikeBrand(brand) ? '' : undefined,
       testModel:
         brand === 'openaiCompatibility' ||
         brand === 'codex' ||
@@ -175,8 +175,8 @@ function buildInitialForm(
           cacheUserId: (cfg as ProviderKeyConfig).cloak?.cacheUserId === true,
         }
       : undefined,
-    experimentalCchSigning: isClaudeLikeBrand(brand)
-      ? (cfg as ProviderKeyConfig).experimentalCchSigning === true
+    fingerprintProfile: isClaudeLikeBrand(brand)
+      ? ((cfg as ProviderKeyConfig).fingerprintProfile ?? '')
       : undefined,
     testModel:
       brand === 'codex' ||
@@ -311,6 +311,18 @@ export function BaseProviderForm({
     }
     return opts;
   }, [form.models, form.testModel, t]);
+
+  const fingerprintProfileOptions = useMemo(() => {
+    const opts: Array<{ value: string; label: string }> = [
+      { value: '', label: t('providersPage.form.fingerprintProfileDefault') },
+      { value: 'claude-code-cli', label: t('providersPage.form.fingerprintProfileClaudeCodeCli') },
+    ];
+    const current = (form.fingerprintProfile ?? '').trim();
+    if (current && current !== 'claude-code-cli') {
+      opts.push({ value: current, label: current });
+    }
+    return opts;
+  }, [form.fingerprintProfile, t]);
 
   const openDiscovery = () => {
     setDiscoveryOpen(true);
@@ -702,6 +714,27 @@ export function BaseProviderForm({
             </span>
           </label>
         ) : null}
+
+        {isClaudeLikeBrand(brand) ? (
+          <div className={styles.field}>
+            <label className={styles.label} id={`${fid}-fingerprintProfile-label`} htmlFor={`${fid}-fingerprintProfile`}>
+              {t('providersPage.form.fingerprintProfile')}
+              <span className={styles.labelHint}>
+                {' '}
+                · {t('providersPage.form.fingerprintProfileHint')}
+              </span>
+            </label>
+            <Select
+              id={`${fid}-fingerprintProfile`}
+              value={form.fingerprintProfile ?? ''}
+              options={fingerprintProfileOptions}
+              onChange={(value) => updateField('fingerprintProfile', value)}
+              disabled={mutating}
+              ariaLabel={t('providersPage.form.fingerprintProfile')}
+              ariaLabelledBy={`${fid}-fingerprintProfile-label`}
+            />
+          </div>
+        ) : null}
       </div>
 
       {/* 高级折叠区 */}
@@ -903,19 +936,6 @@ export function BaseProviderForm({
               <span className={styles.checkboxText}>
                 <span>{t('providersPage.form.cloakCacheUserId')}</span>
                 <small>{t('providersPage.form.cloakCacheUserIdHint')}</small>
-              </span>
-            </label>
-            <label className={styles.checkboxRow}>
-              <input
-                type="checkbox"
-                className={styles.checkboxBox}
-                checked={form.experimentalCchSigning ?? false}
-                disabled={mutating}
-                onChange={(e) => updateField('experimentalCchSigning', e.target.checked)}
-              />
-              <span className={styles.checkboxText}>
-                <span>{t('providersPage.form.experimentalCchSigning')}</span>
-                <small>{t('providersPage.form.experimentalCchSigningHint')}</small>
               </span>
             </label>
             <div className={styles.field}>

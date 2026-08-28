@@ -1660,6 +1660,7 @@
         "headers": "Заголовки"
       },
       "websocketsTag": "WebSockets",
+      "cliProfileTag": "Claude Code CLI",
       "cloakTag": "Cloak",
       "empty": "Нет ресурсов, нажмите \"Создать\".",
       "filterPlaceholder": "Поиск по ключам, URL, префиксам…",
@@ -1742,8 +1743,10 @@
       "thinkingConfigHint": "Поддерживает levels, min, max, zero_allowed, dynamic_allowed",
       "cloakCacheUserId": "Кэшировать user_id",
       "cloakCacheUserIdHint": "Переиспользовать Claude cloak user_id для каждого API-ключа",
-      "experimentalCchSigning": "Экспериментальная CCH-подпись",
-      "experimentalCchSigningHint": "Подписывать финальное тело cloaked Claude /v1/messages через CCH",
+      "fingerprintProfile": "Профиль отпечатка",
+      "fingerprintProfileDefault": "По умолчанию (от вызывающей стороны)",
+      "fingerprintProfileClaudeCodeCli": "Claude Code CLI",
+      "fingerprintProfileHint": "Установить заголовки отпечатка устройства и платформы клиента для запросов Claude",
       "validation": {
         "nameRequired": "Название обязательно",
         "apiKeyRequired": "Нужен хотя бы один API-ключ",

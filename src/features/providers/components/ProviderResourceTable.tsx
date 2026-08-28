@@ -121,6 +121,9 @@ export function ProviderResourceTable({
       if ((r.brand === 'codex' || r.brand === 'xai') && r.flags.websockets) {
         items.push(renderFlagTag('ws', t('providersPage.table.websocketsTag')));
       }
+      if ((r.brand === 'claude' || r.brand === 'claudeApi') && r.flags.claudeCodeCliProfile) {
+        items.push(renderFlagTag('cliProfile', t('providersPage.table.cliProfileTag')));
+      }
       if (r.brand === 'claude' && r.flags.cloakEnabled) {
         items.push(renderFlagTag('cloak', t('providersPage.table.cloakTag')));
       }
