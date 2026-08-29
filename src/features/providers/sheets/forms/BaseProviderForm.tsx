@@ -717,7 +717,11 @@ export function BaseProviderForm({
 
         {isClaudeLikeBrand(brand) ? (
           <div className={styles.field}>
-            <label className={styles.label} id={`${fid}-fingerprintProfile-label`} htmlFor={`${fid}-fingerprintProfile`}>
+            <label
+              className={styles.label}
+              id={`${fid}-fingerprintProfile-label`}
+              htmlFor={`${fid}-fingerprintProfile`}
+            >
               {t('providersPage.form.fingerprintProfile')}
               <span className={styles.labelHint}>
                 {' '}

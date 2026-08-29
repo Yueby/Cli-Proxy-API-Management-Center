@@ -5,11 +5,7 @@ import {
   withDisableAllModelsRule,
   withoutDisableAllModelsRule,
 } from '@/components/providers/utils';
-import type {
-  GeminiKeyConfig,
-  OpenAIProviderConfig,
-  ProviderKeyConfig,
-} from '@/types';
+import type { GeminiKeyConfig, OpenAIProviderConfig, ProviderKeyConfig } from '@/types';
 import {
   claudeApiToResource,
   claudeToResource,
@@ -38,10 +34,33 @@ import {
   isCode0OpenAIProvider,
 } from './code0';
 import { buildFennoAIRaw, isFennoAIClaudeProvider, isFennoAICodexProvider } from './fennoAI';
-import { buildInfistarRaw, isInfistarClaudeProvider, isInfistarCodexProvider, isInfistarGeminiProvider, isInfistarOpenAIProvider } from './infistar';
-import { buildLmuAIRaw, isLmuAIClaudeProvider, isLmuAICodexProvider, isLmuAIGeminiProvider, isLmuAIOpenAIProvider } from './lmuAI';
-import { buildQiniuCloudRaw, isQiniuCloudClaudeProvider, isQiniuCloudCodexProvider, isQiniuCloudGeminiProvider, isQiniuCloudOpenAIProvider } from './qiniuCloud';
-import { applyMultiProtocolProviderMutation, removeMultiProtocolProviderConfigs, toggleMultiProtocolProviderConfigs, type MultiProtocolConfigLists } from './multiProtocolMutations';
+import {
+  buildInfistarRaw,
+  isInfistarClaudeProvider,
+  isInfistarCodexProvider,
+  isInfistarGeminiProvider,
+  isInfistarOpenAIProvider,
+} from './infistar';
+import {
+  buildLmuAIRaw,
+  isLmuAIClaudeProvider,
+  isLmuAICodexProvider,
+  isLmuAIGeminiProvider,
+  isLmuAIOpenAIProvider,
+} from './lmuAI';
+import {
+  buildQiniuCloudRaw,
+  isQiniuCloudClaudeProvider,
+  isQiniuCloudCodexProvider,
+  isQiniuCloudGeminiProvider,
+  isQiniuCloudOpenAIProvider,
+} from './qiniuCloud';
+import {
+  applyMultiProtocolProviderMutation,
+  removeMultiProtocolProviderConfigs,
+  toggleMultiProtocolProviderConfigs,
+  type MultiProtocolConfigLists,
+} from './multiProtocolMutations';
 import { isMultiProtocolProviderBrand } from './multiProtocolDefinitions';
 import { runMultiProtocolMutationWithRecovery } from './multiProtocolMutationRecovery';
 import type {
@@ -52,7 +71,11 @@ import type {
   ProviderSnapshot,
   MultiProtocolProviderRaw,
 } from './types';
-import { getCode0KeyEntries, type Code0KeyEntryInput, type Code0ProviderRaw } from './code0Workbench';
+import {
+  getCode0KeyEntries,
+  type Code0KeyEntryInput,
+  type Code0ProviderRaw,
+} from './code0Workbench';
 
 const getErrorMessage = (err: unknown): string => {
   if (err instanceof Error) return err.message;
@@ -357,10 +380,19 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           break;
         }
         case 'gemini':
-          resources = (config.geminiApiKeys ?? []).reduce<ProviderResource[]>((out, item, index) => {
-            if (!isCode0GeminiProvider(item) && !isQiniuCloudGeminiProvider(item) && !isLmuAIGeminiProvider(item) && !isInfistarGeminiProvider(item)) out.push(geminiToResource(item, index));
-            return out;
-          }, []);
+          resources = (config.geminiApiKeys ?? []).reduce<ProviderResource[]>(
+            (out, item, index) => {
+              if (
+                !isCode0GeminiProvider(item) &&
+                !isQiniuCloudGeminiProvider(item) &&
+                !isLmuAIGeminiProvider(item) &&
+                !isInfistarGeminiProvider(item)
+              )
+                out.push(geminiToResource(item, index));
+              return out;
+            },
+            []
+          );
           break;
         case 'interactions':
           resources = (config.interactionsApiKeys ?? []).map((item, index) =>
@@ -369,7 +401,14 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           break;
         case 'codex':
           resources = (config.codexApiKeys ?? []).reduce<ProviderResource[]>((out, item, index) => {
-            if (!isCode0CodexProvider(item) && !isFennoAICodexProvider(item) && !isQiniuCloudCodexProvider(item) && !isLmuAICodexProvider(item) && !isInfistarCodexProvider(item)) out.push(codexToResource(item, index));
+            if (
+              !isCode0CodexProvider(item) &&
+              !isFennoAICodexProvider(item) &&
+              !isQiniuCloudCodexProvider(item) &&
+              !isLmuAICodexProvider(item) &&
+              !isInfistarCodexProvider(item)
+            )
+              out.push(codexToResource(item, index));
             return out;
           }, []);
           break;
@@ -377,27 +416,49 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           resources = (config.xaiApiKeys ?? []).map((c, i) => xaiToResource(c, i));
           break;
         case 'claude':
-          resources = (config.claudeApiKeys ?? []).reduce<ProviderResource[]>((out, item, index) => {
-            if (!isClaudeApiProvider(item) && !isCode0ClaudeProvider(item) && !isFennoAIClaudeProvider(item) && !isQiniuCloudClaudeProvider(item) && !isLmuAIClaudeProvider(item) && !isInfistarClaudeProvider(item)) {
-              out.push(claudeToResource(item, index));
-            }
-            return out;
-          }, []);
+          resources = (config.claudeApiKeys ?? []).reduce<ProviderResource[]>(
+            (out, item, index) => {
+              if (
+                !isClaudeApiProvider(item) &&
+                !isCode0ClaudeProvider(item) &&
+                !isFennoAIClaudeProvider(item) &&
+                !isQiniuCloudClaudeProvider(item) &&
+                !isLmuAIClaudeProvider(item) &&
+                !isInfistarClaudeProvider(item)
+              ) {
+                out.push(claudeToResource(item, index));
+              }
+              return out;
+            },
+            []
+          );
           break;
         case 'claudeApi':
-          resources = (config.claudeApiKeys ?? []).reduce<ProviderResource[]>((out, item, index) => {
-            if (isClaudeApiProvider(item)) out.push(claudeApiToResource(item, index));
-            return out;
-          }, []);
+          resources = (config.claudeApiKeys ?? []).reduce<ProviderResource[]>(
+            (out, item, index) => {
+              if (isClaudeApiProvider(item)) out.push(claudeApiToResource(item, index));
+              return out;
+            },
+            []
+          );
           break;
         case 'vertex':
           resources = (config.vertexApiKeys ?? []).map((c, i) => vertexToResource(c, i));
           break;
         case 'openaiCompatibility':
-          resources = (config.openaiCompatibility ?? []).reduce<ProviderResource[]>((out, item, index) => {
-            if (!isCode0OpenAIProvider(item) && !isQiniuCloudOpenAIProvider(item) && !isLmuAIOpenAIProvider(item) && !isInfistarOpenAIProvider(item)) out.push(openaiToResource(item, index));
-            return out;
-          }, []);
+          resources = (config.openaiCompatibility ?? []).reduce<ProviderResource[]>(
+            (out, item, index) => {
+              if (
+                !isCode0OpenAIProvider(item) &&
+                !isQiniuCloudOpenAIProvider(item) &&
+                !isLmuAIOpenAIProvider(item) &&
+                !isInfistarOpenAIProvider(item)
+              )
+                out.push(openaiToResource(item, index));
+              return out;
+            },
+            []
+          );
           break;
         case 'code0': {
           const resource = code0ToResource(buildCode0Raw(config));
@@ -547,17 +608,27 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
         );
       }, refetch);
     },
-    [config, persistClaudeConfigs, persistCodexConfigs, persistGeminiKeys, persistOpenAIConfigs, refetch]
+    [
+      config,
+      persistClaudeConfigs,
+      persistCodexConfigs,
+      persistGeminiKeys,
+      persistOpenAIConfigs,
+      refetch,
+    ]
   );
 
-  const persistMultiProtocolLists = useCallback(async (next: MultiProtocolConfigLists) => {
-    await runMultiProtocolMutationWithRecovery(async () => {
-      await persistGeminiKeys(next.geminiApiKeys);
-      await persistCodexConfigs(next.codexApiKeys);
-      await persistClaudeConfigs(next.claudeApiKeys);
-      await persistOpenAIConfigs(next.openaiCompatibility);
-    }, refetch);
-  }, [persistClaudeConfigs, persistCodexConfigs, persistGeminiKeys, persistOpenAIConfigs, refetch]);
+  const persistMultiProtocolLists = useCallback(
+    async (next: MultiProtocolConfigLists) => {
+      await runMultiProtocolMutationWithRecovery(async () => {
+        await persistGeminiKeys(next.geminiApiKeys);
+        await persistCodexConfigs(next.codexApiKeys);
+        await persistClaudeConfigs(next.claudeApiKeys);
+        await persistOpenAIConfigs(next.openaiCompatibility);
+      }, refetch);
+    },
+    [persistClaudeConfigs, persistCodexConfigs, persistGeminiKeys, persistOpenAIConfigs, refetch]
+  );
 
   const createProvider = useCallback(
     async (brand: ProviderBrand, input: ProviderEntryFormInput) => {
@@ -639,7 +710,11 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           const list = [...(config?.interactionsApiKeys ?? [])];
           const existing = list[idx];
           if (!existing) return;
-          const updated = buildProviderKeyConfig('interactions', input, existing) as GeminiKeyConfig;
+          const updated = buildProviderKeyConfig(
+            'interactions',
+            input,
+            existing
+          ) as GeminiKeyConfig;
           await providersApi.updateInteractionsKey(existing.apiKey, existing.baseUrl, updated);
           list[idx] = updated;
           updateInteractionsConfig(list);
@@ -729,16 +804,26 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           clearCache('openai-compatibility');
         } else if (sel.brand === 'code0') {
           const raw = resource.raw as Code0ProviderRaw;
-          const nextGemini = (config?.geminiApiKeys ?? []).filter((_, index) => !raw.gemini.some((item) => item.index === index));
-          const nextCodex = (config?.codexApiKeys ?? []).filter((_, index) => !raw.codex.some((item) => item.index === index));
-          const nextClaude = (config?.claudeApiKeys ?? []).filter((_, index) => !raw.claude.some((item) => item.index === index));
-          const nextOpenAI = (config?.openaiCompatibility ?? []).filter((_, index) => !raw.openai.some((item) => item.index === index));
+          const nextGemini = (config?.geminiApiKeys ?? []).filter(
+            (_, index) => !raw.gemini.some((item) => item.index === index)
+          );
+          const nextCodex = (config?.codexApiKeys ?? []).filter(
+            (_, index) => !raw.codex.some((item) => item.index === index)
+          );
+          const nextClaude = (config?.claudeApiKeys ?? []).filter(
+            (_, index) => !raw.claude.some((item) => item.index === index)
+          );
+          const nextOpenAI = (config?.openaiCompatibility ?? []).filter(
+            (_, index) => !raw.openai.some((item) => item.index === index)
+          );
           await persistGeminiKeys(nextGemini);
           await persistCodexConfigs(nextCodex);
           await persistClaudeConfigs(nextClaude);
           await persistOpenAIConfigs(nextOpenAI);
         } else if (isMultiProtocolProviderBrand(sel.brand)) {
-          await persistMultiProtocolLists(removeMultiProtocolProviderConfigs(config, resource.raw as MultiProtocolProviderRaw));
+          await persistMultiProtocolLists(
+            removeMultiProtocolProviderConfigs(config, resource.raw as MultiProtocolProviderRaw)
+          );
         }
         refreshSnapshot();
       } finally {
@@ -818,12 +903,55 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           }
         } else if (brand === 'code0') {
           const raw = resource.raw as Code0ProviderRaw;
-          await persistGeminiKeys((config?.geminiApiKeys ?? []).map((item, index) => raw.gemini.some((rawItem) => rawItem.index === index) ? { ...item, excludedModels: disabled ? withDisableAllModelsRule(item.excludedModels) : withoutDisableAllModelsRule(item.excludedModels) } : item));
-          await persistCodexConfigs((config?.codexApiKeys ?? []).map((item, index) => raw.codex.some((rawItem) => rawItem.index === index) ? { ...item, excludedModels: disabled ? withDisableAllModelsRule(item.excludedModels) : withoutDisableAllModelsRule(item.excludedModels) } : item));
-          await persistClaudeConfigs((config?.claudeApiKeys ?? []).map((item, index) => raw.claude.some((rawItem) => rawItem.index === index) ? { ...item, excludedModels: disabled ? withDisableAllModelsRule(item.excludedModels) : withoutDisableAllModelsRule(item.excludedModels) } : item));
-          await persistOpenAIConfigs((config?.openaiCompatibility ?? []).map((item, index) => raw.openai.some((rawItem) => rawItem.index === index) ? { ...item, disabled } : item));
+          await persistGeminiKeys(
+            (config?.geminiApiKeys ?? []).map((item, index) =>
+              raw.gemini.some((rawItem) => rawItem.index === index)
+                ? {
+                    ...item,
+                    excludedModels: disabled
+                      ? withDisableAllModelsRule(item.excludedModels)
+                      : withoutDisableAllModelsRule(item.excludedModels),
+                  }
+                : item
+            )
+          );
+          await persistCodexConfigs(
+            (config?.codexApiKeys ?? []).map((item, index) =>
+              raw.codex.some((rawItem) => rawItem.index === index)
+                ? {
+                    ...item,
+                    excludedModels: disabled
+                      ? withDisableAllModelsRule(item.excludedModels)
+                      : withoutDisableAllModelsRule(item.excludedModels),
+                  }
+                : item
+            )
+          );
+          await persistClaudeConfigs(
+            (config?.claudeApiKeys ?? []).map((item, index) =>
+              raw.claude.some((rawItem) => rawItem.index === index)
+                ? {
+                    ...item,
+                    excludedModels: disabled
+                      ? withDisableAllModelsRule(item.excludedModels)
+                      : withoutDisableAllModelsRule(item.excludedModels),
+                  }
+                : item
+            )
+          );
+          await persistOpenAIConfigs(
+            (config?.openaiCompatibility ?? []).map((item, index) =>
+              raw.openai.some((rawItem) => rawItem.index === index) ? { ...item, disabled } : item
+            )
+          );
         } else if (isMultiProtocolProviderBrand(brand)) {
-          await persistMultiProtocolLists(toggleMultiProtocolProviderConfigs(config, resource.raw as MultiProtocolProviderRaw, disabled));
+          await persistMultiProtocolLists(
+            toggleMultiProtocolProviderConfigs(
+              config,
+              resource.raw as MultiProtocolProviderRaw,
+              disabled
+            )
+          );
         }
         refreshSnapshot();
       } finally {

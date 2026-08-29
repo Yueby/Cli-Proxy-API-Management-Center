@@ -70,7 +70,11 @@ const normalizeHeaders = (headers: unknown) => {
 };
 
 const normalizeExcludedModels = (input: unknown): string[] => {
-  const rawList = Array.isArray(input) ? input : typeof input === 'string' ? input.split(/[\n,]/) : [];
+  const rawList = Array.isArray(input)
+    ? input
+    : typeof input === 'string'
+      ? input.split(/[\n,]/)
+      : [];
   const seen = new Set<string>();
   const normalized: string[] = [];
 
@@ -111,7 +115,7 @@ const normalizeApiKeyEntry = (entry: unknown): ApiKeyEntry | null => {
 
   const result: ApiKeyEntry = {
     apiKey: trimmed,
-    proxyUrl: proxyUrl ? String(proxyUrl) : undefined
+    proxyUrl: proxyUrl ? String(proxyUrl) : undefined,
   };
   if (weight !== undefined) result.weight = weight;
   if (authIndex) result.authIndex = authIndex;
@@ -247,7 +251,7 @@ const normalizeOpenAIProvider = (
   const result: OpenAIProviderConfig = {
     name: String(name),
     baseUrl: String(baseUrl),
-    apiKeyEntries
+    apiKeyEntries,
   };
 
   const disabled = normalizeBoolean(provider.disabled);
@@ -292,7 +296,11 @@ export const normalizeConfigResponse = (raw: unknown): Config => {
   config.debug = normalizeBoolean(raw.debug);
   const proxyUrl = raw['proxy-url'];
   config.proxyUrl =
-    typeof proxyUrl === 'string' ? proxyUrl : proxyUrl === undefined || proxyUrl === null ? undefined : String(proxyUrl);
+    typeof proxyUrl === 'string'
+      ? proxyUrl
+      : proxyUrl === undefined || proxyUrl === null
+        ? undefined
+        : String(proxyUrl);
   const requestRetry = raw['request-retry'];
   if (typeof requestRetry === 'number' && Number.isFinite(requestRetry)) {
     config.requestRetry = requestRetry;
@@ -308,7 +316,7 @@ export const normalizeConfigResponse = (raw: unknown): Config => {
     config.quotaExceeded = {
       switchProject: normalizeBoolean(quota['switch-project']),
       switchPreviewModel: normalizeBoolean(quota['switch-preview-model']),
-      antigravityCredits: normalizeBoolean(quota['antigravity-credits'])
+      antigravityCredits: normalizeBoolean(quota['antigravity-credits']),
     };
   }
 
