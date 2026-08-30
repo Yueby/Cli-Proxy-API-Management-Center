@@ -41,12 +41,8 @@ describe('Claude fingerprint profile semantic port', () => {
         fingerprintProfile: 'claude-code-cli',
       },
     ]);
-    expect(claudeToResource(config.claudeApiKeys![0], 0).flags.claudeCodeCliProfile).toBe(
-      true
-    );
-    expect(claudeApiToResource(config.claudeApiKeys![0], 0).flags.claudeCodeCliProfile).toBe(
-      true
-    );
+    expect(claudeToResource(config.claudeApiKeys![0], 0).flags.claudeCodeCliProfile).toBe(true);
+    expect(claudeApiToResource(config.claudeApiKeys![0], 0).flags.claudeCodeCliProfile).toBe(true);
   });
 
   test('does not flag non-cli or arbitrary future profiles as claudeCodeCliProfile', () => {
@@ -61,12 +57,8 @@ describe('Claude fingerprint profile semantic port', () => {
     });
 
     expect(config.claudeApiKeys![0].fingerprintProfile).toBe('future-custom-profile');
-    expect(claudeToResource(config.claudeApiKeys![0], 0).flags.claudeCodeCliProfile).toBe(
-      false
-    );
-    expect(claudeApiToResource(config.claudeApiKeys![0], 0).flags.claudeCodeCliProfile).toBe(
-      false
-    );
+    expect(claudeToResource(config.claudeApiKeys![0], 0).flags.claudeCodeCliProfile).toBe(false);
+    expect(claudeApiToResource(config.claudeApiKeys![0], 0).flags.claudeCodeCliProfile).toBe(false);
   });
 
   test('serializes the opt-in profile when saving Claude configs', async () => {

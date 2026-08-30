@@ -243,21 +243,16 @@ describe('provider-independent quota recovery schedule', () => {
   });
 
   test('keeps Antigravity absolute reset instants unchanged by server-time offset', () => {
-    const events = collectQuotaRowInstants(
-      'antigravity',
-      {
-        status: 'success',
-        groups: [
-          {
-            buckets: [{ id: 'server-window', resetAtMs: 30 * MINUTE_MS }],
-          },
-        ],
-      }
-    );
+    const events = collectQuotaRowInstants('antigravity', {
+      status: 'success',
+      groups: [
+        {
+          buckets: [{ id: 'server-window', resetAtMs: 30 * MINUTE_MS }],
+        },
+      ],
+    });
 
-    expect(events).toEqual([
-      { rowId: 'server-window', atMs: 30 * MINUTE_MS, kind: 'window' },
-    ]);
+    expect(events).toEqual([{ rowId: 'server-window', atMs: 30 * MINUTE_MS, kind: 'window' }]);
   });
 
   test('uses one clock domain for Antigravity relative text and urgent selection', () => {
@@ -291,11 +286,7 @@ describe('provider-independent quota recovery schedule', () => {
     const translate = ((key: string, params?: Record<string, unknown>) =>
       key.endsWith('remaining_percent') ? `${params?.percent}%` : key) as never;
     const markup = renderToStaticMarkup(
-      createElement(
-        'div',
-        null,
-        ANTIGRAVITY_CONFIG.renderQuotaItems(quota, translate, helpers)
-      )
+      createElement('div', null, ANTIGRAVITY_CONFIG.renderQuotaItems(quota, translate, helpers))
     );
 
     expect(markup).toContain('70%');
@@ -315,9 +306,13 @@ describe('provider-independent quota recovery schedule', () => {
       atMs: Date.parse(expiry),
       kind: 'credit',
     });
-    expect(nextRecoveryMs('codex', { status: 'success', windows: [{ resetAtMs: now + 20 * MINUTE_MS }] }, now)).toBe(
-      now + 20 * MINUTE_MS
-    );
+    expect(
+      nextRecoveryMs(
+        'codex',
+        { status: 'success', windows: [{ resetAtMs: now + 20 * MINUTE_MS }] },
+        now
+      )
+    ).toBe(now + 20 * MINUTE_MS);
   });
 
   test('selects only a capacity recovery in the final hour as urgent', () => {
