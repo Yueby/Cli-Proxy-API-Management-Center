@@ -30,6 +30,14 @@ import {
   getInfistarProtocolUrls,
   resolveInfistarBaseUrl,
 } from './infistar';
+import {
+  KIMI_BASE_URL_OPTIONS,
+  KIMI_DISPLAY_NAME,
+  KIMI_PROTOCOL_LABELS,
+  KIMI_PROVIDER_NAME,
+  getKimiProtocolUrls,
+  resolveKimiBaseUrl,
+} from './kimi';
 import type { MultiProtocolProviderBrand, MultiProtocolProviderProtocol } from './types';
 
 export interface MultiProtocolUrls {
@@ -46,7 +54,7 @@ export interface MultiProtocolBaseUrlOption {
   openaiBaseUrl: string;
   codexBaseUrl: string;
   anthropicBaseUrl: string;
-  geminiBaseUrl: string;
+  geminiBaseUrl?: string;
 }
 
 export interface MultiProtocolProviderDefinition {
@@ -62,6 +70,17 @@ export interface MultiProtocolProviderDefinition {
 }
 
 const DEFINITIONS: Record<MultiProtocolProviderBrand, MultiProtocolProviderDefinition> = {
+  kimi: {
+    brand: 'kimi',
+    displayName: KIMI_DISPLAY_NAME,
+    providerName: KIMI_PROVIDER_NAME,
+    protocols: ['openai', 'claude', 'codex'],
+    protocolLabels: KIMI_PROTOCOL_LABELS,
+    defaultProtocol: 'openai',
+    baseUrlOptions: KIMI_BASE_URL_OPTIONS,
+    resolveBaseUrl: resolveKimiBaseUrl,
+    getProtocolUrls: getKimiProtocolUrls,
+  },
   fennoAI: {
     brand: 'fennoAI',
     displayName: FENNO_AI_DISPLAY_NAME,
@@ -109,7 +128,7 @@ const DEFINITIONS: Record<MultiProtocolProviderBrand, MultiProtocolProviderDefin
 };
 
 export const isMultiProtocolProviderBrand = (brand: string): brand is MultiProtocolProviderBrand =>
-  brand === 'fennoAI' || brand === 'qiniuCloud' || brand === 'lmuAI' || brand === 'infistar';
+  brand === 'kimi' || brand === 'fennoAI' || brand === 'qiniuCloud' || brand === 'lmuAI' || brand === 'infistar';
 
 export const getMultiProtocolProviderDefinition = (
   brand: MultiProtocolProviderBrand

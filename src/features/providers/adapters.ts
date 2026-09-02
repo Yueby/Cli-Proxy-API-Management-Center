@@ -27,6 +27,12 @@ import {
   resolveLmuAIBaseUrl,
 } from './lmuAI';
 import {
+  KIMI_DISPLAY_NAME,
+  KIMI_PROTOCOL_LABELS,
+  getKimiProtocolUrls,
+  resolveKimiBaseUrl,
+} from './kimi';
+import {
   INFISTAR_DISPLAY_NAME,
   INFISTAR_PROTOCOL_LABELS,
   getInfistarProtocolUrls,
@@ -319,7 +325,7 @@ function multiProtocolRawToResource(
     apiKeyPreview: apiKey ? maskApiKey(apiKey) : null,
     apiKey: apiKey || null,
     authIndex: null,
-    baseUrl: [urls.openai, urls.anthropic, urls.gemini].filter(Boolean).join(' / '),
+    baseUrl: [urls.openai, urls.anthropic, urls.codex, urls.gemini].filter(Boolean).join(' / '),
     proxyUrl:
       firstOpenAIEntry?.proxyUrl ??
       raw.codex[0]?.config.proxyUrl ??
@@ -355,6 +361,14 @@ function multiProtocolRawToResource(
     raw,
   };
 }
+export const kimiToResource = (raw: MultiProtocolProviderRaw) =>
+  multiProtocolRawToResource('kimi', raw, {
+    displayName: KIMI_DISPLAY_NAME,
+    protocolLabels: KIMI_PROTOCOL_LABELS,
+    resolveBaseUrl: resolveKimiBaseUrl,
+    getProtocolUrls: getKimiProtocolUrls,
+  });
+
 export const fennoAIToResource = (raw: MultiProtocolProviderRaw) =>
   multiProtocolRawToResource('fennoAI', raw, {
     displayName: FENNO_AI_DISPLAY_NAME,

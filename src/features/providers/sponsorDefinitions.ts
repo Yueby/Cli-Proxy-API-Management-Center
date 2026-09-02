@@ -10,7 +10,7 @@ export interface ProviderProtocolDefinition {
   brand: 'kimi';
   displayName: string;
   providerName: string;
-  protocols: readonly ['openai', 'claude'];
+  protocols: readonly ['openai', 'claude', 'codex'];
   baseUrlOptions: typeof KIMI_BASE_URL_OPTIONS;
   resolveBaseUrl: typeof resolveKimiBaseUrl;
   getProtocolUrls: typeof getKimiProtocolUrls;
@@ -21,7 +21,7 @@ const DEFINITIONS: Record<'kimi', ProviderProtocolDefinition> = {
     brand: 'kimi',
     displayName: KIMI_DISPLAY_NAME,
     providerName: KIMI_PROVIDER_NAME,
-    protocols: ['openai', 'claude'],
+    protocols: ['openai', 'claude', 'codex'],
     baseUrlOptions: KIMI_BASE_URL_OPTIONS,
     resolveBaseUrl: resolveKimiBaseUrl,
     getProtocolUrls: getKimiProtocolUrls,

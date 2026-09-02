@@ -16,12 +16,13 @@ import {
   infistarToResource,
   lmuAIToResource,
   interactionsToResource,
+  kimiToResource,
   openaiToResource,
   qiniuCloudToResource,
   vertexToResource,
   xaiToResource,
 } from './adapters';
-import { buildKimiRaw, KIMI_DISPLAY_NAME } from './kimi';
+import { buildKimiRaw, isKimiClaudeProvider, isKimiCodexProvider, isKimiOpenAIProvider } from './kimi';
 import { PROVIDER_BRAND_ORDER, PROVIDER_PATHS } from './descriptors';
 import { CLAUDE_API_BASE_URL, isClaudeApiProvider } from './claudeApi';
 import {
@@ -369,14 +370,8 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
       switch (brand) {
         case 'kimi': {
           const raw = buildKimiRaw(config);
-          resources = raw.openai.map(({ config: item, index }) => ({
-            ...openaiToResource(item, index),
-            id: `kimi:${index}:${item.name}`,
-            brand: 'kimi' as const,
-            name: KIMI_DISPLAY_NAME,
-            identifier: KIMI_DISPLAY_NAME,
-            selector: { brand: 'kimi' as const, name: item.name, index },
-          }));
+          const resource = kimiToResource(raw);
+          resources = resource ? [resource] : [];
           break;
         }
         case 'gemini':
@@ -406,7 +401,8 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
               !isFennoAICodexProvider(item) &&
               !isQiniuCloudCodexProvider(item) &&
               !isLmuAICodexProvider(item) &&
-              !isInfistarCodexProvider(item)
+              !isInfistarCodexProvider(item) &&
+              !isKimiCodexProvider(item)
             )
               out.push(codexToResource(item, index));
             return out;
@@ -424,7 +420,8 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
                 !isFennoAIClaudeProvider(item) &&
                 !isQiniuCloudClaudeProvider(item) &&
                 !isLmuAIClaudeProvider(item) &&
-                !isInfistarClaudeProvider(item)
+                !isInfistarClaudeProvider(item) &&
+                !isKimiClaudeProvider(item)
               ) {
                 out.push(claudeToResource(item, index));
               }
@@ -452,7 +449,8 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
                 !isCode0OpenAIProvider(item) &&
                 !isQiniuCloudOpenAIProvider(item) &&
                 !isLmuAIOpenAIProvider(item) &&
-                !isInfistarOpenAIProvider(item)
+                !isInfistarOpenAIProvider(item) &&
+                !isKimiOpenAIProvider(item)
               )
                 out.push(openaiToResource(item, index));
               return out;
@@ -650,10 +648,6 @@ export function useProviderWorkbench(): UseProviderWorkbenchResult {
           const next = [...(config?.xaiApiKeys ?? [])];
           next.push(buildProviderKeyConfig('xai', input) as ProviderKeyConfig);
           await persistXAIConfigs(next);
-        } else if (brand === 'kimi') {
-          const next = [...(config?.openaiCompatibility ?? [])];
-          next.push({ ...buildOpenAIConfig(input), name: 'kimi' });
-          await persistOpenAIConfigs(next);
         } else if (brand === 'claude') {
           const next = [...(config?.claudeApiKeys ?? [])];
           next.push(buildProviderKeyConfig('claude', input) as ProviderKeyConfig);

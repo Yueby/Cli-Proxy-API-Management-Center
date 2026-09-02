@@ -9,6 +9,7 @@ import type {
   ProviderKeyConfig,
 } from '@/types';
 import { buildFennoAIRaw } from './fennoAI';
+import { buildKimiRaw } from './kimi';
 import { buildInfistarRaw } from './infistar';
 import { buildLmuAIRaw } from './lmuAI';
 import { getMultiProtocolProviderDefinition, multiProtocolUrl } from './multiProtocolDefinitions';
@@ -38,6 +39,7 @@ const rawForBrand = (
   brand: MultiProtocolProviderBrand,
   config: Config | null | undefined
 ): MultiProtocolProviderRaw => {
+  if (brand === 'kimi') return buildKimiRaw(config);
   if (brand === 'fennoAI') return buildFennoAIRaw(config);
   if (brand === 'qiniuCloud') return buildQiniuCloudRaw(config);
   if (brand === 'infistar') return buildInfistarRaw(config);

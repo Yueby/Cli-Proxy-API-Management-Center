@@ -21,7 +21,7 @@ export type ProviderBrand =
   | 'infistar';
 
 export type SponsorProviderBrand = 'code0';
-export type MultiProtocolProviderBrand = 'fennoAI' | 'qiniuCloud' | 'lmuAI' | 'infistar';
+export type MultiProtocolProviderBrand = 'kimi' | 'fennoAI' | 'qiniuCloud' | 'lmuAI' | 'infistar';
 export type MultiProtocolProviderProtocol = 'openai' | 'codex' | 'claude' | 'gemini';
 
 export type ProviderResourceSelector =
