@@ -453,6 +453,9 @@
     "headers_label": "Пользовательские заголовки (headers)",
     "headers_placeholder": "{\n  \"Header-Name\": \"value\"\n}",
     "headers_hint": "Введите пользовательские HTTP-заголовки как JSON-объект, например {\"X-My-Header\": \"value\"}",
+    "headers_invalid_json": "Пользовательские заголовки должны быть корректным JSON.",
+    "headers_invalid_object": "Пользовательские заголовки должны быть JSON-объектом.",
+    "headers_invalid_value": "Значение каждого пользовательского заголовка должно быть строкой.",
     "manual_refresh_button": "Запросить обновление учётных данных",
     "manual_refresh_requested": "Запрошено обновление для {{name}}",
     "manual_refresh_failed": "Не удалось обновить {{name}}: {{message}}",
@@ -1157,6 +1160,7 @@
           "routing_strategy": "Стратегия маршрутизации",
           "routing_strategy_hint": "Выберите стратегию подбора учётных данных",
           "strategy_round_robin": "По кругу",
+          "strategy_weighted_round_robin": "Взвешенный round-robin",
           "strategy_fill_first": "Сначала заполнить",
           "session_affinity_ttl": "TTL привязки сессии",
           "force_model_prefix": "Принудительный префикс модели",
@@ -1845,6 +1849,7 @@
     "openai_test_model": "Тест модели"
   },
   "plugin_resource": {
+    "title": "Страница плагина",
     "empty_src": "URL страницы плагина пуст",
     "empty_src_desc": "Это меню плагина не предоставляет URL встраиваемой страницы.",
     "load_failed": "Не удалось загрузить страницу плагина",

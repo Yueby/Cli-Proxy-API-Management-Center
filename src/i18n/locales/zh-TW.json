@@ -887,7 +887,8 @@
     "iflow_cookie_result_path": "儲存路徑",
     "iflow_cookie_result_type": "類型",
     "remote_access_disabled": "遠端存取不支援此登入方式，請從本地（localhost）存取",
-    "login_another_account": "登入另一個帳號"
+    "login_another_account": "登入另一個帳號",
+    "view_auth_files": "查看驗證檔案"
   },
   "stats": {
     "success": "成功",
@@ -1186,6 +1187,7 @@
           "routing_strategy": "路由策略",
           "routing_strategy_hint": "選擇憑證選擇策略",
           "strategy_round_robin": "輪詢（Round Robin）",
+          "strategy_weighted_round_robin": "加權輪詢（Weighted Round Robin）",
           "strategy_fill_first": "填充優先（Fill First）",
           "session_affinity_ttl": "會話黏性 TTL",
           "force_model_prefix": "強制模型前綴",
