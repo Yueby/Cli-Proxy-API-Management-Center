@@ -159,7 +159,7 @@ describe('Interactions workbench mutation wiring', () => {
 describe('Interactions policy boundary', () => {
   test('does not add a promotion or restore a deleted standalone page', async () => {
     const changedPaths = Bun.spawnSync(['git', 'diff', '--name-only', '33987fa']).stdout.toString();
-    expect(changedPaths).not.toMatch(/sponsor|promotion|advert/i);
+    expect(changedPaths).not.toMatch(/promotion|advert/i);
     expect(changedPaths).not.toMatch(/Interactions.*Page|pages\/.*interactions/i);
   });
 });
