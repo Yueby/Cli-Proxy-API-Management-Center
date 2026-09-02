@@ -613,6 +613,44 @@
   }
 }
 
+.strengthMeter {
+  --strength-color: var(--text-quaternary);
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  min-height: 20px;
+}
+
+.strengthTrack {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(28px, 1fr));
+  gap: 5px;
+  flex: 1;
+}
+
+.strengthSegment {
+  display: block;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border-color);
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+
+  &[data-filled='true'] {
+    background: var(--strength-color);
+    transform: scaleY(1.25);
+  }
+}
+
+.strengthLabel {
+  min-width: 56px;
+  color: var(--strength-color);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: right;
+}
+
 // ─── Expandable textarea ─────────────────────────────────
 
 .expandableInputWrapper {
@@ -824,10 +862,45 @@
   }
 }
 
-.fieldAnchor { scroll-margin-top: 96px; }
-.searchBox { display:flex; align-items:center; gap:6px; padding:8px; }
-.searchInput { width:100%; min-width:0; border:1px solid var(--border-color); border-radius:6px; padding:6px 8px; background:var(--bg-color); color:var(--text-primary); }
-.searchResults { display:flex; flex-direction:column; gap:2px; padding:0 6px 8px; }
-.searchResult { display:flex; flex-direction:column; align-items:flex-start; border:0; border-radius:6px; padding:7px 8px; background:transparent; color:var(--text-primary); cursor:pointer; text-align:left; }
-.searchResult:hover { background:var(--hover-bg); }
-.searchResult small { color:var(--text-secondary); }
+.fieldAnchor {
+  scroll-margin-top: 96px;
+}
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+}
+.searchInput {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: var(--bg-color);
+  color: var(--text-primary);
+}
+.searchResults {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 6px 8px;
+}
+.searchResult {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 0;
+  border-radius: 6px;
+  padding: 7px 8px;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+}
+.searchResult:hover {
+  background: var(--hover-bg);
+}
+.searchResult small {
+  color: var(--text-secondary);
+}

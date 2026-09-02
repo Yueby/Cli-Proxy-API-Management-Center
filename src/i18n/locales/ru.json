@@ -1209,6 +1209,7 @@
         "label": "Список API-ключей (api-keys)",
         "add": "Добавить API-ключ",
         "generate": "Сгенерировать",
+        "generate_failed": "Не удалось сгенерировать надёжный API-ключ. Повторите попытку.",
         "empty": "API-ключи отсутствуют",
         "hint": "Каждая запись — это API-ключ (в том же стиле, что и на странице управления API-ключами)",
         "edit_title": "Редактирование API-ключа",
@@ -1217,7 +1218,15 @@
         "input_placeholder": "Вставьте API-ключ",
         "input_hint": "Меняет только содержимое локального файла конфигурации, не синхронизируется с интерфейсом управления API-ключами",
         "error_empty": "Введите API-ключ",
-        "error_invalid": "API-ключ содержит недопустимые символы"
+        "error_invalid": "API-ключ содержит недопустимые символы",
+        "strength": {
+          "label": "Надёжность API-ключа",
+          "empty": "Введите ключ, чтобы оценить его надёжность",
+          "weak": "Низкая",
+          "fair": "Средняя",
+          "good": "Хорошая",
+          "strong": "Высокая"
+        }
       },
       "payload_rules": {
         "rule": "Правило",
@@ -1651,6 +1660,7 @@
         "headers": "Заголовки"
       },
       "websocketsTag": "WebSockets",
+      "cliProfileTag": "Claude Code CLI",
       "cloakTag": "Cloak",
       "empty": "Нет ресурсов, нажмите \"Создать\".",
       "filterPlaceholder": "Поиск по ключам, URL, префиксам…",
@@ -1733,8 +1743,10 @@
       "thinkingConfigHint": "Поддерживает levels, min, max, zero_allowed, dynamic_allowed",
       "cloakCacheUserId": "Кэшировать user_id",
       "cloakCacheUserIdHint": "Переиспользовать Claude cloak user_id для каждого API-ключа",
-      "experimentalCchSigning": "Экспериментальная CCH-подпись",
-      "experimentalCchSigningHint": "Подписывать финальное тело cloaked Claude /v1/messages через CCH",
+      "fingerprintProfile": "Профиль отпечатка",
+      "fingerprintProfileDefault": "По умолчанию (от вызывающей стороны)",
+      "fingerprintProfileClaudeCodeCli": "Claude Code CLI",
+      "fingerprintProfileHint": "Установить заголовки отпечатка устройства и платформы клиента для запросов Claude",
       "validation": {
         "nameRequired": "Название обязательно",
         "apiKeyRequired": "Нужен хотя бы один API-ключ",

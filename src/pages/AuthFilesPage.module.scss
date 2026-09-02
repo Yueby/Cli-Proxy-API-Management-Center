@@ -10,19 +10,6 @@
   );
 }
 
-.pageHeader {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-xs;
-}
-
-.pageTitle {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-}
-
 .description {
   font-size: 14px;
   color: var(--text-secondary);

@@ -83,7 +83,7 @@ describe('quota renderer time semantics', () => {
   const t = ((key: string, params?: Record<string, unknown>) =>
     key.endsWith('remaining_percent') ? `${params?.percent}%` : key) as never;
 
-  test('renders an absolute and live relative label for Claude windows', () => {
+  test('renders compact percentage and reset labels for Claude windows', () => {
     const markup = renderToStaticMarkup(
       createElement(
         'div',
@@ -107,9 +107,9 @@ describe('quota renderer time semantics', () => {
       )
     );
 
-    expect(markup).toContain(formatInstantShort(30 * MINUTE_MS));
-    expect(markup).toContain('in 30 minutes');
-    expect(markup).toContain('quotaRowRecoverySoon');
+    expect(markup).toContain('75%');
+    expect(markup).toContain('08-13 14:30');
+    expect(markup).toContain('quotaReset');
   });
 
   test('keeps Kimi provider hints when no concrete instant exists', () => {
@@ -136,7 +136,7 @@ describe('quota renderer time semantics', () => {
     expect(markup).toContain('resets in quota_duration.hour_other');
   });
 
-  test('renders relative labels for Codex, Antigravity and xAI recovery windows', () => {
+  test('renders compact labels for Codex, Antigravity and xAI recovery windows', () => {
     const codex: CodexQuotaState = {
       status: 'success',
       windows: [
@@ -192,11 +192,13 @@ describe('quota renderer time semantics', () => {
     const render = (node: React.ReactNode) =>
       renderToStaticMarkup(createElement('div', null, node));
 
-    expect(render(CODEX_CONFIG.renderQuotaItems(codex, t, helpers))).toContain('in 1 hour');
+    expect(render(CODEX_CONFIG.renderQuotaItems(codex, t, helpers))).toContain('70%');
+    expect(render(CODEX_CONFIG.renderQuotaItems(codex, t, helpers))).toContain('absolute-codex');
+    expect(render(ANTIGRAVITY_CONFIG.renderQuotaItems(antigravity, t, helpers))).toContain('70%');
     expect(render(ANTIGRAVITY_CONFIG.renderQuotaItems(antigravity, t, helpers))).toContain(
-      'in 1 hour'
+      'absolute-antigravity'
     );
-    expect(render(XAI_CONFIG.renderQuotaItems(xai, t, helpers))).toContain('in 1 hour');
+    expect(render(XAI_CONFIG.renderQuotaItems(xai, t, helpers))).toContain('70%');
   });
 
   test('projects Codex reset_after_seconds into a concrete reset instant', () => {
@@ -241,21 +243,16 @@ describe('provider-independent quota recovery schedule', () => {
   });
 
   test('keeps Antigravity absolute reset instants unchanged by server-time offset', () => {
-    const events = collectQuotaRowInstants(
-      'antigravity',
-      {
-        status: 'success',
-        groups: [
-          {
-            buckets: [{ id: 'server-window', resetAtMs: 30 * MINUTE_MS }],
-          },
-        ],
-      }
-    );
+    const events = collectQuotaRowInstants('antigravity', {
+      status: 'success',
+      groups: [
+        {
+          buckets: [{ id: 'server-window', resetAtMs: 30 * MINUTE_MS }],
+        },
+      ],
+    });
 
-    expect(events).toEqual([
-      { rowId: 'server-window', atMs: 30 * MINUTE_MS, kind: 'window' },
-    ]);
+    expect(events).toEqual([{ rowId: 'server-window', atMs: 30 * MINUTE_MS, kind: 'window' }]);
   });
 
   test('uses one clock domain for Antigravity relative text and urgent selection', () => {
@@ -289,15 +286,11 @@ describe('provider-independent quota recovery schedule', () => {
     const translate = ((key: string, params?: Record<string, unknown>) =>
       key.endsWith('remaining_percent') ? `${params?.percent}%` : key) as never;
     const markup = renderToStaticMarkup(
-      createElement(
-        'div',
-        null,
-        ANTIGRAVITY_CONFIG.renderQuotaItems(quota, translate, helpers)
-      )
+      createElement('div', null, ANTIGRAVITY_CONFIG.renderQuotaItems(quota, translate, helpers))
     );
 
-    expect(markup).toContain('in 30 minutes');
-    expect(markup).toContain('quotaRowRecoverySoon');
+    expect(markup).toContain('70%');
+    expect(markup).toContain('absolute-antigravity');
   });
 
   test('keeps reset-credit expiry distinct from capacity recovery', () => {
@@ -313,9 +306,13 @@ describe('provider-independent quota recovery schedule', () => {
       atMs: Date.parse(expiry),
       kind: 'credit',
     });
-    expect(nextRecoveryMs('codex', { status: 'success', windows: [{ resetAtMs: now + 20 * MINUTE_MS }] }, now)).toBe(
-      now + 20 * MINUTE_MS
-    );
+    expect(
+      nextRecoveryMs(
+        'codex',
+        { status: 'success', windows: [{ resetAtMs: now + 20 * MINUTE_MS }] },
+        now
+      )
+    ).toBe(now + 20 * MINUTE_MS);
   });
 
   test('selects only a capacity recovery in the final hour as urgent', () => {

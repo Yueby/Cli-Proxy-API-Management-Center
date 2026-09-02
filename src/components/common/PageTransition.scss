@@ -7,6 +7,7 @@
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
+  background: var(--surface-page);
 
   &__layer {
     display: flex;
@@ -14,7 +15,7 @@
     gap: $spacing-lg;
     min-height: 0;
     flex: 1;
-    background: var(--bg-secondary);
+    background: var(--surface-page);
     backface-visibility: hidden;
     transform: translateZ(0);
 

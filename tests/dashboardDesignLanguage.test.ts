@@ -1,8 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { readFileSync } from 'node:fs';
 
-const source = (path: string) =>
-  readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
+const source = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
 
 describe('dashboard flat design language', () => {
   test('publishes semantic surface, radius, shadow, typography and motion tokens', () => {
@@ -71,6 +70,34 @@ describe('dashboard flat design language', () => {
     expect(styles).not.toContain('transition: all 0.2s ease');
   });
 
+  test('card header maintains 8-12px balanced spacing with body and avoids top text sticking', () => {
+    const components = source('src/styles/components.scss');
+    expect(components).toContain('.card-header + .card-body');
+    expect(components).toContain('padding-top: $spacing-sm');
+  });
+
+  test('pages clean up obsolete scoped page header styles in favor of shared PageHeader component', () => {
+    const authFilesStyles = source('src/pages/AuthFilesPage.module.scss');
+    const quotaStyles = source('src/pages/QuotaPage.module.scss');
+    const configStyles = source('src/pages/ConfigPage.module.scss');
+
+    expect(authFilesStyles).not.toContain('.pageHeader {');
+    expect(authFilesStyles).not.toContain('.pageTitle {');
+    expect(quotaStyles).not.toContain('.pageHeader {');
+    expect(quotaStyles).not.toContain('.pageTitle {');
+    expect(configStyles).not.toContain('.pageHeader,');
+  });
+
+  test('auth files edit pages use subtle borders and consistent header spacing in settings cards', () => {
+    const oauthExcludedStyles = source('src/pages/AuthFilesOAuthExcludedEditPage.module.scss');
+    const oauthModelAliasStyles = source('src/pages/AuthFilesOAuthModelAliasEditPage.module.scss');
+
+    expect(oauthExcludedStyles).toContain('border-bottom: 1px solid var(--border-subtle)');
+    expect(oauthExcludedStyles).toContain('padding: $spacing-sm $spacing-lg $spacing-lg');
+    expect(oauthModelAliasStyles).toContain('border-bottom: 1px solid var(--border-subtle)');
+    expect(oauthModelAliasStyles).toContain('padding: $spacing-sm $spacing-lg $spacing-lg');
+  });
+
   test('plugin management and store share the global page header', () => {
     const management = source('src/features/plugins/PluginsPage.tsx');
     const store = source('src/features/plugins/PluginStorePage.tsx');
@@ -80,5 +107,65 @@ describe('dashboard flat design language', () => {
       expect(page).toContain('<PageHeader');
       expect(page).not.toContain('className={styles.pageHeader}');
     }
+  });
+
+  test('dashboard page adopts available full-width content area without restrictive max-width or centering margin', () => {
+    const dashboardStyles = source('src/features/dashboard/dashboard.module.scss');
+
+    expect(dashboardStyles).not.toContain('max-width: 1120px');
+    expect(dashboardStyles).not.toContain('margin: 0 auto');
+    expect(dashboardStyles).toContain('.page {');
+    expect(dashboardStyles).toContain('width: 100%');
+    expect(dashboardStyles).toContain('min-width: 0');
+    // sectionDescription readable text measure constraint is preserved
+    expect(dashboardStyles).toContain('max-width: 64ch');
+  });
+
+  test('active page transition layer strictly uses opaque semantic page surface without transparent or hardcoded black masks', () => {
+    const transitionStyles = source('src/components/common/PageTransition.scss');
+    const layoutStyles = source('src/styles/layout.scss');
+
+    // PageTransition component styles
+    expect(transitionStyles).not.toContain('background: #000');
+    expect(transitionStyles).not.toContain('background: #000000');
+    expect(transitionStyles).not.toContain('background: black');
+    expect(transitionStyles).not.toContain('background-color: #000');
+    expect(transitionStyles).not.toContain('background-color: #000000');
+    expect(transitionStyles).not.toContain('background-color: black');
+    expect(transitionStyles).not.toContain('background: var(--bg-secondary)');
+    expect(transitionStyles).not.toContain('background: transparent');
+    expect(transitionStyles).not.toContain('background: none');
+    expect(transitionStyles).not.toContain('background: inherit');
+
+    expect(transitionStyles).toContain('&__layer {');
+    expect(transitionStyles).toContain('background: var(--surface-page);');
+
+    // layout.scss plugin-resource isolation maintains its required white surface without arbitrary overrides
+    expect(layoutStyles).toContain('.main-content-plugin-resource {');
+    expect(layoutStyles).toContain('.page-transition,');
+    expect(layoutStyles).toContain('background: #ffffff;');
+  });
+
+  test('page transition layers maintain opaque page surface during animation crossfade and stacked states', () => {
+    const transitionStyles = source('src/components/common/PageTransition.scss');
+    const transitionComponent = source('src/components/common/PageTransition.tsx');
+
+    // PageTransition SCSS rules enforce surface and positioning
+    expect(transitionStyles).toContain('.page-transition {');
+    expect(transitionStyles).toContain('background: var(--surface-page);');
+    expect(transitionStyles).toContain('&.page-transition__layer--stacked-keep {');
+    expect(transitionStyles).toContain('opacity: 0;');
+
+    // PageTransition TSX preserves layer semantics
+    expect(transitionComponent).toContain('className={[');
+    expect(transitionComponent).toContain("'page-transition__layer',");
+    expect(transitionComponent).toContain(
+      "layer.status === 'exiting' ? 'page-transition__layer--exit' : ''"
+    );
+    expect(transitionComponent).toContain(
+      "shouldKeepStacked ? 'page-transition__layer--stacked-keep' : ''"
+    );
+    expect(transitionComponent).toContain("inert={layer.status !== 'current'}");
+    expect(transitionComponent).toContain("aria-hidden={layer.status !== 'current'}");
   });
 });

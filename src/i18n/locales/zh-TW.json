@@ -1238,6 +1238,7 @@
         "label": "API 金鑰清單（api-keys）",
         "add": "新增 API 金鑰",
         "generate": "產生",
+        "generate_failed": "產生安全 API 金鑰失敗，請重試",
         "empty": "暫無 API 金鑰",
         "hint": "每個條目代表一個 API 金鑰（與「API 金鑰管理」頁面樣式一致）",
         "edit_title": "編輯 API 金鑰",
@@ -1246,7 +1247,15 @@
         "input_placeholder": "貼上你的 API 金鑰",
         "input_hint": "此處僅修改本地設定檔內容，不會自動同步到 API 金鑰管理介面",
         "error_empty": "請輸入 API 金鑰",
-        "error_invalid": "API 金鑰包含無效字元"
+        "error_invalid": "API 金鑰包含無效字元",
+        "strength": {
+          "label": "API 金鑰強度",
+          "empty": "輸入金鑰以查看強度",
+          "weak": "較弱",
+          "fair": "一般",
+          "good": "良好",
+          "strong": "強"
+        }
       },
       "payload_rules": {
         "rule": "規則",
@@ -1690,6 +1699,7 @@
         "headers": "請求標頭"
       },
       "websocketsTag": "WebSockets",
+      "cliProfileTag": "Claude Code CLI",
       "cloakTag": "Cloak",
       "empty": "尚未新增設定,點擊右上角新增。",
       "filterPlaceholder": "搜尋金鑰、位址、前綴…",
@@ -1772,8 +1782,10 @@
       "thinkingConfigHint": "可設定 levels、min、max、zero_allowed、dynamic_allowed",
       "cloakCacheUserId": "快取 user_id",
       "cloakCacheUserIdHint": "按 API key 複用 Claude cloak 產生的 user_id",
-      "experimentalCchSigning": "實驗性 CCH 簽名",
-      "experimentalCchSigningHint": "對 cloaked Claude /v1/messages 最終請求體啟用 CCH 簽名",
+      "fingerprintProfile": "指紋 Profile",
+      "fingerprintProfileDefault": "預設 (呼叫端自帶)",
+      "fingerprintProfileClaudeCodeCli": "Claude Code CLI",
+      "fingerprintProfileHint": "為 Claude 請求設定用戶端裝置與平台指紋請求標頭",
       "validation": {
         "nameRequired": "名稱必填",
         "apiKeyRequired": "至少填寫一個 API 金鑰",

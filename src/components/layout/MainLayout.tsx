@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -43,6 +44,7 @@ import {
 import { triggerHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { LANGUAGE_LABEL_KEYS, LANGUAGE_ORDER } from '@/utils/constants';
 import { isSupportedLanguage } from '@/utils/language';
+import { getSidebarShortcutLabel, isSidebarToggleShortcut } from '@/utils/sidebarShortcut';
 import type { Theme } from '@/types';
 
 const sidebarIcons: Record<string, ReactNode> = {
@@ -296,6 +298,21 @@ export function MainLayout() {
   const isLogsPage = location.pathname.startsWith('/logs');
   const isPluginResourcePage = location.pathname.startsWith('/plugin-pages');
   const showSidebarLabels = !sidebarCollapsed || sidebarOpen;
+  const isMac = useMemo(() => {
+    if (typeof navigator === 'undefined') return false;
+    return /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent);
+  }, []);
+  const sidebarShortcutLabel = getSidebarShortcutLabel(isMac);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isSidebarToggleShortcut(event)) return;
+      event.preventDefault();
+      setSidebarCollapsed((previous) => !previous);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // 拉取已启用插件声明的页面菜单，转换为侧边栏可渲染的资源条目。
   const loadPluginResources = useCallback(async () => {
@@ -786,9 +803,11 @@ export function MainLayout() {
               : t('sidebar.collapse', { defaultValue: '收起' })
           }
           aria-label={
-            sidebarCollapsed
-              ? t('sidebar.expand', { defaultValue: '展开' })
-              : t('sidebar.collapse', { defaultValue: '收起' })
+            `${
+              sidebarCollapsed
+                ? t('sidebar.expand', { defaultValue: '展开' })
+                : t('sidebar.collapse', { defaultValue: '收起' })
+            } (${sidebarShortcutLabel})`
           }
         >
           {sidebarCollapsed ? headerIcons.chevronRight : headerIcons.chevronLeft}

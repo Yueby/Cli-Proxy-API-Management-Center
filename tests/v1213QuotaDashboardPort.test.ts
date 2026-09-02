@@ -100,6 +100,44 @@ describe('v1.21.3 quota semantic port', () => {
     });
   });
 
+  test('xAI/Grok zero limits compute zero percent for remaining quota, null limits stay null', () => {
+    const zeroLimits = buildXaiBillingSummary({
+      billingPeriodStart: '2026-08-01T00:00:00Z',
+      billingPeriodEnd: '2026-09-01T00:00:00Z',
+      monthlyLimit: 0,
+      used: 0,
+      onDemandCap: 0,
+      onDemandUsed: 0,
+    });
+    expect(zeroLimits).toMatchObject({
+      monthlyLimitCents: 0,
+      usedCents: 0,
+      includedUsedCents: 0,
+      usedPercent: 100,
+      onDemandCapCents: 0,
+      onDemandUsedCents: 0,
+      onDemandUsedPercent: 100,
+    });
+
+    const nullLimits = buildXaiBillingSummary({
+      billingPeriodStart: '2026-08-01T00:00:00Z',
+      billingPeriodEnd: '2026-09-01T00:00:00Z',
+      monthlyLimit: null,
+      used: null,
+      onDemandCap: null,
+      onDemandUsed: null,
+    });
+    expect(nullLimits).toMatchObject({
+      monthlyLimitCents: null,
+      usedCents: null,
+      includedUsedCents: null,
+      usedPercent: null,
+      onDemandCapCents: null,
+      onDemandUsedCents: null,
+      onDemandUsedPercent: null,
+    });
+  });
+
   test('keeps xAI period metadata atomic when weekly and monthly responses merge', () => {
     const weekly = buildXaiBillingSummary({
       currentPeriod: {

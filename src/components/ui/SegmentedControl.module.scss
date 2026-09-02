@@ -6,7 +6,7 @@
   gap: 2px;
   padding: 3px;
   border-radius: $radius-md;
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
 }
 
@@ -28,7 +28,7 @@
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
-  transition: color $transition-fast, background-color $transition-fast;
+  transition: color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
 
   &:hover:not(:disabled) {
     color: var(--text-primary);
@@ -45,6 +45,9 @@
   color: var(--primary-contrast, #fff);
   background: var(--primary-color);
   border-color: var(--primary-color);
+  box-shadow:
+    0 1px 3px rgb(0 0 0 / 0.12),
+    0 1px 2px rgb(0 0 0 / 0.08);
 
   &:hover:not(:disabled) {
     color: var(--primary-contrast, #fff);

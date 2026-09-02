@@ -2,10 +2,10 @@
 @use '../../../styles/variables' as *;
 
 .wrap {
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-panel);
   overflow: hidden;
-  background: var(--bg-primary);
+  background: var(--surface-panel);
 }
 
 .scroll {
@@ -21,7 +21,7 @@
 }
 
 .head {
-  background: var(--muted-bg);
+  background: var(--surface-muted);
 
   th {
     color: var(--muted-foreground);
@@ -29,7 +29,7 @@
     font-size: 12px;
     text-align: left;
     padding: 10px 14px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-subtle);
     vertical-align: middle;
   }
 
@@ -39,15 +39,15 @@
 }
 
 .body {
-  background: var(--bg-primary);
+  background: var(--surface-panel);
 }
 
 .row {
-  transition: background-color $transition-fast;
+  transition: background-color var(--motion-hover);
 
   td {
     padding: 12px 14px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-subtle);
     vertical-align: top;
     line-height: 1.5;
   }

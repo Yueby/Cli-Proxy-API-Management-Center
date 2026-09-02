@@ -1,24 +1,50 @@
+import { evaluateApiKeyStrength } from './apiKeyStrength';
+
 const API_KEY_PREFIX = 'sk-';
 const API_KEY_RANDOM_LENGTH = 48;
 const API_KEY_CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const MAX_UNBIASED_BYTE = Math.floor(256 / API_KEY_CHARSET.length) * API_KEY_CHARSET.length;
 
+const MAX_API_KEY_GENERATION_ATTEMPTS = 32;
+const MAX_REJECTION_SAMPLING_ROUNDS_PER_ATTEMPT = 16;
+
 /** Generates a cryptographically secure, uniformly distributed API key. */
-export function generateSecureApiKey(): string {
-  const characters: string[] = [];
+export function generateSecureApiKey(
+  maxAttempts: number = MAX_API_KEY_GENERATION_ATTEMPTS
+): string {
+  const attemptsLimit = Math.max(1, maxAttempts);
 
-  while (characters.length < API_KEY_RANDOM_LENGTH) {
-    const remaining = API_KEY_RANDOM_LENGTH - characters.length;
-    const randomBytes = new Uint8Array(Math.ceil(remaining * 1.1));
-    globalThis.crypto.getRandomValues(randomBytes);
+  for (let attempt = 1; attempt <= attemptsLimit; attempt += 1) {
+    const characters: string[] = [];
+    let samplingRound = 0;
 
-    for (const byte of randomBytes) {
-      if (byte >= MAX_UNBIASED_BYTE) continue;
+    while (characters.length < API_KEY_RANDOM_LENGTH) {
+      if (samplingRound >= MAX_REJECTION_SAMPLING_ROUNDS_PER_ATTEMPT) {
+        throw new Error(
+          `Failed to collect enough unbiased random bytes after ${MAX_REJECTION_SAMPLING_ROUNDS_PER_ATTEMPT} sampling rounds. Please check the randomness source.`
+        );
+      }
+      samplingRound += 1;
 
-      characters.push(API_KEY_CHARSET[byte % API_KEY_CHARSET.length]);
-      if (characters.length === API_KEY_RANDOM_LENGTH) break;
+      const remaining = API_KEY_RANDOM_LENGTH - characters.length;
+      const randomBytes = new Uint8Array(Math.ceil(remaining * 1.1));
+      globalThis.crypto.getRandomValues(randomBytes);
+
+      for (const byte of randomBytes) {
+        if (byte >= MAX_UNBIASED_BYTE) continue;
+
+        characters.push(API_KEY_CHARSET[byte % API_KEY_CHARSET.length]);
+        if (characters.length === API_KEY_RANDOM_LENGTH) break;
+      }
+    }
+
+    const randomBody = characters.join('');
+    if (evaluateApiKeyStrength(randomBody).tier === 'strong') {
+      return `${API_KEY_PREFIX}${randomBody}`;
     }
   }
 
-  return `${API_KEY_PREFIX}${characters.join('')}`;
+  throw new Error(
+    `Failed to generate a sufficiently strong API key after ${attemptsLimit} attempts. Please check the randomness source.`
+  );
 }

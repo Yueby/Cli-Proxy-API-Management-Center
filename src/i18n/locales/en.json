@@ -1211,6 +1211,7 @@
         "label": "API Keys List (api-keys)",
         "add": "Add API Key",
         "generate": "Generate",
+        "generate_failed": "Failed to generate secure API key. Please try again.",
         "empty": "No API keys",
         "hint": "Each entry represents an API key (consistent with 'API Key Management' page style)",
         "edit_title": "Edit API Key",
@@ -1219,7 +1220,15 @@
         "input_placeholder": "Paste your API key",
         "input_hint": "This only modifies the local config file content, it will not sync to the API Key Management interface",
         "error_empty": "Please enter an API key",
-        "error_invalid": "API key contains invalid characters"
+        "error_invalid": "API key contains invalid characters",
+        "strength": {
+          "label": "API key strength",
+          "empty": "Enter a key to check its strength",
+          "weak": "Weak",
+          "fair": "Fair",
+          "good": "Good",
+          "strong": "Strong"
+        }
       },
       "payload_rules": {
         "rule": "Rule",
@@ -1663,6 +1672,7 @@
         "headers": "Headers"
       },
       "websocketsTag": "WebSockets",
+      "cliProfileTag": "Claude Code CLI",
       "cloakTag": "Cloak",
       "empty": "No resources yet, click \"New\" to add.",
       "filterPlaceholder": "Search keys, URLs, prefixes…",
@@ -1745,8 +1755,10 @@
       "thinkingConfigHint": "Supports levels, min, max, zero_allowed, dynamic_allowed",
       "cloakCacheUserId": "Cache user_id",
       "cloakCacheUserIdHint": "Reuse the Claude cloak user_id per API key",
-      "experimentalCchSigning": "Experimental CCH signing",
-      "experimentalCchSigningHint": "Sign the final cloaked Claude /v1/messages body with CCH",
+      "fingerprintProfile": "Fingerprint profile",
+      "fingerprintProfileDefault": "Default (Caller-owned)",
+      "fingerprintProfileClaudeCodeCli": "Claude Code CLI",
+      "fingerprintProfileHint": "Set client device and platform fingerprint headers for Claude requests",
       "validation": {
         "nameRequired": "Name is required",
         "apiKeyRequired": "At least one API key is required",
