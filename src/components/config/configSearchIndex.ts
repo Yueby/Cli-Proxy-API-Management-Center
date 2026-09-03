@@ -341,6 +341,14 @@ export const CONFIG_FIELD_SEARCH_INDEX: ConfigFieldSearchEntry[] = [
     yamlKeys: ['plugins', 'store-auth'],
   },
   {
+    fieldId: 'antigravitySensitiveWords',
+    sectionId: 'system',
+    labelKey: L('sections.system.antigravity_sensitive_words'),
+    hintKey: L('sections.system.antigravity_sensitive_words_desc'),
+    yamlKeys: ['antigravity', 'sensitive-words'],
+    keywords: ['antigravity', 'obfuscate', 'zero-width'],
+  },
+  {
     fieldId: 'antigravitySignatureCacheEnabled',
     sectionId: 'system',
     labelKey: L('sections.system.antigravity_signature_cache'),

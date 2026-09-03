@@ -38,7 +38,17 @@ describe('visual config field search index', () => {
   test('keeps field anchors stable and indexes only sections present in the fork editor', () => {
     expect(configFieldDomId('proxyUrl')).toBe('cfg-field-proxyUrl');
     expect(new Set(CONFIG_FIELD_SEARCH_INDEX.map((entry) => entry.sectionId))).toEqual(
-      new Set(['server', 'tls', 'remote', 'auth', 'system', 'network', 'quota', 'streaming', 'payload'])
+      new Set([
+        'server',
+        'tls',
+        'remote',
+        'auth',
+        'system',
+        'network',
+        'quota',
+        'streaming',
+        'payload',
+      ])
     );
   });
 
@@ -51,6 +61,7 @@ describe('visual config field search index', () => {
     expect(editorSource).toContain('className={styles.sidebarDrawer}');
     expect(editorSource).toContain('searchConfigFields(searchQuery, t)');
     expect(editorSource).toContain('<FieldAnchor fieldId="tlsCert">');
+    expect(editorSource).toContain('<FieldAnchor fieldId="antigravitySensitiveWords">');
     expect(editorSource).toContain('getFieldRevealPatch(entry.fieldId)');
   });
 });

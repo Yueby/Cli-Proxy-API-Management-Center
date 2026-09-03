@@ -44,6 +44,7 @@ import {
   PayloadFilterRulesEditor,
   PayloadRulesEditor,
   PluginStoreAuthEditor,
+  StringListEditor,
 } from './VisualConfigEditorBlocks';
 import { configFieldDomId, getFieldRevealPatch, searchConfigFields } from './configSearchIndex';
 import styles from './VisualConfigEditor.module.scss';
@@ -136,7 +137,11 @@ function SectionSubsection({
 }
 
 function FieldAnchor({ fieldId, children }: { fieldId: string; children: ReactNode }) {
-  return <div id={configFieldDomId(fieldId)} className={styles.fieldAnchor}>{children}</div>;
+  return (
+    <div id={configFieldDomId(fieldId)} className={styles.fieldAnchor}>
+      {children}
+    </div>
+  );
 }
 
 function FieldShell({
@@ -233,6 +238,10 @@ export function VisualConfigEditor({
   );
   const handlePluginStoreAuthChange = useCallback(
     (pluginStoreAuth: PluginStoreAuthRule[]) => onChange({ pluginStoreAuth }),
+    [onChange]
+  );
+  const handleAntigravitySensitiveWordsChange = useCallback(
+    (antigravitySensitiveWords: string[]) => onChange({ antigravitySensitiveWords }),
     [onChange]
   );
   const handlePayloadDefaultRulesChange = useCallback(
@@ -449,11 +458,16 @@ export function VisualConfigEditor({
       if (revealPatch) onChange(revealPatch);
       setActiveSectionId(entry.sectionId);
       setSidebarOpen(false);
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        const target = document.getElementById(configFieldDomId(entry.fieldId)) ?? sectionRefs.current[entry.sectionId];
-        target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }));
-    }, [onChange]
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          const target =
+            document.getElementById(configFieldDomId(entry.fieldId)) ??
+            sectionRefs.current[entry.sectionId];
+          target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        })
+      );
+    },
+    [onChange]
   );
 
   // Close sidebar on outside click
@@ -479,13 +493,32 @@ export function VisualConfigEditor({
 
   const navContent = (
     <div className={styles.navList}>
-      <div className={styles.searchBox}><IconSearch size={14} /><input className={styles.searchInput}
-        value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)}
-        placeholder={t('config_management.visual.search_placeholder', { defaultValue: 'Search fields' })} /></div>
-      {searchQuery.trim() ? <div className={styles.searchResults}>{searchResults.map((entry) => (
-        <button key={entry.fieldId} type="button" className={styles.searchResult} onClick={() => handleSearchResultJump(entry)}>
-          <span>{t(entry.labelKey)}</span><small>{t(`config_management.visual.sections.${entry.sectionId}.title`)}</small>
-        </button>))}</div> : null}
+      <div className={styles.searchBox}>
+        <IconSearch size={14} />
+        <input
+          className={styles.searchInput}
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder={t('config_management.visual.search_placeholder', {
+            defaultValue: 'Search fields',
+          })}
+        />
+      </div>
+      {searchQuery.trim() ? (
+        <div className={styles.searchResults}>
+          {searchResults.map((entry) => (
+            <button
+              key={entry.fieldId}
+              type="button"
+              className={styles.searchResult}
+              onClick={() => handleSearchResultJump(entry)}
+            >
+              <span>{t(entry.labelKey)}</span>
+              <small>{t(`config_management.visual.sections.${entry.sectionId}.title`)}</small>
+            </button>
+          ))}
+        </div>
+      ) : null}
       {sections.map((section) => {
         const Icon = section.icon;
 
@@ -571,22 +604,22 @@ export function VisualConfigEditor({
                   <Divider />
                   <SectionGrid>
                     <FieldAnchor fieldId="tlsCert">
-                    <Input
-                      label={t('config_management.visual.sections.tls.cert')}
-                      placeholder="/path/to/cert.pem"
-                      value={values.tlsCert}
-                      onChange={(e) => onChange({ tlsCert: e.target.value })}
-                      disabled={disabled}
-                    />
+                      <Input
+                        label={t('config_management.visual.sections.tls.cert')}
+                        placeholder="/path/to/cert.pem"
+                        value={values.tlsCert}
+                        onChange={(e) => onChange({ tlsCert: e.target.value })}
+                        disabled={disabled}
+                      />
                     </FieldAnchor>
                     <FieldAnchor fieldId="tlsKey">
-                    <Input
-                      label={t('config_management.visual.sections.tls.key')}
-                      placeholder="/path/to/key.pem"
-                      value={values.tlsKey}
-                      onChange={(e) => onChange({ tlsKey: e.target.value })}
-                      disabled={disabled}
-                    />
+                      <Input
+                        label={t('config_management.visual.sections.tls.key')}
+                        placeholder="/path/to/key.pem"
+                        value={values.tlsKey}
+                        onChange={(e) => onChange({ tlsKey: e.target.value })}
+                        disabled={disabled}
+                      />
                     </FieldAnchor>
                   </SectionGrid>
                 </>
@@ -787,6 +820,28 @@ export function VisualConfigEditor({
                   }
                 />
               </SectionGrid>
+              <FieldAnchor fieldId="antigravitySensitiveWords">
+                <FieldShell
+                  label={t(
+                    'config_management.visual.sections.system.antigravity_sensitive_words_label'
+                  )}
+                  hint={t(
+                    'config_management.visual.sections.system.antigravity_sensitive_words_hint'
+                  )}
+                >
+                  <StringListEditor
+                    value={values.antigravitySensitiveWords}
+                    disabled={disabled}
+                    placeholder={t(
+                      'config_management.visual.sections.system.antigravity_sensitive_words_placeholder'
+                    )}
+                    inputAriaLabel={t(
+                      'config_management.visual.sections.system.antigravity_sensitive_words_label'
+                    )}
+                    onChange={handleAntigravitySensitiveWordsChange}
+                  />
+                </FieldShell>
+              </FieldAnchor>
 
               <SectionSubsection
                 title={t('config_management.visual.sections.system.plugins')}
@@ -1323,10 +1378,7 @@ export function VisualConfigEditor({
               >
                 {sidebarOpen ? <IconChevronRight size={14} /> : <IconChevronLeft size={14} />}
               </button>
-              <div
-                className={styles.sidebarDrawer}
-                data-open={sidebarOpen ? 'true' : 'false'}
-              >
+              <div className={styles.sidebarDrawer} data-open={sidebarOpen ? 'true' : 'false'}>
                 {navContent}
               </div>
               <div
