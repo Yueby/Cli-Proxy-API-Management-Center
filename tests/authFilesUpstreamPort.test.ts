@@ -37,6 +37,7 @@ describe('Auth Files upstream compatibility port', () => {
     expect(card).toContain('IconNetwork');
     expect(card).not.toContain('file.proxy_configured === true');
     expect(card).toContain("t('auth_files.proxy_configured_badge')");
+    expect(card).toContain('file.proxy_url');
     expect(authFileType).toContain('proxy_url?: string');
 
     for (const locale of ['en', 'ru', 'zh-CN', 'zh-TW']) {

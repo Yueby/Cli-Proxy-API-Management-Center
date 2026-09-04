@@ -433,7 +433,20 @@ export function AuthFileCard(props: AuthFileCardProps) {
       title={identity.primary}
       badges={[
         {
-          label: typeLabel,
+          label: (
+            <>
+              {typeLabel}
+              {hasProxyUrl && (
+                <span
+                  title={t('auth_files.proxy_configured_badge')}
+                  aria-label={t('auth_files.proxy_configured_badge')}
+                  style={{ marginLeft: 6, display: 'inline-flex', verticalAlign: 'middle' }}
+                >
+                  <IconNetwork size={13} />
+                </span>
+              )}
+            </>
+          ),
           variant: 'custom',
           style: {
             backgroundColor: typeColor.bg,
@@ -441,23 +454,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
             ...(typeColor.border ? { border: typeColor.border } : {}),
           },
         },
-        ...(hasProxyUrl
-          ? [
-              {
-                label: <IconNetwork size={13} />,
-                variant: 'custom' as const,
-                title: t('auth_files.proxy_configured_badge'),
-                ariaLabel: t('auth_files.proxy_configured_badge'),
-                tooltip: t('auth_files.proxy_configured_badge'),
-                style: {
-                  backgroundColor: 'rgba(59, 130, 246, 0.10)',
-                  color: '#3b82f6',
-                  border: '1px solid rgba(59, 130, 246, 0.25)',
-                  padding: '4px 6px',
-                },
-              },
-            ]
-          : []),
+
         ...(providerKey === 'xai' && resolvedPlanLabel
           ? [
               {
