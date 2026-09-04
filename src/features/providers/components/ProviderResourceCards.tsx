@@ -27,7 +27,7 @@ import {
   stripDisableAllModelsRule,
   type ProviderRecentUsageMap,
 } from '@/components/providers/utils';
-import { IconEye, IconKey, IconPencil, IconSignal, IconTrash2 } from '@/components/ui/icons';
+import { IconEye, IconKey, IconNetwork, IconPencil, IconSignal, IconTrash2 } from '@/components/ui/icons';
 import type {
   ApiKeyEntry,
   GeminiKeyConfig,
@@ -274,13 +274,31 @@ export function ProviderResourceCards({
       </span>
     ) : null;
 
+  const renderProxyBadge = (configured: boolean) =>
+    configured ? (
+      <span
+        className={ItemCard.styles.typeBadge}
+        title={t('auth_files.proxy_configured_badge')}
+        aria-label={t('auth_files.proxy_configured_badge')}
+        style={{
+          backgroundColor: 'rgba(59, 130, 246, 0.10)',
+          color: '#3b82f6',
+          border: '1px solid rgba(59, 130, 246, 0.25)',
+          padding: '4px 6px',
+        }}
+      >
+        <IconNetwork size={13} />
+      </span>
+    ) : null;
+
   const renderHeaderExtra = (
     entries: ApiKeyEntry[],
     providerName: string,
     baseUrl: string,
-    priority?: number
+    priority?: number,
+    proxyConfigured = false
   ) => {
-    if (!entries.length && priority === undefined) return undefined;
+    if (!entries.length && priority === undefined && !proxyConfigured) return undefined;
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
         <KeyCountBadge
@@ -289,6 +307,7 @@ export function ProviderResourceCards({
           baseUrl={baseUrl}
           usageByProvider={usageByProvider}
         />
+        {renderProxyBadge(proxyConfigured)}
         {renderPriorityBadge(priority)}
       </div>
     );
@@ -299,6 +318,7 @@ export function ProviderResourceCards({
     const excludedModels = stripDisableAllModelsRule(raw.excludedModels);
     const stats = getStats(resource, usageByProvider);
     const statusData = getStatusData(resource, usageByProvider);
+    const proxyConfigured = Boolean(raw.proxyUrl?.trim());
     const apiKeyEntries = raw.apiKey
       ? [{ apiKey: raw.apiKey, proxyUrl: raw.proxyUrl, authIndex: raw.authIndex }]
       : [];
@@ -319,7 +339,8 @@ export function ProviderResourceCards({
           apiKeyEntries,
           PROVIDER_LABELS[resource.brand],
           raw.baseUrl ?? '',
-          raw.priority
+          raw.priority,
+          proxyConfigured
         )}
         content={
           <>
@@ -364,6 +385,7 @@ export function ProviderResourceCards({
               baseUrl={provider.baseUrl}
               usageByProvider={usageByProvider}
             />
+            {renderProxyBadge(Boolean(provider.apiKeyEntries.some((entry) => Boolean(entry.proxyUrl?.trim()))))}
             {provider.priority !== undefined ? (
               <span
                 className={ItemCard.styles.typeBadge}

@@ -46,6 +46,17 @@ describe('Auth Files upstream compatibility port', () => {
     }
   });
 
+  test('provider cards show the same per-resource proxy indicator for every provider type', () => {
+    const cards = source('src/features/providers/components/ProviderResourceCards.tsx');
+
+    expect(cards).toContain('IconNetwork');
+    expect(cards).toContain("t('auth_files.proxy_configured_badge')");
+    expect(cards).toContain('const renderProxyBadge = (configured: boolean)');
+    expect(cards).toContain('const proxyConfigured = Boolean(raw.proxyUrl?.trim())');
+    expect(cards).toContain('provider.apiKeyEntries.some((entry) => Boolean(entry.proxyUrl?.trim()))');
+    expect(cards).toContain('title={t(\'auth_files.proxy_configured_badge\')}');
+  });
+
   test('manual refresh expires only supported OAuth credentials through the fields endpoint', async () => {
     for (const provider of ['antigravity', 'claude', 'codex', 'kimi', 'xai']) {
       expect(supportsAuthFileManualRefresh(provider)).toBeTrue();
