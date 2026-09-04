@@ -55,6 +55,7 @@ describe('Auth Files upstream compatibility port', () => {
     expect(cards).toContain('const proxyConfigured = hasProxyUrl(raw.proxyUrl)');
     expect(cards).toContain('provider.apiKeyEntries.some((entry) => hasProxyUrl(entry.proxyUrl))');
     expect(cards).toContain('title={t(\'auth_files.proxy_configured_badge\')}');
+    expect(cards).toContain('proxy_configured: hasPerFileProxy(entry)');
   });
 
   test('manual refresh expires only supported OAuth credentials through the fields endpoint', async () => {
