@@ -206,7 +206,26 @@ export function useAuthFilesData(options?: UseAuthFilesDataOptions): UseAuthFile
       try {
         const data = await authFilesApi.list();
         if (requestId !== loadRequestIdRef.current) return; // 已被更新的请求/变更取代
-        setFiles(data?.files || []);
+        const listedFiles = data?.files || [];
+        // The list endpoint intentionally omits secret-bearing fields. Reuse the existing
+        // download endpoint and keep only a boolean presence result in the card view model.
+        const filesWithProxyState = await Promise.all(
+          listedFiles.map(async (file) => {
+            try {
+              const rawText = await authFilesApi.downloadText(file.name);
+              const parsed = JSON.parse(rawText) as Record<string, unknown>;
+              return {
+                ...file,
+                hasProxyUrl:
+                  typeof parsed.proxy_url === 'string' && parsed.proxy_url.trim() !== '',
+              };
+            } catch {
+              return { ...file, hasProxyUrl: false };
+            }
+          })
+        );
+        if (requestId !== loadRequestIdRef.current) return;
+        setFiles(filesWithProxyState);
         setError('');
       } catch (err: unknown) {
         if (requestId !== loadRequestIdRef.current) return;

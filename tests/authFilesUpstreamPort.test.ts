@@ -38,7 +38,10 @@ describe('Auth Files upstream compatibility port', () => {
     expect(card).not.toContain('file.proxy_configured === true');
     expect(card).toContain("t('auth_files.proxy_configured_badge')");
     expect(card).toContain('file.proxy_url');
-    expect(authFileType).toContain('proxy_url?: string');
+    const dataHook = source('src/features/authFiles/hooks/useAuthFilesData.ts');
+    expect(dataHook).toContain('authFilesApi.downloadText(file.name)');
+    expect(dataHook).toContain('hasProxyUrl:');
+    expect(authFileType).toContain('hasProxyUrl?: boolean');
 
     for (const locale of ['en', 'ru', 'zh-CN', 'zh-TW']) {
       const messages = JSON.parse(source(`src/i18n/locales/${locale}.json`));

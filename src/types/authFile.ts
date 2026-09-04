@@ -41,9 +41,11 @@ export interface AuthFileItem {
   statusMessage?: string;
   lastRefresh?: string | number;
   modified?: number;
-  /** Per-auth-file proxy URL from the management API; used only as a presence check in the card. */
+  /** Raw per-auth-file proxy URL when supplied by the management API. */
   proxy_url?: string;
   proxyUrl?: string;
+  /** Frontend-only presence flag hydrated from the existing download endpoint; never contains the URL. */
+  hasProxyUrl?: boolean;
   priority?: number;
   weight?: number;
   note?: string;

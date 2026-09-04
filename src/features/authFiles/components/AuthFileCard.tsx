@@ -219,6 +219,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
   const typeLabel = getTypeLabel(t, providerKey);
   const providerIcon = getAuthFileIcon(providerKey, resolvedTheme);
   const hasProxyUrl =
+    file.hasProxyUrl === true ||
     (typeof file.proxy_url === 'string' && file.proxy_url.trim() !== '') ||
     (typeof file.proxyUrl === 'string' && file.proxyUrl.trim() !== '');
   const useThemeSurfaceIcon = isThemeSurfaceIconProvider(providerKey);
