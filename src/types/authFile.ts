@@ -41,8 +41,8 @@ export interface AuthFileItem {
   statusMessage?: string;
   lastRefresh?: string | number;
   modified?: number;
-  /** Per-auth-file proxy URL; the UI only uses its presence and never displays its value. */
-  proxy_url?: string;
+  /** Whether this auth file has a non-empty per-file proxy URL. */
+  proxy_configured?: boolean;
   priority?: number;
   weight?: number;
   note?: string;
