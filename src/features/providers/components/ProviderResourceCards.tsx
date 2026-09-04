@@ -291,6 +291,8 @@ export function ProviderResourceCards({
       </span>
     ) : null;
 
+  const hasProxyUrl = (value: unknown) => typeof value === 'string' && value.trim() !== '';
+
   const renderHeaderExtra = (
     entries: ApiKeyEntry[],
     providerName: string,
@@ -318,7 +320,7 @@ export function ProviderResourceCards({
     const excludedModels = stripDisableAllModelsRule(raw.excludedModels);
     const stats = getStats(resource, usageByProvider);
     const statusData = getStatusData(resource, usageByProvider);
-    const proxyConfigured = Boolean(raw.proxyUrl?.trim());
+    const proxyConfigured = hasProxyUrl(raw.proxyUrl);
     const apiKeyEntries = raw.apiKey
       ? [{ apiKey: raw.apiKey, proxyUrl: raw.proxyUrl, authIndex: raw.authIndex }]
       : [];
@@ -385,7 +387,7 @@ export function ProviderResourceCards({
               baseUrl={provider.baseUrl}
               usageByProvider={usageByProvider}
             />
-            {renderProxyBadge(Boolean(provider.apiKeyEntries.some((entry) => Boolean(entry.proxyUrl?.trim()))))}
+            {renderProxyBadge(provider.apiKeyEntries.some((entry) => hasProxyUrl(entry.proxyUrl)))}
             {provider.priority !== undefined ? (
               <span
                 className={ItemCard.styles.typeBadge}

@@ -52,8 +52,8 @@ describe('Auth Files upstream compatibility port', () => {
     expect(cards).toContain('IconNetwork');
     expect(cards).toContain("t('auth_files.proxy_configured_badge')");
     expect(cards).toContain('const renderProxyBadge = (configured: boolean)');
-    expect(cards).toContain('const proxyConfigured = Boolean(raw.proxyUrl?.trim())');
-    expect(cards).toContain('provider.apiKeyEntries.some((entry) => Boolean(entry.proxyUrl?.trim()))');
+    expect(cards).toContain('const proxyConfigured = hasProxyUrl(raw.proxyUrl)');
+    expect(cards).toContain('provider.apiKeyEntries.some((entry) => hasProxyUrl(entry.proxyUrl))');
     expect(cards).toContain('title={t(\'auth_files.proxy_configured_badge\')}');
   });
 
