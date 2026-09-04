@@ -10,6 +10,7 @@ import { Modal } from '@/components/ui/Modal';
 import {
   IconDownload,
   IconInfo,
+  IconNetwork,
   IconRefreshCw,
   IconSettings,
   IconSignal,
@@ -217,6 +218,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
   const typeColor = getTypeColor(providerKey, resolvedTheme);
   const typeLabel = getTypeLabel(t, providerKey);
   const providerIcon = getAuthFileIcon(providerKey, resolvedTheme);
+  const hasProxyUrl = typeof file.proxy_url === 'string' && file.proxy_url.trim().length > 0;
   const useThemeSurfaceIcon = isThemeSurfaceIconProvider(providerKey);
   const showManualRefreshButton = !isRuntimeOnly && supportsAuthFileManualRefresh(providerKey);
   const isManualRefreshing = manualRefreshing[file.name] === true;
@@ -437,6 +439,22 @@ export function AuthFileCard(props: AuthFileCardProps) {
             ...(typeColor.border ? { border: typeColor.border } : {}),
           },
         },
+        ...(hasProxyUrl
+          ? [
+              {
+                label: <IconNetwork size={13} />,
+                variant: 'custom' as const,
+                title: t('auth_files.proxy_configured_badge'),
+                ariaLabel: t('auth_files.proxy_configured_badge'),
+                style: {
+                  backgroundColor: 'rgba(59, 130, 246, 0.10)',
+                  color: '#3b82f6',
+                  border: '1px solid rgba(59, 130, 246, 0.25)',
+                  padding: '4px 6px',
+                },
+              },
+            ]
+          : []),
         ...(providerKey === 'xai' && resolvedPlanLabel
           ? [
               {

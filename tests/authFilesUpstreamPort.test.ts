@@ -30,6 +30,23 @@ describe('Auth Files upstream compatibility port', () => {
     expect(page).toContain('getThemeSurfaceIconBackground(resolvedTheme)');
   });
 
+  test('auth file cards show a proxy indicator only when the file has its own proxy URL', () => {
+    const card = source('src/features/authFiles/components/AuthFileCard.tsx');
+    const authFileType = source('src/types/authFile.ts');
+
+    expect(card).toContain('IconNetwork');
+    expect(card).toContain("typeof file.proxy_url === 'string'");
+    expect(card).toContain("t('auth_files.proxy_configured_badge')");
+    expect(card).toContain('proxy_url');
+    expect(authFileType).toContain('proxy_url?: string');
+
+    for (const locale of ['en', 'ru', 'zh-CN', 'zh-TW']) {
+      const messages = JSON.parse(source(`src/i18n/locales/${locale}.json`));
+      expect(typeof messages.auth_files.proxy_configured_badge).toBe('string');
+      expect(messages.auth_files.proxy_configured_badge.trim()).not.toBe('');
+    }
+  });
+
   test('manual refresh expires only supported OAuth credentials through the fields endpoint', async () => {
     for (const provider of ['antigravity', 'claude', 'codex', 'kimi', 'xai']) {
       expect(supportsAuthFileManualRefresh(provider)).toBeTrue();

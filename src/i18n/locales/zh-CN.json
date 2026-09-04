@@ -393,6 +393,7 @@
     "batch_enable": "启用",
     "batch_disable": "禁用",
     "prefix_proxy_button": "认证文件详情 / 编辑",
+    "proxy_configured_badge": "此认证文件单独配置了代理 URL",
     "auth_field_editor_title": "认证文件详情 / 编辑 - {{name}}",
     "prefix_proxy_loading": "正在加载认证文件...",
     "prefix_proxy_info_label": "认证文件信息（info）",

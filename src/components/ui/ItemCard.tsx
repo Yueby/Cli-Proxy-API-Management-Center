@@ -54,11 +54,12 @@ export interface ItemCardAvatarProps {
 }
 
 export interface ItemCardBadge {
-  label: string;
+  label: ReactNode;
   variant?: 'active' | 'warning' | 'disabled' | 'custom';
   style?: CSSProperties;
   className?: string;
   title?: string;
+  ariaLabel?: string;
   tooltip?: ReactNode;
 }
 
@@ -362,6 +363,7 @@ function BadgeWithTooltip({ badge }: { badge: ItemCardBadge }) {
         className={badgeClass}
         style={badge.style}
         title={undefined}
+        aria-label={badge.ariaLabel}
         onPointerEnter={(event) => {
           if (event.pointerType === 'mouse') handleEnter();
         }}
@@ -513,6 +515,7 @@ export function ItemCard({
                         className={`${styles.typeBadge} ${badge.className || ''}`}
                         style={badge.style}
                         title={badge.title}
+                        aria-label={badge.ariaLabel}
                       >
                         {badge.label}
                       </span>
@@ -532,6 +535,7 @@ export function ItemCard({
                       className={`${styles.stateBadge} ${badgeClass}`}
                       style={badge.style}
                       title={badge.title}
+                      aria-label={badge.ariaLabel}
                     >
                       {badge.label}
                     </span>

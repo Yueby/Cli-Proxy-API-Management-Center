@@ -393,6 +393,7 @@
     "batch_enable": "Включить",
     "batch_disable": "Отключить",
     "prefix_proxy_button": "Просмотр / редактирование файла авторизации",
+    "proxy_configured_badge": "Для этого файла авторизации настроен собственный URL прокси",
     "auth_field_editor_title": "Просмотр / редактирование файла авторизации - {{name}}",
     "prefix_proxy_loading": "Загрузка файла авторизации...",
     "prefix_proxy_info_label": "Информация о файле авторизации (info)",

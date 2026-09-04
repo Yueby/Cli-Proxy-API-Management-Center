@@ -393,6 +393,7 @@
     "batch_enable": "Enable",
     "batch_disable": "Disable",
     "prefix_proxy_button": "Auth File Details / Edit",
+    "proxy_configured_badge": "This auth file has its own proxy URL configured",
     "auth_field_editor_title": "Auth File Details / Edit - {{name}}",
     "prefix_proxy_loading": "Loading auth file...",
     "prefix_proxy_info_label": "Auth file info (info)",
