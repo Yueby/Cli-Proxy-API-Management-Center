@@ -35,9 +35,9 @@ describe('Auth Files upstream compatibility port', () => {
     const authFileType = source('src/types/authFile.ts');
 
     expect(card).toContain('IconNetwork');
-    expect(card).toContain('file.proxy_configured === true');
+    expect(card).not.toContain('file.proxy_configured === true');
     expect(card).toContain("t('auth_files.proxy_configured_badge')");
-    expect(authFileType).toContain('proxy_configured?: boolean');
+    expect(authFileType).toContain('proxy_url?: string');
 
     for (const locale of ['en', 'ru', 'zh-CN', 'zh-TW']) {
       const messages = JSON.parse(source(`src/i18n/locales/${locale}.json`));
@@ -55,7 +55,6 @@ describe('Auth Files upstream compatibility port', () => {
     expect(cards).toContain('const proxyConfigured = hasProxyUrl(raw.proxyUrl)');
     expect(cards).toContain('provider.apiKeyEntries.some((entry) => hasProxyUrl(entry.proxyUrl))');
     expect(cards).toContain('title={t(\'auth_files.proxy_configured_badge\')}');
-    expect(cards).toContain('proxy_configured: hasPerFileProxy(entry)');
   });
 
   test('manual refresh expires only supported OAuth credentials through the fields endpoint', async () => {

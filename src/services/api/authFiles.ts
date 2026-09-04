@@ -166,12 +166,6 @@ const readDateField = (entry: AuthFileEntry): number => {
 
 const isRuntimeOnlyEntry = (entry: AuthFileEntry): boolean => entry['runtime_only'] === true;
 
-const hasPerFileProxy = (entry: AuthFileEntry): boolean => {
-  if (entry.proxy_configured === true) return true;
-  const values = [entry.proxy_url, entry.proxyUrl];
-  return values.some((value) => typeof value === 'string' && value.trim() !== '');
-};
-
 const hasMeaningfulValue = (value: unknown): boolean => {
   if (value == null) return false;
   if (typeof value === 'string') return value.trim().length > 0;
@@ -273,7 +267,6 @@ const normalizeAuthFileEntry = (entry: AuthFileEntry): AuthFileEntry => {
     ...(note ? { note } : {}),
     ...(email ? { email } : {}),
     ...(projectId ? { projectId } : {}),
-    proxy_configured: hasPerFileProxy(entry),
   };
 };
 

@@ -218,10 +218,7 @@ export function AuthFileCard(props: AuthFileCardProps) {
   const typeColor = getTypeColor(providerKey, resolvedTheme);
   const typeLabel = getTypeLabel(t, providerKey);
   const providerIcon = getAuthFileIcon(providerKey, resolvedTheme);
-  // Prefer the redacted server-side flag, but support older management APIs
-  // that still return the per-file proxy field directly.
   const hasProxyUrl =
-    file.proxy_configured === true ||
     (typeof file.proxy_url === 'string' && file.proxy_url.trim() !== '') ||
     (typeof file.proxyUrl === 'string' && file.proxyUrl.trim() !== '');
   const useThemeSurfaceIcon = isThemeSurfaceIconProvider(providerKey);

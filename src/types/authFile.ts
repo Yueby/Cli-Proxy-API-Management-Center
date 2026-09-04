@@ -41,8 +41,9 @@ export interface AuthFileItem {
   statusMessage?: string;
   lastRefresh?: string | number;
   modified?: number;
-  /** Whether this auth file has a non-empty per-file proxy URL. */
-  proxy_configured?: boolean;
+  /** Per-auth-file proxy URL from the management API; used only as a presence check in the card. */
+  proxy_url?: string;
+  proxyUrl?: string;
   priority?: number;
   weight?: number;
   note?: string;
