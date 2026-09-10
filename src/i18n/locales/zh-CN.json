@@ -665,6 +665,8 @@
   "oauth_excluded": {
     "title": "OAuth 模型禁用",
     "description": "按提供商分列展示，点击卡片编辑或删除；支持 * 通配符，范围跟随上方的配置文件过滤标签。",
+    "editor_description": "为提供商设置不对外展示的模型，支持精确选择和通配符规则。",
+    "models_hint": "展开列表选择模型，或在下方输入通配符规则。",
     "add": "新增禁用",
     "add_title": "新增提供商模型禁用",
     "edit_title": "编辑 {{provider}} 的模型禁用",

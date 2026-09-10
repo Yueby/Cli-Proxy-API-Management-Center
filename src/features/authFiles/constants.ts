@@ -53,6 +53,21 @@ export const AUTH_FILE_MANUAL_REFRESH_PROVIDERS = new Set([
   'xai',
 ]);
 
+export const OAUTH_PROVIDER_PRESETS = [
+  'vertex',
+  'aistudio',
+  'gemini',
+  'antigravity',
+  'xai',
+  'claude',
+  'codex',
+  'qwen',
+  'kimi',
+  'iflow',
+];
+
+const OAUTH_PROVIDER_EXCLUDES = new Set(['all', 'unknown', 'empty']);
+
 // 标签类型颜色配置 — 统一低饱和 graphite 风格，融合微弱的品牌色偏
 export const TYPE_COLORS: Record<string, TypeColorSet> = {
   qwen: {
@@ -136,6 +151,23 @@ export const normalizeProviderKey = (value: string) => {
   const key = value.trim().toLowerCase().replace(/_/g, '-');
   if (key === 'x-ai' || key === 'grok') return 'xai';
   return key;
+};
+
+export const buildOAuthProviderOptions = (values: Iterable<unknown>): string[] => {
+  const extraProviders = new Set<string>();
+
+  Array.from(values).forEach((value) => {
+    const key = normalizeProviderKey(String(value ?? ''));
+    if (!key || OAUTH_PROVIDER_EXCLUDES.has(key)) return;
+    extraProviders.add(key);
+  });
+
+  const baseSet = new Set(OAUTH_PROVIDER_PRESETS.map((value) => normalizeProviderKey(value)));
+  const extraList = Array.from(extraProviders)
+    .filter((value) => !baseSet.has(value))
+    .sort((a, b) => a.localeCompare(b));
+
+  return [...OAUTH_PROVIDER_PRESETS, ...extraList];
 };
 
 export const getAuthFileStatusMessage = (file: AuthFileItem): string => {

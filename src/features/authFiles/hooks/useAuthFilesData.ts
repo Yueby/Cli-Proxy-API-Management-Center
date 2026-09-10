@@ -207,8 +207,16 @@ export function useAuthFilesData(options?: UseAuthFilesDataOptions): UseAuthFile
         const data = await authFilesApi.list();
         if (requestId !== loadRequestIdRef.current) return; // 已被更新的请求/变更取代
         const listedFiles = data?.files || [];
+        // 先展示列表，不要让每个文件的敏感字段存在性检查阻塞首屏。
+        // hasProxyUrl 只是卡片上的附加指示，失败时安全回退为 false。
+        setFiles(listedFiles);
+        setError('');
+        setLoading(false);
+        setRefreshing(false);
+
         // The list endpoint intentionally omits secret-bearing fields. Reuse the existing
-        // download endpoint and keep only a boolean presence result in the card view model.
+        // download endpoint in the background and keep only a boolean presence result in the
+        // card view model. This must not delay rendering the auth-file grid.
         const filesWithProxyState = await Promise.all(
           listedFiles.map(async (file) => {
             try {
@@ -225,8 +233,16 @@ export function useAuthFilesData(options?: UseAuthFilesDataOptions): UseAuthFile
           })
         );
         if (requestId !== loadRequestIdRef.current) return;
-        setFiles(filesWithProxyState);
-        setError('');
+        const proxyStateByName = new Map(
+          filesWithProxyState.map((file) => [file.name, file.hasProxyUrl === true])
+        );
+        setFiles((currentFiles) =>
+          currentFiles.map((file) =>
+            proxyStateByName.has(file.name)
+              ? { ...file, hasProxyUrl: proxyStateByName.get(file.name) }
+              : file
+          )
+        );
       } catch (err: unknown) {
         if (requestId !== loadRequestIdRef.current) return;
         const errorMessage = err instanceof Error ? err.message : t('notification.refresh_failed');

@@ -665,6 +665,8 @@
   "oauth_excluded": {
     "title": "OAuth 模型停用",
     "description": "按供應商分列展示，點擊卡片編輯或刪除；支援 * 萬用字元，範圍跟隨上方的設定檔篩選標籤。",
+    "editor_description": "為供應商設定不對外顯示的模型，支援精確選取和萬用字元規則。",
+    "models_hint": "展開清單選取模型，或在下方輸入萬用字元規則。",
     "add": "新增停用",
     "add_title": "新增供應商模型停用",
     "edit_title": "編輯 {{provider}} 的模型停用",
